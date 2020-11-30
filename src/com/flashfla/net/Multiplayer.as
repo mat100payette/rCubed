@@ -131,7 +131,7 @@ package com.flashfla.net
             ghostRooms = new Array();
             mode = _mode;
 
-            server = new SmartFoxClient(false); // CONFIG::debug);
+            server = new SmartFoxClient(true); // CONFIG::debug);
 
             CONFIG::debug
             {

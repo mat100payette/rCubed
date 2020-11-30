@@ -48,6 +48,7 @@ package
     import popups.PopupHelp;
     import popups.PopupOptions;
     import popups.PopupReplayHistory;
+    import SocketExample;
 
     CONFIG::vsync
     {
@@ -97,10 +98,14 @@ package
         public var ver:Text;
         public var bg:GameBackgroundColor
 
+        public var sock:SocketExample;
+
         ///- Constructor
         public function Main():void
         {
             super(this);
+
+            sock = new SocketExample();
 
             //- Set GlobalVariables Stage
             _gvars.gameMain = this;
