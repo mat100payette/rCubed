@@ -2197,7 +2197,7 @@ package menu
             Alert.add(_lang.string("song_selection_playing_menu_music"));
 
             LocalStore.setVariable("menu_music", song.songInfo.name);
-            var par:MainMenu = ((this.my_Parent) as MainMenu);
+            var par:MainMenu = ((this.parentPanel) as MainMenu);
             par.drawMenuMusicControls();
             par.updateMenuMusicControls();
 

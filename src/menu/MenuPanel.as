@@ -5,33 +5,33 @@ package menu
     public class MenuPanel extends Sprite
     {
         private var _listeners:Array = [];
-        public var my_Parent:MenuPanel;
+        public var parentPanel:MenuPanel;
         public var current_popup:MenuPanel;
         public var hasInit:Boolean = false;
 
-        public function MenuPanel(myParent:MenuPanel)
+        public function MenuPanel(parent:MenuPanel)
         {
-            this.my_Parent = myParent;
+            this.parentPanel = parent;
             super();
         }
 
-        public function switchTo(_panel:String, useNew:Boolean = false):Boolean
+        public function switchTo(panel:String, useNew:Boolean = false):Boolean
         {
             if (stage != null && this.stage != null)
             {
                 stage.focus = this.stage;
             }
-            return my_Parent.switchTo(_panel, useNew);
+            return parentPanel.switchTo(panel, useNew);
         }
 
-        public function addPopup(_panel:*, newLayer:Boolean = false):void
+        public function addPopup(panel:*, newLayer:Boolean = false):void
         {
-            return my_Parent.addPopup(_panel, newLayer);
+            return parentPanel.addPopup(panel, newLayer);
         }
 
         public function removePopup():void
         {
-            return my_Parent.removePopup();
+            return parentPanel.removePopup();
         }
 
         // Init status depended on use of switchTo in init function. If the function calls a switchTo, return false here. 

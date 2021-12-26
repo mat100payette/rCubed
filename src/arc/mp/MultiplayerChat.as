@@ -1,6 +1,5 @@
 package arc.mp
 {
-    import arc.ArcGlobals;
     import com.bit101.components.Component;
     import com.bit101.components.InputText;
     import com.bit101.components.Style;
@@ -14,6 +13,7 @@ package arc.mp
     import com.flashfla.net.events.LoginEvent;
     import com.flashfla.net.events.RoomJoinedEvent;
     import com.flashfla.net.events.GameResultsEvent;
+    import com.flashfla.utils.StringUtil;
     import flash.display.DisplayObjectContainer;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
@@ -24,7 +24,7 @@ package arc.mp
     import classes.Room;
     import classes.User;
     import classes.Gameplay;
-    import com.flashfla.utils.StringUtil;
+    import com.flashfla.utils.HtmlUtil;
 
     public class MultiplayerChat extends Component
     {
@@ -91,15 +91,9 @@ package arc.mp
 
         private function onExtensionResponseEvent(event:ExtensionResponseEvent):void
         {
-            //textAreaAddLine(textFormatServerMessage(event.params.user, event.params.message));
             var data:Object = event.data;
-            if (data.rid == room)
-            {
-                if (data._cmd == "html_message")
-                {
-                    textAreaAddLine(textFormatUserName(data.uid, ": ") + data.m);
-                }
-            }
+            if (data.rid == room && data._cmd == "html_message")
+                textAreaAddLine(textFormatUserName(data.uid, ": ") + data.m);
         }
 
         private function onMessageEvent(event:MessageEvent):void
@@ -141,9 +135,7 @@ package arc.mp
         private function onGameResultsEvent(event:GameResultsEvent):void
         {
             if (event.room == room)
-            {
                 textAreaAddLine(textFormatGameResults(event));
-            }
         }
 
         private function checkRedraw(event:Event):void
@@ -170,59 +162,66 @@ package arc.mp
             }
         }
 
+        public function broadcastServerMsg(event:ContextMenuEvent):void
+        {
+            if (controlInput.text.length > 0)
+                return;
+
+            connection.sendServerMessage(controlInput.text);
+            controlInput.text = "";
+        }
+
+        public function broadcastRoomMsg(event:ContextMenuEvent):void
+        {
+            if (controlInput.text.length > 0)
+                return;
+
+            connection.sendServerMessage(controlInput.text, room);
+            controlInput.text = "";
+        }
+
+        public function broadcastHtmlMsg(event:ContextMenuEvent):void
+        {
+            if (controlInput.text.length > 0)
+                return;
+
+            connection.sendHTMLMessage(controlInput.text, room);
+            controlInput.text = "";
+        }
+
         public function buildContextMenu():void
         {
-            if (connection.currentUser.isModerator)
+            if (!connection.currentUser.isModerator)
             {
-                var inputMenu:ContextMenu = new ContextMenu();
-                var inputBroadcast:ContextMenuItem = new ContextMenuItem("Broadcast Server Message");
-                inputBroadcast.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
-                {
-                    if (controlInput.text.length > 0)
-                    {
-                        connection.sendServerMessage(controlInput.text);
-                        //textAreaAddLine(textFormatServerMessage(room.user, controlInput.text));
-                        controlInput.text = "";
-                    }
-                });
-                inputMenu.customItems.push(inputBroadcast);
-                inputBroadcast = new ContextMenuItem("Broadcast Room Message");
-                inputBroadcast.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
-                {
-                    if (controlInput.text.length > 0)
-                    {
-                        connection.sendServerMessage(controlInput.text, room);
-                        //textAreaAddLine(textFormatServerMessage(room.user, controlInput.text));
-                        controlInput.text = "";
-                    }
-                });
-                inputMenu.customItems.push(inputBroadcast);
-                if (connection.currentUser.isAdmin)
-                {
-                    inputBroadcast = new ContextMenuItem("Send HTML");
-                    inputBroadcast.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
-                    {
-                        if (controlInput.text.length > 0)
-                        {
-                            connection.sendHTMLMessage(controlInput.text, room);
-                            controlInput.text = "";
-                        }
-                    });
-                    inputMenu.customItems.push(inputBroadcast);
-                }
-                inputMenu.clipboardMenu = true;
-                controlInput.contextMenu = controlInput.textField.contextMenu = inputMenu;
-            }
-            else
                 controlInput.contextMenu = controlInput.textField.contextMenu = null;
+                return;
+            }
+
+            var contextMenu:ContextMenu = new ContextMenu();
+
+            var broadcastServerItem:ContextMenuItem = new ContextMenuItem("Broadcast Server Message");
+            broadcastServerItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, broadcastServerMsg);
+            contextMenu.customItems.push(broadcastServerItem);
+
+            var broadcastRoomItem:ContextMenuItem = new ContextMenuItem("Broadcast Room Message");
+            broadcastRoomItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, broadcastRoomMsg);
+            contextMenu.customItems.push(broadcastRoomItem);
+
+            if (connection.currentUser.isAdmin)
+            {
+                var broadcastHtmlItem:ContextMenuItem = new ContextMenuItem("Send HTML");
+                broadcastHtmlItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, broadcastHtmlMsg);
+                contextMenu.customItems.push(broadcastHtmlItem);
+            }
+
+            contextMenu.clipboardMenu = true;
+            controlInput.contextMenu = controlInput.textField.contextMenu = contextMenu;
         }
 
         public function textAreaAddLine(message:String):void
         {
             if (message == null)
-            {
                 return;
-            }
 
             chatScrollV = controlChat.textField.scrollV;
             chatScroll ||= (chatScrollV == controlChat.textField.maxScrollV);
@@ -232,7 +231,11 @@ package arc.mp
             if (GlobalVariables.instance.activeUser.DISPLAY_MP_TIMESTAMP)
             {
                 var date:Date = new Date();
-                chatText += textFormatBold("[" + (date.hours == 0 ? 12 : (date.hours > 12 ? date.hours - 12 : date.hours)) + ":" + (date.minutes < 10 ? "0" : "") + date.minutes + (date.hours < 12 ? " AM" : " PM") + "] ");
+                var hoursStr:String = (date.hours == 0 ? 12 : (date.hours > 12 ? date.hours - 12 : date.hours)).toString();
+                var minutesStr:String = (date.minutes < 10 ? "0" : "") + date.minutes;
+                var ampmStr:String = (date.hours < 12 ? " AM" : " PM");
+
+                chatText += HtmlUtil.bold("[" + hoursStr + ":" + minutesStr + ampmStr + "] ");
             }
             chatText += message;
             redraw();
@@ -246,7 +249,7 @@ package arc.mp
                 return;
 
             chatFrameDelay = 0;
-            controlChat.text = textFormatFont(chatText, Style.fontName);
+            controlChat.text = HtmlUtil.font(chatText, Style.fontName);
             controlChat.draw();
             controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
             controlChat.addEventListener(Event.ENTER_FRAME, onRedrawFrame);
@@ -254,23 +257,25 @@ package arc.mp
 
         private function onRedrawFrame(event:Event):void
         {
-            if (++chatFrameDelay > 2)
+            chatFrameDelay++;
+            if (chatFrameDelay <= 2)
+                return;
+
+            if (chatScroll)
             {
-                if (chatScroll)
-                {
-                    chatScrollV = controlChat.textField.maxScrollV;
-                    chatScroll = false;
-                }
-                controlChat.textField.scrollV = chatScrollV;
-                controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
+                chatScrollV = controlChat.textField.maxScrollV;
+                chatScroll = false;
             }
+            controlChat.textField.scrollV = chatScrollV;
+            controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
         }
 
         public static function nameUser(user:User, format:Boolean = true):String
         {
             if (!user)
                 return "";
-            return (user.userLevel >= 0 ? textFormatLevel(user) : "") + (format ? textFormatUserName(user) : textEscape(user.name));
+
+            return (user.userLevel >= 0 ? textFormatLevel(user) : "") + (format ? textFormatUserName(user) : HtmlUtil.escape(user.name));
         }
 
         public static function textDullColor(color:int, factor:Number):int
@@ -286,8 +291,9 @@ package arc.mp
             var color:String = textDullColor(Multiplayer.COLORS[usercolor], 0.75).toString(16);
             if (user.variables.arc_colour != null)
                 color = user.variables.arc_colour;
-            var userName:String = textEscape(user.name) + postfix;
-            return textFormatColor(userName, "#" + color);
+            var userName:String = HtmlUtil.escape(user.name) + postfix;
+
+            return HtmlUtil.color(userName, "#" + color);
         }
 
         public static function textFormatLevel(user:User):String
@@ -296,54 +302,60 @@ package arc.mp
             const color:int = GlobalVariables.getDivisionColor(level);
             const title:String = GlobalVariables.getDivisionTitle(level);
             const dulledColor:String = textDullColor(color, 1).toString(16);
-            //return textFormatColor(" ", "#" + dulledColor);
-            //return textFormatColor("D" + division + " [" + user.userLevel + "] ", "#" + dulledColor);
-            return textFormatColor("Lv." + level + " (" + title + ") ", "#" + dulledColor);
+
+            return HtmlUtil.color("Lv." + level + " (" + title + ") ", "#" + dulledColor);
         }
 
         public static function textFormatServerMessage(user:User, message:String):String
         {
-            return textFormatColor(textFormatBold(textEscape("* Server Notice" + (user != null ? (" [" + user.name + "]") : "") + ": " + message)), "#901000");
+            var msg:String = "* Server Notice" + (user != null ? (" [" + user.name + "]") : "") + ": " + message;
+            return HtmlUtil.color(HtmlUtil.bold(HtmlUtil.escape(msg)), "#901000");
         }
 
         public static function textFormatMessage(user:User, message:String):String
         {
-            return textFormatUserName(user, ": ") + textEscape(message);
+            return textFormatUserName(user, ": ") + HtmlUtil.escape(message);
         }
 
         public static function textFormatPrivateMessageIn(user:User, message:String):String
         {
-            return textFormatBold(textFormatColor(textEscape("PM << " + user.name + ":") + " ", "#009090")) + textEscape(message);
+            var msgPrefix:String = "PM << " + user.name + ":";
+            return HtmlUtil.bold(HtmlUtil.color(HtmlUtil.escape(msgPrefix), "#009090")) + " " + HtmlUtil.escape(message);
         }
 
         public static function textFormatPrivateMessageOut(user:User, message:String):String
         {
-            return textFormatBold(textFormatColor(textEscape("PM >> " + user.name + ":") + " ", "#009090")) + textEscape(message);
+            var msgPrefix:String = "PM << " + user.name + ":";
+            return HtmlUtil.bold(HtmlUtil.color(HtmlUtil.escape(msgPrefix), "#009090")) + " " + HtmlUtil.escape(message);
         }
 
         public static function textFormatUser(user:User, isJoin:Boolean):String
         {
-            return textFormatBold(textFormatColor("* " + nameUser(user, false) + (isJoin ? " has joined" : " has left"), isJoin ? "#009000" : "#900000"));
+            var msg:String = "* " + nameUser(user, false) + (isJoin ? " has joined" : " has left");
+            var color:String = isJoin ? "#009000" : "#900000";
+            return HtmlUtil.bold(HtmlUtil.color(msg, color));
         }
 
         public static function textFormatJoin(room:Room):String
         {
-            return textFormatColor("* Joined " + textEscape(room.name), "#009000");
+            return HtmlUtil.color("* Joined " + HtmlUtil.escape(room.name), "#009000");
         }
 
         public static function textFormatDisconnect():String
         {
-            return textFormatColor("* Disconnected", "#900000");
+            return HtmlUtil.color("* Disconnected", "#900000");
         }
 
         public static function textFormatModeratorMute(user:User, minutes:int):String
         {
-            return textFormatBold(textFormatColor("* " + nameUser(user, false) + " has been muted for " + minutes + " minutes.", "#901000"));
+            var msg:String = "* " + nameUser(user, false) + " has been muted for " + minutes + " minutes.";
+            return HtmlUtil.bold(HtmlUtil.color(msg, "#901000"));
         }
 
         public static function textFormatModeratorBan(user:User, minutes:int):String
         {
-            return textFormatBold(textFormatColor("* " + nameUser(user, false) + " has been banned for " + minutes + " minutes.", "#901000"));
+            var msg:String = "* " + nameUser(user, false) + " has been banned for " + minutes + " minutes.";
+            return HtmlUtil.bold(HtmlUtil.color(msg, "#901000"));
         }
 
         public static function textFormatGameResults(event:GameResultsEvent):String
@@ -351,14 +363,10 @@ package arc.mp
             var room:Room = event.room;
 
             if (room == null)
-            {
                 return null;
-            }
 
             if (event.initialPlayerCount <= 1)
-            {
                 return null;
-            }
 
             var p1:User = room.getPlayer(1);
             var p2:User = room.getPlayer(2);
@@ -385,38 +393,17 @@ package arc.mp
             var winnertext:String = winner.name + " (" + winner.gameplay.score + " " + pa(winner.gameplay) + ")";
             var losertext:String = loser.name + " (" + loser.gameplay.score + " " + pa(loser.gameplay) + ")";
             var songname:String = MultiplayerPlayer.nameSong(gameplayP1);
-            return textFormatSize(textFormatBold(textFormatColor(textEscape("* " + songname + ": " + winnertext + (isTie ? " tied with " : " won against ") + losertext), "#189018")), "-2");
+
+            var resultMsg:String = "* " + songname + ": " + winnertext + (isTie ? " tied with " : " won against ") + losertext;
+            return HtmlUtil.size(HtmlUtil.bold(HtmlUtil.color(HtmlUtil.escape(resultMsg), "#189018")), "-2");
         }
 
         public static function textFormatGameResultsSingle(room:Room, playerIndex:Number):String
         {
             var player:User = room.getPlayer(playerIndex);
-            return textFormatSize(textFormatBold(textFormatColor(textEscape("* Player has left, " + player.name + " has won."), "#189018")), "-2");
-        }
+            var msg:String = "* Player has left, " + player.name + " has won.";
 
-        public static function textFormatColor(message:String, color:String):String
-        {
-            return "<font color=\"" + color + "\">" + message + "</font>";
-        }
-
-        public static function textFormatSize(message:String, size:String):String
-        {
-            return "<font size=\"" + size + "\">" + message + "</font>";
-        }
-
-        public static function textFormatFont(message:String, face:String):String
-        {
-            return "<font face=\"" + face + "\">" + message + "</font>";
-        }
-
-        public static function textFormatBold(message:String):String
-        {
-            return "<b>" + message + "</b>";
-        }
-
-        public static function textEscape(message:String):String
-        {
-            return StringUtil.htmlEscape(message);
+            return HtmlUtil.size(HtmlUtil.bold(HtmlUtil.color(HtmlUtil.escape(msg), "#189018")), "-2");
         }
     }
 }

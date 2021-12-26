@@ -25,6 +25,7 @@ package arc.mp
     import com.flashfla.net.events.RoomListEvent;
     import com.flashfla.net.events.RoomUserStatusEvent;
     import com.flashfla.net.events.ServerMessageEvent;
+    import com.flashfla.utils.HtmlUtil;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
     import flash.events.MouseEvent;
@@ -197,9 +198,7 @@ package arc.mp
         private function onRoomLeftEvent(event:RoomLeftEvent):void
         {
             if (event.room == connection.lobby)
-            {
                 closeWindow();
-            }
         }
 
         private function onRoomListEvent(event:RoomListEvent):void
@@ -228,12 +227,14 @@ package arc.mp
                 closeWindow();
                 return;
             }
+
             var inGame:Boolean = false;
             for each (var room:Room in connection.rooms)
             {
                 if (room.hasUser(currentUser) && room != connection.lobby)
                     inGame = true;
             }
+
             if (inGame)
                 connection.leaveRoom(connection.lobby);
             else
@@ -274,43 +275,47 @@ package arc.mp
             }
         }
 
+        private function getContextMenuEventRoom(event:ContextMenuEvent):Room
+        {
+            if (!event.mouseTarget.hasOwnProperty("data"))
+                return null;
+
+            var item:Object = event.mouseTarget["data"];
+
+            if (!item)
+                return null;
+
+            return item["data"] as Room;
+        }
+
+        private function spectateRoom(event:ContextMenuEvent):void
+        {
+            var room:Room = getContextMenuEventRoom(event);
+            joinRoom(room, false);
+        }
+
+        private function nukeRoom(event:ContextMenuEvent):void
+        {
+            var room:Room = getContextMenuEventRoom(event);
+            connection.nukeRoom(room);
+        }
+
         public function buildContextMenu():void
         {
-            var roomMenu:ContextMenu = new ContextMenu();
-            var roomItem:ContextMenuItem = new ContextMenuItem("Spectate");
-            roomItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
-            {
-                if (event.mouseTarget.hasOwnProperty("data"))
-                {
-                    var item:Object = event.mouseTarget["data"];
+            var contextMenu:ContextMenu = new ContextMenu();
 
-                    if (!item)
-                        return;
+            var spectateItem:ContextMenuItem = new ContextMenuItem("Spectate");
+            spectateItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, spectateRoom);
+            contextMenu.customItems.push(spectateItem);
 
-                    var room:Room = item["data"];
-                    joinRoom(room, false);
-                }
-            });
-            roomMenu.customItems.push(roomItem);
             if (currentUser.isModerator)
             {
-                roomItem = new ContextMenuItem("Nuke Room");
-                roomItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
-                {
-                    if (event.mouseTarget.hasOwnProperty("data"))
-                    {
-                        var item:Object = event.mouseTarget["data"];
-
-                        if (!item)
-                            return;
-
-                        var room:Room = item["data"];
-                        connection.nukeRoom(room);
-                    }
-                });
-                roomMenu.customItems.push(roomItem);
+                var nukeRoomItem:ContextMenuItem = new ContextMenuItem("Nuke Room");
+                nukeRoomItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, nukeRoom);
+                contextMenu.customItems.push(nukeRoomItem);
             }
-            controlRooms.contextMenu = roomMenu;
+
+            controlRooms.contextMenu = contextMenu;
         }
 
         private function joinRoom(room:Room, asPlayer:Boolean):void
@@ -321,13 +326,9 @@ package arc.mp
             }
 
             if (room.isPrivate)
-            {
                 new Prompt(this, 320, "Password: " + room.name, 100, "SUBMIT", e_joinRoomPassword, true);
-            }
             else
-            {
                 connection.joinRoom(room, asPlayer);
-            }
         }
 
         private function updateRoomPanel(room:Room):void
@@ -372,7 +373,7 @@ package arc.mp
         {
             const level:int = room.level;
             const spectatorString:String = (room.specCount > 0) ? "+" + room.specCount + " " : "";
-            const roomPopulationString:String = MultiplayerChat.textFormatSize(room.userCount + "/2 " + spectatorString, "-1");
+            const roomPopulationString:String = HtmlUtil.size(room.userCount + "/2 " + spectatorString, "-1");
             const isPrivateString:String = (room.isPrivate ? "!" : "");
 
             if (room.userCount > 0 && level != -1)
@@ -382,17 +383,15 @@ package arc.mp
                 const dulledColor:String = MultiplayerChat.textDullColor(color, 1).toString(16);
                 const titlePrefix:String = "(" + titleString + ")";
 
-                return roomPopulationString + MultiplayerChat.textFormatColor(isPrivateString + titlePrefix, "#" + dulledColor) + " " + MultiplayerChat.textEscape(room.name);
+                return roomPopulationString + HtmlUtil.color(isPrivateString + titlePrefix, "#" + dulledColor) + " " + HtmlUtil.escape(room.name);
             }
-            else
-            {
-                return roomPopulationString + " " + MultiplayerChat.textEscape(isPrivateString + room.name);
-            }
+
+            return roomPopulationString + " " + HtmlUtil.escape(isPrivateString + room.name);
         }
 
         public function setParent(value:MenuPanel):void
         {
-            super.my_Parent = value;
+            super.parentPanel = value;
         }
 
         private function showButton(button:BoxButton, show:Boolean):void

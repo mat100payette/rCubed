@@ -1,10 +1,10 @@
 package arc
 {
     import classes.Playlist;
+    import classes.SongInfo;
     import classes.chart.parse.ChartFFRLegacy;
     import flash.events.EventDispatcher;
     import flash.net.SharedObject;
-    import classes.SongInfo;
 
     public class ArcGlobals extends EventDispatcher
     {
@@ -179,7 +179,7 @@ package arc
             {
                 save.flush();
             }
-            catch (e:Error)
+            catch (_)
             {
             }
         }
@@ -217,9 +217,8 @@ package arc
         public static function get instance():ArcGlobals
         {
             if (_instance == null)
-            {
                 _instance = new ArcGlobals(new SingletonEnforcer());
-            }
+
             return _instance;
         }
 

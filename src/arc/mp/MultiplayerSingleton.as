@@ -142,16 +142,12 @@ package arc.mp
             if (event.room == connection.lobby)
             {
                 if (autoJoin)
-                {
                     connection.refreshRooms();
-                }
 
                 autoJoin = true;
             }
             else
-            {
                 currentRoom = event.room;
-            }
         }
 
         private function onRoomLeft(event:RoomLeftEvent):void
@@ -172,23 +168,20 @@ package arc.mp
         private function updateRoomUser(room:Room, user:User):void
         {
             if (user != null && room.isGameRoom && user.id != currentUser.id && room.isPlayer(currentUser) && room.isPlayer(user))
-            {
                 Alert.add(sprintf(_lang.string("mp_user_joins_room_alert"), {"username": user.name}));
-            }
         }
 
         private function onMessage(event:MessageEvent):void
         {
             if (event.msgType == Multiplayer.MESSAGE_PRIVATE)
-            {
                 Alert.add("*** " + event.user.name + ": " + event.message);
-            }
         }
 
         private function forEachRoom(func:Function):void
         {
             if (!connection.connected)
                 return;
+
             for each (var room:Room in connection.rooms)
             {
                 if (room.isGameRoom)
@@ -291,7 +284,7 @@ package arc.mp
             }
             else
             {
-                if (gameplayCompareSong(songInfo, currentSongInfo))
+                if (SongInfo.compare(songInfo, currentSongInfo))
                     gameplayLoading();
                 else
                 {
@@ -301,11 +294,6 @@ package arc.mp
                         gameplayPicking(songInfo);
                 }
             }
-        }
-
-        private function gameplayCompareSong(s1:SongInfo, s2:SongInfo):Boolean
-        {
-            return SongInfo.compare(s1, s2);
         }
 
         // Starts loading the selected song.

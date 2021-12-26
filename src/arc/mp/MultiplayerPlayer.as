@@ -90,7 +90,7 @@ package arc.mp
         private function checkRedraw(event:Event):void
         {
             canRedraw = (GlobalVariables.instance.gameMain.activePanelName == Main.GAME_MENU_PANEL);
-            redraw()
+            redraw();
         }
 
         public function redraw(force:Boolean = false):void

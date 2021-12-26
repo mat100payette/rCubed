@@ -52,6 +52,7 @@ package com.flashfla.net
     import com.flashfla.net.events.RoomUserStatusEvent;
     import com.flashfla.net.events.GameUpdateEvent;
     import com.flashfla.utils.StringUtil;
+    import com.flashfla.utils.HtmlUtil;
 
     public class Multiplayer extends EventDispatcher
     {
@@ -688,13 +689,13 @@ package com.flashfla.net
         public function sendMessage(room:Room, message:String, escape:Boolean = true):void
         {
             if (connected && room && message)
-                server.sendPublicMessage(escape ? StringUtil.htmlEscape(message) : message, room.id);
+                server.sendPublicMessage(escape ? HtmlUtil.escape(message) : message, room.id);
         }
 
         public function sendPrivateMessage(user:User, message:String, room:Room = null):void
         {
             if (connected && user && message)
-                server.sendPrivateMessage(StringUtil.htmlEscape(message), user.id, (room ? room.id : -1));
+                server.sendPrivateMessage(HtmlUtil.escape(message), user.id, (room ? room.id : -1));
         }
 
         /**
@@ -1061,7 +1062,7 @@ package com.flashfla.net
 
         private function onAdminMessage(event:AdminMessageSFSEvent):void
         {
-            eventServerMessage(StringUtil.htmlUnescape(event.message));
+            eventServerMessage(HtmlUtil.unescape(event.message));
         }
 
         private function onModeratorMessage(event:ModerationMessageSFSEvent):void
@@ -1069,7 +1070,7 @@ package com.flashfla.net
             if (event.userId)
             {
                 var user:User = getRoomById(event.roomId).getUser(event.userId);
-                eventServerMessage(StringUtil.htmlUnescape(event.message), user);
+                eventServerMessage(HtmlUtil.unescape(event.message), user);
             }
         }
 
@@ -1134,7 +1135,7 @@ package com.flashfla.net
             var user:User = getRoomUserById(room, event.userId);
 
             if (user)
-                eventMessage(MESSAGE_PRIVATE, room, user, StringUtil.htmlUnescape(event.message));
+                eventMessage(MESSAGE_PRIVATE, room, user, HtmlUtil.unescape(event.message));
         }
 
         private function onPublicMessage(event:PublicMessageSFSEvent):void
@@ -1143,7 +1144,7 @@ package com.flashfla.net
             var user:User = getRoomUserById(room, event.userId);
 
             if (user)
-                eventMessage(MESSAGE_PUBLIC, room, user, StringUtil.htmlUnescape(event.message));
+                eventMessage(MESSAGE_PUBLIC, room, user, HtmlUtil.unescape(event.message));
         }
 
         private function onRoomListUpdate(event:RoomListUpdateSFSEvent):void

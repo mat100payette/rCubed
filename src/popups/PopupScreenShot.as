@@ -141,12 +141,12 @@ package popups
             if (e.target == directCopyBox)
             {
                 SystemUtil.setClipboard(results.upload.links.original);
-                (my_Parent as Main).addAlert("Copied to Clipboard", 75);
+                (parentPanel as Main).addAlert("Copied to Clipboard", 75);
             }
             else if (e.target == deleteCopyBox)
             {
                 SystemUtil.setClipboard(results.upload.links.delete_page);
-                (my_Parent as Main).addAlert("Copied to Clipboard", 75);
+                (parentPanel as Main).addAlert("Copied to Clipboard", 75);
             }
             else if (e.target == closeBox)
             {
