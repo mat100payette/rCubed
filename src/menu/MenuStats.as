@@ -110,13 +110,13 @@ package menu
             var yOffset:int = 0;
             var sI:StatItem;
             var sX:int = 0;
-            for (var sO:String in _gvars.playerUser.level_ranks)
+            for (var sO:String in _gvars.playerUser.levelRanks)
             {
                 var songInfo:SongInfo = _playlist.getSongInfo(Number(sO));
                 if (songInfo == null)
                     continue;
 
-                sI = new StatItem(_gvars.playerUser.level_ranks[sO], songInfo);
+                sI = new StatItem(_gvars.playerUser.levelRanks[sO], songInfo);
                 sI.y = yOffset;
                 sI.index = sX;
                 sI.addEventListener(MouseEvent.CLICK, statItemClick, false, 0, true);

@@ -7,18 +7,19 @@ package classes
         public static function getDefaultStruct():Object
         {
             var DEFAULT_OPTIONS:GameOptions = new GameOptions();
-            DEFAULT_OPTIONS.noteColors.push("receptor");
+            DEFAULT_OPTIONS.settings.noteColors.push("receptor");
 
             var output:Object = {"options": {"grid_dim": "5,2", "rotate": "90"}};
-            for (var c:int = 0; c < DEFAULT_OPTIONS.noteColors.length; c++)
+            for (var c:int = 0; c < DEFAULT_OPTIONS.settings.noteColors.length; c++)
             {
                 var color_obj:Object = {};
-                for (var d:int = 0; d < DEFAULT_OPTIONS.noteDirections.length; d++)
+
+                for (var d:int = 0; d < GameOptions.noteDirections; d++)
                 {
                     var dir_obj:Object = {"r": "", "c": ""};
-                    color_obj[DEFAULT_OPTIONS.noteDirections[d]] = dir_obj;
+                    color_obj[GameOptions.noteDirections[d]] = dir_obj;
                 }
-                output[DEFAULT_OPTIONS.noteColors[c]] = color_obj;
+                output[DEFAULT_OPTIONS.settings.noteColors[c]] = color_obj;
             }
             return output;
         }

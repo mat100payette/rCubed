@@ -73,7 +73,7 @@ package classes
 
         public function string(id:String):String
         {
-            return string2(id, _gvars.playerUser ? _gvars.playerUser.language : "us");
+            return string2(id, _gvars.playerUser ? _gvars.playerUser.settings.language : "us");
         }
 
         public function string2(id:String, lang:String):String
@@ -99,7 +99,7 @@ package classes
 
         public function stringSimple(id:String):String
         {
-            return string2Simple(id, _gvars.playerUser ? _gvars.playerUser.language : "us");
+            return string2Simple(id, _gvars.playerUser ? _gvars.playerUser.settings.language : "us");
         }
 
         public function string2Simple(id:String, lang:String):String

@@ -93,7 +93,7 @@ package popups.settings
                 var lang:String = _lang.indexed[id];
                 var lang_name:String = _lang.string2Simple("_real_name", lang) + (_lang.data[lang]['_en_name'] != _lang.data[lang]['_real_name'] ? (' / ' + _lang.string2Simple("_en_name", lang)) : '');
                 optionGameLanguages.push({"label": lang_name, "data": lang});
-                if (lang == _gvars.activeUser.language)
+                if (lang == _gvars.activeUser.settings.language)
                 {
                     selectedLanguage = lang_name;
                 }
@@ -263,14 +263,14 @@ package popups.settings
         override public function setValues():void
         {
             // Set Framerate
-            optionFPS.text = _gvars.activeUser.frameRate.toString();
+            optionFPS.text = _gvars.activeUser.settings.frameRate.toString();
 
-            forceJudgeCheck.checked = _gvars.activeUser.forceNewJudge;
+            forceJudgeCheck.checked = _gvars.activeUser.settings.forceNewJudge;
 
-            timestampCheck.checked = _gvars.activeUser.DISPLAY_MP_TIMESTAMP;
-            legacySongsCheck.checked = _gvars.activeUser.DISPLAY_LEGACY_SONGS;
+            timestampCheck.checked = _gvars.activeUser.settings.DISPLAY_MP_TIMESTAMP;
+            legacySongsCheck.checked = _gvars.activeUser.settings.DISPLAY_LEGACY_SONGS;
             optionMPSize.text = _avars.configMPSize.toString();
-            startUpScreenCombo.selectedIndex = _gvars.activeUser.startUpScreen;
+            startUpScreenCombo.selectedIndex = _gvars.activeUser.settings.startUpScreen;
 
             setLanguage();
 
@@ -298,21 +298,21 @@ package popups.settings
             if (e.target == forceJudgeCheck)
             {
                 e.target.checked = !e.target.checked;
-                _gvars.activeUser.forceNewJudge = !_gvars.activeUser.forceNewJudge;
+                _gvars.activeUser.settings.forceNewJudge = !_gvars.activeUser.settings.forceNewJudge;
             }
 
             // MP Timestamp
             else if (e.target == timestampCheck)
             {
                 e.target.checked = !e.target.checked;
-                _gvars.activeUser.DISPLAY_MP_TIMESTAMP = !_gvars.activeUser.DISPLAY_MP_TIMESTAMP;
+                _gvars.activeUser.settings.DISPLAY_MP_TIMESTAMP = !_gvars.activeUser.settings.DISPLAY_MP_TIMESTAMP;
             }
 
             // Legacy Songs
             else if (e.target == legacySongsCheck)
             {
                 e.target.checked = !e.target.checked;
-                _gvars.activeUser.DISPLAY_LEGACY_SONGS = !_gvars.activeUser.DISPLAY_LEGACY_SONGS;
+                _gvars.activeUser.settings.DISPLAY_LEGACY_SONGS = !_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS;
             }
 
             //- Auto Save Local Replays
@@ -425,8 +425,8 @@ package popups.settings
         {
             if (e.target == optionFPS)
             {
-                _gvars.activeUser.frameRate = optionFPS.validate(60);
-                _gvars.activeUser.frameRate = Math.max(Math.min(_gvars.activeUser.frameRate, 1000), 10);
+                _gvars.activeUser.settings.frameRate = optionFPS.validate(60);
+                _gvars.activeUser.settings.frameRate = Math.max(Math.min(_gvars.activeUser.settings.frameRate, 1000), 10);
                 _gvars.removeSongFiles();
             }
 
@@ -489,13 +489,13 @@ package popups.settings
 
         private function startUpScreenSelect(e:Event):void
         {
-            _gvars.activeUser.startUpScreen = e.target.selectedItem.data as int;
+            _gvars.activeUser.settings.startUpScreen = e.target.selectedItem.data as int;
         }
 
         private function setLanguage():void
         {
             languageComboIgnore = true;
-            languageCombo.selectedItemByData = _gvars.activeUser.language;
+            languageCombo.selectedItemByData = _gvars.activeUser.settings.language;
             languageComboIgnore = false;
         }
 
@@ -503,7 +503,7 @@ package popups.settings
         {
             if (!languageComboIgnore)
             {
-                _gvars.activeUser.language = e.target.selectedItem.data as String;
+                _gvars.activeUser.settings.language = e.target.selectedItem.data as String;
 
                 _gvars.gameMain.activePanel.draw();
                 _gvars.gameMain.buildContextMenu();

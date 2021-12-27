@@ -39,7 +39,7 @@ package arc.mp
     import menu.MenuPanel;
     import menu.MenuSongSelection;
 
-    public class MultiplayerSingleton extends Object
+    public class MultiplayerState extends Object
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
@@ -58,12 +58,12 @@ package arc.mp
 
         private var panel:MultiplayerPanel = null;
 
-        private static var instance:MultiplayerSingleton = null;
+        private static var instance:MultiplayerState = null;
 
-        public static function getInstance():MultiplayerSingleton
+        public static function getInstance():MultiplayerState
         {
             if (instance == null)
-                instance = new MultiplayerSingleton();
+                instance = new MultiplayerState();
             return instance;
         }
 
@@ -84,9 +84,9 @@ package arc.mp
             return panel;
         }
 
-        public function MultiplayerSingleton()
+        public function MultiplayerState()
         {
-            var self:MultiplayerSingleton = this;
+            var self:MultiplayerState = this;
 
             username = _gvars.activeUser.name;
             password = _gvars.activeUser.hash;
@@ -419,10 +419,10 @@ package arc.mp
             _gvars.options = new GameOptions();
             _gvars.options.mpRoom = room;
             _gvars.options.fill();
-            if (_gvars.options.frameRate <= 30)
-                _gvars.options.frameRate = 60;
+            if (_gvars.options.settings.frameRate <= 30)
+                _gvars.options.settings.frameRate = 60;
             _gvars.options.isAutoplay = true;
-            _gvars.options.songRate = 1;
+            _gvars.options.settings.songRate = 1;
             _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
             _gvars.options.loadPreview = true;
             _gvars.gameMain.switchTo(Main.GAME_PLAY_PANEL);

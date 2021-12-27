@@ -2,7 +2,7 @@ package menu
 {
     import arc.ArcGlobals;
     import arc.mp.MultiplayerPanel;
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import assets.menu.Logo;
     import assets.menu.MainMenuBackground;
@@ -120,7 +120,7 @@ package menu
                 }
             }
 
-            MultiplayerSingleton.getInstance().gameplayCleanup();
+            MultiplayerState.getInstance().gameplayCleanup();
 
             //- Add Main Panel to Stage
             var targetMenu:String = "";
@@ -133,11 +133,11 @@ package menu
             {
                 if (!Flags.VALUES[Flags.STARTUP_SCREEN])
                 {
-                    var playerStartup:int = _gvars.activeUser.startUpScreen;
+                    var playerStartup:int = _gvars.activeUser.settings.startUpScreen;
 
                     // Auto - Connect MP
                     if (playerStartup == 0 || playerStartup == 1)
-                        var pan:MultiplayerPanel = MultiplayerSingleton.getInstance().getPanel(this);
+                        var pan:MultiplayerPanel = MultiplayerState.getInstance().getPanel(this);
 
                     if (playerStartup == 0)
                         targetMenu = MENU_MULTIPLAYER;
@@ -404,7 +404,7 @@ package menu
 
                 case MENU_MULTIPLAYER:
                     if (_MenuMultiplayer == null || useNew)
-                        _MenuMultiplayer = MultiplayerSingleton.getInstance().getPanel(this); //_MenuMultiplayer = new MenuMultiplayer(this);
+                        _MenuMultiplayer = MultiplayerState.getInstance().getPanel(this); //_MenuMultiplayer = new MenuMultiplayer(this);
                     panel = _MenuMultiplayer;
                     options.activePanel = 1;
                     isFound = true;

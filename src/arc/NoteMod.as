@@ -52,13 +52,13 @@ package arc
             modScramble = options.modEnabled("scramble");
             modShuffle = options.modEnabled("shuffle");
             modReverse = options.modEnabled("reverse");
-            modColumnColor = options.modEnabled("columncolour");
+            modColumnColor = options.modEnabled("columncolor");
             modHalfTime = options.modEnabled("halftime");
             modNoBackground = options.modEnabled("nobackground");
             modIsolation = options.isolation;
-            modOffset = options.offsetGlobal != 0;
-            modRate = options.songRate != 1;
-            modFPS = options.frameRate > 30;
+            modOffset = options.settings.GLOBAL_OFFSET != 0;
+            modRate = options.settings.songRate != 1;
+            modFPS = options.settings.frameRate > 30;
             modJudgeWindow = Boolean(options.judgeWindow);
 
             reverseLastFrame = -1;
@@ -145,13 +145,13 @@ package arc
 
             if (modRate)
             {
-                pos /= options.songRate;
-                frame /= options.songRate;
+                pos /= options.settings.songRate;
+                frame /= options.settings.songRate;
             }
 
             if (modOffset)
             {
-                var goffset:int = Math.round(options.offsetGlobal);
+                var goffset:int = Math.round(options.settings.GLOBAL_OFFSET);
                 frame += goffset;
                 pos += goffset / 30;
             }
@@ -244,7 +244,7 @@ package arc
             // Rates after everything.
             if (modRate)
             {
-                time /= options.songRate;
+                time /= options.settings.songRate;
             }
 
             return time + 1; // 1 seconds for fade out.

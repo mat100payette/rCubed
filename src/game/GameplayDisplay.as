@@ -1,7 +1,7 @@
 package game
 {
     import arc.ArcGlobals;
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import assets.gameplay.viewLR;
     import assets.gameplay.viewUD;
@@ -173,7 +173,6 @@ package game
 
         private var replayPressCount:Number = 0;
 
-        private var keyDirections:Array = ["L", "D", "U", "R"];
         private var hitAmazing:int;
         private var hitPerfect:int;
         private var hitGood:int;
@@ -210,10 +209,10 @@ package game
             {
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
-                var screen:int = _gvars.activeUser.startUpScreen;
-                if (!_gvars.activeUser.isGuest && (screen == 0 || screen == 1) && !MultiplayerSingleton.getInstance().connection.connected)
+                var screen:int = _gvars.activeUser.settings.startUpScreen;
+                if (!_gvars.activeUser.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
                 {
-                    MultiplayerSingleton.getInstance().connection.connect();
+                    MultiplayerState.getInstance().connection.connect();
                 }
                 switchTo(Main.GAME_MENU_PANEL);
                 return false;
@@ -228,8 +227,8 @@ package game
                 // Custom Offsets
                 if (perSongOptions.set_custom_offsets)
                 {
-                    options.offsetJudge = perSongOptions.offset_judge;
-                    options.offsetGlobal = perSongOptions.offset_music;
+                    options.settings.JUDGE_OFFSET = perSongOptions.offset_judge;
+                    options.settings.GLOBAL_OFFSET = perSongOptions.offset_music;
                 }
 
                 // Invert Mirror Mod
@@ -237,12 +236,12 @@ package game
                 {
                     if (options.modEnabled("mirror"))
                     {
-                        options.mods.removeAt(options.mods.indexOf("mirror"));
+                        options.settings.activeMods.removeAt(options.settings.activeMods.indexOf("mirror"));
                         delete options.modCache["mirror"];
                     }
                     else
                     {
-                        options.mods.push("mirror");
+                        options.settings.activeMods.push("mirror");
                         options.modCache["mirror"] = true;
                     }
                 }
@@ -269,7 +268,7 @@ package game
 
             // Prebuild Websocket Message, this is updated instead of creating a new object every message.
             SOCKET_SONG_MESSAGE = {"player": {
-                        "settings": options.settingsEncode(),
+                        "settings": options.settings.stringify(),
                         "name": _gvars.activeUser.name,
                         "userid": _gvars.activeUser.siteId,
                         "avatar": Constant.USER_AVATAR_URL + "?uid=" + _gvars.activeUser.siteId,
@@ -342,7 +341,7 @@ package game
             // Setup MP Things
             if (options.mpRoom)
             {
-                MultiplayerSingleton.getInstance().gameplayPlaying(this);
+                MultiplayerState.getInstance().gameplayPlaying(this);
                 if (!options.isEditor)
                 {
                     options.singleplayer = false; // Back to multiplayer lobby
@@ -371,7 +370,7 @@ package game
             if (options.isEditor)
             {
                 options.isAutoplay = true;
-                stage.frameRate = options.frameRate;
+                stage.frameRate = options.settings.frameRate;
                 stage.addEventListener(Event.ENTER_FRAME, editorOnEnterFrame, false, int.MAX_VALUE - 10, true);
                 stage.addEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown, false, int.MAX_VALUE - 10, true);
             }
@@ -389,7 +388,7 @@ package game
             stage.frameRate = 60;
             if (options.isEditor)
             {
-                _gvars.activeUser.screencutPosition = options.screencutPosition;
+                _gvars.activeUser.settings.screencutPosition = options.settings.screencutPosition;
                 stage.removeEventListener(Event.ENTER_FRAME, editorOnEnterFrame);
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown);
             }
@@ -443,7 +442,7 @@ package game
                     setChildIndex(song_background, 0);
             }
             song.start();
-            songDelay = song.mp3Frame / options.songRate * 1000 / 30 - globalOffset;
+            songDelay = song.mp3Frame / options.settings.songRate * 1000 / 30 - globalOffset;
         }
 
         private function initBackground():void
@@ -470,10 +469,10 @@ package game
             noteBox.position();
             this.addChild(noteBox);
 
-            if (!options.isEditor && MultiplayerSingleton.getInstance().connection.connected && !MultiplayerSingleton.getInstance().isInRoom())
+            if (!options.isEditor && MultiplayerState.getInstance().connection.connected && !MultiplayerState.getInstance().isInRoom())
             {
                 var isInSoloMode:Boolean = true;
-                MultiplayerSingleton.getInstance().connection.disconnect(isInSoloMode);
+                MultiplayerState.getInstance().connection.disconnect(isInSoloMode);
             }
 
             /*
@@ -482,7 +481,7 @@ package game
                togglePause();
                var aa:Alert;
                for each(var rec:MovieClip in noteBox.receptorArray) {
-               aa = new Alert(StringUtil.keyCodeChar(_gvars.activeUser["key" + rec.KEY]));
+               aa = new Alert(StringUtil.keyCodeChar(_gvars.activeUser.settings["key" + rec.KEY]));
                if(rec.VERTEX == "y") {
                aa.x = rec.x - (aa.width / 2);
                aa.y = rec.y - ((rec.height / 2) * rec.DIRECTION) - (10 * rec.DIRECTION);
@@ -506,16 +505,16 @@ package game
             gameplayUI = (sideScroll ? new viewLR() : new viewUD());
             this.addChild(gameplayUI);
 
-            if (!options.displayGameTopBar)
+            if (!options.settings.DISPLAY_GAME_TOP_BAR)
                 gameplayUI.top_bar.visible = false;
 
-            if (!options.displayGameBottomBar)
+            if (!options.settings.DISPLAY_GAME_BOTTOM_BAR)
                 gameplayUI.bottom_bar.visible = false;
 
-            if (!options.displayGameTopBar && !options.displayGameBottomBar)
+            if (!options.settings.DISPLAY_GAME_TOP_BAR && !options.settings.DISPLAY_GAME_BOTTOM_BAR)
                 gameplayUI.visible = false;
 
-            if (options.displayPA)
+            if (options.settings.DISPLAY_PACOUNT)
             {
                 player1PAWindow = new PAWindow(options);
                 if (sideScroll)
@@ -523,13 +522,13 @@ package game
                 this.addChild(player1PAWindow);
             }
 
-            if (options.displayScore)
+            if (options.settings.DISPLAY_SCORE)
             {
                 score = new Score(options);
                 this.addChild(score);
             }
 
-            if (options.displayCombo)
+            if (options.settings.DISPLAY_COMBO)
             {
                 player1Combo = new Combo(options);
                 if (!sideScroll)
@@ -540,7 +539,7 @@ package game
                 this.addChild(comboStatic);
             }
 
-            if (options.displayComboTotal)
+            if (options.settings.DISPLAY_TOTAL)
             {
                 comboTotal = new Combo(options);
                 if (sideScroll)
@@ -551,20 +550,20 @@ package game
                 this.addChild(comboTotalStatic);
             }
 
-            if (options.displayAccuracyBar)
+            if (options.settings.DISPLAY_ACCURACY_BAR)
             {
                 accBar = new AccuracyBar(options);
                 this.addChild(accBar);
             }
 
-            if (options.displaySongProgress || options.replay)
+            if (options.settings.DISPLAY_SONGPROGRESS || options.replay)
             {
                 progressDisplay = new ProgressBar(this, 161, 9, 458, 20, 4, 0x545454, 0.1);
 
                 if (options.replay)
                     progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
             }
-            if (options.displaySongProgressText)
+            if (options.settings.DISPLAY_SONGPROGRESS_TEXT)
             {
                 progressDisplayText = new TextStatic("0:00");
                 this.addChild(progressDisplayText);
@@ -589,8 +588,8 @@ package game
                     GAME_STATE = GAME_END;
                     if (!options.replay)
                     {
-                        _gvars.activeUser.saveLocal();
-                        _gvars.activeUser.save();
+                        _gvars.activeUser.saveSettingsLocally();
+                        _gvars.activeUser.saveSettingsOnline();
                     }
                 }
 
@@ -612,31 +611,33 @@ package game
             // Force no Judge on SongPreviews
             if (options.replay && options.replay.isPreview)
             {
-                options.offsetJudge = 0;
-                options.offsetGlobal = 0;
+                options.settings.JUDGE_OFFSET = 0;
+                options.settings.GLOBAL_OFFSET = 0;
                 options.isAutoplay = true;
             }
 
             reverseMod = options.modEnabled("reverse");
-            sideScroll = (options.scrollDirection == "left" || options.scrollDirection == "right");
-            player1JudgeOffset = Math.round(options.offsetJudge);
-            globalOffsetRounded = Math.round(options.offsetGlobal);
-            globalOffset = (options.offsetGlobal - globalOffsetRounded) * 1000 / 30;
+            sideScroll = (options.settings.scrollDirection == "left" || options.settings.scrollDirection == "right");
+            player1JudgeOffset = Math.round(options.settings.JUDGE_OFFSET);
+            globalOffsetRounded = Math.round(options.settings.GLOBAL_OFFSET);
+            globalOffset = (options.settings.GLOBAL_OFFSET - globalOffsetRounded) * 1000 / 30;
 
             if (options.judgeWindow)
                 judgeSettings = buildJudgeNodes(options.judgeWindow);
             else
                 judgeSettings = buildJudgeNodes(Constant.JUDGE_WINDOW);
-            judgeOffset = options.offsetJudge * 1000 / 30;
-            autoJudgeOffset = options.autoJudgeOffset;
+            judgeOffset = options.settings.JUDGE_OFFSET * 1000 / 30;
+            autoJudgeOffset = options.settings.AUTO_JUDGE_OFFSET;
 
             mpSpectate = (options.mpRoom && !options.mpRoom.connection.currentUser.isPlayer);
             if (mpSpectate)
             {
-                options.displayCombo = options.displayComboTotal = options.displayPA = false;
+                options.settings.DISPLAY_COMBO = false;
+                options.settings.DISPLAY_TOTAL = false;
+                options.settings.DISPLAY_PACOUNT = false;
             }
             else if (options.mpRoom)
-                options.displayComboTotal = false;
+                options.settings.DISPLAY_TOTAL = false;
         }
 
         private function initVars(postStart:Boolean = true):void
@@ -987,14 +988,14 @@ package game
             }
 
             // UI Updates
-            if (options.displayMPJudge && options.mpRoom)
+            if (options.settings.DISPLAY_MP_JUDGE && options.mpRoom)
             {
                 for each (var mpJudgeComponent:Judge in mpJudge)
                 {
                     mpJudgeComponent.updateJudge(e);
                 }
             }
-            else if (options.displayJudge && player1Judge != null)
+            else if (options.settings.DISPLAY_JUDGE && player1Judge != null)
             {
                 player1Judge.updateJudge(e);
             }
@@ -1056,9 +1057,9 @@ package game
                             spectateSync();
 
                         if (reverseMod)
-                            stopClips(song_background, 2 + song.musicDelay - globalOffsetRounded + gameProgress * options.songRate);
+                            stopClips(song_background, 2 + song.musicDelay - globalOffsetRounded + gameProgress * options.settings.songRate);
                         else
-                            stopClips(song_background, 2 + song.musicDelay - globalOffsetRounded + gameProgress * options.songRate);
+                            stopClips(song_background, 2 + song.musicDelay - globalOffsetRounded + gameProgress * options.settings.songRate);
                     }
 
                     if (options.modEnabled("tap_pulse"))
@@ -1117,22 +1118,22 @@ package game
                     var dir:String = null;
                     switch (keyCode)
                     {
-                        case _gvars.activeUser.keyLeft:
+                        case _gvars.activeUser.settings.keyLeft:
                             //case Keyboard.NUMPAD_4:
                             dir = "L";
                             break;
 
-                        case _gvars.activeUser.keyRight:
+                        case _gvars.activeUser.settings.keyRight:
                             //case Keyboard.NUMPAD_6:
                             dir = "R";
                             break;
 
-                        case _gvars.activeUser.keyUp:
+                        case _gvars.activeUser.settings.keyUp:
                             //case Keyboard.NUMPAD_8:
                             dir = "U";
                             break;
 
-                        case _gvars.activeUser.keyDown:
+                        case _gvars.activeUser.settings.keyDown:
                             //case Keyboard.NUMPAD_2:
                             dir = "D";
                             break;
@@ -1148,13 +1149,13 @@ package game
             }
 
             // Game Restart
-            if (keyCode == _gvars.playerUser.keyRestart && !options.mpRoom)
+            if (keyCode == _gvars.playerUser.settings.keyRestart && !options.mpRoom)
             {
                 GAME_STATE = GAME_RESTART;
             }
 
             // Quit
-            else if (keyCode == _gvars.playerUser.keyQuit)
+            else if (keyCode == _gvars.playerUser.settings.keyQuit)
             {
                 if (_gvars.songQueue.length > 0)
                 {
@@ -1165,7 +1166,7 @@ package game
                     }
                     else
                     {
-                        quitDoubleTap = options.frameRate / 4;
+                        quitDoubleTap = options.settings.frameRate / 4;
                     }
                 }
                 else
@@ -1235,29 +1236,29 @@ package game
             var keyCode:int = e.keyCode;
             var dir:String = "";
 
-            if (keyCode == _gvars.playerUser.keyQuit)
+            if (keyCode == _gvars.playerUser.settings.keyQuit)
             {
                 GAME_STATE = GAME_END;
             }
 
             switch (keyCode)
             {
-                case _gvars.playerUser.keyLeft:
+                case _gvars.playerUser.settings.keyLeft:
                     //case Keyboard.NUMPAD_4:
                     dir = "L";
                     break;
 
-                case _gvars.playerUser.keyRight:
+                case _gvars.playerUser.settings.keyRight:
                     //case Keyboard.NUMPAD_6:
                     dir = "R";
                     break;
 
-                case _gvars.playerUser.keyUp:
+                case _gvars.playerUser.settings.keyUp:
                     //case Keyboard.NUMPAD_8:
                     dir = "U";
                     break;
 
-                case _gvars.playerUser.keyDown:
+                case _gvars.playerUser.settings.keyDown:
                     //case Keyboard.NUMPAD_2:
                     dir = "D";
                     break;
@@ -1497,10 +1498,10 @@ package game
 
             GAME_STATE = GAME_DISPOSE;
 
-            var screen:int = _gvars.activeUser.startUpScreen;
-            if (!_gvars.activeUser.isGuest && (screen == 0 || screen == 1) && !MultiplayerSingleton.getInstance().connection.connected)
+            var screen:int = _gvars.activeUser.settings.startUpScreen;
+            if (!_gvars.activeUser.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
             {
-                MultiplayerSingleton.getInstance().connection.connect();
+                MultiplayerState.getInstance().connection.connect();
             }
 
             // Go to results
@@ -1578,7 +1579,7 @@ package game
 
         private function buildScreenCut():void
         {
-            if (!options.displayScreencut)
+            if (!options.settings.DISPLAY_SCREENCUT)
                 return;
 
             if (screenCut)
@@ -1593,7 +1594,7 @@ package game
 
         private function buildJudge():void
         {
-            if (!options.displayJudge)
+            if (!options.settings.DISPLAY_JUDGE)
                 return;
 
             player1Judge = new Judge(options);
@@ -1604,7 +1605,7 @@ package game
 
         private function buildHealth():void
         {
-            if (!options.displayHealth)
+            if (!options.settings.DISPLAY_HEALTH)
                 return;
 
             player1Life = new LifeBar();
@@ -1620,7 +1621,7 @@ package game
             mpCombo = [];
             mpHeader = [];
 
-            if (!options.displayMPUI && !mpSpectate)
+            if (!options.settings.DISPLAY_MP_UI && !mpSpectate)
                 return;
 
             for each (var user:User in options.mpRoom.players)
@@ -1636,7 +1637,7 @@ package game
                     continue;
                 }
 
-                if (options.displayMPPA)
+                if (options.settings.DISPLAY_MP_PA)
                 {
                     var pa:PAWindow = new PAWindow(options);
                     addChild(pa);
@@ -1646,21 +1647,21 @@ package game
                 if (mpSpectate)
                 {
                     var header:MPHeader = new MPHeader(user);
-                    if (options.displayMPPA)
+                    if (options.settings.DISPLAY_MP_PA)
                         mpPA[user.playerIdx].addChild(header);
                     else
                         addChild(header);
                     mpHeader[user.playerIdx] = header;
                 }
 
-                if (options.displayMPCombo)
+                if (options.settings.DISPLAY_MP_COMBO)
                 {
                     var combo:Combo = new Combo(options);
                     addChild(combo);
                     mpCombo[user.playerIdx] = combo;
                 }
 
-                if (options.displayMPJudge)
+                if (options.settings.DISPLAY_MP_JUDGE)
                 {
                     var judge:Judge = new Judge(options);
                     addChild(judge);
@@ -1675,7 +1676,7 @@ package game
         {
             if (defaults)
             {
-                var ret:Object = new Object();
+                var ret:Object = {};
                 var def:Object = defaultLayout[key];
                 for (var i:String in def)
                     ret[i] = def[i];
@@ -1685,13 +1686,13 @@ package game
                 return ret;
             }
             else if (!options.layout[key])
-                options.layout[key] = new Object();
+                options.layout[key] = {};
             return options.layout[key];
         }
 
         private function interfaceSetup():void
         {
-            defaultLayout = new Object();
+            defaultLayout = {};
             defaultLayout[LAYOUT_PROGRESS_BAR] = {x: 161, y: 9};
             defaultLayout[LAYOUT_PROGRESS_TEXT] = {x: 768, y: 5, properties: {alignment: "right"}};
             defaultLayout[LAYOUT_JUDGE] = {x: 392, y: 228};
@@ -1721,7 +1722,7 @@ package game
             defaultLayout[LAYOUT_MP_COMBO + "1"] = defaultLayout[LAYOUT_COMBO];
             defaultLayout[LAYOUT_MP_JUDGE + "1"] = {x: 208, y: 102};
             defaultLayout[LAYOUT_MP_PA + "1"] = {x: 6, y: 96};
-            if (options.displayMPPA)
+            if (options.settings.DISPLAY_MP_PA)
                 defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 0, y: -35};
             else
                 defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 6, y: 190};
@@ -1729,7 +1730,7 @@ package game
             defaultLayout[LAYOUT_MP_COMBO + "2"] = defaultLayout[LAYOUT_COMBO_TOTAL];
             defaultLayout[LAYOUT_MP_JUDGE + "2"] = {x: 568, y: 102};
             defaultLayout[LAYOUT_MP_PA + "2"] = {x: 645, y: 96, properties: {alignment: "right"}};
-            if (options.displayMPPA)
+            if (options.settings.DISPLAY_MP_PA)
                 defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 25, y: -35, properties: {alignment: MPHeader.ALIGN_RIGHT}};
             else
                 defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 690, y: 190, properties: {alignment: MPHeader.ALIGN_RIGHT}};
@@ -1940,13 +1941,13 @@ package game
             if (options.modEnabled("tap_pulse"))
             {
                 if (dir == "L")
-                    noteBoxOffset.x -= Math.abs(options.receptorSpacing * 0.20);
+                    noteBoxOffset.x -= Math.abs(options.settings.receptorGap * 0.20);
                 if (dir == "R")
-                    noteBoxOffset.x += Math.abs(options.receptorSpacing * 0.20);
+                    noteBoxOffset.x += Math.abs(options.settings.receptorGap * 0.20);
                 if (dir == "U")
-                    noteBoxOffset.y -= Math.abs(options.receptorSpacing * 0.15);
+                    noteBoxOffset.y -= Math.abs(options.settings.receptorGap * 0.15);
                 if (dir == "D")
-                    noteBoxOffset.y += Math.abs(options.receptorSpacing * 0.15);
+                    noteBoxOffset.y += Math.abs(options.settings.receptorGap * 0.15);
             }
 
             return Boolean(score);
@@ -1996,13 +1997,13 @@ package game
             if (options.modEnabled("tap_pulse"))
             {
                 if (dir == "L")
-                    noteBoxOffset.x -= Math.abs(options.receptorSpacing * 0.20);
+                    noteBoxOffset.x -= Math.abs(options.settings.receptorGap * 0.20);
                 if (dir == "R")
-                    noteBoxOffset.x += Math.abs(options.receptorSpacing * 0.20);
+                    noteBoxOffset.x += Math.abs(options.settings.receptorGap * 0.20);
                 if (dir == "U")
-                    noteBoxOffset.y -= Math.abs(options.receptorSpacing * 0.15);
+                    noteBoxOffset.y -= Math.abs(options.settings.receptorGap * 0.15);
                 if (dir == "D")
-                    noteBoxOffset.y += Math.abs(options.receptorSpacing * 0.15);
+                    noteBoxOffset.y += Math.abs(options.settings.receptorGap * 0.15);
             }
 
             if (score)
@@ -2032,7 +2033,7 @@ package game
                     hitCombo++;
                     gameScore += 50;
                     health = 1;
-                    if (options.displayAmazing)
+                    if (options.settings.DISPLAY_AMAZING)
                     {
                         checkAutofail(options.autofail[0], hitAmazing);
                     }

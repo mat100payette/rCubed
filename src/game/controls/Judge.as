@@ -32,17 +32,17 @@ package game.controls
         {
             this.options = options;
 
-            if (!this.options.displayJudgeAnimations)
+            if (!this.options.settings.DISPLAY_JUDGE_ANIMATIONS)
                 indexes = Judge_Tweens.judge_indexes_static;
 
-            speedScale = this.options.judgeSpeed;
+            speedScale = this.options.settings.judgeSpeed;
 
-            labelDesc[100] = {color: options.judgeColors[0], title: "AMAZING!!!"};
-            labelDesc[50] = {color: options.judgeColors[1], title: "PERFECT!"};
-            labelDesc[25] = {color: options.judgeColors[2], title: "GOOD"};
-            labelDesc[5] = {color: options.judgeColors[3], title: "AVERAGE"};
-            labelDesc[-5] = {color: options.judgeColors[5], title: "BOO!!"};
-            labelDesc[-10] = {color: options.judgeColors[4], title: "MISS!"};
+            labelDesc[100] = {color: options.settings.judgeColors[0], title: "AMAZING!!!"};
+            labelDesc[50] = {color: options.settings.judgeColors[1], title: "PERFECT!"};
+            labelDesc[25] = {color: options.settings.judgeColors[2], title: "GOOD"};
+            labelDesc[5] = {color: options.settings.judgeColors[3], title: "AVERAGE"};
+            labelDesc[-5] = {color: options.settings.judgeColors[5], title: "BOO!!"};
+            labelDesc[-10] = {color: options.settings.judgeColors[4], title: "MISS!"};
 
             var textFormat:TextFormat = new TextFormat(new AachenLight().fontName, 42, 0xffffff, true);
 
@@ -81,7 +81,7 @@ package game.controls
         public function showJudge(newScore:int, doFreeze:Boolean = false):void
         {
             // Hide Perfect/Amazing Judge
-            if (!options.isEditor && newScore >= 50 && !options.displayPerfect)
+            if (!options.isEditor && newScore >= 50 && !options.settings.DISPLAY_PERFECT)
             {
                 return;
             }

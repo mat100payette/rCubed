@@ -1,7 +1,7 @@
 package game
 {
     import arc.ArcGlobals;
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import assets.menu.icons.fa.iconPhoto;
     import assets.menu.icons.fa.iconRandom;
     import assets.menu.icons.fa.iconRight;
@@ -47,6 +47,7 @@ package game
     import popups.PopupSongNotes;
     import popups.PopupTokenUnlock;
     import popups.replays.ReplayHistoryTabLocal;
+    import classes.UserSettings;
 
     public class GameResults extends MenuPanel
     {
@@ -57,7 +58,7 @@ package game
 
         private var graphCache:Object = {"0": {}, "1": {}};
 
-        private var _mp:MultiplayerSingleton = MultiplayerSingleton.getInstance();
+        private var _mp:MultiplayerState = MultiplayerState.getInstance();
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
@@ -357,9 +358,10 @@ package game
                 result = songResults[resultIndex];
                 songInfo = result.songInfo;
 
-                var seconds:Number = Math.floor(songInfo.time_secs * (1 / result.options.songRate));
+                var songRate:Number = result.options.settings.songRate;
+                var seconds:Number = Math.floor(songInfo.time_secs * (1 / songRate));
                 var songLength:String = (Math.floor(seconds / 60)) + ":" + (seconds % 60 >= 10 ? "" : "0") + (seconds % 60);
-                var rateString:String = result.options.songRate != 1 ? " (" + result.options.songRate + "x Rate)" : "";
+                var rateString:String = songRate != 1 ? " (" + songRate + "x Rate)" : "";
 
                 // Song Title
                 songTitle = songInfo.engine ? songInfo.name + rateString : "<a href=\"" + Constant.LEVEL_STATS_URL + songInfo.level + "\">" + songInfo.name + rateString + "</a>";
@@ -479,12 +481,12 @@ package game
             }
 
             // Mod Text
-            resultsMods.text = "Scroll Speed: " + result.options.scrollSpeed;
+            resultsMods.text = "Scroll Speed: " + result.options.settings.scrollSpeed;
             if (result.restarts > 0)
                 resultsMods.text += ", Restarts: " + result.restarts;
 
             var mods:Array = [];
-            for each (var mod:String in result.options.mods)
+            for each (var mod:String in result.options.settings.activeMods)
                 mods.push(_lang.string("options_mod_" + mod));
 
             if (result.options.judgeWindow)
@@ -600,14 +602,14 @@ package game
          */
         private function updateJudgeOffset(result:GameScoreResult):void
         {
-            if (_gvars.activeUser.AUTO_JUDGE_OFFSET && // Auto Judge Offset enabled 
+            if (_gvars.activeUser.settings.AUTO_JUDGE_OFFSET && // Auto Judge Offset enabled 
                 (result.amazing + result.perfect + result.good + result.average >= 50) && // Accuracy data is reliable
                 result.accuracy !== 0)
             {
-                _gvars.activeUser.JUDGE_OFFSET = Number(result.accuracy_frames.toFixed(3));
+                _gvars.activeUser.settings.JUDGE_OFFSET = Number(result.accuracy_frames.toFixed(3));
                 // Save settings
-                _gvars.activeUser.saveLocal();
-                _gvars.activeUser.save();
+                _gvars.activeUser.saveSettingsLocally();
+                _gvars.activeUser.saveSettingsOnline();
             }
         }
 
@@ -686,19 +688,19 @@ package game
             {
                 target = null;
                 var keyCode:int = e.keyCode;
-                if ((keyCode == _gvars.playerUser.keyLeft || keyCode == Keyboard.LEFT) && navPrev.visible)
+                if ((keyCode == _gvars.playerUser.settings.keyLeft || keyCode == Keyboard.LEFT) && navPrev.visible)
                 {
                     target = navPrev;
                 }
-                else if ((keyCode == _gvars.playerUser.keyRight || keyCode == Keyboard.RIGHT) && navNext.visible)
+                else if ((keyCode == _gvars.playerUser.settings.keyRight || keyCode == Keyboard.RIGHT) && navNext.visible)
                 {
                     target = navNext;
                 }
-                else if (keyCode == _gvars.playerUser.keyRestart)
+                else if (keyCode == _gvars.playerUser.settings.keyRestart)
                 {
                     target = navReplay;
                 }
-                else if (keyCode == _gvars.playerUser.keyQuit)
+                else if (keyCode == _gvars.playerUser.settings.keyQuit)
                 {
                     target = navMenu;
                     stage.removeEventListener(KeyboardEvent.KEY_DOWN, eventHandler);
@@ -931,7 +933,7 @@ package game
             // Post Game Data
             scoreSender.level = gameResult.level;
             scoreSender.update = canUpdateScore(gameResult, true, true, false, false);
-            scoreSender.rate = gameResult.options.songRate;
+            scoreSender.rate = gameResult.options.settings.songRate;
             scoreSender.restarts = gameResult.restarts;
             scoreSender.accuracy = gameResult.accuracy_frames;
             scoreSender.amazing = gameResult.amazing;
@@ -943,7 +945,7 @@ package game
             scoreSender.max_combo = gameResult.max_combo;
             scoreSender.score = gameResult.score;
             scoreSender.replay = Replay.getReplayString(gameResult.replayData);
-            scoreSender.save_settings = JSON.stringify(gameResult.options.settingsEncode());
+            scoreSender.save_settings = gameResult.options.settings.stringify();
             scoreSender.restart_stats = JSON.stringify(gameResult.restart_stats);
             scoreSender.session = _gvars.userSession;
             scoreSender.start_time = gameResult.start_time;
@@ -1039,7 +1041,7 @@ package game
                     }
 
                     // Check raw score vs level ranks and update.
-                    var previousLevelRanks:Object = _gvars.activeUser.level_ranks[songInfo.level];
+                    var previousLevelRanks:Object = _gvars.activeUser.levelRanks[songInfo.level];
                     var newLevelRanks:Object = {"genre": songInfo.genre,
                             "rank": data.new_ranking,
                             "score": gameResult.score,
@@ -1065,7 +1067,7 @@ package game
                             newLevelRanks["aaas"] += previousLevelRanks["aaas"];
                             newLevelRanks["fcs"] += previousLevelRanks["fcs"];
                         }
-                        _gvars.activeUser.level_ranks[songInfo.level] = newLevelRanks;
+                        _gvars.activeUser.levelRanks[songInfo.level] = newLevelRanks;
                     }
 
                     // Update Counters
@@ -1180,7 +1182,7 @@ package game
             dataObject.engine = gameResult.songInfo.engine;
             dataObject.song_data = sd;
             dataObject.level = gameResult.level;
-            dataObject.rate = gameResult.options.songRate;
+            dataObject.rate = gameResult.options.settings.songRate;
             dataObject.restarts = gameResult.restarts;
             dataObject.accuracy = gameResult.accuracy_frames;
             dataObject.amazing = gameResult.amazing;
@@ -1192,9 +1194,11 @@ package game
             dataObject.max_combo = gameResult.max_combo;
             dataObject.score = gameResult.score;
             dataObject.replay = gameResult.replay_bin_encoded;
-            dataObject.save_settings = gameResult.options.settingsEncode();
+            dataObject.save_settings = gameResult.options.settings;
             dataObject.session = _gvars.userSession;
             dataObject.hashMap = getSaveHash(dataObject);
+
+            // TODO: This probably crashes because settings are circular here
             scoreSender.data = JSON.stringify(dataObject);
             scoreSender.session = _gvars.userSession;
 
@@ -1297,9 +1301,10 @@ package game
             var nR:Replay = new Replay(_gvars.gameIndex);
             nR.user = _gvars.playerUser;
             nR.level = result.songInfo.level;
-            nR.settings = result.options.settingsEncode();
+            nR.settings = new UserSettings(true);
+            nR.settings.update(result.options.settings);
             if (result.songInfo.engine)
-                nR.settings.arc_engine = _avars.legacyEncode(result.songInfo);
+                nR.arc_engine = _avars.legacyEncode(result.songInfo);
             nR.score = result.score;
             nR.perfect = (result.amazing + result.perfect);
             nR.good = result.good;
@@ -1368,7 +1373,7 @@ package game
             // Post Game Data
             scoreSender.level = gameResult.level;
             scoreSender.update = canUpdateScore(gameResult, true, true, false, false);
-            scoreSender.rate = gameResult.options.songRate;
+            scoreSender.rate = gameResult.options.settings.songRate;
             scoreSender.restarts = gameResult.restarts;
             scoreSender.accuracy = gameResult.accuracy_frames;
             scoreSender.amazing = gameResult.amazing;
@@ -1381,7 +1386,7 @@ package game
             scoreSender.score = gameResult.score;
             scoreSender.replay = Replay.getReplayString(gameResult.replayData);
             scoreSender.replay_bin = gameResult.replay_bin_encoded;
-            scoreSender.save_settings = JSON.stringify(gameResult.options.settingsEncode());
+            scoreSender.save_settings = gameResult.options.settings.stringify();
             scoreSender.session = _gvars.userSession;
             scoreSender.start_time = gameResult.start_time;
             scoreSender.start_hash = gameResult.start_hash;

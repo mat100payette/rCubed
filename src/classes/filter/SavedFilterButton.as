@@ -100,7 +100,7 @@ package classes.filter
         private function e_defaultClick(e:Event):void
         {
             if (!filter.is_default)
-                for each (var item:EngineLevelFilter in _gvars.activeUser.filters)
+                for each (var item:EngineLevelFilter in _gvars.activeUser.settings.filters)
                     item.is_default = false;
 
             filter.is_default = !filter.is_default;
@@ -117,7 +117,7 @@ package classes.filter
 
         private function e_deleteClick(e:Event):void
         {
-            if (VectorUtil.removeFirst(filter, _gvars.activeUser.filters))
+            if (VectorUtil.removeFirst(filter, _gvars.activeUser.settings.filters))
                 updater.draw();
         }
 

@@ -5,11 +5,10 @@ package game.controls
     import classes.Noteskins;
     import classes.chart.Song;
     import classes.chart.Note;
-    import flash.display.DisplayObject;
     import flash.utils.getTimer;
-    import game.GameOptions;
     import flash.display.Sprite;
     import flash.display.MovieClip;
+    import game.GameOptions;
     import com.flashfla.utils.ObjectPool;
 
     public class NoteBox extends Sprite
@@ -45,10 +44,9 @@ package game.controls
             for each (var item:Object in _noteskins.data)
             {
                 notePool[item.id] = {"L": [], "D": [], "U": [], "R": []};
-
-                for each (var direction:String in options.noteDirections)
+                for each (var direction:String in GameOptions.noteDirections)
                 {
-                    for each (var color:String in options.noteColors)
+                    for each (var color:String in options.settings.noteColors)
                     {
                         notePool[item.id][direction][color] = new ObjectPool();
                     }
@@ -56,23 +54,23 @@ package game.controls
             }
 
             // Check for invalid Noteskin / Pool
-            if (notePool[options.noteskin] == null)
+            if (notePool[options.settings.activeNoteskin] == null)
             {
-                options.noteskin = 1;
+                options.settings.activeNoteskin = 1;
             }
 
             // Prefill Object Pools for active noteskin.
             var i:int = 0;
             var preLoadCount:int = 4;
-            for each (var pre_dir:String in options.noteDirections)
+            for each (var pre_dir:String in GameOptions.noteDirections)
             {
-                for each (var pre_color:String in options.noteColors)
+                for each (var pre_color:String in options.settings.noteColors)
                 {
-                    var pool:ObjectPool = notePool[options.noteskin][pre_dir][pre_color];
+                    var pool:ObjectPool = notePool[options.settings.activeNoteskin][pre_dir][pre_color];
 
                     for (i = 0; i < preLoadCount; i++)
                     {
-                        var gameNote:GameNote = pool.addObject(new GameNote(0, pre_dir, pre_color, 1 * 1000, 0, 0, options.noteskin));
+                        var gameNote:GameNote = pool.addObject(new GameNote(0, pre_dir, pre_color, 1 * 1000, 0, 0, options.settings.activeNoteskin));
                         gameNote.visible = false;
                         pool.unmarkObject(gameNote);
                         addChild(gameNote);
@@ -81,21 +79,21 @@ package game.controls
             }
 
             // Setup Receptors
-            leftReceptor = _noteskins.getReceptor(options.noteskin, "L");
+            leftReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "L");
             leftReceptor.KEY = "Left";
-            downReceptor = _noteskins.getReceptor(options.noteskin, "D");
+            downReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "D");
             downReceptor.KEY = "Down";
-            upReceptor = _noteskins.getReceptor(options.noteskin, "U");
+            upReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "U");
             upReceptor.KEY = "Up";
-            rightReceptor = _noteskins.getReceptor(options.noteskin, "R");
+            rightReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "R");
             rightReceptor.KEY = "Right";
 
             if (leftReceptor is GameReceptor)
             {
-                (leftReceptor as GameReceptor).animationSpeed = options.receptorAnimationSpeed;
-                (downReceptor as GameReceptor).animationSpeed = options.receptorAnimationSpeed;
-                (upReceptor as GameReceptor).animationSpeed = options.receptorAnimationSpeed;
-                (rightReceptor as GameReceptor).animationSpeed = options.receptorAnimationSpeed;
+                (leftReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
+                (downReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
+                (upReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
+                (rightReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
             }
 
             addChildAt(leftReceptor, 0);
@@ -104,8 +102,8 @@ package game.controls
             addChildAt(rightReceptor, 0);
 
             // Other Stuff
-            sideScroll = options.scrollDirection == "left" || options.scrollDirection == "right";
-            scrollSpeed = options.scrollSpeed * (sideScroll ? 1.5 : 1);
+            sideScroll = options.settings.scrollDirection == "left" || options.settings.scrollDirection == "right";
+            scrollSpeed = options.settings.scrollSpeed * (sideScroll ? 1.5 : 1);
             readahead = ((sideScroll ? Main.GAME_WIDTH : Main.GAME_HEIGHT) / 300 * 1000 / scrollSpeed);
             receptorAlpha = 1.0;
             notes = [];
@@ -136,14 +134,14 @@ package game.controls
             var color:String = options.getNewNoteColor(note.color);
             if (options.DISABLE_NOTE_POOL)
             {
-                var gameNote:GameNote = new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.noteskin);
+                var gameNote:GameNote = new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.activeNoteskin);
             }
             else
             {
-                var spawnPoolRef:ObjectPool = notePool[options.noteskin][direction][color];
+                var spawnPoolRef:ObjectPool = notePool[options.settings.activeNoteskin][direction][color];
                 if (!spawnPoolRef)
                 {
-                    spawnPoolRef = notePool[options.noteskin][direction][color] = new ObjectPool();
+                    spawnPoolRef = notePool[options.settings.activeNoteskin][direction][color] = new ObjectPool();
                 }
 
                 gameNote = spawnPoolRef.getObject();
@@ -157,7 +155,7 @@ package game.controls
                 }
                 else
                 {
-                    gameNote = spawnPoolRef.addObject(new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.noteskin));
+                    gameNote = spawnPoolRef.addObject(new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.activeNoteskin));
                     addChild(gameNote);
                 }
             }
@@ -166,13 +164,13 @@ package game.controls
             gameNote.rotation = getReceptor(direction).rotation;
 
             if (options.modEnabled("_spawn_noteskin_data_rotation"))
-                gameNote.rotation = noteRealSpawnRotation(direction, options.noteskin);
+                gameNote.rotation = noteRealSpawnRotation(direction, options.settings.activeNoteskin);
 
-            if (options.noteScale != 1.0)
+            if (options.settings.noteScale != 1.0)
             {
-                gameNote.scaleX = gameNote.scaleY = options.noteScale;
+                gameNote.scaleX = gameNote.scaleY = options.settings.noteScale;
             }
-            else if (options.modEnabled("mini") && !options.modEnabled("mini_resize") && options.noteScale == 1.0)
+            else if (options.modEnabled("mini") && !options.modEnabled("mini_resize") && options.settings.noteScale == 1.0)
             {
                 gameNote.scaleX = gameNote.scaleY = 0.75;
             }
@@ -212,10 +210,8 @@ package game.controls
 
         public function receptorFeedback(dir:String, score:int):void
         {
-            if (!options.displayReceptorAnimations)
-            {
+            if (!options.settings.DISPLAY_RECEPTOR_ANIMATIONS)
                 return;
-            }
 
             var f:int = 2;
             var c:uint = 0;
@@ -225,16 +221,16 @@ package game.controls
                 case 100:
                 case 50:
                     f = 2;
-                    c = options.judgeColors[0];
+                    c = options.settings.judgeColors[0];
                     break;
                 case 25:
                     f = 7;
-                    c = options.judgeColors[2];
+                    c = options.settings.judgeColors[2];
                     break;
                 case 5:
                 case -5:
                     f = 12;
-                    c = options.judgeColors[3];
+                    c = options.settings.judgeColors[3];
                     break;
                 default:
                     return;
@@ -348,7 +344,7 @@ package game.controls
             // Position Mods
             if (options.modEnabled("tornado"))
             {
-                var tornadoOffset:Number = Math.sin(updateBaseOffsetRef * Math.PI) * (options.receptorSpacing / 2);
+                var tornadoOffset:Number = Math.sin(updateBaseOffsetRef * Math.PI) * (options.settings.receptorGap / 2);
                 if (updateReceptorRef.VERTEX == "x")
                 {
                     note.y += tornadoOffset;
@@ -390,7 +386,7 @@ package game.controls
             }
 
             // Scale Mods
-            if (options.noteScale == 1 && options.modEnabled("mini_resize") && !options.modEnabled("mini"))
+            if (options.settings.noteScale == 1 && options.modEnabled("mini_resize") && !options.modEnabled("mini"))
             {
                 note.scaleX = note.scaleY = 1 - (updateBaseOffsetRef * 0.65);
             }
@@ -449,10 +445,10 @@ package game.controls
 
         public function position():void
         {
-            var data:Object = _noteskins.getInfo(options.noteskin);
+            var data:Object = _noteskins.getInfo(options.settings.activeNoteskin);
             var rotation:Number = data.rotation;
-            var gap:int = options.receptorSpacing;
-            var noteScale:Number = options.noteScale;
+            var gap:int = options.settings.receptorGap;
+            var noteScale:Number = options.settings.noteScale;
             var centerOffset:int = 160;
 
             //if (data.width > 64)
@@ -472,7 +468,7 @@ package game.controls
                 gap *= 0.75;
             }
 
-            switch (options.scrollDirection)
+            switch (options.settings.scrollDirection)
             {
                 case "down":
                     downReceptor.x = int(-gap / 2) + centerOffset;
@@ -696,14 +692,14 @@ package game.controls
                 rightReceptor.rotation -= 90;
             }
 
-            if (options.noteScale != 1.0)
-                downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = options.noteScale;
+            if (options.settings.noteScale != 1.0)
+                downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = options.settings.noteScale;
 
-            if (options.modEnabled("mini") && !options.modEnabled("mini_resize") && options.noteScale == 1.0)
+            if (options.modEnabled("mini") && !options.modEnabled("mini_resize") && options.settings.noteScale == 1.0)
                 downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = 0.75;
 
 
-            if (options.modEnabled("mini_resize") && !options.modEnabled("mini") && options.noteScale == 1.0)
+            if (options.modEnabled("mini_resize") && !options.modEnabled("mini") && options.settings.noteScale == 1.0)
                 downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = 0.5;
 
             if (options.modEnabled("dark"))

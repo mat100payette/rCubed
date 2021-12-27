@@ -157,18 +157,18 @@ package popups.settings
         {
             for each (var item:BoxCheck in optionDisplays)
             {
-                item.checked = (_gvars.activeUser["DISPLAY_" + item.display]);
+                item.checked = (_gvars.activeUser.settings["DISPLAY_" + item.display]);
             }
 
-            optionJudgeSpeed.slideValue = _gvars.activeUser.judgeSpeed;
-            textJudgeSpeed.text = _gvars.activeUser.judgeSpeed.toFixed(2) + "x";
+            optionJudgeSpeed.slideValue = _gvars.activeUser.settings.judgeSpeed;
+            textJudgeSpeed.text = _gvars.activeUser.settings.judgeSpeed.toFixed(2) + "x";
         }
 
         override public function clickHandler(e:MouseEvent):void
         {
             if (e.target.hasOwnProperty("display"))
             {
-                _gvars.activeUser["DISPLAY_" + e.target.display] = !_gvars.activeUser["DISPLAY_" + e.target.display];
+                _gvars.activeUser.settings["DISPLAY_" + e.target.display] = !_gvars.activeUser.settings["DISPLAY_" + e.target.display];
                 e.target.checked = !e.target.checked;
                 if (e.target.display == "GENRE_FLAG" || e.target.display == "SONG_FLAG" || e.target.display == "SONG_NOTE")
                 {
@@ -183,8 +183,8 @@ package popups.settings
         {
             if (e.target == optionJudgeSpeed)
             {
-                _gvars.activeUser.judgeSpeed = (Math.round((optionJudgeSpeed.slideValue * 100) / 5) * 5) / 100; // Snap to 0.05 intervals.
-                textJudgeSpeed.text = _gvars.activeUser.judgeSpeed.toFixed(2) + "x";
+                _gvars.activeUser.settings.judgeSpeed = (Math.round((optionJudgeSpeed.slideValue * 100) / 5) * 5) / 100; // Snap to 0.05 intervals.
+                textJudgeSpeed.text = _gvars.activeUser.settings.judgeSpeed.toFixed(2) + "x";
             }
 
             parent.checkValidMods();

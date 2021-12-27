@@ -16,6 +16,7 @@ package popups.replays
     import com.flashfla.utils.SpriteUtil;
     import flash.display.Bitmap;
     import classes.Language;
+    import classes.UserSettings;
 
     public class ReplayHistoryTabLocal extends ReplayHistoryTabBase
     {
@@ -129,14 +130,15 @@ package popups.replays
                 r.boo = cacheObj["judge"][4];
                 r.maxcombo = cacheObj["judge"][5];
 
-                r.settings = {'songRate': cacheObj["rate"]};
+                r.settings = new UserSettings(true);
+                r.settings.update({'songRate': cacheObj["rate"]});
                 if (cacheObj["engine"] != null)
                 {
                     var engine:Object = _avars.legacyEngine(cacheObj["engine"]);
                     if (!engine)
                         engine = {id: cacheObj["engine"]};
 
-                    r.settings.arc_engine = {engineID: cacheObj["engine"]};
+                    r.arc_engine = {engineID: cacheObj["engine"]};
 
                     r.song.engine = engine;
                 }
@@ -308,7 +310,7 @@ package popups.replays
                                     'score': r.score,
                                     'judge': [r.perfect, r.good, r.average, r.miss, r.boo, r.maxcombo]}
 
-                            if (r.settings.arc_engine != null)
+                            if (r.arc_engine != null)
                                 cacheObj["engine"] = r.song.engine.id;
 
                             _gvars.file_replay_cache.setValue(chartFile.parent.name + "/" + chartFile.name, cacheObj);

@@ -174,7 +174,7 @@ package popups
                 importFilterButton.visible = true;
                 var yPos:Number = -40;
                 var savedFilterButton:SavedFilterButton;
-                for each (var item:EngineLevelFilter in _gvars.activeUser.filters)
+                for each (var item:EngineLevelFilter in _gvars.activeUser.settings.filters)
                 {
                     savedFilterButton = new SavedFilterButton(scrollpane.content, 0, yPos += 40, item, this);
                 }
@@ -280,8 +280,8 @@ package popups
             removePopup();
             if (_gvars.activeUser == _gvars.playerUser)
             {
-                _gvars.activeUser.saveLocal();
-                _gvars.activeUser.save();
+                _gvars.activeUser.saveSettingsLocally();
+                _gvars.activeUser.saveSettingsOnline();
             }
 
             if (_gvars.gameMain.activePanel != null && _gvars.gameMain.activePanel is MainMenu)
@@ -312,10 +312,10 @@ package popups
 
         private function e_addSavedFilterButton(e:Event):void
         {
-            _gvars.activeUser.filters.push(new EngineLevelFilter(true));
+            _gvars.activeUser.settings.filters.push(new EngineLevelFilter(true));
 
             if (DRAW_TAB == TAB_FILTER)
-                _gvars.activeFilter = _gvars.activeUser.filters[_gvars.activeUser.filters.length - 1];
+                _gvars.activeFilter = _gvars.activeUser.settings.filters[_gvars.activeUser.settings.filters.length - 1];
 
             draw();
         }
@@ -333,7 +333,7 @@ package popups
                 var filter:EngineLevelFilter = new EngineLevelFilter();
                 filter.setup(item);
                 filter.is_default = false;
-                _gvars.activeUser.filters.push(filter);
+                _gvars.activeUser.settings.filters.push(filter);
                 draw();
             }
             catch (e:Error)

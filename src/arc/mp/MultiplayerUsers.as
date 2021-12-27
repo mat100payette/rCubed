@@ -34,7 +34,7 @@ package arc.mp
             this.controlChat = controlChat;
             this.owner = owner ? owner : parent;
 
-            connection = MultiplayerSingleton.getInstance().connection;
+            connection = MultiplayerState.getInstance().connection;
 
             controlUsers = new List();
             controlUsers.listItemClass = ListItemDoubleClick;

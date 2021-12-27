@@ -62,7 +62,7 @@ package arc.mp
 
             var self:MultiplayerPanel = this;
 
-            connection = MultiplayerSingleton.getInstance().connection;
+            connection = MultiplayerState.getInstance().connection;
             // Connect immediately if logged in
             if (!GlobalVariables.instance.activeUser.isGuest && GlobalVariables.instance.activeUser.id != 2)
             {
@@ -270,7 +270,7 @@ package arc.mp
             {
                 updateWindowTitle(connection.lobby);
 
-                if (!MultiplayerSingleton.getInstance().gameplayPlayingStatus())
+                if (!MultiplayerState.getInstance().gameplayPlayingStatus())
                     connection.refreshRooms();
             }
         }

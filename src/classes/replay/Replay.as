@@ -16,6 +16,7 @@ package classes.replay
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
     import flash.utils.ByteArray;
+    import classes.UserSettings;
 
     public class Replay
     {
@@ -38,7 +39,7 @@ package classes.replay
         public var id:Number;
         public var user:User;
         public var level:int;
-        public var settings:Object;
+        public var settings:UserSettings;
         public var score:Number;
         public var perfect:Number;
         public var good:Number;
@@ -50,6 +51,7 @@ package classes.replay
         public var timestamp:Number;
 
         public var song:SongInfo;
+        public var arc_engine:Object;
 
         public function Replay(id:Number, doLoad:Boolean = false)
         {
@@ -103,6 +105,7 @@ package classes.replay
             if (data == null)
                 return;
 
+            // Only used for pre-R3 replays support
             var jsonSettings:Object;
 
             //- Level Details
@@ -149,7 +152,8 @@ package classes.replay
                 }
                 jsonSettings.viewOffset = 0;
                 jsonSettings.judgeOffset = 0;
-                this.settings = jsonSettings;
+                this.settings = new UserSettings(true);
+                this.settings.update(jsonSettings);
             }
             else if (data.replayversion == "R^2")
             {
@@ -174,13 +178,15 @@ package classes.replay
                 jsonSettings.noteskin = Number(tempSettings[2][3]);
                 jsonSettings.viewOffset = 0;
                 jsonSettings.judgeOffset = 0;
-                this.settings = jsonSettings;
-            }
 
+                this.settings = new UserSettings(true);
+                this.settings.update(jsonSettings);
+            }
             // R^3 Replay JSON
             else if (data.replayversion == "R^3")
             {
-                this.settings = JSON.parse(data.replaysettings);
+                this.settings = new UserSettings(true);
+                this.settings.update(JSON.parse(data.replaysettings));
             }
 
             //- Frames
@@ -229,7 +235,8 @@ package classes.replay
             this.maxcombo = data.judgements["maxcombo"];
             this.score = (perfect * 50) + (good * 25) + (average * 5) - (miss * 10) - (boo * 5);
 
-            this.settings = data.settings;
+            this.settings = user.settings;
+            this.settings.update(data.settings);
 
             //- Replay
             this.replayData = [];
@@ -291,7 +298,6 @@ package classes.replay
             }
         }
 
-        /////
         public function get songname():String
         {
             return song.name;
@@ -299,7 +305,7 @@ package classes.replay
 
         public function loadSongInfo():void
         {
-            song = settings.arc_engine ? ArcGlobals.instance.legacyDecode(settings.arc_engine) : Playlist.instanceCanon.getSongInfo(level);
+            song = arc_engine ? ArcGlobals.instance.legacyDecode(arc_engine) : Playlist.instanceCanon.getSongInfo(level);
         }
 
         private function getDirCol(noteDir:String):String
@@ -323,7 +329,7 @@ package classes.replay
         private function userLoad(e:Event):void
         {
             this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
-            this.user.settings = this.settings;
+            this.user.settings.update(this.settings);
             isLoaded = true;
         }
 
@@ -341,7 +347,6 @@ package classes.replay
             _loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, replayLoadError);
         }
 
-        /////
         public function getPress(index:int):ReplayNote
         {
             return replayData[index];
@@ -362,7 +367,7 @@ package classes.replay
                 var o:Object = {};
                 o.userid = this.user.siteId;
                 o.replaylevelid = this.level;
-                o.replaysettings = JSON.stringify(this.settings);
+                o.replaysettings = this.settings.stringify();
                 o.replayscore = (sT + "|" + perfect + "|" + good + "|" + average + "|" + miss + "|" + boo + "|" + maxcombo);
                 o.replayframes = getReplayString(replayData);
                 o.replayversion = "R^3";

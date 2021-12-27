@@ -166,7 +166,7 @@ package arc.mp
                 {
                     room.songInfo = room.getPlayersSong()
                     connection.lastRoomGamePlayerCount = room.playerCount;
-                    MultiplayerSingleton.getInstance().spectateGame(room);
+                    MultiplayerState.getInstance().spectateGame(room);
                 }
             }
             updateRoomDisplay();
@@ -179,7 +179,7 @@ package arc.mp
             if (event.room == room && GlobalVariables.instance.gameMain.activePanel is MainMenu)
             {
                 connection.lastRoomGamePlayerCount = room.playerCount;
-                MultiplayerSingleton.getInstance().spectateGame(room);
+                MultiplayerState.getInstance().spectateGame(room);
             }
         }
 

@@ -94,7 +94,7 @@ package popups.settings
             optionNoteScale.maxValue = 1.5;
             yOff += 10;
 
-            textNoteScale = new Text(container, xOff, yOff, Math.round(_gvars.activeUser.noteScale * 100) + "%");
+            textNoteScale = new Text(container, xOff, yOff, Math.round(_gvars.activeUser.settings.noteScale * 100) + "%");
             yOff += 30;
 
             yOff += drawSeperator(container, xOff, 170, yOff, -4, 5);
@@ -107,7 +107,7 @@ package popups.settings
             optionGameVolume.maxValue = 1.25;
             yOff += 10;
 
-            textGameVolume = new Text(container, xOff, yOff, Math.round(_gvars.activeUser.gameVolume * 100) + "%");
+            textGameVolume = new Text(container, xOff, yOff, Math.round(_gvars.activeUser.settings.gameVolume * 100) + "%");
             yOff += 30;
 
             // Menu Music Volume
@@ -191,7 +191,7 @@ package popups.settings
                 new Text(container, xOff + 22, yOff - 1, _lang.string("options_scroll_" + directionData[i]));
 
                 var optionScrollCheck:BoxCheck = new BoxCheck(container, xOff + 2, yOff + 3, clickHandler);
-                optionScrollCheck.slideDirection = directionData[i];
+                optionScrollCheck.scrollDirection = directionData[i];
                 optionScrollDirections.push(optionScrollCheck);
                 yOff += 21;
             }
@@ -237,47 +237,47 @@ package popups.settings
             var item:*;
 
             // Set Speed
-            optionGameSpeed.text = _gvars.activeUser.gameSpeed.toString();
+            optionGameSpeed.text = _gvars.activeUser.settings.scrollSpeed.toString();
 
             // Set Scroll
             for each (item in optionScrollDirections)
             {
-                item.checked = (_gvars.activeUser.slideDirection == item.slideDirection);
+                item.checked = (_gvars.activeUser.settings.scrollDirection == item.scrollDirection);
             }
 
             // Set Offset
-            optionOffset.text = _gvars.activeUser.GLOBAL_OFFSET.toString();
+            optionOffset.text = _gvars.activeUser.settings.GLOBAL_OFFSET.toString();
 
             // Set Judge Offset
-            optionJudgeOffset.text = _gvars.activeUser.JUDGE_OFFSET.toString();
+            optionJudgeOffset.text = _gvars.activeUser.settings.JUDGE_OFFSET.toString();
 
             // Set Auto Judge Offset
-            optionJudgeOffsetAuto.checked = _gvars.activeUser.AUTO_JUDGE_OFFSET;
-            optionJudgeOffset.selectable = !_gvars.activeUser.AUTO_JUDGE_OFFSET;
-            optionJudgeOffset.alpha = _gvars.activeUser.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
+            optionJudgeOffsetAuto.checked = _gvars.activeUser.settings.AUTO_JUDGE_OFFSET;
+            optionJudgeOffset.selectable = !_gvars.activeUser.settings.AUTO_JUDGE_OFFSET;
+            optionJudgeOffset.alpha = _gvars.activeUser.settings.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
 
             // Set Receptor Spacing
-            optionReceptorSpacing.text = _gvars.activeUser.receptorGap.toString();
+            optionReceptorSpacing.text = _gvars.activeUser.settings.receptorGap.toString();
 
             // Set Note Scale
-            optionNoteScale.slideValue = _gvars.activeUser.noteScale;
+            optionNoteScale.slideValue = _gvars.activeUser.settings.noteScale;
 
             // Set Volume
-            optionGameVolume.slideValue = _gvars.activeUser.gameVolume;
+            optionGameVolume.slideValue = _gvars.activeUser.settings.gameVolume;
 
             // Set Menu Volume
             optionMenuVolume.slideValue = _gvars.menuMusicSoundVolume;
 
             // Set Song Rate
-            optionRate.text = _gvars.activeUser.songRate.toString();
+            optionRate.text = _gvars.activeUser.settings.songRate.toString();
 
             // Mirror Mod
-            optionMirrorMod.checked = (_gvars.activeUser.activeVisualMods.indexOf(optionMirrorMod.visual_mod) != -1);
+            optionMirrorMod.checked = (_gvars.activeUser.settings.activeVisualMods.indexOf(optionMirrorMod.visual_mod) != -1);
 
             // Set Autofails
             for each (item in optionAutofail)
             {
-                item.text = _gvars.activeUser["autofail" + StringUtil.upperCase(item.autofail)];
+                item.text = _gvars.activeUser.settings["autofail" + StringUtil.upperCase(item.autofail)];
             }
 
             optionIsolation.text = (_avars.configIsolationStart + 1).toString();
@@ -290,33 +290,33 @@ package popups.settings
 
             if (e.target == optionJudgeOffsetAuto)
             {
-                _gvars.activeUser.AUTO_JUDGE_OFFSET = !_gvars.activeUser.AUTO_JUDGE_OFFSET;
-                optionJudgeOffset.selectable = !_gvars.activeUser.AUTO_JUDGE_OFFSET;
-                optionJudgeOffset.alpha = _gvars.activeUser.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
-                optionJudgeOffsetAuto.checked = _gvars.activeUser.AUTO_JUDGE_OFFSET;
+                _gvars.activeUser.settings.AUTO_JUDGE_OFFSET = !_gvars.activeUser.settings.AUTO_JUDGE_OFFSET;
+                optionJudgeOffset.selectable = !_gvars.activeUser.settings.AUTO_JUDGE_OFFSET;
+                optionJudgeOffset.alpha = _gvars.activeUser.settings.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
+                optionJudgeOffsetAuto.checked = _gvars.activeUser.settings.AUTO_JUDGE_OFFSET;
             }
 
-            else if (e.target.hasOwnProperty("slideDirection"))
+            else if (e.target.hasOwnProperty("scrollDirection"))
             {
-                var dir:String = e.target.slideDirection;
-                _gvars.activeUser.slideDirection = dir;
+                var dir:String = e.target.scrollDirection;
+                _gvars.activeUser.settings.scrollDirection = dir;
 
                 for each (item in optionScrollDirections)
                 {
-                    item.checked = (_gvars.activeUser.slideDirection == item.slideDirection);
+                    item.checked = (_gvars.activeUser.settings.scrollDirection == item.scrollDirection);
                 }
             }
 
             else if (e.target == optionMirrorMod)
             {
                 var visual_mod:String = optionMirrorMod.visual_mod;
-                if (_gvars.activeUser.activeVisualMods.indexOf(visual_mod) != -1)
+                if (_gvars.activeUser.settings.activeVisualMods.indexOf(visual_mod) != -1)
                 {
-                    ArrayUtil.removeValue(visual_mod, _gvars.activeUser.activeVisualMods);
+                    ArrayUtil.removeValue(visual_mod, _gvars.activeUser.settings.activeVisualMods);
                 }
                 else
                 {
-                    _gvars.activeUser.activeVisualMods.push(visual_mod);
+                    _gvars.activeUser.settings.activeVisualMods.push(visual_mod);
                 }
                 optionMirrorMod.checked = !optionMirrorMod.checked;
             }
@@ -328,22 +328,22 @@ package popups.settings
         {
             if (e.target == optionGameSpeed)
             {
-                _gvars.activeUser.gameSpeed = optionGameSpeed.validate(1, 0.1);
+                _gvars.activeUser.settings.scrollSpeed = optionGameSpeed.validate(1, 0.1);
             }
 
             else if (e.target == optionOffset)
             {
-                _gvars.activeUser.GLOBAL_OFFSET = optionOffset.validate(0);
+                _gvars.activeUser.settings.GLOBAL_OFFSET = optionOffset.validate(0);
             }
 
             else if (e.target == optionJudgeOffset)
             {
-                _gvars.activeUser.JUDGE_OFFSET = optionJudgeOffset.validate(0);
+                _gvars.activeUser.settings.JUDGE_OFFSET = optionJudgeOffset.validate(0);
             }
 
             else if (e.target == optionReceptorSpacing)
             {
-                _gvars.activeUser.receptorGap = optionReceptorSpacing.validate(80);
+                _gvars.activeUser.settings.receptorGap = optionReceptorSpacing.validate(80);
             }
 
             else if (e.target == optionNoteScale)
@@ -356,19 +356,19 @@ package popups.settings
                 if (snapValue == 1 || snapValue == snapTarget - 1)
                     sliderValue = Math.round(sliderValue / snapTarget) * snapTarget;
 
-                _gvars.activeUser.noteScale = sliderValue / 100;
+                _gvars.activeUser.settings.noteScale = sliderValue / 100;
                 textNoteScale.text = sliderValue + "%";
             }
 
             else if (e.target == optionGameVolume)
             {
-                _gvars.activeUser.gameVolume = optionGameVolume.slideValue;
-                textGameVolume.text = Math.round(_gvars.activeUser.gameVolume * 100) + "%";
+                _gvars.activeUser.settings.gameVolume = optionGameVolume.slideValue;
+                textGameVolume.text = Math.round(_gvars.activeUser.settings.gameVolume * 100) + "%";
             }
 
             else if (e.target == optionRate)
             {
-                _gvars.activeUser.songRate = optionRate.validate(1, 0.1);
+                _gvars.activeUser.settings.songRate = optionRate.validate(1, 0.1);
                 _gvars.removeSongFiles();
             }
 
@@ -404,7 +404,7 @@ package popups.settings
             else if (e.target.hasOwnProperty("autofail"))
             {
                 var autofail:String = StringUtil.upperCase(e.target.autofail);
-                _gvars.activeUser["autofail" + autofail] = e.target.validate(0, 0);
+                _gvars.activeUser.settings["autofail" + autofail] = e.target.validate(0, 0);
             }
 
             parent.checkValidMods();

@@ -3,7 +3,7 @@ package com.flashfla.net
     import flash.events.EventDispatcher;
 
     import arc.ArcGlobals;
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import classes.Alert;
     import classes.Language;
     import classes.Playlist;
@@ -58,8 +58,8 @@ package com.flashfla.net
     {
         private var _lang:Language = Language.instance;
 
-        private static const serverAddress:String = "flashflashrevolution.com";
-        private static const serverPort:int = 8082;
+        private static const SERVER_ADDRESS:String = "flashflashrevolution.com";
+        private static const SERVER_PORT:int = 8082;
 
         public static const EVENT_ERROR:String = "ARC_EVENT_ERROR";
         public static const EVENT_CONNECTION:String = "ARC_EVENT_CONNECTION";
@@ -406,7 +406,7 @@ package com.flashfla.net
                     {
                         room.songInfo = room.getPlayersSong()
                         lastRoomGamePlayerCount = room.playerCount;
-                        MultiplayerSingleton.getInstance().spectateGame(room)
+                        MultiplayerState.getInstance().spectateGame(room)
                     }
                 }
                 else if (room.isAllPlayersInStatus(STATUS_RESULTS) && anyPlayerStatusChanged)
@@ -440,12 +440,12 @@ package com.flashfla.net
 
         public function connect():void
         {
-            server.connect(serverAddress, serverPort);
+            server.connect(SERVER_ADDRESS, SERVER_PORT);
         }
 
-        public function disconnect(_inSolo:Boolean = false):void
+        public function disconnect(inSolo:Boolean = false):void
         {
-            inSolo = _inSolo;
+            this.inSolo = inSolo;
             server.disconnect();
         }
 
@@ -574,27 +574,21 @@ package com.flashfla.net
         public function joinRoom(room:Room, asPlayer:Boolean = true, password:String = ""):void
         {
             if (!connected || !room)
-            {
                 return;
-            }
 
             var currentRoom:Room = getCurrentRoom();
 
             if (currentRoom != null)
             {
                 if (currentRoom.id == room.id)
-                {
                     return;
-                }
 
                 leaveRoom(currentRoom);
                 Alert.add(_lang.string("mp_error_multiple_room_restriction"), 120);
             }
 
             if (room.isGameRoom)
-            {
                 asPlayer &&= room.userCount < Room.MAX_PLAYERS;
-            }
 
             server.joinRoom(room.id, password, !asPlayer, true);
         }
@@ -665,9 +659,7 @@ package com.flashfla.net
             }
 
             if (!connected || name.length <= 0)
-            {
                 return;
-            }
 
             var params:Object = {};
             params.name = name;

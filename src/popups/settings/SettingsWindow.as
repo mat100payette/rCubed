@@ -326,15 +326,15 @@ package popups.settings
             {
                 if (_gvars.activeUser == _gvars.playerUser)
                 {
-                    _gvars.activeUser.saveLocal();
-                    _gvars.activeUser.save();
+                    _gvars.activeUser.saveSettingsLocally();
+                    _gvars.activeUser.saveSettingsOnline();
 
                     // Setup Background Colors
-                    GameBackgroundColor.BG_LIGHT = _gvars.activeUser.gameColors[0];
-                    GameBackgroundColor.BG_DARK = _gvars.activeUser.gameColors[1];
-                    GameBackgroundColor.BG_STATIC = _gvars.activeUser.gameColors[2];
-                    GameBackgroundColor.BG_POPUP = _gvars.activeUser.gameColors[3];
-                    GameBackgroundColor.BG_STAGE = _gvars.activeUser.gameColors[4];
+                    GameBackgroundColor.BG_LIGHT = _gvars.activeUser.settings.gameColors[0];
+                    GameBackgroundColor.BG_DARK = _gvars.activeUser.settings.gameColors[1];
+                    GameBackgroundColor.BG_STATIC = _gvars.activeUser.settings.gameColors[2];
+                    GameBackgroundColor.BG_POPUP = _gvars.activeUser.settings.gameColors[3];
+                    GameBackgroundColor.BG_STAGE = _gvars.activeUser.settings.gameColors[4];
                     (_gvars.gameMain.getChildAt(0) as GameBackgroundColor).redraw();
 
                     if (_gvars.gameMain.activePanel is MainMenu && ((_gvars.gameMain.activePanel as MainMenu).panel is MenuSongSelection))
@@ -344,7 +344,7 @@ package popups.settings
                         panel.drawPages();
                     }
                 }
-                SoundMixer.soundTransform = new SoundTransform(_gvars.activeUser.gameVolume);
+                SoundMixer.soundTransform = new SoundTransform(_gvars.activeUser.settings.gameVolume);
                 LocalOptions.setVariable("menu_music_volume", _gvars.menuMusicSoundVolume);
                 removePopup();
                 return;
@@ -388,6 +388,7 @@ import flash.text.TextField;
 import flash.text.TextFieldType;
 import flash.text.TextFormat;
 import popups.settings.SettingsWindow;
+import classes.UserSettings;
 
 internal class TabButton extends Sprite
 {
@@ -482,7 +483,9 @@ internal class ManageWindow extends Sprite
     {
         this.win = win;
 
-        saveJSON = JSON.stringify(_gvars.activeUser.save(true));
+        var userSettings:UserSettings = _gvars.activeUser.settings;
+        _gvars.activeUser.saveSettingsOnline();
+        saveJSON = userSettings.stringify();
 
         bmp = SpriteUtil.getBitmapSprite(win.stage);
         this.addChild(bmp);
@@ -570,7 +573,7 @@ internal class ManageWindow extends Sprite
                 if (optionsJSON.length >= 2 && optionsJSON.charAt(0) == "{")
                 {
                     var item:Object = JSON.parse(optionsJSON);
-                    _gvars.activeUser.settings = item;
+                    _gvars.activeUser.settings.update(item);
                     Alert.add("Settings Imported!", 120, Alert.GREEN);
                 }
                 else
@@ -583,7 +586,6 @@ internal class ManageWindow extends Sprite
                 Alert.add("Import Fail...", 120, Alert.RED);
             }
         }
-
         else if (e.target == btn_close)
         {
             win.removeChild(this);

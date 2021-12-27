@@ -132,9 +132,9 @@ package popups
             if (CURRENT_TAB == TAB_MAIN)
             {
                 // Display Custom User Queues
-                if (_gvars.playerUser.songQueues.length > 0)
+                if (_gvars.playerUser.settings.songQueues.length > 0)
                 {
-                    for each (var sqi:SongQueueItem in _gvars.playerUser.songQueues)
+                    for each (var sqi:SongQueueItem in _gvars.playerUser.settings.songQueues)
                     {
                         if (sqi.items.length > 0)
                         {
@@ -147,7 +147,7 @@ package popups
                         }
                         else
                         {
-                            _gvars.playerUser.songQueues.splice(_gvars.playerUser.songQueues.indexOf(sqi), 1);
+                            _gvars.playerUser.settings.songQueues.splice(_gvars.playerUser.settings.songQueues.indexOf(sqi), 1);
                         }
                     }
                 }
@@ -193,7 +193,7 @@ package popups
             var temp:SongQueueItem = SongQueueItem.fromString(songQueueJSON);
             if (temp.items.length > 0)
             {
-                _gvars.playerUser.songQueues.push(temp);
+                _gvars.playerUser.settings.songQueues.push(temp);
                 renderQueues();
             }
         }
@@ -365,9 +365,9 @@ internal class QueueBox extends Sprite
 
     private function deleteQueue():void
     {
-        _gvars.playerUser.songQueues.splice(_gvars.playerUser.songQueues.indexOf(this.queueItem), 1);
+        _gvars.playerUser.settings.songQueues.splice(_gvars.playerUser.settings.songQueues.indexOf(this.queueItem), 1);
         popup.renderQueues();
-        _gvars.playerUser.save();
+        _gvars.playerUser.saveSettingsOnline();
     }
 
     private function playQueue():void
@@ -409,7 +409,7 @@ internal class QueueBox extends Sprite
     {
         queueItem.name = queueName;
         popup.renderQueues();
-        _gvars.playerUser.save();
+        _gvars.playerUser.saveSettingsOnline();
     }
 
     private function renameQueue():void

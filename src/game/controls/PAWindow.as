@@ -27,14 +27,14 @@ package game.controls
             var ypos:int = 0;
             var scoreSize:int = 36;
 
-            var labelDesc:Array = [{color: options.judgeColors[0], title: _lang.stringSimple("game_amazing")},
-                {color: options.judgeColors[1], title: _lang.stringSimple("game_perfect")},
-                {color: options.judgeColors[2], title: _lang.stringSimple("game_good")},
-                {color: options.judgeColors[3], title: _lang.stringSimple("game_average")},
-                {color: options.judgeColors[4], title: _lang.stringSimple("game_miss")},
-                {color: options.judgeColors[5], title: _lang.stringSimple("game_boo")}];
+            var labelDesc:Array = [{color: options.settings.judgeColors[0], title: _lang.stringSimple("game_amazing")},
+                {color: options.settings.judgeColors[1], title: _lang.stringSimple("game_perfect")},
+                {color: options.settings.judgeColors[2], title: _lang.stringSimple("game_good")},
+                {color: options.settings.judgeColors[3], title: _lang.stringSimple("game_average")},
+                {color: options.settings.judgeColors[4], title: _lang.stringSimple("game_miss")},
+                {color: options.settings.judgeColors[5], title: _lang.stringSimple("game_boo")}];
 
-            if (!options.displayAmazing)
+            if (!options.settings.DISPLAY_AMAZING)
             {
                 labelDesc.splice(0, 1);
                 ypos = 49;
@@ -79,7 +79,7 @@ package game.controls
         public function update(amazing:int, perfect:int, good:int, average:int, miss:int, boo:int):void
         {
             var offset:int = 0;
-            if (options.displayAmazing)
+            if (options.settings.DISPLAY_AMAZING)
             {
                 updateScore(0, amazing);
                 updateScore(1, perfect);

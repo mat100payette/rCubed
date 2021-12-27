@@ -93,13 +93,13 @@ package popups.settings
             // Set Game Mods
             for each (item in optionGameMods)
             {
-                item.checked = (_gvars.activeUser.activeMods.indexOf(item.mod) != -1);
+                item.checked = (_gvars.activeUser.settings.activeMods.indexOf(item.mod) != -1);
             }
 
             // Set Visual Game Mods
             for each (item in optionVisualGameMods)
             {
-                item.checked = (_gvars.activeUser.activeVisualMods.indexOf(item.visual_mod) != -1);
+                item.checked = (_gvars.activeUser.settings.activeVisualMods.indexOf(item.visual_mod) != -1);
             }
         }
 
@@ -110,13 +110,13 @@ package popups.settings
             {
                 e.target.checked = !e.target.checked;
                 var visual_mod:String = e.target.visual_mod;
-                if (_gvars.activeUser.activeVisualMods.indexOf(visual_mod) != -1)
+                if (_gvars.activeUser.settings.activeVisualMods.indexOf(visual_mod) != -1)
                 {
-                    ArrayUtil.removeValue(visual_mod, _gvars.activeUser.activeVisualMods);
+                    ArrayUtil.removeValue(visual_mod, _gvars.activeUser.settings.activeVisualMods);
                 }
                 else
                 {
-                    _gvars.activeUser.activeVisualMods.push(visual_mod);
+                    _gvars.activeUser.settings.activeVisualMods.push(visual_mod);
                 }
             }
 
@@ -125,13 +125,13 @@ package popups.settings
             {
                 e.target.checked = !e.target.checked;
                 var mod:String = e.target.mod;
-                if (_gvars.activeUser.activeMods.indexOf(mod) != -1)
+                if (_gvars.activeUser.settings.activeMods.indexOf(mod) != -1)
                 {
-                    ArrayUtil.removeValue(mod, _gvars.activeUser.activeMods);
+                    ArrayUtil.removeValue(mod, _gvars.activeUser.settings.activeMods);
                 }
                 else
                 {
-                    _gvars.activeUser.activeMods.push(mod);
+                    _gvars.activeUser.settings.activeMods.push(mod);
                 }
                 if (mod == "reverse")
                     _gvars.removeSongFiles();

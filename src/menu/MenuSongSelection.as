@@ -1,7 +1,7 @@
 package menu
 {
     import arc.ArcGlobals;
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import assets.menu.GenreSelection;
     import assets.menu.ScrollBackground;
@@ -73,7 +73,7 @@ package menu
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
         private var _playlist:Playlist = Playlist.instance;
-        private var _mp:MultiplayerSingleton = MultiplayerSingleton.getInstance();
+        private var _mp:MultiplayerState = MultiplayerState.getInstance();
 
         private var genreDisplay:Sprite;
         private var genreItems:Vector.<Text> = new <Text>[];
@@ -366,7 +366,7 @@ package menu
          */
         public function buildGenreListFlags():void
         {
-            if (!_gvars.activeUser.DISPLAY_GENRE_FLAG)
+            if (!_gvars.activeUser.settings.DISPLAY_GENRE_FLAG)
                 return;
 
             genreListFlags = [];
@@ -465,7 +465,7 @@ package menu
                 // If displaying genres, and Legacy Genre isn't displayed, skip it.
                 if (GENRE_MODE == GENRE_GENRES)
                 {
-                    if (!_gvars.activeUser.DISPLAY_LEGACY_SONGS && !_playlist.engine && genre_index == (Constant.LEGACY_GENRE - 1))
+                    if (!_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS && !_playlist.engine && genre_index == (Constant.LEGACY_GENRE - 1))
                     {
                         continue;
                     }
@@ -480,7 +480,7 @@ package menu
                 var genre_flag:String = genreListFlags[genre_index];
                 var genre_text:String = getGenreText(genre_index);
 
-                if (genre_flag != null && _gvars.activeUser.DISPLAY_GENRE_FLAG)
+                if (genre_flag != null && _gvars.activeUser.settings.DISPLAY_GENRE_FLAG)
                     genre_text = "<font color=\"" + genre_flag + "\">•</font> " + genre_text;
 
                 // Build Label
@@ -557,7 +557,7 @@ package menu
                 case GENRE_SONGFLAGS:
                     return GlobalVariables.SONG_ICON_TEXT.length;
                 default:
-                    return (!_gvars.activeUser.DISPLAY_LEGACY_SONGS && !_playlist.engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
+                    return (!_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS && !_playlist.engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
             }
         }
 
@@ -746,7 +746,7 @@ package menu
                 songInfo = songList[sX];
                 sI = new SongItem();
                 sI.setData(songInfo, _gvars.activeUser.getLevelRank(songInfo));
-                sI.noteEnabled = _gvars.activeUser.DISPLAY_SONG_NOTE;
+                sI.noteEnabled = _gvars.activeUser.settings.DISPLAY_SONG_NOTE;
                 sI.setContextMenu(songItemContextMenu);
                 sI.y = yOffset;
                 sI.index = sX;
@@ -843,7 +843,7 @@ package menu
          */
         private function filterSongListLegacy(songList:Array):Array
         {
-            if (!_playlist.engine && !_gvars.activeUser.DISPLAY_LEGACY_SONGS)
+            if (!_playlist.engine && !_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS)
                 songList = songList.filter(filterSongListLegacyFilter);
 
             return songList;
@@ -2092,8 +2092,8 @@ package menu
             {
                 songArray[songArray.length] = _gvars.songQueue[songQueueI].level;
             }
-            _gvars.playerUser.songQueues.push(new SongQueueItem(queueName, songArray));
-            _gvars.playerUser.save();
+            _gvars.playerUser.settings.songQueues.push(new SongQueueItem(queueName, songArray));
+            _gvars.playerUser.saveSettingsOnline();
         }
 
         /**

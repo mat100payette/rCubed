@@ -83,7 +83,7 @@ package classes.chart
             options = _gvars.options;
             noteMod = new NoteMod(this, options);
             rateReverse = options.modEnabled("reverse");
-            rateRate = options.songRate;
+            rateRate = options.settings.songRate;
 
             if (type == "EDITOR")
             {
@@ -93,7 +93,7 @@ package classes.chart
 
                 chart = NoteChart.parseChart(NoteChart.FFR_BEATBOX, editorSongInfo, '_root.beatBox = [];');
             }
-            else if (options.songRate != 1 || options.frameRate > 30 || rateReverse || options.forceNewJudge)
+            else if (options.settings.songRate != 1 || options.settings.frameRate > 30 || rateReverse || options.settings.forceNewJudge)
                 this.type = NoteChart.FFR_MP3;
 
             load();
@@ -554,7 +554,7 @@ package classes.chart
             }
             if (sound)
             {
-                soundChannel = sound.play(musicDelay * 1000 / options.songRate / 30 + seek);
+                soundChannel = sound.play(musicDelay * 1000 / options.settings.songRate / 30 + seek);
                 soundChannel.soundTransform = SoundMixer.soundTransform;
                 soundChannel.addEventListener(Event.SOUND_COMPLETE, stopSound);
             }
@@ -699,14 +699,14 @@ package classes.chart
 
         public function get frameRate():int
         {
-            return type == NoteChart.FFR_MP3 ? _gvars.activeUser.frameRate : chart.framerate;
+            return type == NoteChart.FFR_MP3 ? _gvars.activeUser.settings.frameRate : chart.framerate;
         }
 
         public function updateMusicDelay():void
         {
             options = _gvars.options;
             rateReverse = options.modEnabled("reverse");
-            rateRate = options.songRate;
+            rateRate = options.settings.songRate;
             noteMod.start(options);
             if (options.isolation && totalNotes > 0)
             {
@@ -730,7 +730,7 @@ package classes.chart
 
                 case NoteChart.FFR_MP3:
                 case NoteChart.THIRDSTYLE:
-                    return soundChannel ? soundChannel.position - musicDelay / options.songRate * 1000 / 30 : 0;
+                    return soundChannel ? soundChannel.position - musicDelay / options.settings.songRate * 1000 / 30 : 0;
 
                 default:
                     return 0;

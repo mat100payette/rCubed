@@ -363,7 +363,7 @@ package classes.replay
                 return null;
 
             // Get Alt engine Settings
-            var settings:Object = options.settingsEncode();
+            var settings:Object = options.settings;
             if (options.song.songInfo.engine)
                 settings.arc_engine = ArcGlobals.instance.legacyEncode(options.song.songInfo);
 
@@ -376,7 +376,7 @@ package classes.replay
             binReplay.writeByte(1); // Header Flag
             binReplay.writeUnsignedInt(activeUser.siteId); // Userid
             binReplay.writeUnsignedInt(options.song.id); // Song ID
-            binReplay.writeFloat(options.songRate) // Song Rate
+            binReplay.writeFloat(options.settings.songRate) // Song Rate
             binReplay.writeUnsignedInt(timestamp);
             binReplay.writeUTF(judgements);
             binReplay.writeUTF(settingsEncode);
@@ -482,9 +482,9 @@ package classes.replay
                 trace("song_id failed comparison", options.song.id, test.song_id);
                 return false;
             }
-            if (options.songRate.toFixed(3) != test.song_rate.toFixed(3))
+            if (options.settings.songRate.toFixed(3) != test.song_rate.toFixed(3))
             {
-                trace("song_rate failed comparison", options.songRate, test.song_rate);
+                trace("song_rate failed comparison", options.settings.songRate, test.song_rate);
                 return false;
             }
             if (timestamp != test.timestamp)

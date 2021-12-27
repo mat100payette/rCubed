@@ -25,19 +25,19 @@ package game.controls
             this.options = options;
 
             // Copy Combo Colors
-            colors = new Vector.<Number>(options.comboColors.length, true);
-            colors_dark = new Vector.<Number>(options.comboColors.length, true);
-            for (var i:int = 0; i < options.comboColors.length; i++)
+            colors = new Vector.<Number>(options.settings.comboColors.length, true);
+            colors_dark = new Vector.<Number>(options.settings.comboColors.length, true);
+            for (var i:int = 0; i < options.settings.comboColors.length; i++)
             {
-                colors[i] = options.comboColors[i];
-                colors_dark[i] = ColorUtil.darkenColor(options.comboColors[i], 0.5);
+                colors[i] = options.settings.comboColors[i];
+                colors_dark[i] = ColorUtil.darkenColor(options.settings.comboColors[i], 0.5);
             }
 
             // Copy Enabled Colors
-            colors_enabled = new Vector.<Boolean>(options.enableComboColors.length, true);
-            for (i = 0; i < options.enableComboColors.length; i++)
+            colors_enabled = new Vector.<Boolean>(options.settings.enableComboColors.length, true);
+            for (i = 0; i < options.settings.enableComboColors.length; i++)
             {
-                colors_enabled[i] = options.enableComboColors[i];
+                colors_enabled[i] = options.settings.enableComboColors[i];
             }
 
             fieldShadow = new TextField();
@@ -113,7 +113,7 @@ package game.controls
                     field.textColor = colors[7];
                     fieldShadow.textColor = colors_dark[7];
                 }
-                else if (colors_enabled[8] && raw_goods >= options.rawGoodTracker) // Display color for raw good tracker
+                else if (colors_enabled[8] && raw_goods >= options.settings.rawGoodTracker) // Display color for raw good tracker
                 {
                     field.textColor = colors[8];
                     fieldShadow.textColor = colors_dark[8];

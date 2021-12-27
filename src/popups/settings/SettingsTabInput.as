@@ -44,7 +44,7 @@ package popups.settings
             var xOff:int = 15;
             var yOff:int = 15;
 
-            var data:Object = _noteskins.getInfo(_gvars.activeUser.activeNoteskin);
+            var data:Object = _noteskins.getInfo(_gvars.activeUser.settings.activeNoteskin);
             var hasRotation:Boolean = (data.rotation != 0);
 
             optionKeyInputs = [];
@@ -144,7 +144,7 @@ package popups.settings
         {
             for each (var item:BoxText in optionKeyInputs)
             {
-                item.text = StringUtil.keyCodeChar(_gvars.activeUser["key" + StringUtil.upperCase(item.key)]).toUpperCase();
+                item.text = StringUtil.keyCodeChar(_gvars.activeUser.settings["key" + StringUtil.upperCase(item.key)]).toUpperCase();
             }
         }
 
@@ -163,7 +163,7 @@ package popups.settings
                 var keyChar:String = StringUtil.keyCodeChar(keyCode);
                 if (keyChar != "")
                 {
-                    _gvars.activeUser["key" + StringUtil.upperCase(keyListenerTarget.key)] = keyCode;
+                    _gvars.activeUser.settings["key" + StringUtil.upperCase(keyListenerTarget.key)] = keyCode;
                     keyListenerTarget = null;
                     setValues();
                 }

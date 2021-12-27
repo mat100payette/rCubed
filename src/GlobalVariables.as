@@ -1,6 +1,6 @@
 package
 {
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import be.aboutme.airserver.AIRServer;
     import be.aboutme.airserver.endpoints.socket.SocketEndPoint;
     import be.aboutme.airserver.endpoints.socket.handlers.websocket.WebSocketClientHandlerFactory;
@@ -66,7 +66,7 @@ package
         public var TOKENS_TYPE:Object = {};
         public var SCROLL_DIRECTIONS:Array = ["up", "down", "left", "right", "split", "split_down", "plus"];
         public var GAME_MODS:Array = ["hidden", "sudden", "blink", "----", "rotating", "rotate_cw", "rotate_ccw", "wave", "drunk", "tornado", "mini_resize", "tap_pulse", "----", "random", "scramble", "shuffle", "reverse"];
-        public var VISUAL_MODS:Array = ["mirror", "dark", "hide", "mini", "columncolour", "halftime", "----", "nobackground"];
+        public var VISUAL_MODS:Array = ["mirror", "dark", "hide", "mini", "columncolor", "halftime", "----", "nobackground"];
         public var songStartTime:String = "0";
         public var songStartHash:String = "0";
         public var songCache:Array = [];
@@ -350,7 +350,7 @@ package
 
             songCache = [];
 
-            const mpInstance:MultiplayerSingleton = MultiplayerSingleton.getInstance();
+            const mpInstance:MultiplayerState = MultiplayerState.getInstance();
             if (mpInstance != null)
             {
                 mpInstance.clearStatus();

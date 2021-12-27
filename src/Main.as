@@ -777,7 +777,7 @@ package
             if (Flags.VALUES[Flags.ENABLE_GLOBAL_POPUPS])
             {
                 // Options
-                if (keyCode == _gvars.playerUser.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
+                if (keyCode == _gvars.playerUser.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
                 {
                     if (current_popup is SettingsWindow)
                     {

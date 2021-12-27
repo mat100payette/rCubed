@@ -62,12 +62,12 @@ package classes.chart
 
         public function setNotescale(value:Number):void
         {
-            options.noteScale = value;
+            options.settings.noteScale = value;
         }
 
         public function setNoteskin(id:int):void
         {
-            options.noteskin = id;
+            options.settings.activeNoteskin = id;
         }
 
         public function setNotePool(enabled:Boolean):void

@@ -25,8 +25,6 @@ package popups.settings
         private var _lang:Language = Language.instance;
         private var _noteskins:Noteskins = Noteskins.instance;
 
-        private var noteskin_struct:Object = NoteskinsStruct.getDefaultStruct();
-
         private var noteColorComboArray:Array = [];
         private var optionNoteskins:Array;
         private var optionNoteskinPreview:Sprite;
@@ -49,12 +47,12 @@ package popups.settings
         {
             super(settingsWindow);
 
-            lastNoteskin = _gvars.activeUser.activeNoteskin;
+            lastNoteskin = _gvars.activeUser.settings.activeNoteskin;
 
             noteColorComboArray = [];
-            for (var i:int = 0; i < DEFAULT_OPTIONS.noteColors.length; i++)
+            for (var i:int = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
             {
-                noteColorComboArray.push({"label": _lang.stringSimple("note_colors_" + DEFAULT_OPTIONS.noteColors[i]), "data": DEFAULT_OPTIONS.noteColors[i]});
+                noteColorComboArray.push({"label": _lang.stringSimple("note_colors_" + DEFAULT_OPTIONS.settings.noteColors[i]), "data": DEFAULT_OPTIONS.settings.noteColors[i]});
             }
         }
 
@@ -149,22 +147,22 @@ package popups.settings
             optionNoteColors = [];
             arrayColorSprites = [];
             arrayColorSpritesReplace = [];
-            for (i = 0; i < DEFAULT_OPTIONS.noteColors.length; i++)
+            for (i = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
             {
-                arrayColorSprites.push(addNoteImage(xOff + 11, yOff + 11, 22, DEFAULT_OPTIONS.noteColors[i]));
+                arrayColorSprites.push(addNoteImage(xOff + 11, yOff + 11, 22, DEFAULT_OPTIONS.settings.noteColors[i]));
 
-                var gameNoteColor:Text = new Text(container, xOff + 25, yOff, _lang.string("note_colors_" + DEFAULT_OPTIONS.noteColors[i]));
+                var gameNoteColor:Text = new Text(container, xOff + 25, yOff, _lang.string("note_colors_" + DEFAULT_OPTIONS.settings.noteColors[i]));
                 gameNoteColor.width = 95;
 
-                var gameNoteColorCombo:ComboBox = new ComboBox(container, xOff + 125, yOff, _lang.stringSimple("note_colors_" + DEFAULT_OPTIONS.noteColors[i]), noteColorComboArray);
+                var gameNoteColorCombo:ComboBox = new ComboBox(container, xOff + 125, yOff, _lang.stringSimple("note_colors_" + DEFAULT_OPTIONS.settings.noteColors[i]), noteColorComboArray);
                 gameNoteColorCombo.setSize(114, 22);
                 gameNoteColorCombo.openPosition = ComboBox.BOTTOM;
                 gameNoteColorCombo.fontSize = 11;
-                gameNoteColorCombo.numVisibleItems = DEFAULT_OPTIONS.noteColors.length;
+                gameNoteColorCombo.numVisibleItems = DEFAULT_OPTIONS.settings.noteColors.length;
                 gameNoteColorCombo.addEventListener(Event.SELECT, gameNoteColorSelect);
                 optionNoteColors.push(gameNoteColorCombo);
 
-                arrayColorSpritesReplace.push(addNoteImage(xOff + 255, yOff + 11, 22, _gvars.activeUser.noteColors[i]));
+                arrayColorSpritesReplace.push(addNoteImage(xOff + 255, yOff + 11, 22, _gvars.activeUser.settings.noteColors[i]));
 
                 yOff += 20;
                 yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
@@ -173,7 +171,7 @@ package popups.settings
 
         private function addNoteImage(xOff:Number, yOff:Number, receptorSize:Number, color:String):Sprite
         {
-            var data:Object = _noteskins.getInfo(_gvars.activeUser.activeNoteskin);
+            var data:Object = _noteskins.getInfo(_gvars.activeUser.settings.activeNoteskin);
             var hasRotation:Boolean = (data.rotation != 0);
 
             var noteHolder:Sprite = new Sprite();
@@ -209,10 +207,10 @@ package popups.settings
 
         private function updateNoteImages():void
         {
-            for (var i:int = 0; i < DEFAULT_OPTIONS.noteColors.length; i++)
+            for (var i:int = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
             {
-                arrayColorSprites[i] = replaceNoteImage(arrayColorSprites[i], 22, DEFAULT_OPTIONS.noteColors[i]);
-                arrayColorSpritesReplace[i] = replaceNoteImage(arrayColorSpritesReplace[i], 22, _gvars.activeUser.noteColors[i]);
+                arrayColorSprites[i] = replaceNoteImage(arrayColorSprites[i], 22, DEFAULT_OPTIONS.settings.noteColors[i]);
+                arrayColorSpritesReplace[i] = replaceNoteImage(arrayColorSpritesReplace[i], 22, _gvars.activeUser.settings.noteColors[i]);
             }
 
             optionNoteskinPreview = replaceNoteImage(optionNoteskinPreview, 64, "blue");
@@ -223,17 +221,17 @@ package popups.settings
             // Set Noteskin
             for each (var item:BoxCheck in optionNoteskins)
             {
-                item.checked = (item.skin == _gvars.activeUser.activeNoteskin);
+                item.checked = (item.skin == _gvars.activeUser.settings.activeNoteskin);
             }
 
-            for (var i:int = 0; i < DEFAULT_OPTIONS.noteColors.length; i++)
+            for (var i:int = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
             {
-                (optionNoteColors[i] as ComboBox).selectedItemByData = _gvars.activeUser.noteColors[i];
+                (optionNoteColors[i] as ComboBox).selectedItemByData = _gvars.activeUser.settings.noteColors[i];
             }
 
-            if (lastNoteskin != _gvars.activeUser.activeNoteskin)
+            if (lastNoteskin != _gvars.activeUser.settings.activeNoteskin)
             {
-                lastNoteskin = _gvars.activeUser.activeNoteskin;
+                lastNoteskin = _gvars.activeUser.settings.activeNoteskin;
                 updateNoteImages();
             }
         }
@@ -243,7 +241,7 @@ package popups.settings
             //- Noteskin
             if (e.target.hasOwnProperty("skin"))
             {
-                _gvars.activeUser.activeNoteskin = e.target.skin;
+                _gvars.activeUser.settings.activeNoteskin = e.target.skin;
             }
 
             //- Custom Refresh
@@ -299,8 +297,8 @@ package popups.settings
             {
                 if (optionNoteColors[i] == e.target)
                 {
-                    _gvars.activeUser.noteColors[i] = data;
-                    arrayColorSpritesReplace[i] = replaceNoteImage(arrayColorSpritesReplace[i], 22, _gvars.activeUser.noteColors[i]);
+                    _gvars.activeUser.settings.noteColors[i] = data;
+                    arrayColorSpritesReplace[i] = replaceNoteImage(arrayColorSpritesReplace[i], 22, _gvars.activeUser.settings.noteColors[i]);
                 }
             }
         }
@@ -380,9 +378,9 @@ package popups.settings
                 LocalStore.setVariable(Noteskins.CUSTOM_NOTESKIN_FILE, extNS.file);
             }
 
-            if (_gvars.activeUser.activeNoteskin != 0)
+            if (_gvars.activeUser.settings.activeNoteskin != 0)
             {
-                _gvars.activeUser.activeNoteskin = 0;
+                _gvars.activeUser.settings.activeNoteskin = 0;
                 setValues();
             }
 
@@ -416,7 +414,7 @@ package popups.settings
         private function e_delayCustomUpdate(e:Event):void
         {
             // reload images, custom noteskins are async loaded so we just check for them to load
-            if (_gvars.activeUser.activeNoteskin == 0)
+            if (_gvars.activeUser.settings.activeNoteskin == 0)
             {
                 if (_noteskins.data[0]["notes"]["blue"] != null)
                 {

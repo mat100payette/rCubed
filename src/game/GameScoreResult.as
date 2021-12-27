@@ -188,7 +188,7 @@ package game
          */
         public function get screenshot_path():String
         {
-            var rateString:String = options.songRate != 1 ? " (" + options.songRate + "x Rate)" : "";
+            var rateString:String = options.settings.songRate != 1 ? " (" + options.settings.songRate + "x Rate)" : "";
 
             return "R^3 - " + songInfo.name + rateString + " - " + score + " - " + pa_string;
         }
@@ -200,7 +200,7 @@ package game
         public function get replay_cache_object():Object
         {
             var out:Object = {'name': song.songInfo.name,
-                    'rate': options.songRate,
+                    'rate': options.settings.songRate,
                     'score': score,
                     'judge': [(amazing + perfect), good, average, miss, boo, max_combo]}
 

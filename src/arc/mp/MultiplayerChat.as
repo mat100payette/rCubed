@@ -45,7 +45,7 @@ package arc.mp
             super(parent);
             this.room = roomValue;
 
-            connection = MultiplayerSingleton.getInstance().connection;
+            connection = MultiplayerState.getInstance().connection;
 
             setSize(400, 300);
 
@@ -228,7 +228,7 @@ package arc.mp
             chatFrameDelay = 0;
 
             chatText += (chatText.length == 0 ? "" : "\n");
-            if (GlobalVariables.instance.activeUser.DISPLAY_MP_TIMESTAMP)
+            if (GlobalVariables.instance.activeUser.settings.DISPLAY_MP_TIMESTAMP)
             {
                 var date:Date = new Date();
                 var hoursStr:String = (date.hours == 0 ? 12 : (date.hours > 12 ? date.hours - 12 : date.hours)).toString();
@@ -289,8 +289,8 @@ package arc.mp
             if (!user.userColor)
                 usercolor = user.userColor;
             var color:String = textDullColor(Multiplayer.COLORS[usercolor], 0.75).toString(16);
-            if (user.variables.arc_colour != null)
-                color = user.variables.arc_colour;
+            if (user.variables.arc_color != null)
+                color = user.variables.arc_color;
             var userName:String = HtmlUtil.escape(user.name) + postfix;
 
             return HtmlUtil.color(userName, "#" + color);

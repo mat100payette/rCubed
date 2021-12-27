@@ -1,6 +1,6 @@
 package popups
 {
-    import arc.mp.MultiplayerSingleton;
+    import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import classes.Language;
     import classes.Playlist;
@@ -133,7 +133,7 @@ package popups
             {
                 if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.activePanel is GameMenu))
                 {
-                    MultiplayerSingleton.destroyInstance();
+                    MultiplayerState.destroyInstance();
                     Flags.VALUES = {};
                     Playlist.clearCanon();
                     _gvars.gameMain.loadComplete = false;
@@ -144,7 +144,7 @@ package popups
             {
                 if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.activePanel is GameMenu))
                 {
-                    MultiplayerSingleton.destroyInstance();
+                    MultiplayerState.destroyInstance();
                     Flags.VALUES = {};
                     _gvars.playerUser.refreshUser();
                     _gvars.gameMain.switchTo(Main.GAME_LOGIN_PANEL);

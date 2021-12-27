@@ -81,7 +81,7 @@ package popups.settings
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
             optionGameColors = [];
-            for (i = 0; i < DEFAULT_OPTIONS.gameColors.length; i++)
+            for (i = 0; i < DEFAULT_OPTIONS.settings.gameColors.length; i++)
             {
                 if (i == 2 || i == 3)
                 {
@@ -119,7 +119,7 @@ package popups.settings
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
             optionComboColors = [];
-            for (i = 0; i < DEFAULT_OPTIONS.comboColors.length; i++)
+            for (i = 0; i < DEFAULT_OPTIONS.settings.comboColors.length; i++)
             {
                 var gameComboColor:Text = new Text(container, xOff, yOff, _lang.string("options_combo_colors_" + i));
                 gameComboColor.width = 95;
@@ -159,31 +159,31 @@ package popups.settings
             // Set Judge Colors
             for (i = 0; i < judgeTitles.length; i++)
             {
-                optionJudgeColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.judgeColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                optionJudgeColors[i]["display"].color = _gvars.activeUser.judgeColors[i];
+                optionJudgeColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.settings.judgeColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
+                optionJudgeColors[i]["display"].color = _gvars.activeUser.settings.judgeColors[i];
             }
             // Set Combo Colors
-            for (i = 0; i < DEFAULT_OPTIONS.comboColors.length; i++)
+            for (i = 0; i < DEFAULT_OPTIONS.settings.comboColors.length; i++)
             {
-                optionComboColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.comboColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                optionComboColors[i]["display"].color = _gvars.activeUser.comboColors[i];
+                optionComboColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.settings.comboColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
+                optionComboColors[i]["display"].color = _gvars.activeUser.settings.comboColors[i];
                 if (i > 0)
                 {
-                    optionComboColors[i]["enable"].checked = (_gvars.activeUser.enableComboColors[i]);
+                    optionComboColors[i]["enable"].checked = (_gvars.activeUser.settings.enableComboColors[i]);
                 }
             }
 
             // Set Raw Good Tracker
-            optionRawGoodTracker.text = _gvars.activeUser.rawGoodTracker.toString();
+            optionRawGoodTracker.text = _gvars.activeUser.settings.rawGoodTracker.toString();
 
             // Set Game Colors
-            for (i = 0; i < DEFAULT_OPTIONS.gameColors.length; i++)
+            for (i = 0; i < DEFAULT_OPTIONS.settings.gameColors.length; i++)
             {
                 if (i == 2 || i == 3)
                     continue;
 
-                optionGameColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.gameColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                optionGameColors[i]["display"].color = _gvars.activeUser.gameColors[i];
+                optionGameColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.settings.gameColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
+                optionGameColors[i]["display"].color = _gvars.activeUser.settings.gameColors[i];
             }
         }
 
@@ -192,21 +192,21 @@ package popups.settings
             // Judge Color Reset
             if (e.target.hasOwnProperty("judge_color_reset_id"))
             {
-                _gvars.activeUser.judgeColors[e.target.judge_color_reset_id] = DEFAULT_OPTIONS.judgeColors[e.target.judge_color_reset_id];
+                _gvars.activeUser.settings.judgeColors[e.target.judge_color_reset_id] = DEFAULT_OPTIONS.settings.judgeColors[e.target.judge_color_reset_id];
                 setValues();
             }
 
             // Combo Color Reset
             else if (e.target.hasOwnProperty("combo_color_reset_id"))
             {
-                _gvars.activeUser.comboColors[e.target.combo_color_reset_id] = DEFAULT_OPTIONS.comboColors[e.target.combo_color_reset_id];
+                _gvars.activeUser.settings.comboColors[e.target.combo_color_reset_id] = DEFAULT_OPTIONS.settings.comboColors[e.target.combo_color_reset_id];
                 setValues();
             }
 
             // Combo Color Enable/Disable
             else if (e.target.hasOwnProperty("combo_color_enable_id"))
             {
-                _gvars.activeUser.enableComboColors[e.target.combo_color_enable_id] = !_gvars.activeUser.enableComboColors[e.target.combo_color_enable_id];
+                _gvars.activeUser.settings.enableComboColors[e.target.combo_color_enable_id] = !_gvars.activeUser.settings.enableComboColors[e.target.combo_color_enable_id];
                 e.target.checked = !e.target.checked;
             }
 
@@ -214,12 +214,12 @@ package popups.settings
             else if (e.target.hasOwnProperty("game_color_reset_id"))
             {
                 var gid:int = e.target.game_color_reset_id;
-                _gvars.activeUser.gameColors[gid] = DEFAULT_OPTIONS.gameColors[gid];
+                _gvars.activeUser.settings.gameColors[gid] = DEFAULT_OPTIONS.settings.gameColors[gid];
 
                 if (gid == 0)
-                    _gvars.activeUser.gameColors[2] = ColorUtil.darkenColor(DEFAULT_OPTIONS.gameColors[gid], 0.27);
+                    _gvars.activeUser.settings.gameColors[2] = ColorUtil.darkenColor(DEFAULT_OPTIONS.settings.gameColors[gid], 0.27);
                 if (gid == 1)
-                    _gvars.activeUser.gameColors[3] = ColorUtil.brightenColor(DEFAULT_OPTIONS.gameColors[gid], 0.08);
+                    _gvars.activeUser.settings.gameColors[3] = ColorUtil.brightenColor(DEFAULT_OPTIONS.settings.gameColors[gid], 0.08);
 
                 setValues();
             }
@@ -229,32 +229,32 @@ package popups.settings
         {
             if (e.target == optionRawGoodTracker)
             {
-                _gvars.activeUser.rawGoodTracker = optionRawGoodTracker.validate(0, 0);
+                _gvars.activeUser.settings.rawGoodTracker = optionRawGoodTracker.validate(0, 0);
             }
             else if (e.target.hasOwnProperty("judge_color_id"))
             {
                 var jid:int = e.target.judge_color_id;
-                _gvars.activeUser.judgeColors[jid] = e.target.validate(0, 0);
-                optionJudgeColors[jid]["display"].color = _gvars.activeUser.judgeColors[jid];
+                _gvars.activeUser.settings.judgeColors[jid] = e.target.validate(0, 0);
+                optionJudgeColors[jid]["display"].color = _gvars.activeUser.settings.judgeColors[jid];
             }
             else if (e.target.hasOwnProperty("combo_color_id"))
             {
                 var cid:int = e.target.combo_color_id;
-                _gvars.activeUser.comboColors[cid] = e.target.validate(0, 0);
-                optionComboColors[cid]["display"].color = _gvars.activeUser.comboColors[cid];
+                _gvars.activeUser.settings.comboColors[cid] = e.target.validate(0, 0);
+                optionComboColors[cid]["display"].color = _gvars.activeUser.settings.comboColors[cid];
             }
             else if (e.target.hasOwnProperty("game_color_id"))
             {
                 var gid:int = e.target.game_color_id;
                 var newColorG:Number = e.target.validate(0, 0);
-                _gvars.activeUser.gameColors[gid] = newColorG;
+                _gvars.activeUser.settings.gameColors[gid] = newColorG;
 
                 if (gid == 0)
-                    _gvars.activeUser.gameColors[2] = ColorUtil.darkenColor(newColorG, 0.27);
+                    _gvars.activeUser.settings.gameColors[2] = ColorUtil.darkenColor(newColorG, 0.27);
                 if (gid == 1)
-                    _gvars.activeUser.gameColors[3] = ColorUtil.brightenColor(newColorG, 0.08);
+                    _gvars.activeUser.settings.gameColors[3] = ColorUtil.brightenColor(newColorG, 0.08);
 
-                optionGameColors[gid]["display"].color = _gvars.activeUser.gameColors[gid];
+                optionGameColors[gid]["display"].color = _gvars.activeUser.settings.gameColors[gid];
             }
             else if (e.target is ColorField)
             {
