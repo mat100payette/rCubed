@@ -37,9 +37,8 @@ package classes.replay
         public var generationReplayNotes:Vector.<ReplayBinFrame>;
 
         public var id:Number;
-        public var user:User;
+        public var user:User = new User();
         public var level:int;
-        public var settings:UserSettings;
         public var score:Number;
         public var perfect:Number;
         public var good:Number;
@@ -106,7 +105,7 @@ package classes.replay
                 return;
 
             // Only used for pre-R3 replays support
-            var jsonSettings:Object;
+            var jsonSettings:UserSettings;
 
             //- Level Details
             this.user = new User(loadUser, false, data.userid);
@@ -136,24 +135,23 @@ package classes.replay
             {
                 tempSettings = tempSettings.split("|");
                 jsonSettings = _gvars.playerUser.isGuest ? new User().settings : _gvars.playerUser.settings;
-                jsonSettings.speed = Number(tempSettings[0]);
-                jsonSettings.direction = Constant.cleanScrollDirection(tempSettings[2]);
+                jsonSettings.scrollSpeed = Number(tempSettings[0]);
+                jsonSettings.scrollDirection = Constant.cleanScrollDirection(tempSettings[2]);
                 jsonSettings.songRate = 1;
                 if (tempSettings.length >= 12)
                 {
                     if (tempSettings[11] == "Mirror")
                     {
-                        jsonSettings.visual.push("mirror");
+                        jsonSettings.activeVisualMods.push("mirror");
                     }
-                    else if ((mirrorIndex = jsonSettings.visual.indexOf("mirror")) >= 0)
+                    else if ((mirrorIndex = jsonSettings.activeVisualMods.indexOf("mirror")) >= 0)
                     {
-                        jsonSettings.visual.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
+                        jsonSettings.activeVisualMods.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
                     }
                 }
-                jsonSettings.viewOffset = 0;
-                jsonSettings.judgeOffset = 0;
-                this.settings = new UserSettings(true);
-                this.settings.update(jsonSettings);
+                jsonSettings.GLOBAL_OFFSET = 0;
+                jsonSettings.JUDGE_OFFSET = 0;
+                this.user.settings.update(jsonSettings);
             }
             else if (data.replayversion == "R^2")
             {
@@ -163,30 +161,28 @@ package classes.replay
                     tempSettings[ss] = tempSettings[ss].split("|");
                 }
                 jsonSettings = _gvars.playerUser.isGuest ? new User().settings : _gvars.playerUser.settings;
-                jsonSettings.speed = Number(tempSettings[0][1]);
-                jsonSettings.direction = Constant.cleanScrollDirection(tempSettings[0][0]);
+                jsonSettings.scrollSpeed = Number(tempSettings[0][1]);
+                jsonSettings.scrollDirection = Constant.cleanScrollDirection(tempSettings[0][0]);
                 jsonSettings.songRate = 1;
                 if (tempSettings[0][2] == "true")
                 {
-                    jsonSettings.visual.push("mirror");
+                    jsonSettings.activeVisualMods.push("mirror");
                 }
-                else if ((mirrorIndex = jsonSettings.visual.indexOf("mirror")) >= 0)
+                else if ((mirrorIndex = jsonSettings.activeVisualMods.indexOf("mirror")) >= 0)
                 {
-                    jsonSettings.visual.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
+                    jsonSettings.activeVisualMods.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
                 }
-                jsonSettings.gap = Number(tempSettings[2][0]);
-                jsonSettings.noteskin = Number(tempSettings[2][3]);
-                jsonSettings.viewOffset = 0;
-                jsonSettings.judgeOffset = 0;
+                jsonSettings.receptorGap = Number(tempSettings[2][0]);
+                jsonSettings.activeNoteskin = Number(tempSettings[2][3]);
+                jsonSettings.GLOBAL_OFFSET = 0;
+                jsonSettings.JUDGE_OFFSET = 0;
 
-                this.settings = new UserSettings(true);
-                this.settings.update(jsonSettings);
+                this.user.settings.update(jsonSettings);
             }
             // R^3 Replay JSON
             else if (data.replayversion == "R^3")
             {
-                this.settings = new UserSettings(true);
-                this.settings.update(JSON.parse(data.replaysettings));
+                this.user.settings.update(JSON.parse(data.replaysettings));
             }
 
             //- Frames
@@ -235,8 +231,7 @@ package classes.replay
             this.maxcombo = data.judgements["maxcombo"];
             this.score = (perfect * 50) + (good * 25) + (average * 5) - (miss * 10) - (boo * 5);
 
-            this.settings = user.settings;
-            this.settings.update(data.settings);
+            this.user.settings.update(data.settings);
 
             //- Replay
             this.replayData = [];
@@ -329,7 +324,6 @@ package classes.replay
         private function userLoad(e:Event):void
         {
             this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
-            this.user.settings.update(this.settings);
             isLoaded = true;
         }
 
@@ -367,7 +361,7 @@ package classes.replay
                 var o:Object = {};
                 o.userid = this.user.siteId;
                 o.replaylevelid = this.level;
-                o.replaysettings = this.settings.stringify();
+                o.replaysettings = this.user.settings.stringify();
                 o.replayscore = (sT + "|" + perfect + "|" + good + "|" + average + "|" + miss + "|" + boo + "|" + maxcombo);
                 o.replayframes = getReplayString(replayData);
                 o.replayversion = "R^3";

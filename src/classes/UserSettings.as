@@ -59,7 +59,6 @@ package classes
         public var noteColors:Array = ["red", "blue", "purple", "yellow", "pink", "orange", "cyan", "green", "white"];
         public var rawGoodTracker:Number = 0;
 
-        public var autofail:Boolean = false;
         public var autofailAmazing:int = 0;
         public var autofailPerfect:int = 0;
         public var autofailGood:int = 0;
@@ -99,6 +98,22 @@ package classes
             this._isLiteUser = isLiteUser;
         }
 
+        // This replacer manages the filters to avoid circular dependencies
+        public static function replacer(settings:UserSettings):Function
+        {
+            return function _replacer(name:String, val:*):Object
+            {
+                if (val === settings.filters)
+                    return settings.exportFilters();
+
+                // No need to expose internal state
+                if (name == 'isLiteUser' || name == '_compatSettings')
+                    return undefined;
+
+                return val;
+            };
+        }
+
         public function get isLiteUser():Boolean
         {
             return _isLiteUser;
@@ -109,22 +124,19 @@ package classes
          */
         public function stringify():String
         {
-            // This replacer manages the filters to avoid circular dependencies
-            function _replacer(name:String, val:*):Object
-            {
-                if (val === filters)
-                    return exportFilters();
-
-                // No need to expose internal state
-                if (name == 'isLiteUser')
-                    return undefined;
-
-                return val;
-            };
-
-            var stringified:String = JSON.stringify(this, _replacer);
-
+            var stringified:String = JSON.stringify(this, replacer(this));
             return stringified;
+        }
+
+        public function get autofail():Array
+        {
+            return [autofailAmazing,
+                autofailPerfect,
+                autofailGood,
+                autofailAverage,
+                autofailMiss,
+                autofailBoo,
+                autofailRawGoods];
         }
 
         public function update(settings:Object):void
@@ -156,129 +168,125 @@ package classes
             if (settings.language != null)
                 this.language = settings.language;
 
-            if (settings.viewOffset != null)
-                this.GLOBAL_OFFSET = settings.viewOffset;
+            if (settings.GLOBAL_OFFSET != null)
+                this.GLOBAL_OFFSET = settings.GLOBAL_OFFSET;
 
-            if (settings.judgeOffset != null)
-                this.JUDGE_OFFSET = settings.judgeOffset;
+            if (settings.JUDGE_OFFSET != null)
+                this.JUDGE_OFFSET = settings.JUDGE_OFFSET;
 
-            if (settings.autoJudgeOffset != null)
-                this.AUTO_JUDGE_OFFSET = settings.autoJudgeOffset;
+            if (settings.AUTO_JUDGE_OFFSET != null)
+                this.AUTO_JUDGE_OFFSET = settings.AUTO_JUDGE_OFFSET;
 
-            if (settings.viewSongFlag != null)
-                this.DISPLAY_SONG_FLAG = settings.viewSongFlag;
+            if (settings.DISPLAY_SONG_FLAG != null)
+                this.DISPLAY_SONG_FLAG = settings.DISPLAY_SONG_FLAG;
 
-            if (settings.viewGenreFlag != null)
-                this.DISPLAY_GENRE_FLAG = settings.viewGenreFlag;
+            if (settings.DISPLAY_GENRE_FLAG != null)
+                this.DISPLAY_GENRE_FLAG = settings.DISPLAY_GENRE_FLAG;
 
-            if (settings.viewSongNote != null)
-                this.DISPLAY_SONG_NOTE = settings.viewSongNote;
+            if (settings.DISPLAY_SONG_NOTE != null)
+                this.DISPLAY_SONG_NOTE = settings.DISPLAY_SONG_NOTE;
 
-            if (settings.viewJudge != null)
-                this.DISPLAY_JUDGE = settings.viewJudge;
+            if (settings.DISPLAY_JUDGE != null)
+                this.DISPLAY_JUDGE = settings.DISPLAY_JUDGE;
 
-            if (settings.viewJudgeAnimations != null)
-                this.DISPLAY_JUDGE_ANIMATIONS = settings.viewJudgeAnimations;
+            if (settings.DISPLAY_JUDGE_ANIMATIONS != null)
+                this.DISPLAY_JUDGE_ANIMATIONS = settings.DISPLAY_JUDGE_ANIMATIONS;
 
-            if (settings.viewReceptorAnimations != null)
-                this.DISPLAY_RECEPTOR_ANIMATIONS = settings.viewReceptorAnimations;
+            if (settings.DISPLAY_RECEPTOR_ANIMATIONS != null)
+                this.DISPLAY_RECEPTOR_ANIMATIONS = settings.DISPLAY_RECEPTOR_ANIMATIONS;
 
-            if (settings.viewHealth != null)
-                this.DISPLAY_HEALTH = settings.viewHealth;
+            if (settings.DISPLAY_HEALTH != null)
+                this.DISPLAY_HEALTH = settings.DISPLAY_HEALTH;
 
-            if (settings.viewGameTopBar != null)
-                this.DISPLAY_GAME_TOP_BAR = settings.viewGameTopBar;
+            if (settings.DISPLAY_GAME_TOP_BAR != null)
+                this.DISPLAY_GAME_TOP_BAR = settings.DISPLAY_GAME_TOP_BAR;
 
-            if (settings.viewGameBottomBar != null)
-                this.DISPLAY_GAME_BOTTOM_BAR = settings.viewGameBottomBar;
+            if (settings.DISPLAY_GAME_BOTTOM_BAR != null)
+                this.DISPLAY_GAME_BOTTOM_BAR = settings.DISPLAY_GAME_BOTTOM_BAR;
 
-            if (settings.viewScore != null)
-                this.DISPLAY_SCORE = settings.viewScore;
+            if (settings.DISPLAY_SCORE != null)
+                this.DISPLAY_SCORE = settings.DISPLAY_SCORE;
 
-            if (settings.viewCombo != null)
-                this.DISPLAY_COMBO = settings.viewCombo;
+            if (settings.DISPLAY_COMBO != null)
+                this.DISPLAY_COMBO = settings.DISPLAY_COMBO;
 
-            if (settings.viewPACount != null)
-                this.DISPLAY_PACOUNT = settings.viewPACount;
+            if (settings.DISPLAY_PACOUNT != null)
+                this.DISPLAY_PACOUNT = settings.DISPLAY_PACOUNT;
 
-            if (settings.viewAccBar != null)
-                this.DISPLAY_ACCURACY_BAR = settings.viewAccBar;
+            if (settings.DISPLAY_ACCURACY_BAR != null)
+                this.DISPLAY_ACCURACY_BAR = settings.DISPLAY_ACCURACY_BAR;
 
-            if (settings.viewAmazing != null)
-                this.DISPLAY_AMAZING = settings.viewAmazing;
+            if (settings.DISPLAY_AMAZING != null)
+                this.DISPLAY_AMAZING = settings.DISPLAY_AMAZING;
 
-            if (settings.viewPerfect != null)
-                this.DISPLAY_PERFECT = settings.viewPerfect;
+            if (settings.DISPLAY_PERFECT != null)
+                this.DISPLAY_PERFECT = settings.DISPLAY_PERFECT;
 
-            if (settings.viewTotal != null)
-                this.DISPLAY_TOTAL = settings.viewTotal;
+            if (settings.DISPLAY_TOTAL != null)
+                this.DISPLAY_TOTAL = settings.DISPLAY_TOTAL;
 
-            if (settings.viewScreencut != null)
-                this.DISPLAY_SCREENCUT = settings.viewScreencut;
+            if (settings.DISPLAY_SCREENCUT != null)
+                this.DISPLAY_SCREENCUT = settings.DISPLAY_SCREENCUT;
 
-            if (settings.viewSongProgress != null)
-                this.DISPLAY_SONGPROGRESS = settings.viewSongProgress;
+            if (settings.DISPLAY_SONGPROGRESS != null)
+                this.DISPLAY_SONGPROGRESS = settings.DISPLAY_SONGPROGRESS;
 
-            if (settings.viewSongProgressText != null)
-                this.DISPLAY_SONGPROGRESS_TEXT = settings.viewSongProgressText;
+            if (settings.DISPLAY_SONGPROGRESS_TEXT != null)
+                this.DISPLAY_SONGPROGRESS_TEXT = settings.DISPLAY_SONGPROGRESS_TEXT;
 
-            if (settings.viewMPUI != null)
-                this.DISPLAY_MP_UI = settings.viewMPUI;
+            if (settings.DISPLAY_MP_UI != null)
+                this.DISPLAY_MP_UI = settings.DISPLAY_MP_UI;
 
-            if (settings.viewMPPA != null)
-                this.DISPLAY_MP_PA = settings.viewMPPA;
+            if (settings.DISPLAY_MP_PA != null)
+                this.DISPLAY_MP_PA = settings.DISPLAY_MP_PA;
 
-            if (settings.viewMPCombo != null)
-                this.DISPLAY_MP_COMBO = settings.viewMPCombo;
+            if (settings.DISPLAY_MP_COMBO != null)
+                this.DISPLAY_MP_COMBO = settings.DISPLAY_MP_COMBO;
 
-            if (settings.viewMPJudge != null)
-                this.DISPLAY_MP_JUDGE = settings.viewMPJudge;
+            if (settings.DISPLAY_MP_JUDGE != null)
+                this.DISPLAY_MP_JUDGE = settings.DISPLAY_MP_JUDGE;
 
-            if (settings.viewMPTimestamp != null)
-                this.DISPLAY_MP_TIMESTAMP = settings.viewMPTimestamp;
+            if (settings.DISPLAY_MP_TIMESTAMP != null)
+                this.DISPLAY_MP_TIMESTAMP = settings.DISPLAY_MP_TIMESTAMP;
 
-            if (settings.viewLegacySongs != null)
-                this.DISPLAY_LEGACY_SONGS = settings.viewLegacySongs;
+            if (settings.DISPLAY_LEGACY_SONGS != null)
+                this.DISPLAY_LEGACY_SONGS = settings.DISPLAY_LEGACY_SONGS;
 
-            // TODO: Do not map indices to fields. Just use `keysLeft` for example.
-            if (settings.keys != null)
-            {
-                if (settings.keys[0] != null)
-                    this.keyLeft = settings.keys[0];
+            if (settings.keyLeft != null)
+                this.keyLeft = settings.keyLeft;
 
-                if (settings.keys[1] != null)
-                    this.keyDown = settings.keys[1];
+            if (settings.keyDown != null)
+                this.keyDown = settings.keyDown;
 
-                if (settings.keys[2] != null)
-                    this.keyUp = settings.keys[2];
+            if (settings.keyUp != null)
+                this.keyUp = settings.keyUp;
 
-                if (settings.keys[3] != null)
-                    this.keyRight = settings.keys[3];
+            if (settings.keyRight != null)
+                this.keyRight = settings.keyRight;
 
-                if (settings.keys[4] != null)
-                    this.keyRestart = settings.keys[4];
+            if (settings.keyRestart != null)
+                this.keyRestart = settings.keyRestart;
 
-                if (settings.keys[5] != null)
-                    this.keyQuit = settings.keys[5];
+            if (settings.keyQuit != null)
+                this.keyQuit = settings.keyQuit;
 
-                if (settings.keys[6] != null)
-                    this.keyOptions = settings.keys[6];
-            }
+            if (settings.keyOptions != null)
+                this.keyOptions = settings.keyOptions;
 
-            if (settings.noteskin != null)
-                this.activeNoteskin = settings.noteskin;
+            if (settings.activeNoteskin != null)
+                this.activeNoteskin = settings.activeNoteskin;
 
-            if (settings.direction != null)
-                this.scrollDirection = settings.direction;
+            if (settings.scrollDirection != null)
+                this.scrollDirection = settings.scrollDirection;
 
-            if (settings.speed != null)
-                this.scrollSpeed = settings.speed;
+            if (settings.scrollSpeed != null)
+                this.scrollSpeed = settings.scrollSpeed;
 
             if (settings.judgeSpeed != null)
                 this.judgeSpeed = settings.judgeSpeed;
 
-            if (settings.gap != null)
-                this.receptorGap = settings.gap;
+            if (settings.receptorGap != null)
+                this.receptorGap = settings.receptorGap;
 
             if (settings.noteScale != null)
                 this.noteScale = settings.noteScale;
@@ -295,8 +303,8 @@ package classes
             if (settings.forceNewJudge != null)
                 this.forceNewJudge = settings.forceNewJudge;
 
-            if (settings.visual != null)
-                this.activeVisualMods = settings.visual;
+            if (settings.activeVisualMods != null)
+                this.activeVisualMods = settings.activeVisualMods;
 
             if (settings.judgeColors != null)
                 mergeIntoArray(this.judgeColors, settings.judgeColors);
@@ -394,7 +402,6 @@ package classes
 
         /**
          * Exports the user filters into an array of filter objects.
-         * @param	filtersOut Array of EngineLevelFilter to export.
          * @return	Array of Filter Object.
          */
         public function exportFilters():Array
@@ -402,8 +409,8 @@ package classes
             var filters:Array = [];
             for each (var item:EngineLevelFilter in this.filters)
             {
-                var filter:Object = item.export();
-                if (filter["filters"] && filter["filters"].length > 0) // Don't export blank filters.
+                var filter:Object = item.toJSON();
+                if (filter)
                     filters.push(filter);
             }
             return filters;

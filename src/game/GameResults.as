@@ -785,7 +785,7 @@ package game
                 {
                     selectedSong = songList[Math.floor(Math.random() * (songList.length - 1))];
                     _gvars.songQueue.push(selectedSong);
-                    _gvars.options = new GameOptions();
+                    _gvars.options = new GameOptions(_gvars.activeUser);
                     _gvars.options.fill();
                     switchTo(Main.GAME_PLAY_PANEL);
                 }
@@ -1198,8 +1198,8 @@ package game
             dataObject.session = _gvars.userSession;
             dataObject.hashMap = getSaveHash(dataObject);
 
-            // TODO: This probably crashes because settings are circular here
-            scoreSender.data = JSON.stringify(dataObject);
+            // Must create a replacer for the settings' circular dependencies
+            scoreSender.data = JSON.stringify(dataObject, UserSettings.replacer(dataObject.save_settings));
             scoreSender.session = _gvars.userSession;
 
             // Set Request
@@ -1301,8 +1301,6 @@ package game
             var nR:Replay = new Replay(_gvars.gameIndex);
             nR.user = _gvars.playerUser;
             nR.level = result.songInfo.level;
-            nR.settings = new UserSettings(true);
-            nR.settings.update(result.options.settings);
             if (result.songInfo.engine)
                 nR.arc_engine = _avars.legacyEncode(result.songInfo);
             nR.score = result.score;

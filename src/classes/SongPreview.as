@@ -29,7 +29,7 @@ package classes
             this.user.loadAvatar();
 
             this.timestamp = Math.floor((new Date()).getTime() / 1000);
-            this.settings = _gvars.playerUser.settings;
+            this.user.settings.update(_gvars.playerUser.settings);
 
             this.isPreview = true;
             this.isLoaded = true;

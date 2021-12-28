@@ -126,9 +126,9 @@ package popups.replays
             else
                 engine.visible = false;
 
-            if (item.settings.songRate != 1)
+            if (item.user.settings.songRate != 1)
             {
-                rate.text = "x" + item.settings.songRate;
+                rate.text = "x" + item.user.settings.songRate;
                 rate.visible = true;
             }
             else

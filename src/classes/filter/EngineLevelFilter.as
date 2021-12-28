@@ -341,6 +341,18 @@ package classes.filter
             }
         }
 
+        /*
+         * Override of toJSON to be used by `JSON.stringify()`.
+         */
+        public function toJSON():Object
+        {
+            var filter:Object = this.export();
+            if (filter["filters"] && filter["filters"].length > 0) // Don't export blank filters.
+                return this;
+            else
+                return null;
+        }
+
         public function export():Object
         {
             var obj:Object = {"type": type};

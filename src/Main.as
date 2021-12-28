@@ -223,7 +223,7 @@ package
             // Replay
             if (_gvars.flashvars.replay != null)
             {
-                _gvars.options = new GameOptions();
+                _gvars.options = new GameOptions(_gvars.activeUser);
                 _gvars.options.replay = new Replay(_gvars.flashvars.replay, true);
                 _gvars.options.loadPreview = true;
                 _gvars.replayHistory.push(_gvars.options.replay);
@@ -232,7 +232,7 @@ package
             // Song Preview
             if (_gvars.flashvars.preview_file != null)
             {
-                _gvars.options = new GameOptions();
+                _gvars.options = new GameOptions(_gvars.activeUser);
                 _gvars.options.replay = new SongPreview(_gvars.flashvars.preview_file);
                 _gvars.options.loadPreview = true;
                 _gvars.replayHistory.push(_gvars.options.replay);

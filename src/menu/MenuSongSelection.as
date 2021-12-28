@@ -992,7 +992,7 @@ package menu
          */
         private function e_setAsMenuMusicContextSelect(e:ContextMenuEvent):void
         {
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
             var songItem:SongItem = (e.contextMenuOwner as SongItem);
             var songInfo:SongInfo = _playlist.getSongInfo(songItem.level);
@@ -1017,7 +1017,7 @@ package menu
          */
         private function e_playChartPreviewContextSelect(e:ContextMenuEvent):void
         {
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
             _gvars.options.replay = new SongPreview(0);
 
@@ -1045,7 +1045,7 @@ package menu
          */
         private function e_listenToSongPreviewContextSelect(e:ContextMenuEvent):void
         {
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
 
             var songItem:SongItem = (e.contextMenuOwner as SongItem);
@@ -1570,7 +1570,7 @@ package menu
 
             saveSearchTextAndType();
 
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
             switchTo(Main.GAME_PLAY_PANEL);
         }

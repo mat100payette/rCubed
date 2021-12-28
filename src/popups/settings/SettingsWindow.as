@@ -59,7 +59,7 @@ package popups.settings
         private var btn_editor_multiplayer:TabButton;
         private var btn_editor_spectator:TabButton;
 
-        private var game_options_test:GameOptions = new GameOptions();
+        private var game_options_test:GameOptions = new GameOptions(null);
 
         private var win_manage:ManageWindow;
 
@@ -267,7 +267,7 @@ package popups.settings
         {
             if (e.currentTarget == btn_editor_gameplay || e.currentTarget == btn_editor_multiplayer || e.currentTarget == btn_editor_spectator)
             {
-                _gvars.options = new GameOptions();
+                _gvars.options = new GameOptions(_gvars.activeUser);
                 _gvars.options.isEditor = true;
                 _gvars.options.mpRoom = e.currentTarget.editor;
 

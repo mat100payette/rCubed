@@ -44,7 +44,7 @@ package game.controls
             for each (var item:Object in _noteskins.data)
             {
                 notePool[item.id] = {"L": [], "D": [], "U": [], "R": []};
-                for each (var direction:String in GameOptions.noteDirections)
+                for each (var direction:String in GameOptions.NOTE_DIRECTIONS)
                 {
                     for each (var color:String in options.settings.noteColors)
                     {
@@ -62,7 +62,7 @@ package game.controls
             // Prefill Object Pools for active noteskin.
             var i:int = 0;
             var preLoadCount:int = 4;
-            for each (var pre_dir:String in GameOptions.noteDirections)
+            for each (var pre_dir:String in GameOptions.NOTE_DIRECTIONS)
             {
                 for each (var pre_color:String in options.settings.noteColors)
                 {
@@ -132,7 +132,7 @@ package game.controls
         {
             var direction:String = note.direction;
             var color:String = options.getNewNoteColor(note.color);
-            if (options.DISABLE_NOTE_POOL)
+            if (options.disableNotePool)
             {
                 var gameNote:GameNote = new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.activeNoteskin);
             }
@@ -403,7 +403,7 @@ package game.controls
                 removeNoteRef = notes[removeNoteIndex];
                 if (removeNoteRef.ID == id)
                 {
-                    if (!options.DISABLE_NOTE_POOL)
+                    if (!options.disableNotePool)
                     {
                         notePool[removeNoteRef.NOTESKIN][removeNoteRef.DIR][removeNoteRef.COLOR].unmarkObject(removeNoteRef);
                         removeNoteRef.visible = false;
@@ -423,7 +423,7 @@ package game.controls
         {
             for each (var note:GameNote in notes)
             {
-                if (!options.DISABLE_NOTE_POOL)
+                if (!options.disableNotePool)
                 {
                     notePool[note.NOTESKIN][note.DIR][note.COLOR].unmarkObject(note);
                     note.visible = false;

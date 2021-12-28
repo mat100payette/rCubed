@@ -11,7 +11,7 @@ package popups.settings
 
     public class SettingsTabBase
     {
-        protected static var DEFAULT_OPTIONS:GameOptions = new GameOptions();
+        protected static var DEFAULT_OPTIONS:GameOptions = new GameOptions(null);
 
         protected var parent:SettingsWindow;
         public var container:ScrollPaneContent;

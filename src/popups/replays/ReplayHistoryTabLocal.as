@@ -130,8 +130,7 @@ package popups.replays
                 r.boo = cacheObj["judge"][4];
                 r.maxcombo = cacheObj["judge"][5];
 
-                r.settings = new UserSettings(true);
-                r.settings.update({'songRate': cacheObj["rate"]});
+                r.user.settings.update({'songRate': cacheObj["rate"]});
                 if (cacheObj["engine"] != null)
                 {
                     var engine:Object = _avars.legacyEngine(cacheObj["engine"]);
@@ -306,7 +305,7 @@ package popups.replays
                             REPLAYS[REPLAYS.length] = r;
 
                             cacheObj = {'name': r.song.name,
-                                    'rate': r.settings.songRate,
+                                    'rate': r.user.settings.songRate,
                                     'score': r.score,
                                     'judge': [r.perfect, r.good, r.average, r.miss, r.boo, r.maxcombo]}
 

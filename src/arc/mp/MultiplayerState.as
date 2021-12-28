@@ -38,6 +38,7 @@ package arc.mp
     import menu.MainMenu;
     import menu.MenuPanel;
     import menu.MenuSongSelection;
+    import arc.ArcGlobals;
 
     public class MultiplayerState extends Object
     {
@@ -299,7 +300,7 @@ package arc.mp
         // Starts loading the selected song.
         public function gameplayLoading():void
         {
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
             currentSongFile = _gvars.getSongFile(currentSongInfo);
 
@@ -416,7 +417,7 @@ package arc.mp
         {
             var song:SongInfo = room.songInfo;
             _gvars.songQueue = [song];
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.mpRoom = room;
             _gvars.options.fill();
             if (_gvars.options.settings.frameRate <= 30)
@@ -432,7 +433,7 @@ package arc.mp
         {
             currentStatus = Multiplayer.STATUS_PLAYING;
 
-            _gvars.options = new GameOptions();
+            _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.mpRoom = room;
             _gvars.options.fill();
             _gvars.options.song = currentSongFile;

@@ -2035,22 +2035,22 @@ package game
                     health = 1;
                     if (options.settings.DISPLAY_AMAZING)
                     {
-                        checkAutofail(options.autofail[0], hitAmazing);
+                        checkAutofail(options.settings.autofail[0], hitAmazing);
                     }
                     else
                     {
                         jscore = 50;
-                        checkAutofail(options.autofail[0] + options.autofail[1], hitAmazing + hitPerfect);
+                        checkAutofail(options.settings.autofail[0] + options.settings.autofail[1], hitAmazing + hitPerfect);
                     }
-                    checkAutofail(options.autofail[6], gameRawGoods);
+                    checkAutofail(options.settings.autofail[6], gameRawGoods);
                     break;
                 case 50:
                     hitPerfect++;
                     hitCombo++;
                     gameScore += 50;
                     health = 1;
-                    checkAutofail(options.autofail[1], hitPerfect);
-                    checkAutofail(options.autofail[6], gameRawGoods);
+                    checkAutofail(options.settings.autofail[1], hitPerfect);
+                    checkAutofail(options.settings.autofail[6], gameRawGoods);
                     break;
                 case 25:
                     hitGood++;
@@ -2058,8 +2058,8 @@ package game
                     gameScore += 25;
                     gameRawGoods += 1;
                     health = 1;
-                    checkAutofail(options.autofail[2], hitGood);
-                    checkAutofail(options.autofail[6], gameRawGoods);
+                    checkAutofail(options.settings.autofail[2], hitGood);
+                    checkAutofail(options.settings.autofail[6], gameRawGoods);
                     break;
                 case 5:
                     hitAverage++;
@@ -2067,8 +2067,8 @@ package game
                     gameScore += 5;
                     gameRawGoods += 1.8;
                     health = 1;
-                    checkAutofail(options.autofail[3], hitAverage);
-                    checkAutofail(options.autofail[6], gameRawGoods);
+                    checkAutofail(options.settings.autofail[3], hitAverage);
+                    checkAutofail(options.settings.autofail[6], gameRawGoods);
                     break;
                 case -5:
                     if (frame < gameFirstNoteFrame)
@@ -2077,8 +2077,8 @@ package game
                     gameScore -= 5;
                     gameRawGoods += 0.2;
                     health = -1;
-                    checkAutofail(options.autofail[5], hitBoo);
-                    checkAutofail(options.autofail[6], gameRawGoods);
+                    checkAutofail(options.settings.autofail[5], hitBoo);
+                    checkAutofail(options.settings.autofail[6], gameRawGoods);
                     break;
                 case -10:
                     hitMiss++;
@@ -2086,8 +2086,8 @@ package game
                     gameScore -= 10;
                     gameRawGoods += 2.4;
                     health = -1;
-                    checkAutofail(options.autofail[4], hitMiss);
-                    checkAutofail(options.autofail[6], gameRawGoods);
+                    checkAutofail(options.settings.autofail[4], hitMiss);
+                    checkAutofail(options.settings.autofail[6], gameRawGoods);
                     break;
             }
 

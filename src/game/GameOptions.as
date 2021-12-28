@@ -9,8 +9,12 @@ package game
 
     public class GameOptions extends Object
     {
-        public var DISABLE_NOTE_POOL:Boolean = false;
-        public static const noteDirections:Array = ["D", "L", "U", "R"];
+        public static const NOTE_DIRECTIONS:Array = ["D", "L", "U", "R"];
+
+        private var _user:User;
+        private var _settings:UserSettings;
+
+        public var disableNotePool:Boolean = false;
 
         public var noteSwapColors:Object = {"red": "red", "blue": "blue", "purple": "purple", "yellow": "yellow", "pink": "pink", "orange": "orange", "cyan": "cyan", "green": "green", "white": "white"};
 
@@ -18,7 +22,6 @@ package game
 
         public var judgeWindow:Array = null;
         public var modCache:Object = null;
-        public var settings:UserSettings = new UserSettings(true);
         public var song:Song = null;
         public var replay:Replay = null;
         public var loadPreview:Boolean = false;
@@ -26,10 +29,20 @@ package game
         public var isAutoplay:Boolean = false;
         public var mpRoom:Room = null;
         public var singleplayer:Boolean = false;
-        public var autofail:Array = [0, 0, 0, 0, 0, 0, 0];
 
         public var isolationOffset:int = 0;
         public var isolationLength:int = 0;
+
+        public function GameOptions(user:User):void
+        {
+            _user = user;
+            _settings = user === null ? new UserSettings() : user.settings;
+        }
+
+        public function get settings():UserSettings
+        {
+            return _settings;
+        }
 
         public function get isolation():Boolean
         {
@@ -40,20 +53,6 @@ package game
         {
             if (!value)
                 isolationOffset = isolationLength = 0;
-        }
-
-        public function fillFromUser(user:User):void
-        {
-            settings = user.settings;
-            modCache = null;
-
-            autofail = [settings.autofailAmazing,
-                settings.autofailPerfect,
-                settings.autofailGood,
-                settings.autofailAverage,
-                settings.autofailMiss,
-                settings.autofailBoo,
-                settings.autofailRawGoods];
         }
 
         public function fillFromArcGlobals():void
@@ -67,7 +66,7 @@ package game
             if (!avars.configInterface[layoutKey])
                 avars.configInterface[layoutKey] = {};
             layout = avars.configInterface[layoutKey];
-            layoutKey = settings.scrollDirection;
+            layoutKey = _settings.scrollDirection;
             if (!layout[layoutKey])
                 layout[layoutKey] = {};
             layout = layout[layoutKey];
@@ -80,13 +79,12 @@ package game
             if (replay == null)
                 return;
 
-            settings = replay.settings;
+            _settings = replay.user.settings;
             modCache = null;
         }
 
         public function fill():void
         {
-            fillFromUser(GlobalVariables.instance.activeUser);
             fillFromArcGlobals();
         }
 
@@ -95,7 +93,7 @@ package game
             if (!modCache)
             {
                 modCache = {};
-                for each (var gameMod:String in settings.activeMods)
+                for each (var gameMod:String in _settings.activeMods)
                     modCache[gameMod] = true;
             }
             return mod in modCache;
@@ -120,7 +118,7 @@ package game
         {
             var ret:Boolean = false;
             ret ||= score && (isAutoplay || modEnabled("shuffle") || modEnabled("random") || modEnabled("scramble") || judgeWindow);
-            ret ||= replay && (settings.songRate != 1 || modEnabled("reverse") //||
+            ret ||= replay && (_settings.songRate != 1 || modEnabled("reverse") //||
                 //modEnabled("nobackground") ||
                 //isolation
                 );

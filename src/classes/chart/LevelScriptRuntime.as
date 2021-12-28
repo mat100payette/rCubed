@@ -72,7 +72,7 @@ package classes.chart
 
         public function setNotePool(enabled:Boolean):void
         {
-            options.DISABLE_NOTE_POOL = !enabled;
+            options.disableNotePool = !enabled;
         }
 
     }
