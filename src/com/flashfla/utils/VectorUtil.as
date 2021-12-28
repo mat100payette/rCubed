@@ -55,6 +55,18 @@ package com.flashfla.utils
             return false;
         }
 
+        public static function mergeArray(vec:*, arr:Array):void
+        {
+            if (!(vec is Vector.<*>))
+                return;
+
+            var minArrLen:int = Math.min(vec.length, arr.length);
+            for (var i:int = 0; i < minArrLen; i++)
+            {
+                vec[i] = arr[i];
+            }
+        }
+
     }
 
 }

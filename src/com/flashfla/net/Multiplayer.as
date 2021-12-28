@@ -140,7 +140,7 @@ package com.flashfla.net
         public function Multiplayer()
         {
             _rooms = {};
-            currentUser = new User(false, true);
+            currentUser = new User(true);
             ghostRooms = new <Room>[];
             gameUpdateCallbacks = new <Function>[];
 

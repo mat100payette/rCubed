@@ -6,6 +6,8 @@ package classes
     import flash.media.SoundMixer;
     import flash.media.SoundTransform;
     import flash.ui.Keyboard;
+    import com.flashfla.utils.VectorUtil;
+    import com.flashfla.utils.compat.UserSettingsCompat;
 
     // TODO: Refactor all occurences of `.settings[...]`
 
@@ -89,6 +91,8 @@ package classes
         public var frameRate:int = 60;
         public var forceNewJudge:Boolean = false;
         public var songRate:Number = 1;
+        public var isolationOffset:int = 1;
+        public var isolationLength:int = 0;
 
         public var songQueues:Vector.<Object> = new <Object>[];
         public var filters:Vector.<EngineLevelFilter> = new <EngineLevelFilter>[];
@@ -139,10 +143,13 @@ package classes
                 autofailRawGoods];
         }
 
-        public function update(settings:Object):void
+        public function update(settings:Object, versionFlag:String = null):void
         {
             if (settings == null)
                 return;
+
+            if (versionFlag != null)
+                UserSettingsCompat.update(this, settings, versionFlag);
 
             // For backwards compatibility
             for (var key:String in settings)
@@ -328,16 +335,19 @@ package classes
                 this.gameVolume = settings.gameVolume;
 
             if (settings.isolationOffset != null)
-                ArcGlobals.instance.configIsolationStart = settings.isolationOffset;
+                settings.isolationOffset = settings.isolationOffset;
 
             if (settings.isolationLength != null)
-                ArcGlobals.instance.configIsolationLength = settings.isolationLength;
+                settings.isolationLength = settings.isolationLength;
 
             if (settings.startUpScreen != null)
                 this.startUpScreen = Math.max(0, Math.min(2, settings.startUpScreen));
 
             if (settings.filters != null)
-                this.filters = importFilters(settings.filters);
+                if (settings.filters is Vector.<*>)
+                    this.filters = importFilters(settings.filters);
+                else
+                    this.filters = importFilters(VectorUtil.fromArr(settings.filters));
 
             if (settings.songQueues != null)
             {
@@ -376,7 +386,7 @@ package classes
          * @param	filtersIn Array of Filter objects.
          * @return Array of EngineLevelFilters.
          */
-        public function importFilters(filtersIn:Array):Vector.<EngineLevelFilter>
+        public function importFilters(filtersIn:Vector.<*>):Vector.<EngineLevelFilter>
         {
             if (!_isLiteUser)
                 GlobalVariables.instance.activeFilter = null;

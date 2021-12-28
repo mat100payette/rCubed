@@ -163,9 +163,6 @@ package
             //- Load Menu Music
             _gvars.loadMenuMusic();
 
-            //- Set Vars
-            _gvars.flashvars = stage.loaderInfo.parameters;
-
             //- Background
             this.stage.color = 0x000000;
 
@@ -219,24 +216,6 @@ package
             //CONFIG::debug { _gvars.flashvars = { replay: "366743"};} //, replaySkip: "1"
             //CONFIG::debug { _gvars.flashvars = { preview_file: 2283};} //, replaySkip: "1"
             //CONFIG::debug { _gvars.flashvars = { "__forceLogin": true };} // Login, then on the second go at the login screen, press guest. This should let me test multiple users without dealing with IE. :D
-
-            // Replay
-            if (_gvars.flashvars.replay != null)
-            {
-                _gvars.options = new GameOptions(_gvars.activeUser);
-                _gvars.options.replay = new Replay(_gvars.flashvars.replay, true);
-                _gvars.options.loadPreview = true;
-                _gvars.replayHistory.push(_gvars.options.replay);
-            }
-
-            // Song Preview
-            if (_gvars.flashvars.preview_file != null)
-            {
-                _gvars.options = new GameOptions(_gvars.activeUser);
-                _gvars.options.replay = new SongPreview(_gvars.flashvars.preview_file);
-                _gvars.options.loadPreview = true;
-                _gvars.replayHistory.push(_gvars.options.replay);
-            }
 
             //- Key listener
             stage.addEventListener(KeyboardEvent.KEY_DOWN, keyboardKeyDown, false, 0, true);
@@ -340,7 +319,8 @@ package
         {
             loadTotal = (!isLoginLoad) ? 5 : 3;
 
-            _gvars.playerUser = new User(true, true);
+            _gvars.playerUser = new User(true);
+            _gvars.playerUser.loadData(true, true);
             _gvars.activeUser = _gvars.playerUser;
             _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
             _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
@@ -462,7 +442,7 @@ package
                     }
                 }
 
-                if ((_gvars.flashvars.replay != null || _gvars.flashvars.preview_file != null) && _gvars.options && _gvars.options.replay)
+                if (_gvars.options && _gvars.options.replay)
                 {
                     if (_gvars.options.replay is SongPreview && !_gvars.options.replay.isLoaded)
                     {
@@ -498,7 +478,8 @@ package
                     _playlist.updateSongAccess();
                     _playlist.updatePublicSongsCount();
                     _gvars.loadUserSongData();
-                    switchTo(_gvars.activeUser.isGuest || _gvars.flashvars["__forceLogin"] ? GAME_LOGIN_PANEL : GAME_MENU_PANEL);
+                    // TODO: Validate this switchTo logic
+                    switchTo(_gvars.activeUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL);
                 }
             }
         }
@@ -523,7 +504,7 @@ package
             {
                 _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
                 _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _gvars.activeUser.load();
+                _gvars.activeUser.loadData(true, true);
             }
             /*
                if (!_friends.isLoaded()) {

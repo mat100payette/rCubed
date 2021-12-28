@@ -237,9 +237,9 @@ package popups.replays
                     }
 
                     if (!replay.user.isLoaded())
-                        replay.user.loadUser(replay.user.siteId);
+                        replay.user.loadData(true, false);
 
-                    _gvars.options = new GameOptions(_gvars.activeUser);
+                    _gvars.options = new GameOptions(replay.user);
                     _gvars.options.isolation = false;
                     _gvars.options.replay = replay;
                     _gvars.options.loadPreview = true;

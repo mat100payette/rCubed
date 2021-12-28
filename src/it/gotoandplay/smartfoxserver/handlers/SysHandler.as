@@ -403,7 +403,7 @@ package it.gotoandplay.smartfoxserver.handlers
             var userId:int = int(o.body.user.@id)
             var changedVars:Array = []
 
-            var user:User = new User(false, false, userId)
+            var user:User = new User(false, userId)
 
             // First, we check if there's actual variables data available
             if (o.body.vars.toString().length > 0)

@@ -22,7 +22,7 @@ package classes
 
             this.level = songData.level;
 
-            this.user = new User(false, false);
+            this.user = new User(false);
             this.user.siteId = 1743546;
             this.user.name = "Song Preview";
             this.user.skillLevel = _gvars.MAX_DIFFICULTY;

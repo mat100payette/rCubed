@@ -33,7 +33,7 @@ package game
             {
                 // Clone Song queue
                 _gvars.totalSongQueue = _gvars.songQueue.concat();
-                switchTo(_gvars.flashvars.replay || _gvars.flashvars.preview_file ? GAME_REPLAY : GAME_LOADING);
+                switchTo(GAME_LOADING);
             }
             return false;
         }

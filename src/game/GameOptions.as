@@ -11,8 +11,7 @@ package game
     {
         public static const NOTE_DIRECTIONS:Array = ["D", "L", "U", "R"];
 
-        private var _user:User;
-        private var _settings:UserSettings;
+        private var _user:User = new User();
 
         public var disableNotePool:Boolean = false;
 
@@ -35,13 +34,13 @@ package game
 
         public function GameOptions(user:User):void
         {
-            _user = user;
-            _settings = user === null ? new UserSettings() : user.settings;
+            if (user != null)
+                _user = user;
         }
 
         public function get settings():UserSettings
         {
-            return _settings;
+            return _user.settings;
         }
 
         public function get isolation():Boolean
@@ -66,7 +65,7 @@ package game
             if (!avars.configInterface[layoutKey])
                 avars.configInterface[layoutKey] = {};
             layout = avars.configInterface[layoutKey];
-            layoutKey = _settings.scrollDirection;
+            layoutKey = _user.settings.scrollDirection;
             if (!layout[layoutKey])
                 layout[layoutKey] = {};
             layout = layout[layoutKey];
@@ -79,7 +78,7 @@ package game
             if (replay == null)
                 return;
 
-            _settings = replay.user.settings;
+            _user.settings = replay.user.settings;
             modCache = null;
         }
 
@@ -93,7 +92,7 @@ package game
             if (!modCache)
             {
                 modCache = {};
-                for each (var gameMod:String in _settings.activeMods)
+                for each (var gameMod:String in _user.settings.activeMods)
                     modCache[gameMod] = true;
             }
             return mod in modCache;
@@ -118,7 +117,7 @@ package game
         {
             var ret:Boolean = false;
             ret ||= score && (isAutoplay || modEnabled("shuffle") || modEnabled("random") || modEnabled("scramble") || judgeWindow);
-            ret ||= replay && (_settings.songRate != 1 || modEnabled("reverse") //||
+            ret ||= replay && (_user.settings.songRate != 1 || modEnabled("reverse") //||
                 //modEnabled("nobackground") ||
                 //isolation
                 );

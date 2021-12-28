@@ -17,6 +17,7 @@ package classes.replay
     import flash.net.URLVariables;
     import flash.utils.ByteArray;
     import classes.UserSettings;
+    import com.flashfla.utils.compat.UserSettingsCompat;
 
     public class Replay
     {
@@ -108,10 +109,14 @@ package classes.replay
             var jsonSettings:UserSettings;
 
             //- Level Details
-            this.user = new User(loadUser, false, data.userid);
-            this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
-            if (!loadUser)
+            this.user = new User(false, data.userid);
+            this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
+
+            if (loadUser)
+                this.user.loadData(true, true);
+            else
                 this.user.siteId = data.userid;
+
             this.level = data.replaylevelid;
             this.timestamp = data.timestamp;
 
@@ -182,7 +187,7 @@ package classes.replay
             // R^3 Replay JSON
             else if (data.replayversion == "R^3")
             {
-                this.user.settings.update(JSON.parse(data.replaysettings));
+                this.user.settings.update(JSON.parse(data.replaysettings), UserSettingsCompat.R3_v1_4_REPLAY);
             }
 
             //- Frames
@@ -216,8 +221,10 @@ package classes.replay
                 return;
 
             //- Level Details
-            this.user = new User(loadUser, false);
-            this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
+            this.user = new User(false);
+            if (loadUser)
+                this.user.loadData(true, false);
+            this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
             this.user.siteId = data.user_id;
             this.level = data.song_id;
             this.timestamp = data.timestamp;
@@ -321,9 +328,9 @@ package classes.replay
             return noteDir;
         }
 
-        private function userLoad(e:Event):void
+        private function onUserLoad(e:Event):void
         {
-            this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, userLoad);
+            this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
             isLoaded = true;
         }
 

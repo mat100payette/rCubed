@@ -97,11 +97,10 @@ package classes
         /**
          * Defines the creation of a new User object.
          *
-         * @param	loadData Loads the user data on creation.
          * @param	isActiveUser Sets the active user flag.
          * @tiptext
          */
-        public function User(loadData:Boolean = false, isActiveUser:Boolean = false, sfsId:int = -1):void
+        public function User(isActiveUser:Boolean = false, sfsId:int = -1):void
         {
             this.id = sfsId;
             this.variables = [];
@@ -110,24 +109,27 @@ package classes
             this._isLiteUser = !isActiveUser;
 
             this.settings = new UserSettings(!isActiveUser);
+        }
 
-            if (loadData)
-            {
-                if (sfsId > -1)
-                {
-                    loadUser(sfsId);
-                }
+        /**
+         * Initiates fetching the user's data from the database, including only the necessary data.
+         * @param includeProfile
+         * @param includeSettings
+         */
+        public function loadData(includeProfile:Boolean = true, includeSettings:Boolean = true):void
+        {
+            if (includeProfile)
+                if (includeSettings)
+                    _loadFullUser();
                 else
-                {
-                    load();
-                }
-            }
+                    _loadUserNoSettings();
         }
 
         public function refreshUser():void
         {
             _gvars.userSession = "0";
-            _gvars.playerUser = new User(true, true);
+            _gvars.playerUser = new User(true);
+            _gvars.playerUser.loadData(true, true);
             _gvars.activeUser = _gvars.playerUser;
         }
 
@@ -157,20 +159,22 @@ package classes
             return _loadError;
         }
 
-        public function load():void
+        private function _loadFullUser():void
         {
             // Kill old Loading Stream
             if (_loader && _isLoading)
             {
-                removeLoaderListeners();
+                _loader.removeEventListener(Event.COMPLETE, _onFullUserDataLoaded);
+                _removeCommonLoaderListeners();
                 _loader.close();
             }
 
-            Logger.info(this, "Main User Load Requested");
+            Logger.info(this, "User Load Requested");
             _isLoaded = false;
             _loadError = false;
             _loader = new URLLoader();
-            addLoaderListeners();
+            _loader.addEventListener(Event.COMPLETE, _onFullUserDataLoaded);
+            _addCommonLoaderListeners();
 
             var req:URLRequest = new URLRequest(Constant.USER_INFO_URL + "?d=" + new Date().getTime());
             var requestVars:URLVariables = new URLVariables();
@@ -182,34 +186,48 @@ package classes
             _isLoading = true;
         }
 
-        public function loadUser(userid:int):void
+        private function _loadUserNoSettings():void
         {
-            Logger.info(this, "Secondary User Load Requested");
+            Logger.info(this, "User No Settings Load Requested");
             _isLoaded = false;
             _loader = new URLLoader();
-            addLoaderListeners();
+            _loader.addEventListener(Event.COMPLETE, _onUserDataNoSettingsLoaded);
+            _addCommonLoaderListeners();
 
             var req:URLRequest = new URLRequest(Constant.USER_INFO_LITE_URL + "?d=" + new Date().getTime());
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.userid = userid;
+            requestVars.userid = siteId;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
             _isLoading = true;
         }
 
-        private function profileLoadComplete(e:Event):void
+        private function _onFullUserDataLoaded(e:Event):void
         {
-            Logger.info(this, "Profile Load Success");
-            removeLoaderListeners();
+            Logger.info(this, "Full User Load Success");
+            _loader.removeEventListener(Event.COMPLETE, _onFullUserDataLoaded);
+            _onUserLoaded(e, true, true);
+        }
+
+        private function _onUserDataNoSettingsLoaded(e:Event):void
+        {
+            Logger.info(this, "User No Settings Load Success");
+            _loader.removeEventListener(Event.COMPLETE, _onUserDataNoSettingsLoaded);
+            _onUserLoaded(e, true, false);
+        }
+
+        private function _onUserLoaded(e:Event, includeProfile:Boolean, includeSettings:Boolean):void
+        {
+            _removeCommonLoaderListeners();
 
             // Parse Response
-            var _data:Object;
+            var data:Object;
             var siteDataString:String = e.target.data;
             try
             {
-                _data = JSON.parse(siteDataString);
+                data = JSON.parse(siteDataString);
             }
             catch (err:Error)
             {
@@ -222,8 +240,9 @@ package classes
                 return;
             }
 
-            // Has Response
-            loadUserData(_data);
+            _applyLoadedUserProfile(data);
+            if (includeSettings)
+                _applyLoadedUserSettings(data);
 
             if (!_isLiteUser)
             {
@@ -236,7 +255,7 @@ package classes
             }
         }
 
-        public function loadUserData(data:Object):void
+        private function _applyLoadedUserProfile(data:Object):void
         {
             // Private
             if (!_isLiteUser)
@@ -263,22 +282,23 @@ package classes
 
             // Load Avatar
             loadAvatar();
+        }
 
-            // Setup Settings from server or local
-            if (data["settings"] != null && !this.isGuest)
-            {
-                try
-                {
-                    settings.update(JSON.parse(data.settings));
-                }
-                catch (err:Error)
-                {
-                    Logger.error(this, "Settings Parse Failure: " + Logger.exception_error(err));
-                }
-            }
+        private function _applyLoadedUserSettings(data:Object):void
+        {
+            var loadedSettings:Object;
+            if (this.isGuest || data["settings"] == null)
+                loadedSettings = _loadLocalSettings();
             else
+                loadedSettings = data.settings;
+
+            try
             {
-                loadLocal();
+                settings.update(JSON.parse(data.settings));
+            }
+            catch (err:Error)
+            {
+                Logger.error(this, "Settings Parse Failure: " + Logger.exception_error(err));
             }
         }
 
@@ -291,27 +311,29 @@ package classes
             }
         }
 
-        private function profileLoadError(err:ErrorEvent = null):void
+        private function _onUserLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Profile Load Failure: " + Logger.event_error(err));
-            removeLoaderListeners();
+
+            _loader.removeEventListener(Event.COMPLETE, _onFullUserDataLoaded);
+            _loader.removeEventListener(Event.COMPLETE, _onUserDataNoSettingsLoaded);
+            _removeCommonLoaderListeners();
+
             _loadError = true;
             this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
         }
 
-        private function addLoaderListeners():void
+        private function _addCommonLoaderListeners():void
         {
-            _loader.addEventListener(Event.COMPLETE, profileLoadComplete);
-            _loader.addEventListener(IOErrorEvent.IO_ERROR, profileLoadError);
-            _loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, profileLoadError);
+            _loader.addEventListener(IOErrorEvent.IO_ERROR, _onUserLoadError);
+            _loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, _onUserLoadError);
         }
 
-        private function removeLoaderListeners():void
+        private function _removeCommonLoaderListeners():void
         {
             _isLoaded = false;
-            _loader.removeEventListener(Event.COMPLETE, profileLoadComplete);
-            _loader.removeEventListener(IOErrorEvent.IO_ERROR, profileLoadError);
-            _loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, profileLoadError);
+            _loader.removeEventListener(IOErrorEvent.IO_ERROR, _onUserLoadError);
+            _loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _onUserLoadError);
         }
 
         private function setupPermissions():void
@@ -478,19 +500,13 @@ package classes
             LocalStore.flush();
         }
 
-        public function loadLocal():void
+        private function _loadLocalSettings():Object
         {
             var encodedSettings:String = LocalStore.getVariable("sEncode", null);
-            if (encodedSettings != null)
-            {
-                try
-                {
-                    settings.update(JSON.parse(encodedSettings));
-                }
-                catch (e:Error)
-                {
-                }
-            }
+            if (encodedSettings == null)
+                return null;
+
+            return JSON.parse(encodedSettings);
         }
 
         public function getLevelRank(songInfo:SongInfo):Object
