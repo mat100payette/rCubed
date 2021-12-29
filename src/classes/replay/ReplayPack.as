@@ -5,6 +5,7 @@ package classes.replay
     import com.flashfla.utils.StringUtil;
     import flash.utils.ByteArray;
     import game.GameOptions;
+    import classes.UserSettings;
 
     /**
      * A Class needed to pack and unpack a binary based R3 replay.
@@ -363,9 +364,10 @@ package classes.replay
                 return null;
 
             // Get Alt engine Settings
-            var settings:Object = options.settings;
+            // TODO: Does this need a `new UserSettings()` ?
+            var settings:UserSettings = options.settings;
             if (options.song.songInfo.engine)
-                settings.arc_engine = ArcGlobals.instance.legacyEncode(options.song.songInfo);
+                settings.update({"arc_engine": ArcGlobals.instance.legacyEncode(options.song.songInfo)});
 
             var timestamp:Number = Math.floor(new Date().getTime() / 1000);
             var settingsEncode:String = JSON.stringify(settings);

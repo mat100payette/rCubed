@@ -128,7 +128,12 @@ package classes
          */
         public function stringify():String
         {
-            var stringified:String = JSON.stringify(this, replacer(this));
+            var preStringified:String = JSON.stringify(this, replacer(this));
+            var json:Object = JSON.parse(preStringified);
+            for (var key:String in json._compatSettings)
+                json[key] = json._compatSettings[key];
+            var stringified:String = JSON.stringify(json);
+
             return stringified;
         }
 
@@ -159,17 +164,15 @@ package classes
 
                 try
                 {
-                    isKeyNotFound = this[key] === undefined;
+                    var _:* = this[key];
                 }
                 catch (_)
                 {
+                    isKeyNotFound = true;
                 }
 
                 if (isCompatSetting || isKeyNotFound)
-                {
-                    this[key] = settings[key];
-                    this._compatSettings[key] = true;
-                }
+                    this._compatSettings[key] = settings[key];
             }
 
             if (settings.language != null)
