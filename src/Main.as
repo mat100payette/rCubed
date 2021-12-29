@@ -442,45 +442,15 @@ package
                     }
                 }
 
-                if (_gvars.options && _gvars.options.replay)
-                {
-                    if (_gvars.options.replay is SongPreview && !_gvars.options.replay.isLoaded)
-                    {
-                        (_gvars.options.replay as SongPreview).setupSongPreview();
-                        return;
-                    }
-                    if (_gvars.options.replay.isLoaded)
-                    {
-                        loadScripts = 0;
-                        preloader.remove();
-
-                        if (this.contains(loadStatus))
-                            removeChild(loadStatus);
-                        if (this.contains(epilepsyWarning))
-                            removeChild(epilepsyWarning);
-
-                        this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
-
-                        // Setup Vars
-                        _gvars.songQueue.push(Playlist.instance.getSongInfo(_gvars.options.replay.level));
-
-                        // Switch to game
-                        switchTo(GAME_PLAY_PANEL);
-                    }
-                    return;
-                }
-                else
-                {
-                    loadScripts = 0;
-                    preloader.remove();
-                    removeChild(loadStatus);
-                    this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
-                    _playlist.updateSongAccess();
-                    _playlist.updatePublicSongsCount();
-                    _gvars.loadUserSongData();
-                    // TODO: Validate this switchTo logic
-                    switchTo(_gvars.activeUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL);
-                }
+                loadScripts = 0;
+                preloader.remove();
+                removeChild(loadStatus);
+                this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
+                _playlist.updateSongAccess();
+                _playlist.updatePublicSongsCount();
+                _gvars.loadUserSongData();
+                // TODO: Validate this switchTo logic
+                switchTo(_gvars.activeUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL);
             }
         }
 

@@ -112,8 +112,6 @@ package popups.replays
                 for each (var replay:Object in json)
                 {
                     var r:Replay = new Replay(replay["replayid"]);
-                    // TODO: Check if this is needed, and if so, where exactly
-                    //r.user = _gvars.playerUser;
                     r.parseReplay(replay, false);
                     r.loadSongInfo();
                     REPLAYS[REPLAYS.length] = r;

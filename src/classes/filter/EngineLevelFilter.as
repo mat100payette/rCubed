@@ -346,11 +346,18 @@ package classes.filter
          */
         public function toJSON():Object
         {
-            var filter:Object = this.export();
-            if (filter["filters"] && filter["filters"].length > 0) // Don't export blank filters.
-                return this;
-            else
+            try
+            {
+                var filter:Object = this.export();
+                if (filter["filters"] && filter["filters"].length > 0) // Don't export blank filters.
+                    return this;
+
                 return null;
+            }
+            catch (e:Error)
+            {
+                return null;
+            }
         }
 
         public function export():Object
