@@ -505,16 +505,16 @@ package game
             gameplayUI = (sideScroll ? new viewLR() : new viewUD());
             this.addChild(gameplayUI);
 
-            if (!options.settings.DISPLAY_GAME_TOP_BAR)
+            if (!options.settings.displayGameTopBar)
                 gameplayUI.top_bar.visible = false;
 
-            if (!options.settings.DISPLAY_GAME_BOTTOM_BAR)
+            if (!options.settings.displayGameBottomBar)
                 gameplayUI.bottom_bar.visible = false;
 
-            if (!options.settings.DISPLAY_GAME_TOP_BAR && !options.settings.DISPLAY_GAME_BOTTOM_BAR)
+            if (!options.settings.displayGameTopBar && !options.settings.displayGameBottomBar)
                 gameplayUI.visible = false;
 
-            if (options.settings.DISPLAY_PACOUNT)
+            if (options.settings.displayPACount)
             {
                 player1PAWindow = new PAWindow(options);
                 if (sideScroll)
@@ -522,13 +522,13 @@ package game
                 this.addChild(player1PAWindow);
             }
 
-            if (options.settings.DISPLAY_SCORE)
+            if (options.settings.displayScore)
             {
                 score = new Score(options);
                 this.addChild(score);
             }
 
-            if (options.settings.DISPLAY_COMBO)
+            if (options.settings.displayCombo)
             {
                 player1Combo = new Combo(options);
                 if (!sideScroll)
@@ -539,7 +539,7 @@ package game
                 this.addChild(comboStatic);
             }
 
-            if (options.settings.DISPLAY_TOTAL)
+            if (options.settings.displayTotal)
             {
                 comboTotal = new Combo(options);
                 if (sideScroll)
@@ -550,20 +550,20 @@ package game
                 this.addChild(comboTotalStatic);
             }
 
-            if (options.settings.DISPLAY_ACCURACY_BAR)
+            if (options.settings.displayAccuracyBar)
             {
                 accBar = new AccuracyBar(options);
                 this.addChild(accBar);
             }
 
-            if (options.settings.DISPLAY_SONGPROGRESS || options.replay)
+            if (options.settings.displaySongProgress || options.replay)
             {
                 progressDisplay = new ProgressBar(this, 161, 9, 458, 20, 4, 0x545454, 0.1);
 
                 if (options.replay)
                     progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
             }
-            if (options.settings.DISPLAY_SONGPROGRESS_TEXT)
+            if (options.settings.displaySongProgressText)
             {
                 progressDisplayText = new TextStatic("0:00");
                 this.addChild(progressDisplayText);
@@ -632,12 +632,12 @@ package game
             mpSpectate = (options.mpRoom && !options.mpRoom.connection.currentUser.isPlayer);
             if (mpSpectate)
             {
-                options.settings.DISPLAY_COMBO = false;
-                options.settings.DISPLAY_TOTAL = false;
-                options.settings.DISPLAY_PACOUNT = false;
+                options.settings.displayCombo = false;
+                options.settings.displayTotal = false;
+                options.settings.displayPACount = false;
             }
             else if (options.mpRoom)
-                options.settings.DISPLAY_TOTAL = false;
+                options.settings.displayTotal = false;
         }
 
         private function initVars(postStart:Boolean = true):void
@@ -988,14 +988,14 @@ package game
             }
 
             // UI Updates
-            if (options.settings.DISPLAY_MP_JUDGE && options.mpRoom)
+            if (options.settings.displayMPJudge && options.mpRoom)
             {
                 for each (var mpJudgeComponent:Judge in mpJudge)
                 {
                     mpJudgeComponent.updateJudge(e);
                 }
             }
-            else if (options.settings.DISPLAY_JUDGE && player1Judge != null)
+            else if (options.settings.displayJudge && player1Judge != null)
             {
                 player1Judge.updateJudge(e);
             }
@@ -1579,7 +1579,7 @@ package game
 
         private function buildScreenCut():void
         {
-            if (!options.settings.DISPLAY_SCREENCUT)
+            if (!options.settings.displayScreencut)
                 return;
 
             if (screenCut)
@@ -1594,7 +1594,7 @@ package game
 
         private function buildJudge():void
         {
-            if (!options.settings.DISPLAY_JUDGE)
+            if (!options.settings.displayJudge)
                 return;
 
             player1Judge = new Judge(options);
@@ -1605,7 +1605,7 @@ package game
 
         private function buildHealth():void
         {
-            if (!options.settings.DISPLAY_HEALTH)
+            if (!options.settings.displayHealth)
                 return;
 
             player1Life = new LifeBar();
@@ -1621,7 +1621,7 @@ package game
             mpCombo = [];
             mpHeader = [];
 
-            if (!options.settings.DISPLAY_MP_UI && !mpSpectate)
+            if (!options.settings.displayMPUI && !mpSpectate)
                 return;
 
             for each (var user:User in options.mpRoom.players)
@@ -1637,7 +1637,7 @@ package game
                     continue;
                 }
 
-                if (options.settings.DISPLAY_MP_PA)
+                if (options.settings.displayMPPA)
                 {
                     var pa:PAWindow = new PAWindow(options);
                     addChild(pa);
@@ -1647,21 +1647,21 @@ package game
                 if (mpSpectate)
                 {
                     var header:MPHeader = new MPHeader(user);
-                    if (options.settings.DISPLAY_MP_PA)
+                    if (options.settings.displayMPPA)
                         mpPA[user.playerIdx].addChild(header);
                     else
                         addChild(header);
                     mpHeader[user.playerIdx] = header;
                 }
 
-                if (options.settings.DISPLAY_MP_COMBO)
+                if (options.settings.displayMPCombo)
                 {
                     var combo:Combo = new Combo(options);
                     addChild(combo);
                     mpCombo[user.playerIdx] = combo;
                 }
 
-                if (options.settings.DISPLAY_MP_JUDGE)
+                if (options.settings.displayMPJudge)
                 {
                     var judge:Judge = new Judge(options);
                     addChild(judge);
@@ -1722,7 +1722,7 @@ package game
             defaultLayout[LAYOUT_MP_COMBO + "1"] = defaultLayout[LAYOUT_COMBO];
             defaultLayout[LAYOUT_MP_JUDGE + "1"] = {x: 208, y: 102};
             defaultLayout[LAYOUT_MP_PA + "1"] = {x: 6, y: 96};
-            if (options.settings.DISPLAY_MP_PA)
+            if (options.settings.displayMPPA)
                 defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 0, y: -35};
             else
                 defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 6, y: 190};
@@ -1730,7 +1730,7 @@ package game
             defaultLayout[LAYOUT_MP_COMBO + "2"] = defaultLayout[LAYOUT_COMBO_TOTAL];
             defaultLayout[LAYOUT_MP_JUDGE + "2"] = {x: 568, y: 102};
             defaultLayout[LAYOUT_MP_PA + "2"] = {x: 645, y: 96, properties: {alignment: "right"}};
-            if (options.settings.DISPLAY_MP_PA)
+            if (options.settings.displayMPPA)
                 defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 25, y: -35, properties: {alignment: MPHeader.ALIGN_RIGHT}};
             else
                 defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 690, y: 190, properties: {alignment: MPHeader.ALIGN_RIGHT}};
@@ -2033,7 +2033,7 @@ package game
                     hitCombo++;
                     gameScore += 50;
                     health = 1;
-                    if (options.settings.DISPLAY_AMAZING)
+                    if (options.settings.displayAmazing)
                     {
                         checkAutofail(options.settings.autofail[0], hitAmazing);
                     }

@@ -1,15 +1,12 @@
 package classes
 {
-    import arc.ArcGlobals;
     import assets.GameBackgroundColor;
     import classes.filter.EngineLevelFilter;
     import flash.media.SoundMixer;
     import flash.media.SoundTransform;
     import flash.ui.Keyboard;
     import com.flashfla.utils.VectorUtil;
-    import com.flashfla.utils.compat.UserSettingsCompat;
-
-    // TODO: Refactor all occurences of `.settings[...]`
+    import compat.UserSettingsCompat;
 
     public class UserSettings
     {
@@ -23,35 +20,35 @@ package classes
         public var startUpScreen:int = 0; // 0 = MP Connect + MP Screen   |   1 = MP Connect + Song List   |   2 = Song List
 
         public var DISPLAY_LEGACY_SONGS:Boolean = false;
-        public var DISPLAY_GENRE_FLAG:Boolean = true;
-        public var DISPLAY_SONG_FLAG:Boolean = true;
-        public var DISPLAY_SONG_NOTE:Boolean = true;
+        public var displayGenreFlag:Boolean = true;
+        public var displaySongFlag:Boolean = true;
+        public var displaySongNote:Boolean = true;
 
         //- Game Data
         public var GLOBAL_OFFSET:Number = 0;
         public var JUDGE_OFFSET:Number = 0;
         public var AUTO_JUDGE_OFFSET:Boolean = false;
-        public var DISPLAY_JUDGE:Boolean = true;
-        public var DISPLAY_JUDGE_ANIMATIONS:Boolean = true;
-        public var DISPLAY_RECEPTOR_ANIMATIONS:Boolean = true;
-        public var DISPLAY_HEALTH:Boolean = true;
-        public var DISPLAY_GAME_TOP_BAR:Boolean = true;
-        public var DISPLAY_GAME_BOTTOM_BAR:Boolean = true;
-        public var DISPLAY_SCORE:Boolean = true;
-        public var DISPLAY_COMBO:Boolean = true;
-        public var DISPLAY_PACOUNT:Boolean = true;
-        public var DISPLAY_ACCURACY_BAR:Boolean = true;
-        public var DISPLAY_AMAZING:Boolean = true;
-        public var DISPLAY_PERFECT:Boolean = true;
-        public var DISPLAY_TOTAL:Boolean = true;
-        public var DISPLAY_SCREENCUT:Boolean = false;
-        public var DISPLAY_SONGPROGRESS:Boolean = true;
-        public var DISPLAY_SONGPROGRESS_TEXT:Boolean = false;
+        public var displayJudge:Boolean = true;
+        public var displayJudgeAnimations:Boolean = true;
+        public var displayReceptorAnimations:Boolean = true;
+        public var displayHealth:Boolean = true;
+        public var displayGameTopBar:Boolean = true;
+        public var displayGameBottomBar:Boolean = true;
+        public var displayScore:Boolean = true;
+        public var displayCombo:Boolean = true;
+        public var displayPACount:Boolean = true;
+        public var displayAccuracyBar:Boolean = true;
+        public var displayAmazing:Boolean = true;
+        public var displayPerfect:Boolean = true;
+        public var displayTotal:Boolean = true;
+        public var displayScreencut:Boolean = false;
+        public var displaySongProgress:Boolean = true;
+        public var displaySongProgressText:Boolean = false;
 
-        public var DISPLAY_MP_UI:Boolean = true;
-        public var DISPLAY_MP_PA:Boolean = true;
-        public var DISPLAY_MP_JUDGE:Boolean = true;
-        public var DISPLAY_MP_COMBO:Boolean = true;
+        public var displayMPUI:Boolean = true;
+        public var displayMPPA:Boolean = true;
+        public var displayMPJudge:Boolean = true;
+        public var displayMPCombo:Boolean = true;
 
         public var DISPLAY_MP_TIMESTAMP:Boolean = false;
         public var judgeColors:Array = [0x78ef29, 0x12e006, 0x01aa0f, 0xf99800, 0xfe0000, 0x804100];
@@ -188,73 +185,73 @@ package classes
                 this.AUTO_JUDGE_OFFSET = settings.AUTO_JUDGE_OFFSET;
 
             if (settings.DISPLAY_SONG_FLAG != null)
-                this.DISPLAY_SONG_FLAG = settings.DISPLAY_SONG_FLAG;
+                this.displaySongFlag = settings.DISPLAY_SONG_FLAG;
 
             if (settings.DISPLAY_GENRE_FLAG != null)
-                this.DISPLAY_GENRE_FLAG = settings.DISPLAY_GENRE_FLAG;
+                this.displayGenreFlag = settings.DISPLAY_GENRE_FLAG;
 
             if (settings.DISPLAY_SONG_NOTE != null)
-                this.DISPLAY_SONG_NOTE = settings.DISPLAY_SONG_NOTE;
+                this.displaySongNote = settings.DISPLAY_SONG_NOTE;
 
             if (settings.DISPLAY_JUDGE != null)
-                this.DISPLAY_JUDGE = settings.DISPLAY_JUDGE;
+                this.displayJudge = settings.DISPLAY_JUDGE;
 
             if (settings.DISPLAY_JUDGE_ANIMATIONS != null)
-                this.DISPLAY_JUDGE_ANIMATIONS = settings.DISPLAY_JUDGE_ANIMATIONS;
+                this.displayJudgeAnimations = settings.DISPLAY_JUDGE_ANIMATIONS;
 
             if (settings.DISPLAY_RECEPTOR_ANIMATIONS != null)
-                this.DISPLAY_RECEPTOR_ANIMATIONS = settings.DISPLAY_RECEPTOR_ANIMATIONS;
+                this.displayReceptorAnimations = settings.DISPLAY_RECEPTOR_ANIMATIONS;
 
             if (settings.DISPLAY_HEALTH != null)
-                this.DISPLAY_HEALTH = settings.DISPLAY_HEALTH;
+                this.displayHealth = settings.DISPLAY_HEALTH;
 
             if (settings.DISPLAY_GAME_TOP_BAR != null)
-                this.DISPLAY_GAME_TOP_BAR = settings.DISPLAY_GAME_TOP_BAR;
+                this.displayGameTopBar = settings.DISPLAY_GAME_TOP_BAR;
 
             if (settings.DISPLAY_GAME_BOTTOM_BAR != null)
-                this.DISPLAY_GAME_BOTTOM_BAR = settings.DISPLAY_GAME_BOTTOM_BAR;
+                this.displayGameBottomBar = settings.DISPLAY_GAME_BOTTOM_BAR;
 
             if (settings.DISPLAY_SCORE != null)
-                this.DISPLAY_SCORE = settings.DISPLAY_SCORE;
+                this.displayScore = settings.DISPLAY_SCORE;
 
             if (settings.DISPLAY_COMBO != null)
-                this.DISPLAY_COMBO = settings.DISPLAY_COMBO;
+                this.displayCombo = settings.DISPLAY_COMBO;
 
             if (settings.DISPLAY_PACOUNT != null)
-                this.DISPLAY_PACOUNT = settings.DISPLAY_PACOUNT;
+                this.displayPACount = settings.DISPLAY_PACOUNT;
 
             if (settings.DISPLAY_ACCURACY_BAR != null)
-                this.DISPLAY_ACCURACY_BAR = settings.DISPLAY_ACCURACY_BAR;
+                this.displayAccuracyBar = settings.DISPLAY_ACCURACY_BAR;
 
             if (settings.DISPLAY_AMAZING != null)
-                this.DISPLAY_AMAZING = settings.DISPLAY_AMAZING;
+                this.displayAmazing = settings.DISPLAY_AMAZING;
 
             if (settings.DISPLAY_PERFECT != null)
-                this.DISPLAY_PERFECT = settings.DISPLAY_PERFECT;
+                this.displayPerfect = settings.DISPLAY_PERFECT;
 
             if (settings.DISPLAY_TOTAL != null)
-                this.DISPLAY_TOTAL = settings.DISPLAY_TOTAL;
+                this.displayTotal = settings.DISPLAY_TOTAL;
 
             if (settings.DISPLAY_SCREENCUT != null)
-                this.DISPLAY_SCREENCUT = settings.DISPLAY_SCREENCUT;
+                this.displayScreencut = settings.DISPLAY_SCREENCUT;
 
             if (settings.DISPLAY_SONGPROGRESS != null)
-                this.DISPLAY_SONGPROGRESS = settings.DISPLAY_SONGPROGRESS;
+                this.displaySongProgress = settings.DISPLAY_SONGPROGRESS;
 
             if (settings.DISPLAY_SONGPROGRESS_TEXT != null)
-                this.DISPLAY_SONGPROGRESS_TEXT = settings.DISPLAY_SONGPROGRESS_TEXT;
+                this.displaySongProgressText = settings.DISPLAY_SONGPROGRESS_TEXT;
 
             if (settings.DISPLAY_MP_UI != null)
-                this.DISPLAY_MP_UI = settings.DISPLAY_MP_UI;
+                this.displayMPUI = settings.DISPLAY_MP_UI;
 
             if (settings.DISPLAY_MP_PA != null)
-                this.DISPLAY_MP_PA = settings.DISPLAY_MP_PA;
+                this.displayMPPA = settings.DISPLAY_MP_PA;
 
             if (settings.DISPLAY_MP_COMBO != null)
-                this.DISPLAY_MP_COMBO = settings.DISPLAY_MP_COMBO;
+                this.displayMPCombo = settings.DISPLAY_MP_COMBO;
 
             if (settings.DISPLAY_MP_JUDGE != null)
-                this.DISPLAY_MP_JUDGE = settings.DISPLAY_MP_JUDGE;
+                this.displayMPJudge = settings.DISPLAY_MP_JUDGE;
 
             if (settings.DISPLAY_MP_TIMESTAMP != null)
                 this.DISPLAY_MP_TIMESTAMP = settings.DISPLAY_MP_TIMESTAMP;

@@ -34,7 +34,7 @@ package game.controls
                 {color: options.settings.judgeColors[4], title: _lang.stringSimple("game_miss")},
                 {color: options.settings.judgeColors[5], title: _lang.stringSimple("game_boo")}];
 
-            if (!options.settings.DISPLAY_AMAZING)
+            if (!options.settings.displayAmazing)
             {
                 labelDesc.splice(0, 1);
                 ypos = 49;
@@ -79,7 +79,7 @@ package game.controls
         public function update(amazing:int, perfect:int, good:int, average:int, miss:int, boo:int):void
         {
             var offset:int = 0;
-            if (options.settings.DISPLAY_AMAZING)
+            if (options.settings.displayAmazing)
             {
                 updateScore(0, amazing);
                 updateScore(1, perfect);

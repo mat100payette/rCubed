@@ -366,7 +366,7 @@ package menu
          */
         public function buildGenreListFlags():void
         {
-            if (!_gvars.activeUser.settings.DISPLAY_GENRE_FLAG)
+            if (!_gvars.activeUser.settings.displayGenreFlag)
                 return;
 
             genreListFlags = [];
@@ -480,7 +480,7 @@ package menu
                 var genre_flag:String = genreListFlags[genre_index];
                 var genre_text:String = getGenreText(genre_index);
 
-                if (genre_flag != null && _gvars.activeUser.settings.DISPLAY_GENRE_FLAG)
+                if (genre_flag != null && _gvars.activeUser.settings.displayGenreFlag)
                     genre_text = "<font color=\"" + genre_flag + "\">•</font> " + genre_text;
 
                 // Build Label
@@ -746,7 +746,7 @@ package menu
                 songInfo = songList[sX];
                 sI = new SongItem();
                 sI.setData(songInfo, _gvars.activeUser.getLevelRank(songInfo));
-                sI.noteEnabled = _gvars.activeUser.settings.DISPLAY_SONG_NOTE;
+                sI.noteEnabled = _gvars.activeUser.settings.displaySongNote;
                 sI.setContextMenu(songItemContextMenu);
                 sI.y = yOffset;
                 sI.index = sX;

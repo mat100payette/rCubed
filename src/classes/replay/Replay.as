@@ -7,7 +7,9 @@ package classes.replay
     import classes.Playlist;
     import classes.SongInfo;
     import classes.User;
+    import classes.UserSettings;
     import classes.replay.ReplayPack;
+    import compat.UserSettingsCompat;
     import flash.events.Event;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
@@ -16,8 +18,6 @@ package classes.replay
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
     import flash.utils.ByteArray;
-    import classes.UserSettings;
-    import com.flashfla.utils.compat.UserSettingsCompat;
 
     public class Replay
     {

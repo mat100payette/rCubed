@@ -32,7 +32,7 @@ package game.controls
         {
             this.options = options;
 
-            if (!this.options.settings.DISPLAY_JUDGE_ANIMATIONS)
+            if (!this.options.settings.displayJudgeAnimations)
                 indexes = Judge_Tweens.judge_indexes_static;
 
             speedScale = this.options.settings.judgeSpeed;
@@ -81,7 +81,7 @@ package game.controls
         public function showJudge(newScore:int, doFreeze:Boolean = false):void
         {
             // Hide Perfect/Amazing Judge
-            if (!options.isEditor && newScore >= 50 && !options.settings.DISPLAY_PERFECT)
+            if (!options.isEditor && newScore >= 50 && !options.settings.displayPerfect)
             {
                 return;
             }

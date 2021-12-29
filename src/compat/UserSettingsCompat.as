@@ -1,8 +1,7 @@
-package com.flashfla.utils.compat
+package compat
 {
 
     import classes.UserSettings;
-    import arc.ArcGlobals;
     import com.flashfla.utils.ArrayUtil;
     import com.flashfla.utils.VectorUtil;
 
@@ -39,22 +38,22 @@ package com.flashfla.utils.compat
                 settings.AUTO_JUDGE_OFFSET = newSettings.autoJudgeOffset;
 
             if (newSettings.viewHealth != null)
-                settings.DISPLAY_HEALTH = newSettings.viewHealth;
+                settings.displayHealth = newSettings.viewHealth;
 
             if (newSettings.viewCombo != null)
-                settings.DISPLAY_COMBO = newSettings.viewCombo;
+                settings.displayCombo = newSettings.viewCombo;
 
             if (newSettings.viewPACount != null)
-                settings.DISPLAY_PACOUNT = newSettings.viewPACount;
+                settings.displayPACount = newSettings.viewPACount;
 
             if (newSettings.viewAmazing != null)
-                settings.DISPLAY_AMAZING = newSettings.viewAmazing;
+                settings.displayAmazing = newSettings.viewAmazing;
 
             if (newSettings.viewTotal != null)
-                settings.DISPLAY_TOTAL = newSettings.viewTotal;
+                settings.displayTotal = newSettings.viewTotal;
 
             if (newSettings.viewScreencut != null)
-                settings.DISPLAY_SCREENCUT = newSettings.viewScreencut;
+                settings.displayScreencut = newSettings.viewScreencut;
 
             if (newSettings.keys != null)
             {

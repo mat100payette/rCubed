@@ -210,7 +210,7 @@ package game.controls
 
         public function receptorFeedback(dir:String, score:int):void
         {
-            if (!options.settings.DISPLAY_RECEPTOR_ANIMATIONS)
+            if (!options.settings.displayReceptorAnimations)
                 return;
 
             var f:int = 2;
