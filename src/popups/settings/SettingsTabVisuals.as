@@ -46,7 +46,7 @@ package popups.settings
 
         private function initSliderOption(textLocalStringName:String, value:Number):void
         {
-            var slider:BoxSlider = _sliderOptions[textLocalStringName];
+            const slider:BoxSlider = _sliderOptions[textLocalStringName];
             slider.slideValue = value;
         }
 
@@ -74,22 +74,25 @@ package popups.settings
             var xOff:int;
             var yOff:int;
 
-            var rowHeight:int = 25;
-            var textXOff:int = 23;
-            var checkXOff:int = 3;
-            var checkYOff:int = 3;
-            var sliderWidht:int = 100;
-            var sliderHeight:int = 10;
-            var sliderTextXOff:int = 128;
+            const SECTION_TITLE_FONT_SIZE:int = 14;
+            const ROW_HEIGHT:int = 25;
+            const SEPARATOR_WIDTH:int = 250;
+            const TEXT_X_OFF:int = 23;
+            const CHECK_X_OFF:int = 3;
+            const CHECK_Y_OFF:int = 3;
+            const SLIDER_WIDTH:int = 100;
+            const SLIDER_HEIGHT:int = 10;
+            const SLIDER_TEXT_X_OFF:int = 128;
+            const SLIDER_TEXT_Y_OFF:int = -2;
 
             /**
              * Adds a new checkbox option with a given initialization function and check callback.
              */
             function addCheckOption(textLocalStringName:String, initFunc:Function, checkCallback:Function):void
             {
-                new Text(container, xOff + textXOff, yOff, _lang.string(textLocalStringName));
-                var boxCheck:BoxCheck = new BoxCheck(container, xOff + checkXOff, yOff + checkYOff, checkCallback);
-                yOff += rowHeight;
+                new Text(container, xOff + TEXT_X_OFF, yOff, _lang.string(textLocalStringName));
+                const boxCheck:BoxCheck = new BoxCheck(container, xOff + CHECK_X_OFF, yOff + CHECK_Y_OFF, checkCallback);
+                yOff += ROW_HEIGHT;
                 _checkOptions[textLocalStringName] = boxCheck;
                 _checkOptionsInits[textLocalStringName] = initFunc;
             }
@@ -99,18 +102,18 @@ package popups.settings
              */
             function addSliderOption(textLocalStringName:String, minValue:Number, maxValue:Number, sliderInitFunc:Function, textInitFunc:Function, slideCallback:Function):void
             {
-                new Text(container, xOff + textXOff, yOff, _lang.string(textLocalStringName));
-                yOff += rowHeight;
+                new Text(container, xOff + TEXT_X_OFF, yOff, _lang.string(textLocalStringName));
+                yOff += ROW_HEIGHT;
 
-                var valueText:Text = new Text(container, xOff + sliderTextXOff, yOff - 2);
-                var slider:BoxSlider = new BoxSlider(container, xOff + textXOff, yOff, sliderWidht, sliderHeight, function(e:Event):void
+                const valueText:Text = new Text(container, xOff + SLIDER_TEXT_X_OFF, yOff + SLIDER_TEXT_Y_OFF);
+                const slider:BoxSlider = new BoxSlider(container, xOff + TEXT_X_OFF, yOff, SLIDER_WIDTH, SLIDER_HEIGHT, function(e:Event):void
                 {
                     slideCallback(e, valueText);
                 });
                 slider.minValue = minValue;
                 slider.maxValue = maxValue;
 
-                yOff += rowHeight;
+                yOff += ROW_HEIGHT;
 
                 _sliderOptions[textLocalStringName] = slider;
                 _sliderOptionsInits[textLocalStringName] = sliderInitFunc;
@@ -122,8 +125,8 @@ package popups.settings
 
             xOff = 15;
             yOff = 15;
-            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAMEPLAY_DISPLAY), 14);
-            yOff += rowHeight;
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAMEPLAY_DISPLAY), SECTION_TITLE_FONT_SIZE);
+            yOff += ROW_HEIGHT;
 
             addCheckOption(Lang.OPTIONS_GAME_TOP_BAR, initDisplayGameTopBar, onDisplayGameTopBarChanged);
             addCheckOption(Lang.OPTIONS_GAME_BOTTOM_BAR, initDisplayGameBottomBar, onDisplayGameBottomBarChanged);
@@ -137,10 +140,10 @@ package popups.settings
             addCheckOption(Lang.OPTIONS_ACCURACY_BAR, initDisplayAccuracyBar, onDisplayAccuracyBarChanged);
             addCheckOption(Lang.OPTIONS_SCREENCUT, initDisplayScreencut, onDisplayScreencutChanged);
 
-            yOff += drawSeperator(container, xOff, 250, yOff, 0, 1);
+            yOff += drawSeperator(container, xOff, SEPARATOR_WIDTH, yOff, 0, 1);
 
             addCheckOption(Lang.OPTIONS_AMAZING, initDisplayAmazing, onDisplayAmazingChanged);
-            addCheckOption(Lang.OPTIONS_PERFECT, initDisplayPerfefct, onDisplayPerfectChanged);
+            addCheckOption(Lang.OPTIONS_PERFECT, initDisplayPerfect, onDisplayPerfectChanged);
             addCheckOption(Lang.OPTIONS_RECEPTOR_ANIMATIONS, initDisplayReceptorAnimations, onDisplayReceptorAnimationsChanged);
             addCheckOption(Lang.OPTIONS_JUDGE_ANIMATIONS, initDisplayJudgeAnimations, onDisplayJudgeAnimationsChanged);
             addSliderOption(Lang.OPTIONS_JUDGE_SPEED, 0.25, 3, initJudgeAnimationSpeed, initJudgeAnimationSpeedText, onJudgeAnimationSpeedChanged);
@@ -149,23 +152,23 @@ package popups.settings
 
             xOff = 310;
             yOff = 15;
-            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAMEPLAY_MP_DISPLAY), 14);
-            yOff += rowHeight;
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAMEPLAY_MP_DISPLAY), SECTION_TITLE_FONT_SIZE);
+            yOff += ROW_HEIGHT;
 
             addCheckOption(Lang.OPTIONS_MP_UI, initDisplayMPUI, onDisplayMPUIChanged);
             addCheckOption(Lang.OPTIONS_MP_PA, initDisplayMPPA, onDisplayMPPAChanged);
             addCheckOption(Lang.OPTIONS_MP_JUDGE, initDisplayMPJudge, onDisplayMPJudgeChanged);
             addCheckOption(Lang.OPTIONS_MP_COMBO, initDisplayMPCombo, onDisplayMPComboChanged);
 
-            yOff += drawSeperator(container, xOff, 250, yOff, 6, 5);
-            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_PLAYLIST_DISPLAY), 14);
-            yOff += rowHeight;
+            yOff += drawSeperator(container, xOff, SEPARATOR_WIDTH, yOff, 6, 5);
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_PLAYLIST_DISPLAY), SECTION_TITLE_FONT_SIZE);
+            yOff += ROW_HEIGHT;
 
             addCheckOption(Lang.OPTIONS_GENRE_FLAG, initDisplayGenreFlag, onDisplayGenreFlagChanged);
             addCheckOption(Lang.OPTIONS_SONG_FLAG, initDisplaySongFlag, onDisplaySongFlagChanged);
             addCheckOption(Lang.OPTIONS_SONG_NOTE, initDisplaySongNote, onDisplaySongNoteChanged);
 
-            yOff += 30;
+            yOff += ROW_HEIGHT;
         }
 
         override public function setValues():void
@@ -318,7 +321,7 @@ package popups.settings
             checkOption(e);
         }
 
-        private function initDisplayPerfefct():void
+        private function initDisplayPerfect():void
         {
             initCheckOption(Lang.OPTIONS_PERFECT, _gvars.activeUser.settings.displayPerfect);
         }
