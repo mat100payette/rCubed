@@ -71,17 +71,20 @@ package popups.settings
             /**
              * Adds a new color option with a given reset callback.
              */
-            function addColorOption(localStringName:String, onColorChanged:Function, onReset:Function):void
+            function addColorOption(localStringName:String, onColorChanged:Function, onReset:Function, tightLayout:Boolean = false):void
             {
                 const label:Text = new Text(container, xOff, yOff, _lang.string(localStringName));
                 label.width = 115;
 
-                const textField:ValidatedText = new ValidatedText(container, xOff + 120, yOff, 70, 20, ValidatedText.R_COLOR, onColorChanged);
+                const textFieldXOff:int = tightLayout ? 100 : 120;
+                const textField:ValidatedText = new ValidatedText(container, xOff + textFieldXOff, yOff, 70, 20, ValidatedText.R_COLOR, onColorChanged);
                 textField.field.maxChars = 7;
 
-                const colorDisplay:ColorField = new ColorField(container, xOff + 195, yOff, 0, 45, 21, onColorChanged);
+                const colorDisplayXOff:int = tightLayout ? 175 : 195;
+                const colorDisplay:ColorField = new ColorField(container, xOff + colorDisplayXOff, yOff, 0, 45, 21, onColorChanged);
 
-                const resetButton:BoxButton = new BoxButton(container, xOff + 245, yOff, 20, 21, "R", 12, function(_:Event):void
+                const resetButtonXOff:int = tightLayout ? 225 : 245;
+                const resetButton:BoxButton = new BoxButton(container, xOff + resetButtonXOff, yOff, 20, 21, "R", 12, function(_:Event):void
                 {
                     onReset();
                 });
@@ -101,12 +104,12 @@ package popups.settings
                 const label:Text = new Text(container, xOff, yOff, _lang.string(localStringName));
                 label.width = 115;
 
-                const textField:ValidatedText = new ValidatedText(container, xOff + 120, yOff, 70, 20, ValidatedText.R_COLOR, onColorChanged);
+                const textField:ValidatedText = new ValidatedText(container, xOff + 100, yOff, 70, 20, ValidatedText.R_COLOR, onColorChanged);
                 textField.field.maxChars = 7;
 
-                const colorDisplay:ColorField = new ColorField(container, xOff + 195, yOff, 0, 45, 21, onColorChanged);
+                const colorDisplay:ColorField = new ColorField(container, xOff + 175, yOff, 0, 45, 21, onColorChanged);
 
-                const resetButton:BoxButton = new BoxButton(container, xOff + 245, yOff, 20, 21, "R", 12, function(_:Event):void
+                const resetButton:BoxButton = new BoxButton(container, xOff + 225, yOff, 20, 21, "R", 12, function(_:Event):void
                 {
                     onReset();
                 });
@@ -165,7 +168,7 @@ package popups.settings
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
-            addColorOption(Lang.OPTIONS_NORMAL_COMBO, onNormalComboColorChanged, onNormalComboColorReset);
+            addColorOption(Lang.OPTIONS_NORMAL_COMBO, onNormalComboColorChanged, onNormalComboColorReset, true);
             addSelectableColorOption(Lang.OPTIONS_FC_COMBO, onFCComboColorChanged, onFCComboColorReset, onFCComboColorEnabled);
             addSelectableColorOption(Lang.OPTIONS_AAA_COMBO, onAAAComboColorChanged, onAAAComboColorReset, onAAAComboColorEnabled);
             addSelectableColorOption(Lang.OPTIONS_SDG_COMBO, onSDGComboColorChanged, onSDGComboColorReset, onSDGComboColorEnabled);
@@ -456,7 +459,8 @@ package popups.settings
 
         public function onRawGoodsTrackerChanged(e:Event):void
         {
-            _settings.rawGoodTracker = (e.target as ValidatedText).validate(0, 0);
+            if (e.target is ValidatedText)
+                _settings.rawGoodTracker = (e.target as ValidatedText).validate(0, 0);
         }
     }
 }

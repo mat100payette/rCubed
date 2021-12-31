@@ -5,7 +5,6 @@ package classes.ui
     import classes.ui.ColorField;
     import classes.ui.BoxButton;
     import com.flashfla.utils.StringUtil;
-    import flash.events.Event;
 
     public class ColorOption
     {
