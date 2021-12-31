@@ -1,5 +1,6 @@
 package popups.settings
 {
+    import classes.UserSettings;
     import classes.ui.MouseTooltip;
     import classes.ui.ScrollPaneContent;
     import classes.ui.Text;
@@ -11,18 +12,20 @@ package popups.settings
 
     public class SettingsTabBase
     {
-        protected static var DEFAULT_OPTIONS:GameOptions = new GameOptions(null);
+        protected static const DEFAULT_OPTIONS:GameOptions = new GameOptions(null);
+        protected static const JUDGE_TITLES:Array = ["amazing", "perfect", "good", "average", "miss", "boo"];
+        protected static const RECEPTOR_ROTATIONS:Array = [1, 0, 2, -1];
 
-        protected var parent:SettingsWindow;
         public var container:ScrollPaneContent;
-        private var hover_message:MouseTooltip;
 
-        protected var judgeTitles:Array = ["amazing", "perfect", "good", "average", "miss", "boo"];
-        protected var receptorRotations:Array = [1, 0, 2, -1];
+        protected var _parent:SettingsWindow;
+        protected var _settings:UserSettings;
+        private var _hoverMessage:MouseTooltip;
 
-        public function SettingsTabBase(settingWindow:SettingsWindow):void
+        public function SettingsTabBase(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            this.parent = settingWindow;
+            _parent = settingsWindow;
+            _settings = settings;
         }
 
         public function get name():String
@@ -41,7 +44,7 @@ package popups.settings
 
             for (var index:int = container.numChildren - 1; index >= 0; index--)
             {
-                var olditem:DisplayObject = container.getChildAt(index);
+                const olditem:DisplayObject = container.getChildAt(index);
                 olditem.removeEventListener(MouseEvent.CLICK, clickHandler);
                 olditem.removeEventListener(Event.CHANGE, changeHandler);
             }
@@ -67,6 +70,7 @@ package popups.settings
             container.graphics.lineStyle(1, 0xFFFFFF, 0.35);
             container.graphics.moveTo(x, y + 10 + a);
             container.graphics.lineTo(x + w, y + 10 + a);
+
             return 20 + a + b;
         }
 
@@ -74,42 +78,40 @@ package popups.settings
         {
             for (var i:int = 0; i < container.numChildren; i++)
             {
-                var chd:* = container.getChildAt(i);
-                if (chd is Text)
-                {
-                    chd.width = maxWidth;
-                }
+                const child:DisplayObject = container.getChildAt(i);
+                if (child is Text)
+                    child.width = maxWidth;
             }
         }
 
         public function displayToolTip(tx:Number, ty:Number, text:String, align:String = "left"):void
         {
-            if (!hover_message)
-                hover_message = new MouseTooltip();
-            hover_message.message = text;
+            if (!_hoverMessage)
+                _hoverMessage = new MouseTooltip();
+            _hoverMessage.message = text;
 
-            var messagePoint:Point = parent.globalToLocal(parent.pane.content.localToGlobal(new Point(tx, ty)));
+            const messagePoint:Point = _parent.globalToLocal(_parent.pane.content.localToGlobal(new Point(tx, ty)));
 
             switch (align)
             {
                 default:
                 case "left":
-                    hover_message.x = messagePoint.x;
-                    hover_message.y = messagePoint.y;
+                    _hoverMessage.x = messagePoint.x;
+                    _hoverMessage.y = messagePoint.y;
                     break;
                 case "right":
-                    hover_message.x = messagePoint.x - hover_message.width;
-                    hover_message.y = messagePoint.y;
+                    _hoverMessage.x = messagePoint.x - _hoverMessage.width;
+                    _hoverMessage.y = messagePoint.y;
                     break;
             }
 
-            parent.addChild(hover_message);
+            _parent.addChild(_hoverMessage);
         }
 
         public function hideTooltip():void
         {
-            if (hover_message && parent.contains(hover_message))
-                parent.removeChild(hover_message);
+            if (_hoverMessage && _parent.contains(_hoverMessage))
+                _parent.removeChild(_hoverMessage);
         }
     }
 }

@@ -10,9 +10,6 @@ package classes.ui
 
     public class ColorField extends Sprite
     {
-
-        public var key_name:String;
-
         private var _color:int = 0x000000;
         private var _width:Number;
         private var _height:Number;
@@ -29,30 +26,30 @@ package classes.ui
             if (parent)
                 parent.addChild(this);
 
-            this.x = xpos;
-            this.y = ypos;
+            x = xpos;
+            y = ypos;
 
-            this._color = this._pickerColor = defaultColor;
-            this._width = dWidth;
-            this._height = dHeight;
+            _color = _pickerColor = defaultColor;
+            _width = dWidth;
+            _height = dHeight;
 
-            this.addEventListener(MouseEvent.CLICK, e_onClick);
+            addEventListener(MouseEvent.CLICK, e_onClick);
 
-            this.buttonMode = true;
-            this.useHandCursor = true;
+            buttonMode = true;
+            useHandCursor = true;
 
             draw();
 
             if (listener != null)
             {
-                this._listener = listener;
-                this.addEventListener(Event.CHANGE, listener);
+                _listener = listener;
+                addEventListener(Event.CHANGE, listener);
             }
         }
 
         private function e_onClick(e:MouseEvent):void
         {
-            if (!this.parent || !this.parent.contains(this))
+            if (!parent || !parent.contains(this))
                 return;
 
             if (_picker == null)
@@ -74,31 +71,35 @@ package classes.ui
                 _picker.graphics.endFill();
             }
 
-            if (this.parent.contains(_picker))
+            if (parent.contains(_picker))
                 removePicker();
             else
             {
                 _picker.addEventListener(MouseEvent.MOUSE_MOVE, e_pickerMove);
                 _picker.addEventListener(MouseEvent.MOUSE_OUT, e_pickerOut);
+
                 stage.addEventListener(MouseEvent.CLICK, e_pickerClick, true, 100);
-                var stagePoint:Point = this.localToGlobal(new Point(this.width + 5, 0));
+
+                const stagePoint:Point = localToGlobal(new Point(width + 5, 0));
                 stagePoint.x = Math.max(0, Math.min(stagePoint.x, Main.GAME_WIDTH - _picker.width - 5));
                 stagePoint.y = Math.max(0, Math.min(stagePoint.y, Main.GAME_HEIGHT - _picker.height - 5));
+
                 _picker.x = stagePoint.x;
                 _picker.y = stagePoint.y;
+
                 stage.addChild(_picker);
             }
         }
 
         private function draw():void
         {
-            this.graphics.clear();
-            this.graphics.lineStyle(0, 0, 0);
-            this.graphics.beginFill(_color);
-            this.graphics.drawRect(1, 1, _width - 1, _height - 1);
-            this.graphics.endFill();
-            this.graphics.lineStyle(1, 0xFFFFFF, 0.5);
-            this.graphics.drawRect(0, 0, _width, _height);
+            graphics.clear();
+            graphics.lineStyle(0, 0, 0);
+            graphics.beginFill(_color);
+            graphics.drawRect(1, 1, _width - 1, _height - 1);
+            graphics.endFill();
+            graphics.lineStyle(1, 0xFFFFFF, 0.5);
+            graphics.drawRect(0, 0, _width, _height);
         }
 
         public function get color():int
@@ -108,7 +109,7 @@ package classes.ui
 
         public function set color(newColor:int):void
         {
-            this._color = this._pickerColor = newColor;
+            _color = _pickerColor = newColor;
             draw();
         }
 
@@ -143,8 +144,8 @@ package classes.ui
 
         private function e_pickerMove(e:MouseEvent):void
         {
-            var newColor:uint = _bmp.bitmapData.getPixel(_bmp.mouseX, _bmp.mouseY);
-            var newColorS:String = newColor.toString(16);
+            const newColor:uint = _bmp.bitmapData.getPixel(_bmp.mouseX, _bmp.mouseY);
+            const newColorS:String = newColor.toString(16);
             _pickerColor = newColor;
             updateExampleColor();
         }
@@ -155,10 +156,9 @@ package classes.ui
             removePicker();
             if (e.target == _picker)
             {
-                this.color = this._pickerColor;
-                this.dispatchEvent(new Event(Event.CHANGE));
+                color = _pickerColor;
+                dispatchEvent(new Event(Event.CHANGE));
             }
         }
     }
-
 }

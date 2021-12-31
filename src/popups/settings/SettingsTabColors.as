@@ -3,29 +3,26 @@ package popups.settings
     import classes.Language;
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
-    import classes.ui.BoxText;
     import classes.ui.ColorField;
+    import classes.ui.ColorOption;
     import classes.ui.Text;
+    import classes.ui.SelectableColorOption;
     import classes.ui.ValidatedText;
+    import classes.UserSettings;
     import com.flashfla.utils.ColorUtil;
-    import com.flashfla.utils.StringUtil;
     import flash.events.Event;
     import flash.events.MouseEvent;
 
     public class SettingsTabColors extends SettingsTabBase
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
-        private var optionJudgeColors:Array;
-        private var optionComboColors:Array;
-        private var optionComboColorCheck:BoxCheck;
-        private var optionGameColors:Array;
-        private var optionRawGoodTracker:ValidatedText;
+        private var _colorOptions:Object = {};
+        private var _optionRawGoodTracker:ValidatedText;
 
-        public function SettingsTabColors(settingsWindow:SettingsWindow):void
+        public function SettingsTabColors(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            super(settingsWindow);
+            super(settingsWindow, settings);
         }
 
         override public function get name():String
@@ -33,8 +30,96 @@ package popups.settings
             return "colors";
         }
 
+        /**
+         * A common change handler for the checkbox options.
+         */
+        private function checkOption(e:MouseEvent):void
+        {
+            e.target.checked = !e.target.checked;
+        }
+
+        private function initColorOption(textLocalStringName:String, color:int):void
+        {
+            const option:ColorOption = _colorOptions[textLocalStringName] as ColorOption;
+            option.color = color;
+        }
+
+        private function initSelectableColorOption(textLocalStringName:String, color:int, checked:Boolean):void
+        {
+            const option:SelectableColorOption = _colorOptions[textLocalStringName] as SelectableColorOption;
+            option.color = color;
+            option.checked = checked;
+        }
+
+        private function changeColor(e:Event, option:ColorOption):int
+        {
+            var newColor:int;
+
+            if (e.target is ColorField)
+                newColor = (e.target as ColorField).color;
+            else if (e.target is ValidatedText)
+                newColor = (e.target as ValidatedText).validate(0, 0);
+            else
+                newColor = option.color;
+
+            option.color = newColor;
+            return newColor;
+        }
+
         override public function openTab():void
         {
+            /**
+             * Adds a new color option with a given reset callback.
+             */
+            function addColorOption(localStringName:String, onColorChanged:Function, onReset:Function):void
+            {
+                const label:Text = new Text(container, xOff, yOff, _lang.string(localStringName));
+                label.width = 115;
+
+                const textField:ValidatedText = new ValidatedText(container, xOff + 120, yOff, 70, 20, ValidatedText.R_COLOR, onColorChanged);
+                textField.field.maxChars = 7;
+
+                const colorDisplay:ColorField = new ColorField(container, xOff + 195, yOff, 0, 45, 21, onColorChanged);
+
+                const resetButton:BoxButton = new BoxButton(container, xOff + 245, yOff, 20, 21, "R", 12, function(_:Event):void
+                {
+                    onReset();
+                });
+                resetButton.color = 0xff0000;
+
+                _colorOptions[localStringName] = new ColorOption(textField, colorDisplay, resetButton);
+
+                yOff += 20;
+                yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
+            }
+
+            /**
+             * Adds a new selectable color option with given reset and enabled callbacks.
+             */
+            function addSelectableColorOption(localStringName:String, onColorChanged:Function, onReset:Function, onEnabledChange:Function):void
+            {
+                const label:Text = new Text(container, xOff, yOff, _lang.string(localStringName));
+                label.width = 115;
+
+                const textField:ValidatedText = new ValidatedText(container, xOff + 120, yOff, 70, 20, ValidatedText.R_COLOR, onColorChanged);
+                textField.field.maxChars = 7;
+
+                const colorDisplay:ColorField = new ColorField(container, xOff + 195, yOff, 0, 45, 21, onColorChanged);
+
+                const resetButton:BoxButton = new BoxButton(container, xOff + 245, yOff, 20, 21, "R", 12, function(_:Event):void
+                {
+                    onReset();
+                });
+                resetButton.color = 0xff0000;
+
+                const checkBox:BoxCheck = new BoxCheck(container, xOff + 250, yOff + 3, onEnabledChange);
+
+                _colorOptions[localStringName] = new SelectableColorOption(textField, colorDisplay, resetButton, checkBox);
+
+                yOff += 20;
+                yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
+            }
+
             container.graphics.lineStyle(1, 0xFFFFFF, 0.35);
             container.graphics.moveTo(295, 15);
             container.graphics.lineTo(295, 405);
@@ -44,242 +129,334 @@ package popups.settings
             var yOff:int = 15;
 
             /// Col 1
-            var gameJudgeColorTitle:Text = new Text(container, xOff, yOff, _lang.string("options_judge_colors_title"), 14);
+            const gameJudgeColorTitle:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_JUDGE_COLORS_DISPLAY), 14);
             gameJudgeColorTitle.width = 265;
             gameJudgeColorTitle.align = Text.CENTER;
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
-            optionJudgeColors = [];
-            for (i = 0; i < judgeTitles.length; i++)
-            {
-                var gameJudgeColor:Text = new Text(container, xOff, yOff, _lang.string("game_" + judgeTitles[i]));
-                gameJudgeColor.width = 115;
-
-                var optionJudgeColor:ValidatedText = new ValidatedText(container, xOff + 120, yOff, 70, 20, ValidatedText.R_COLOR, changeHandler);
-                optionJudgeColor.judge_color_id = i;
-                optionJudgeColor.field.maxChars = 7;
-
-                var gameJudgeColorDisplay:ColorField = new ColorField(container, xOff + 195, yOff, 0, 45, 21, changeHandler);
-                gameJudgeColorDisplay.key_name = "optionJudgeColor";
-
-                var optionJudgeColorReset:BoxButton = new BoxButton(container, xOff + 245, yOff, 20, 21, "R", 12, clickHandler);
-                optionJudgeColorReset.judge_color_reset_id = i;
-                optionJudgeColorReset.color = 0xff0000;
-                optionJudgeColors.push({"text": optionJudgeColor, "display": gameJudgeColorDisplay, "reset": optionJudgeColorReset});
-
-                yOff += 20;
-                yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
-            }
+            addColorOption(Lang.OPTIONS_GAME_AMAZING, onAmazingJudgeColorChanged, onAmazingJudgeColorReset);
+            addColorOption(Lang.OPTIONS_GAME_PERFECT, onPerfectJudgeColorChanged, onPerfectJudgeColorReset);
+            addColorOption(Lang.OPTIONS_GAME_GOOD, onGoodJudgeColorChanged, onGoodJudgeColorReset);
+            addColorOption(Lang.OPTIONS_GAME_AVERAGE, onAverageJudgeColorChanged, onAverageJudgeColorReset);
+            addColorOption(Lang.OPTIONS_GAME_MISS, onMissJudgeColorChanged, onMissJudgeColorReset);
+            addColorOption(Lang.OPTIONS_GAME_BOO, onBooJudgeColorChanged, onBooJudgeColorReset);
 
             yOff += 8;
 
-            var gameGameColorTitle:Text = new Text(container, xOff, yOff, _lang.string("options_game_colors_title"), 14);
-            gameGameColorTitle.width = 265;
-            gameGameColorTitle.align = Text.CENTER;
+            const gameColorTitle:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAME_COLORS_TITLE), 14);
+            gameColorTitle.width = 265;
+            gameColorTitle.align = Text.CENTER;
+
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
-            optionGameColors = [];
-            for (i = 0; i < DEFAULT_OPTIONS.settings.gameColors.length; i++)
-            {
-                if (i == 2 || i == 3)
-                {
-                    optionGameColors.push(null);
-                    continue;
-                }
-
-                var gameGameColor:Text = new Text(container, xOff, yOff, _lang.string("options_game_colors_" + i));
-                gameGameColor.width = 115;
-
-                var optionGameColor:ValidatedText = new ValidatedText(container, xOff + 120, yOff, 70, 20, ValidatedText.R_COLOR, changeHandler);
-                optionGameColor.game_color_id = i;
-                optionGameColor.field.maxChars = 7;
-
-                var gameGameColorDisplay:ColorField = new ColorField(container, xOff + 195, yOff, 0, 45, 21, changeHandler);
-                gameGameColorDisplay.key_name = "gameGameColorDisplay";
-
-                var optionGameColorReset:BoxButton = new BoxButton(container, xOff + 245, yOff, 20, 21, "R", 12, clickHandler);
-                optionGameColorReset.game_color_reset_id = i;
-                optionGameColorReset.color = 0xff0000;
-                optionGameColors.push({"text": optionGameColor, "display": gameGameColorDisplay, "reset": optionGameColorReset});
-
-                yOff += 20;
-                yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
-            }
+            addColorOption(Lang.OPTIONS_GAME_COLOR_1, onGameAColorChanged, onGameAColorReset);
+            addColorOption(Lang.OPTIONS_GAME_COLOR_2, onGameBColorChanged, onGameBColorReset);
+            addColorOption(Lang.OPTIONS_GAME_COLOR_3, onGameCColorChanged, onGameCColorReset);
 
             /// Col 2
             xOff = 310;
             yOff = 15;
 
-            var gameComboColorTitle:Text = new Text(container, xOff, yOff, _lang.string("options_combo_colors_title"), 14);
+            const gameComboColorTitle:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_COMBO_COLORS_TITLE), 14);
             gameComboColorTitle.width = 265;
             gameComboColorTitle.align = Text.CENTER;
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
-            optionComboColors = [];
-            for (i = 0; i < DEFAULT_OPTIONS.settings.comboColors.length; i++)
-            {
-                var gameComboColor:Text = new Text(container, xOff, yOff, _lang.string("options_combo_colors_" + i));
-                gameComboColor.width = 95;
+            addColorOption(Lang.OPTIONS_NORMAL_COMBO, onNormalComboColorChanged, onNormalComboColorReset);
+            addSelectableColorOption(Lang.OPTIONS_FC_COMBO, onFCComboColorChanged, onFCComboColorReset, onFCComboColorEnabled);
+            addSelectableColorOption(Lang.OPTIONS_AAA_COMBO, onAAAComboColorChanged, onAAAComboColorReset, onAAAComboColorEnabled);
+            addSelectableColorOption(Lang.OPTIONS_SDG_COMBO, onSDGComboColorChanged, onSDGComboColorReset, onSDGComboColorEnabled);
+            addSelectableColorOption(Lang.OPTIONS_BLACKFLAG_COMBO, onBlackflagComboColorChanged, onBlackflagComboColorReset, onBlackflagComboColorEnabled);
+            addSelectableColorOption(Lang.OPTIONS_AVFLAG_COMBO, onAvflagComboColorChanged, onAvflagComboColorReset, onAvflagComboColorEnabled);
+            addSelectableColorOption(Lang.OPTIONS_BOOFLAG_COMBO, onBooflagComboColorChanged, onBooflagComboColorReset, onBooflagComboColorEnabled);
+            addSelectableColorOption(Lang.OPTIONS_MISSFLAG_COMBO, onMissflagComboColorChanged, onMissflagComboColorReset, onMissflagComboColorEnabled);
 
-                var optionComboColor:ValidatedText = new ValidatedText(container, xOff + 100, yOff, 70, 20, ValidatedText.R_COLOR, changeHandler);
-                optionComboColor.combo_color_id = i;
-                optionComboColor.field.maxChars = 7;
-
-                var gameComboColorDisplay:ColorField = new ColorField(container, xOff + 175, yOff, 0, 45, 21, changeHandler);
-                gameComboColorDisplay.key_name = "gameComboColorDisplay";
-
-                var optionComboColorReset:BoxButton = new BoxButton(container, xOff + 225, yOff, 20, 21, "R", 12, clickHandler);
-                optionComboColorReset.combo_color_reset_id = i;
-                optionComboColorReset.color = 0xff0000;
-
-                if (i > 0)
-                {
-                    optionComboColorCheck = new BoxCheck(container, xOff + 250, yOff + 3, clickHandler);
-                    optionComboColorCheck.combo_color_enable_id = i;
-                }
-
-                optionComboColors.push({"text": optionComboColor, "display": gameComboColorDisplay, "reset": optionComboColorReset, "enable": optionComboColorCheck});
-
-                yOff += 20;
-                yOff += drawSeperator(container, xOff, 265, yOff, -3, -4);
-            }
-
-            var gameRawGoodTracker:Text = new Text(container, xOff, yOff, _lang.string("options_raw_goods_tracker"));
+            const gameRawGoodTracker:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_RAWGOODS_TRACKER));
             gameRawGoodTracker.width = 144;
-            optionRawGoodTracker = new ValidatedText(container, xOff + 149, yOff, 70, 20, ValidatedText.R_FLOAT_P, changeHandler);
+            _optionRawGoodTracker = new ValidatedText(container, xOff + 149, yOff, 70, 20, ValidatedText.R_FLOAT_P, onRawGoodsTrackerChanged);
         }
 
         override public function setValues():void
         {
-            var i:int;
+            initColorOption(Lang.OPTIONS_GAME_AMAZING, _settings.judgeColors[0]);
+            initColorOption(Lang.OPTIONS_GAME_PERFECT, _settings.judgeColors[1]);
+            initColorOption(Lang.OPTIONS_GAME_GOOD, _settings.judgeColors[2]);
+            initColorOption(Lang.OPTIONS_GAME_AVERAGE, _settings.judgeColors[3]);
+            initColorOption(Lang.OPTIONS_GAME_MISS, _settings.judgeColors[4]);
+            initColorOption(Lang.OPTIONS_GAME_BOO, _settings.judgeColors[5]);
 
-            // Set Judge Colors
-            for (i = 0; i < judgeTitles.length; i++)
-            {
-                optionJudgeColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.settings.judgeColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                optionJudgeColors[i]["display"].color = _gvars.activeUser.settings.judgeColors[i];
-            }
-            // Set Combo Colors
-            for (i = 0; i < DEFAULT_OPTIONS.settings.comboColors.length; i++)
-            {
-                optionComboColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.settings.comboColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                optionComboColors[i]["display"].color = _gvars.activeUser.settings.comboColors[i];
-                if (i > 0)
-                {
-                    optionComboColors[i]["enable"].checked = (_gvars.activeUser.settings.enableComboColors[i]);
-                }
-            }
+            initColorOption(Lang.OPTIONS_GAME_COLOR_1, _settings.gameColors[0]);
+            initColorOption(Lang.OPTIONS_GAME_COLOR_2, _settings.gameColors[1]);
+            initColorOption(Lang.OPTIONS_GAME_COLOR_3, _settings.gameColors[4]);
 
-            // Set Raw Good Tracker
-            optionRawGoodTracker.text = _gvars.activeUser.settings.rawGoodTracker.toString();
+            initColorOption(Lang.OPTIONS_NORMAL_COMBO, _settings.comboColors[0]);
+            initSelectableColorOption(Lang.OPTIONS_FC_COMBO, _settings.comboColors[1], _settings.enableComboColors[1]);
+            initSelectableColorOption(Lang.OPTIONS_AAA_COMBO, _settings.comboColors[2], _settings.enableComboColors[2]);
+            initSelectableColorOption(Lang.OPTIONS_SDG_COMBO, _settings.comboColors[3], _settings.enableComboColors[3]);
+            initSelectableColorOption(Lang.OPTIONS_BLACKFLAG_COMBO, _settings.comboColors[4], _settings.enableComboColors[4]);
+            initSelectableColorOption(Lang.OPTIONS_AVFLAG_COMBO, _settings.comboColors[5], _settings.enableComboColors[5]);
+            initSelectableColorOption(Lang.OPTIONS_BOOFLAG_COMBO, _settings.comboColors[6], _settings.enableComboColors[6]);
+            initSelectableColorOption(Lang.OPTIONS_MISSFLAG_COMBO, _settings.comboColors[7], _settings.enableComboColors[7]);
 
-            // Set Game Colors
-            for (i = 0; i < DEFAULT_OPTIONS.settings.gameColors.length; i++)
-            {
-                if (i == 2 || i == 3)
-                    continue;
-
-                optionGameColors[i]["text"].text = "#" + StringUtil.pad(_gvars.activeUser.settings.gameColors[i].toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                optionGameColors[i]["display"].color = _gvars.activeUser.settings.gameColors[i];
-            }
+            _optionRawGoodTracker.text = _settings.rawGoodTracker.toString();
         }
 
-        override public function clickHandler(e:MouseEvent):void
+        private function onAmazingJudgeColorChanged(e:Event):void
         {
-            // Judge Color Reset
-            if (e.target.hasOwnProperty("judge_color_reset_id"))
-            {
-                _gvars.activeUser.settings.judgeColors[e.target.judge_color_reset_id] = DEFAULT_OPTIONS.settings.judgeColors[e.target.judge_color_reset_id];
-                setValues();
-            }
-
-            // Combo Color Reset
-            else if (e.target.hasOwnProperty("combo_color_reset_id"))
-            {
-                _gvars.activeUser.settings.comboColors[e.target.combo_color_reset_id] = DEFAULT_OPTIONS.settings.comboColors[e.target.combo_color_reset_id];
-                setValues();
-            }
-
-            // Combo Color Enable/Disable
-            else if (e.target.hasOwnProperty("combo_color_enable_id"))
-            {
-                _gvars.activeUser.settings.enableComboColors[e.target.combo_color_enable_id] = !_gvars.activeUser.settings.enableComboColors[e.target.combo_color_enable_id];
-                e.target.checked = !e.target.checked;
-            }
-
-            // Game Background Color Reset
-            else if (e.target.hasOwnProperty("game_color_reset_id"))
-            {
-                var gid:int = e.target.game_color_reset_id;
-                _gvars.activeUser.settings.gameColors[gid] = DEFAULT_OPTIONS.settings.gameColors[gid];
-
-                if (gid == 0)
-                    _gvars.activeUser.settings.gameColors[2] = ColorUtil.darkenColor(DEFAULT_OPTIONS.settings.gameColors[gid], 0.27);
-                if (gid == 1)
-                    _gvars.activeUser.settings.gameColors[3] = ColorUtil.brightenColor(DEFAULT_OPTIONS.settings.gameColors[gid], 0.08);
-
-                setValues();
-            }
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_AMAZING]);
+            _settings.judgeColors[0] = newColor;
         }
 
-        override public function changeHandler(e:Event):void
+        private function onAmazingJudgeColorReset():void
         {
-            if (e.target == optionRawGoodTracker)
-            {
-                _gvars.activeUser.settings.rawGoodTracker = optionRawGoodTracker.validate(0, 0);
-            }
-            else if (e.target.hasOwnProperty("judge_color_id"))
-            {
-                var jid:int = e.target.judge_color_id;
-                _gvars.activeUser.settings.judgeColors[jid] = e.target.validate(0, 0);
-                optionJudgeColors[jid]["display"].color = _gvars.activeUser.settings.judgeColors[jid];
-            }
-            else if (e.target.hasOwnProperty("combo_color_id"))
-            {
-                var cid:int = e.target.combo_color_id;
-                _gvars.activeUser.settings.comboColors[cid] = e.target.validate(0, 0);
-                optionComboColors[cid]["display"].color = _gvars.activeUser.settings.comboColors[cid];
-            }
-            else if (e.target.hasOwnProperty("game_color_id"))
-            {
-                var gid:int = e.target.game_color_id;
-                var newColorG:Number = e.target.validate(0, 0);
-                _gvars.activeUser.settings.gameColors[gid] = newColorG;
+            _settings.judgeColors[0] = DEFAULT_OPTIONS.settings.judgeColors[0];
+            setValues();
+        }
 
-                if (gid == 0)
-                    _gvars.activeUser.settings.gameColors[2] = ColorUtil.darkenColor(newColorG, 0.27);
-                if (gid == 1)
-                    _gvars.activeUser.settings.gameColors[3] = ColorUtil.brightenColor(newColorG, 0.08);
+        private function onPerfectJudgeColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_PERFECT]);
+            _settings.judgeColors[1] = newColor;
+        }
 
-                optionGameColors[gid]["display"].color = _gvars.activeUser.settings.gameColors[gid];
-            }
-            else if (e.target is ColorField)
-            {
-                var sourceArray:Array;
-                switch (e.target.key_name)
-                {
-                    case "optionJudgeColor":
-                        sourceArray = optionJudgeColors;
-                        break;
-                    case "gameComboColorDisplay":
-                        sourceArray = optionComboColors;
-                        break;
-                    case "gameGameColorDisplay":
-                        sourceArray = optionGameColors;
-                        break;
-                }
-                for each (var item:Object in sourceArray)
-                {
-                    if (item != null && item.display == e.target)
-                    {
-                        (item.text as BoxText).text = "#" + StringUtil.pad((e.target as ColorField).color.toString(16).substr(0, 6), 6, "0", StringUtil.STR_PAD_LEFT);
-                        (item.text as BoxText).dispatchEvent(new Event(Event.CHANGE));
-                    }
-                }
-            }
+        private function onPerfectJudgeColorReset():void
+        {
+            _settings.judgeColors[1] = DEFAULT_OPTIONS.settings.judgeColors[1];
+            setValues();
+        }
+
+        private function onGoodJudgeColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_GOOD]);
+            _settings.judgeColors[2] = newColor;
+        }
+
+        private function onGoodJudgeColorReset():void
+        {
+            _settings.judgeColors[2] = DEFAULT_OPTIONS.settings.judgeColors[2];
+            setValues();
+        }
+
+        private function onAverageJudgeColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_AVERAGE]);
+            _settings.judgeColors[3] = newColor;
+        }
+
+        private function onAverageJudgeColorReset():void
+        {
+            _settings.judgeColors[3] = DEFAULT_OPTIONS.settings.judgeColors[3];
+            setValues();
+        }
+
+        private function onMissJudgeColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_MISS]);
+            _settings.judgeColors[4] = newColor;
+        }
+
+        private function onMissJudgeColorReset():void
+        {
+            _settings.judgeColors[4] = DEFAULT_OPTIONS.settings.judgeColors[4];
+            setValues();
+        }
+
+        private function onBooJudgeColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_BOO]);
+            _settings.judgeColors[5] = newColor;
+        }
+
+        private function onBooJudgeColorReset():void
+        {
+            _settings.judgeColors[5] = DEFAULT_OPTIONS.settings.judgeColors[5];
+            setValues();
+        }
+
+        private function onGameAColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_COLOR_1]);
+            _settings.gameColors[0] = newColor;
+            _settings.gameColors[2] = ColorUtil.darkenColor(newColor, 0.27);
+        }
+
+        private function onGameAColorReset():void
+        {
+            _settings.gameColors[0] = DEFAULT_OPTIONS.settings.gameColors[0];
+            _settings.gameColors[2] = ColorUtil.darkenColor(DEFAULT_OPTIONS.settings.gameColors[0], 0.27);
+            setValues();
+        }
+
+        private function onGameBColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_COLOR_2]);
+            _settings.gameColors[1] = newColor;
+            _settings.gameColors[3] = ColorUtil.darkenColor(newColor, 0.08);
+        }
+
+        private function onGameBColorReset():void
+        {
+            _settings.gameColors[0] = DEFAULT_OPTIONS.settings.gameColors[0];
+            _settings.gameColors[3] = ColorUtil.brightenColor(DEFAULT_OPTIONS.settings.gameColors[1], 0.08);
+            setValues();
+        }
+
+        private function onGameCColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_GAME_COLOR_3]);
+            _settings.gameColors[4] = newColor;
+        }
+
+        private function onGameCColorReset():void
+        {
+            _settings.gameColors[4] = DEFAULT_OPTIONS.settings.gameColors[4];
+            setValues();
+        }
+
+        private function onNormalComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_NORMAL_COMBO]);
+            _settings.comboColors[0] = newColor;
+        }
+
+        private function onNormalComboColorReset():void
+        {
+            _settings.comboColors[0] = DEFAULT_OPTIONS.settings.comboColors[0];
+            setValues();
+        }
+
+        private function onFCComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_FC_COMBO]);
+            _settings.comboColors[1] = newColor;
+        }
+
+        private function onFCComboColorReset():void
+        {
+            _settings.comboColors[1] = DEFAULT_OPTIONS.settings.comboColors[1];
+            setValues();
+        }
+
+        private function onFCComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[1] = !_settings.enableComboColors[1];
+            checkOption(e);
+        }
+
+        private function onAAAComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_AAA_COMBO]);
+            _settings.comboColors[2] = newColor;
+        }
+
+        private function onAAAComboColorReset():void
+        {
+            _settings.comboColors[2] = DEFAULT_OPTIONS.settings.comboColors[2];
+            setValues();
+        }
+
+        private function onAAAComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[2] = !_settings.enableComboColors[2];
+            checkOption(e);
+        }
+
+        private function onSDGComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_SDG_COMBO]);
+            _settings.comboColors[3] = newColor;
+        }
+
+        private function onSDGComboColorReset():void
+        {
+            _settings.comboColors[3] = DEFAULT_OPTIONS.settings.comboColors[2];
+            setValues();
+        }
+
+        private function onSDGComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[2] = !_settings.enableComboColors[2];
+            checkOption(e);
+        }
+
+        private function onBlackflagComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_BLACKFLAG_COMBO]);
+            _settings.comboColors[4] = newColor;
+        }
+
+        private function onBlackflagComboColorReset():void
+        {
+            _settings.comboColors[4] = DEFAULT_OPTIONS.settings.comboColors[4];
+            setValues();
+        }
+
+        private function onBlackflagComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[4] = !_settings.enableComboColors[4];
+            checkOption(e);
+        }
+
+        private function onAvflagComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_AVFLAG_COMBO]);
+            _settings.comboColors[5] = newColor;
+        }
+
+        private function onAvflagComboColorReset():void
+        {
+            _settings.comboColors[5] = DEFAULT_OPTIONS.settings.comboColors[5];
+            setValues();
+        }
+
+        private function onAvflagComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[5] = !_settings.enableComboColors[5];
+            checkOption(e);
+        }
+
+        private function onBooflagComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_BOOFLAG_COMBO]);
+            _settings.comboColors[6] = newColor;
+        }
+
+        private function onBooflagComboColorReset():void
+        {
+            _settings.comboColors[6] = DEFAULT_OPTIONS.settings.comboColors[6];
+            setValues();
+        }
+
+        private function onBooflagComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[6] = !_settings.enableComboColors[6];
+            checkOption(e);
+        }
+
+        private function onMissflagComboColorChanged(e:Event):void
+        {
+            const newColor:int = changeColor(e, _colorOptions[Lang.OPTIONS_MISSFLAG_COMBO]);
+            _settings.comboColors[4] = newColor;
+        }
+
+        private function onMissflagComboColorReset():void
+        {
+            _settings.comboColors[7] = DEFAULT_OPTIONS.settings.comboColors[7];
+            setValues();
+        }
+
+        private function onMissflagComboColorEnabled(e:MouseEvent):void
+        {
+            _settings.enableComboColors[7] = !_settings.enableComboColors[7];
+            checkOption(e);
+        }
+
+        public function onRawGoodsTrackerChanged(e:Event):void
+        {
+            _settings.rawGoodTracker = (e.target as ValidatedText).validate(0, 0);
         }
     }
 }

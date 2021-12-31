@@ -1,6 +1,7 @@
 package popups.settings
 {
     import classes.Language;
+    import classes.UserSettings;
     import classes.ui.BoxCheck;
     import classes.ui.Text;
     import com.flashfla.utils.ArrayUtil;
@@ -14,9 +15,9 @@ package popups.settings
         private var optionGameMods:Array;
         private var optionVisualGameMods:Array;
 
-        public function SettingsTabModifiers(settingsWindow:SettingsWindow):void
+        public function SettingsTabModifiers(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            super(settingsWindow);
+            super(settingsWindow, settings);
         }
 
         override public function get name():String
@@ -93,13 +94,13 @@ package popups.settings
             // Set Game Mods
             for each (item in optionGameMods)
             {
-                item.checked = (_gvars.activeUser.settings.activeMods.indexOf(item.mod) != -1);
+                item.checked = (_settings.activeMods.indexOf(item.mod) != -1);
             }
 
             // Set Visual Game Mods
             for each (item in optionVisualGameMods)
             {
-                item.checked = (_gvars.activeUser.settings.activeVisualMods.indexOf(item.visual_mod) != -1);
+                item.checked = (_settings.activeVisualMods.indexOf(item.visual_mod) != -1);
             }
         }
 
@@ -110,13 +111,13 @@ package popups.settings
             {
                 e.target.checked = !e.target.checked;
                 var visual_mod:String = e.target.visual_mod;
-                if (_gvars.activeUser.settings.activeVisualMods.indexOf(visual_mod) != -1)
+                if (_settings.activeVisualMods.indexOf(visual_mod) != -1)
                 {
-                    ArrayUtil.removeValue(visual_mod, _gvars.activeUser.settings.activeVisualMods);
+                    ArrayUtil.removeValue(visual_mod, _settings.activeVisualMods);
                 }
                 else
                 {
-                    _gvars.activeUser.settings.activeVisualMods.push(visual_mod);
+                    _settings.activeVisualMods.push(visual_mod);
                 }
             }
 
@@ -125,19 +126,19 @@ package popups.settings
             {
                 e.target.checked = !e.target.checked;
                 var mod:String = e.target.mod;
-                if (_gvars.activeUser.settings.activeMods.indexOf(mod) != -1)
+                if (_settings.activeMods.indexOf(mod) != -1)
                 {
-                    ArrayUtil.removeValue(mod, _gvars.activeUser.settings.activeMods);
+                    ArrayUtil.removeValue(mod, _settings.activeMods);
                 }
                 else
                 {
-                    _gvars.activeUser.settings.activeMods.push(mod);
+                    _settings.activeMods.push(mod);
                 }
                 if (mod == "reverse")
                     _gvars.removeSongFiles();
             }
 
-            parent.checkValidMods();
+            _parent.checkValidMods();
         }
     }
 }

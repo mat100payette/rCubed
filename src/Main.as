@@ -641,7 +641,7 @@ package
                     switch (_panel)
                     {
                         case POPUP_OPTIONS:
-                            current_popup = new SettingsWindow(this);
+                            current_popup = new SettingsWindow(this, _gvars.activeUser);
                             break;
                         case POPUP_HELP:
                             current_popup = new PopupHelp(this);

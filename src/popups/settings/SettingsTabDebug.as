@@ -1,12 +1,14 @@
 package popups.settings
 {
 
+    import classes.UserSettings;
+
     public class SettingsTabDebug extends SettingsTabBase
     {
 
-        public function SettingsTabDebug(settingsWindow:SettingsWindow):void
+        public function SettingsTabDebug(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            super(settingsWindow);
+            super(settingsWindow, settings);
         }
 
         override public function get name():String

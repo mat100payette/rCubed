@@ -4,7 +4,7 @@ package popups.settings
     import classes.Alert;
     import classes.Language;
     import classes.Noteskins;
-    import classes.NoteskinsStruct;
+    import classes.UserSettings;
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
     import classes.ui.BoxIcon;
@@ -43,9 +43,9 @@ package popups.settings
 
         private var lastNoteskin:int;
 
-        public function SettingsTabNoteskin(settingsWindow:SettingsWindow):void
+        public function SettingsTabNoteskin(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            super(settingsWindow);
+            super(settingsWindow, settings);
 
             lastNoteskin = _gvars.activeUser.settings.activeNoteskin;
 
@@ -268,7 +268,7 @@ package popups.settings
             //- Import Custom Noteskin
             else if (e.target == optionImportCustomNoteskin)
             {
-                new Prompt(parent, 320, _lang.string("popup_noteskin_import_json"), 100, _lang.string("popup_noteskin_import"), e_importNoteskin);
+                new Prompt(_parent, 320, _lang.string("popup_noteskin_import_json"), 100, _lang.string("popup_noteskin_import"), e_importNoteskin);
                 return;
             }
 
@@ -385,7 +385,7 @@ package popups.settings
             }
 
             _noteskins.loadCustomNoteskin();
-            parent.addEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
+            _parent.addEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
         }
 
 
@@ -404,7 +404,7 @@ package popups.settings
 
                 Alert.add(_lang.string("popup_noteskin_saved"), 90, Alert.GREEN);
 
-                parent.addEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
+                _parent.addEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
             }
             catch (e:Error)
             {
@@ -418,8 +418,8 @@ package popups.settings
             {
                 if (_noteskins.data[0]["notes"]["blue"] != null)
                 {
-                    parent.removeEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
-                    if (parent != null && parent.stage != null)
+                    _parent.removeEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
+                    if (_parent != null && _parent.stage != null)
                     {
                         updateNoteImages();
                     }

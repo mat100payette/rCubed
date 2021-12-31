@@ -6,6 +6,7 @@ package popups.settings
     import classes.ui.Text;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import classes.UserSettings;
 
     public class SettingsTabVisuals extends SettingsTabBase
     {
@@ -13,16 +14,12 @@ package popups.settings
         private var _lang:Language = Language.instance;
 
         private var _checkOptions:Object = {};
-        private var _checkOptionsInits:Object = {};
-
         private var _sliderOptions:Object = {};
-        private var _sliderOptionsInits:Object = {};
         private var _sliderTexts:Object = {};
-        private var _sliderTextsInits:Object = {};
 
-        public function SettingsTabVisuals(settingsWindow:SettingsWindow):void
+        public function SettingsTabVisuals(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            super(settingsWindow);
+            super(settingsWindow, settings);
         }
 
         override public function get name():String
@@ -41,7 +38,7 @@ package popups.settings
         private function checkOption(e:MouseEvent):void
         {
             e.target.checked = !e.target.checked;
-            parent.checkValidMods();
+            _parent.checkValidMods();
         }
 
         private function initSliderOption(textLocalStringName:String, value:Number):void
@@ -61,19 +58,11 @@ package popups.settings
         private function slideOption(valueText:Text, text:String):void
         {
             valueText.text = text;
-            parent.checkValidMods();
+            _parent.checkValidMods();
         }
 
         override public function openTab():void
         {
-            container.graphics.lineStyle(1, 0xFFFFFF, 0.35);
-            container.graphics.moveTo(295, 15);
-            container.graphics.lineTo(295, 405);
-
-            var i:int;
-            var xOff:int;
-            var yOff:int;
-
             const SECTION_TITLE_FONT_SIZE:int = 14;
             const ROW_HEIGHT:int = 25;
             const SEPARATOR_WIDTH:int = 250;
@@ -86,21 +75,20 @@ package popups.settings
             const SLIDER_TEXT_Y_OFF:int = -2;
 
             /**
-             * Adds a new checkbox option with a given initialization function and check callback.
+             * Adds a new checkbox option with a given check callback.
              */
-            function addCheckOption(textLocalStringName:String, initFunc:Function, checkCallback:Function):void
+            function addCheckOption(textLocalStringName:String, checkCallback:Function):void
             {
                 new Text(container, xOff + TEXT_X_OFF, yOff, _lang.string(textLocalStringName));
                 const boxCheck:BoxCheck = new BoxCheck(container, xOff + CHECK_X_OFF, yOff + CHECK_Y_OFF, checkCallback);
                 yOff += ROW_HEIGHT;
                 _checkOptions[textLocalStringName] = boxCheck;
-                _checkOptionsInits[textLocalStringName] = initFunc;
             }
 
             /**
-             * Adds a new slider option and value text (both with a given initialization function) with a slide callback.
+             * Adds a new slider option and value text with a slide callback.
              */
-            function addSliderOption(textLocalStringName:String, minValue:Number, maxValue:Number, sliderInitFunc:Function, textInitFunc:Function, slideCallback:Function):void
+            function addSliderOption(textLocalStringName:String, minValue:Number, maxValue:Number, slideCallback:Function):void
             {
                 new Text(container, xOff + TEXT_X_OFF, yOff, _lang.string(textLocalStringName));
                 yOff += ROW_HEIGHT;
@@ -116,10 +104,16 @@ package popups.settings
                 yOff += ROW_HEIGHT;
 
                 _sliderOptions[textLocalStringName] = slider;
-                _sliderOptionsInits[textLocalStringName] = sliderInitFunc;
                 _sliderTexts[textLocalStringName] = valueText;
-                _sliderTextsInits[textLocalStringName] = textInitFunc;
             }
+
+            container.graphics.lineStyle(1, 0xFFFFFF, 0.35);
+            container.graphics.moveTo(295, 15);
+            container.graphics.lineTo(295, 405);
+
+            var i:int;
+            var xOff:int;
+            var yOff:int;
 
             // LEFT COLUMN OPTIONS
 
@@ -128,25 +122,25 @@ package popups.settings
             new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAMEPLAY_DISPLAY), SECTION_TITLE_FONT_SIZE);
             yOff += ROW_HEIGHT;
 
-            addCheckOption(Lang.OPTIONS_GAME_TOP_BAR, initDisplayGameTopBar, onDisplayGameTopBarChanged);
-            addCheckOption(Lang.OPTIONS_GAME_BOTTOM_BAR, initDisplayGameBottomBar, onDisplayGameBottomBarChanged);
-            addCheckOption(Lang.OPTIONS_JUDGE, initDisplayJudge, onDisplayJudgeChanged);
-            addCheckOption(Lang.OPTIONS_HEALTH, initDisplayHealth, onDisplayHealthChanged);
-            addCheckOption(Lang.OPTIONS_SONGPROGRESS, initDisplaySongProgress, onDisplaySongProgressChanged);
-            addCheckOption(Lang.OPTIONS_SONPROGRESS_TEXT, initDisplaySongProgressText, onDisplaySongProgressTextChanged);
-            addCheckOption(Lang.OPTIONS_SCORE, initDisplayScore, onDisplayScoreChanged);
-            addCheckOption(Lang.OPTIONS_COMBO, initDisplayCombo, onDisplayComboChanged);
-            addCheckOption(Lang.OPTIONS_PA_COUNT, initDisplayPACount, onDisplayPACountChanged);
-            addCheckOption(Lang.OPTIONS_ACCURACY_BAR, initDisplayAccuracyBar, onDisplayAccuracyBarChanged);
-            addCheckOption(Lang.OPTIONS_SCREENCUT, initDisplayScreencut, onDisplayScreencutChanged);
+            addCheckOption(Lang.OPTIONS_GAME_TOP_BAR, onDisplayGameTopBarChanged);
+            addCheckOption(Lang.OPTIONS_GAME_BOTTOM_BAR, onDisplayGameBottomBarChanged);
+            addCheckOption(Lang.OPTIONS_JUDGE, onDisplayJudgeChanged);
+            addCheckOption(Lang.OPTIONS_HEALTH, onDisplayHealthChanged);
+            addCheckOption(Lang.OPTIONS_SONGPROGRESS, onDisplaySongProgressChanged);
+            addCheckOption(Lang.OPTIONS_SONPROGRESS_TEXT, onDisplaySongProgressTextChanged);
+            addCheckOption(Lang.OPTIONS_SCORE, onDisplayScoreChanged);
+            addCheckOption(Lang.OPTIONS_COMBO, onDisplayComboChanged);
+            addCheckOption(Lang.OPTIONS_PA_COUNT, onDisplayPACountChanged);
+            addCheckOption(Lang.OPTIONS_ACCURACY_BAR, onDisplayAccuracyBarChanged);
+            addCheckOption(Lang.OPTIONS_SCREENCUT, onDisplayScreencutChanged);
 
             yOff += drawSeperator(container, xOff, SEPARATOR_WIDTH, yOff, 0, 1);
 
-            addCheckOption(Lang.OPTIONS_AMAZING, initDisplayAmazing, onDisplayAmazingChanged);
-            addCheckOption(Lang.OPTIONS_PERFECT, initDisplayPerfect, onDisplayPerfectChanged);
-            addCheckOption(Lang.OPTIONS_RECEPTOR_ANIMATIONS, initDisplayReceptorAnimations, onDisplayReceptorAnimationsChanged);
-            addCheckOption(Lang.OPTIONS_JUDGE_ANIMATIONS, initDisplayJudgeAnimations, onDisplayJudgeAnimationsChanged);
-            addSliderOption(Lang.OPTIONS_JUDGE_SPEED, 0.25, 3, initJudgeAnimationSpeed, initJudgeAnimationSpeedText, onJudgeAnimationSpeedChanged);
+            addCheckOption(Lang.OPTIONS_AMAZING, onDisplayAmazingChanged);
+            addCheckOption(Lang.OPTIONS_PERFECT, onDisplayPerfectChanged);
+            addCheckOption(Lang.OPTIONS_RECEPTOR_ANIMATIONS, onDisplayReceptorAnimationsChanged);
+            addCheckOption(Lang.OPTIONS_JUDGE_ANIMATIONS, onDisplayJudgeAnimationsChanged);
+            addSliderOption(Lang.OPTIONS_JUDGE_SPEED, 0.25, 3, onJudgeAnimationSpeedChanged);
 
             // RIGHT COLUMN OPTIONS
 
@@ -155,293 +149,192 @@ package popups.settings
             new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAMEPLAY_MP_DISPLAY), SECTION_TITLE_FONT_SIZE);
             yOff += ROW_HEIGHT;
 
-            addCheckOption(Lang.OPTIONS_MP_UI, initDisplayMPUI, onDisplayMPUIChanged);
-            addCheckOption(Lang.OPTIONS_MP_PA, initDisplayMPPA, onDisplayMPPAChanged);
-            addCheckOption(Lang.OPTIONS_MP_JUDGE, initDisplayMPJudge, onDisplayMPJudgeChanged);
-            addCheckOption(Lang.OPTIONS_MP_COMBO, initDisplayMPCombo, onDisplayMPComboChanged);
+            addCheckOption(Lang.OPTIONS_MP_UI, onDisplayMPUIChanged);
+            addCheckOption(Lang.OPTIONS_MP_PA, onDisplayMPPAChanged);
+            addCheckOption(Lang.OPTIONS_MP_JUDGE, onDisplayMPJudgeChanged);
+            addCheckOption(Lang.OPTIONS_MP_COMBO, onDisplayMPComboChanged);
 
             yOff += drawSeperator(container, xOff, SEPARATOR_WIDTH, yOff, 6, 5);
             new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_PLAYLIST_DISPLAY), SECTION_TITLE_FONT_SIZE);
             yOff += ROW_HEIGHT;
 
-            addCheckOption(Lang.OPTIONS_GENRE_FLAG, initDisplayGenreFlag, onDisplayGenreFlagChanged);
-            addCheckOption(Lang.OPTIONS_SONG_FLAG, initDisplaySongFlag, onDisplaySongFlagChanged);
-            addCheckOption(Lang.OPTIONS_SONG_NOTE, initDisplaySongNote, onDisplaySongNoteChanged);
+            addCheckOption(Lang.OPTIONS_GENRE_FLAG, onDisplayGenreFlagChanged);
+            addCheckOption(Lang.OPTIONS_SONG_FLAG, onDisplaySongFlagChanged);
+            addCheckOption(Lang.OPTIONS_SONG_NOTE, onDisplaySongNoteChanged);
 
             yOff += ROW_HEIGHT;
         }
 
         override public function setValues():void
         {
-            for each (var checkInit:Function in _checkOptionsInits)
-                checkInit();
+            initCheckOption(Lang.OPTIONS_GAME_TOP_BAR, _settings.displayGameTopBar);
+            initCheckOption(Lang.OPTIONS_GAME_BOTTOM_BAR, _settings.displayGameBottomBar);
+            initCheckOption(Lang.OPTIONS_JUDGE, _settings.displayJudge);
+            initCheckOption(Lang.OPTIONS_HEALTH, _settings.displayHealth);
+            initCheckOption(Lang.OPTIONS_SONGPROGRESS, _settings.displaySongProgress);
+            initCheckOption(Lang.OPTIONS_SONPROGRESS_TEXT, _settings.displaySongProgressText);
+            initCheckOption(Lang.OPTIONS_SCORE, _settings.displayScore);
+            initCheckOption(Lang.OPTIONS_COMBO, _settings.displayCombo);
+            initCheckOption(Lang.OPTIONS_PA_COUNT, _settings.displayPACount);
+            initCheckOption(Lang.OPTIONS_ACCURACY_BAR, _settings.displayAccuracyBar);
+            initCheckOption(Lang.OPTIONS_SCREENCUT, _settings.displayScreencut);
 
-            for each (var sliderInit:Function in _sliderOptionsInits)
-                sliderInit();
+            initCheckOption(Lang.OPTIONS_AMAZING, _settings.displayAmazing);
+            initCheckOption(Lang.OPTIONS_PERFECT, _settings.displayPerfect);
+            initCheckOption(Lang.OPTIONS_RECEPTOR_ANIMATIONS, _settings.displayReceptorAnimations);
+            initCheckOption(Lang.OPTIONS_JUDGE_ANIMATIONS, _settings.displayJudgeAnimations);
+            initSliderOption(Lang.OPTIONS_JUDGE_SPEED, _settings.judgeSpeed);
+            initSliderTextOption(Lang.OPTIONS_JUDGE_SPEED, _settings.judgeSpeed.toFixed(2) + "x");
 
-            for each (var sliderTextInit:Function in _sliderTextsInits)
-                sliderTextInit();
+            initCheckOption(Lang.OPTIONS_MP_UI, _settings.displayMPUI);
+            initCheckOption(Lang.OPTIONS_MP_PA, _settings.displayMPPA);
+            initCheckOption(Lang.OPTIONS_MP_JUDGE, _settings.displayMPJudge);
+            initCheckOption(Lang.OPTIONS_MP_COMBO, _settings.displayMPCombo);
+
+            initCheckOption(Lang.OPTIONS_GENRE_FLAG, _settings.displayGenreFlag);
+            initCheckOption(Lang.OPTIONS_SONG_FLAG, _settings.displaySongFlag);
+            initCheckOption(Lang.OPTIONS_SONG_NOTE, _settings.displaySongNote);
         }
 
         private function onDisplayGameTopBarChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayGameTopBar = !_gvars.activeUser.settings.displayGameTopBar;
+            _settings.displayGameTopBar = !_settings.displayGameTopBar;
             checkOption(e);
-        }
-
-        private function initDisplayGameTopBar():void
-        {
-            initCheckOption(Lang.OPTIONS_GAME_TOP_BAR, _gvars.activeUser.settings.displayGameTopBar);
         }
 
         private function onDisplayGameBottomBarChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayGameBottomBar = !_gvars.activeUser.settings.displayGameBottomBar;
+            _settings.displayGameBottomBar = !_settings.displayGameBottomBar;
             checkOption(e);
-        }
-
-        private function initDisplayGameBottomBar():void
-        {
-            initCheckOption(Lang.OPTIONS_GAME_BOTTOM_BAR, _gvars.activeUser.settings.displayGameBottomBar);
         }
 
         private function onDisplayJudgeChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayJudge = !_gvars.activeUser.settings.displayJudge;
+            _settings.displayJudge = !_settings.displayJudge;
             checkOption(e);
-        }
-
-        private function initDisplayJudge():void
-        {
-            initCheckOption(Lang.OPTIONS_JUDGE, _gvars.activeUser.settings.displayJudge);
         }
 
         private function onDisplayHealthChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayHealth = !_gvars.activeUser.settings.displayHealth;
+            _settings.displayHealth = !_settings.displayHealth;
             checkOption(e);
-        }
-
-        private function initDisplayHealth():void
-        {
-            initCheckOption(Lang.OPTIONS_HEALTH, _gvars.activeUser.settings.displayHealth);
         }
 
         private function onDisplaySongProgressChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displaySongProgress = !_gvars.activeUser.settings.displaySongProgress;
+            _settings.displaySongProgress = !_settings.displaySongProgress;
             checkOption(e);
-        }
-
-        private function initDisplaySongProgress():void
-        {
-            initCheckOption(Lang.OPTIONS_SONGPROGRESS, _gvars.activeUser.settings.displaySongProgress);
         }
 
         private function onDisplaySongProgressTextChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displaySongProgressText = !_gvars.activeUser.settings.displaySongProgressText;
+            _settings.displaySongProgressText = !_settings.displaySongProgressText;
             checkOption(e);
-        }
-
-        private function initDisplaySongProgressText():void
-        {
-            initCheckOption(Lang.OPTIONS_SONPROGRESS_TEXT, _gvars.activeUser.settings.displaySongProgressText);
         }
 
         private function onDisplayScoreChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayScore = !_gvars.activeUser.settings.displayScore;
+            _settings.displayScore = !_settings.displayScore;
             checkOption(e);
-        }
-
-        private function initDisplayScore():void
-        {
-            initCheckOption(Lang.OPTIONS_SCORE, _gvars.activeUser.settings.displayScore);
         }
 
         private function onDisplayComboChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayCombo = !_gvars.activeUser.settings.displayCombo;
+            _settings.displayCombo = !_settings.displayCombo;
             checkOption(e);
-        }
-
-        private function initDisplayCombo():void
-        {
-            initCheckOption(Lang.OPTIONS_COMBO, _gvars.activeUser.settings.displayCombo);
         }
 
         private function onDisplayPACountChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayPACount = !_gvars.activeUser.settings.displayPACount;
+            _settings.displayPACount = !_settings.displayPACount;
             checkOption(e);
-        }
-
-        private function initDisplayPACount():void
-        {
-            initCheckOption(Lang.OPTIONS_PA_COUNT, _gvars.activeUser.settings.displayPACount);
         }
 
         private function onDisplayAccuracyBarChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayAccuracyBar = !_gvars.activeUser.settings.displayAccuracyBar;
+            _settings.displayAccuracyBar = !_settings.displayAccuracyBar;
             checkOption(e);
-        }
-
-        private function initDisplayAccuracyBar():void
-        {
-            initCheckOption(Lang.OPTIONS_ACCURACY_BAR, _gvars.activeUser.settings.displayAccuracyBar);
         }
 
         private function onDisplayScreencutChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayScreencut = !_gvars.activeUser.settings.displayScreencut;
+            _settings.displayScreencut = !_settings.displayScreencut;
             checkOption(e);
-        }
-
-        private function initDisplayScreencut():void
-        {
-            initCheckOption(Lang.OPTIONS_SCREENCUT, _gvars.activeUser.settings.displayScreencut);
         }
 
         private function onDisplayAmazingChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayAmazing = !_gvars.activeUser.settings.displayAmazing;
+            _settings.displayAmazing = !_settings.displayAmazing;
             checkOption(e);
-        }
-
-        private function initDisplayAmazing():void
-        {
-            initCheckOption(Lang.OPTIONS_AMAZING, _gvars.activeUser.settings.displayAmazing);
         }
 
         private function onDisplayPerfectChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayPerfect = !_gvars.activeUser.settings.displayPerfect;
+            _settings.displayPerfect = !_settings.displayPerfect;
             checkOption(e);
-        }
-
-        private function initDisplayPerfect():void
-        {
-            initCheckOption(Lang.OPTIONS_PERFECT, _gvars.activeUser.settings.displayPerfect);
         }
 
         private function onDisplayReceptorAnimationsChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayReceptorAnimations = !_gvars.activeUser.settings.displayReceptorAnimations;
+            _settings.displayReceptorAnimations = !_settings.displayReceptorAnimations;
             checkOption(e);
-        }
-
-        private function initDisplayReceptorAnimations():void
-        {
-            initCheckOption(Lang.OPTIONS_RECEPTOR_ANIMATIONS, _gvars.activeUser.settings.displayReceptorAnimations);
         }
 
         private function onDisplayJudgeAnimationsChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayJudgeAnimations = !_gvars.activeUser.settings.displayJudgeAnimations;
+            _settings.displayJudgeAnimations = !_settings.displayJudgeAnimations;
             checkOption(e);
-        }
-
-        private function initDisplayJudgeAnimations():void
-        {
-            initCheckOption(Lang.OPTIONS_JUDGE_ANIMATIONS, _gvars.activeUser.settings.displayJudgeAnimations);
         }
 
         private function onJudgeAnimationSpeedChanged(e:Event, valueText:Text):void
         {
-            _gvars.activeUser.settings.judgeSpeed = ((Math.round((e.target.slideValue * 100) / 5) * 5) / 100);
-            slideOption(valueText, _gvars.activeUser.settings.judgeSpeed.toFixed(2) + "x");
-        }
-
-        private function initJudgeAnimationSpeed():void
-        {
-            initSliderOption(Lang.OPTIONS_JUDGE_SPEED, _gvars.activeUser.settings.judgeSpeed);
-        }
-
-        private function initJudgeAnimationSpeedText():void
-        {
-            initSliderTextOption(Lang.OPTIONS_JUDGE_SPEED, _gvars.activeUser.settings.judgeSpeed.toFixed(2) + "x");
+            _settings.judgeSpeed = ((Math.round((e.target.slideValue * 100) / 5) * 5) / 100);
+            slideOption(valueText, _settings.judgeSpeed.toFixed(2) + "x");
         }
 
         private function onDisplayMPUIChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayMPUI = !_gvars.activeUser.settings.displayMPUI;
+            _settings.displayMPUI = !_settings.displayMPUI;
             checkOption(e);
-        }
-
-        private function initDisplayMPUI():void
-        {
-            initCheckOption(Lang.OPTIONS_MP_UI, _gvars.activeUser.settings.displayMPUI);
         }
 
         private function onDisplayMPPAChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayMPPA = !_gvars.activeUser.settings.displayMPPA;
+            _settings.displayMPPA = !_settings.displayMPPA;
             checkOption(e);
-        }
-
-        private function initDisplayMPPA():void
-        {
-            initCheckOption(Lang.OPTIONS_MP_PA, _gvars.activeUser.settings.displayMPPA);
         }
 
         private function onDisplayMPJudgeChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayMPJudge = !_gvars.activeUser.settings.displayMPJudge;
+            _settings.displayMPJudge = !_settings.displayMPJudge;
             checkOption(e);
-        }
-
-        private function initDisplayMPJudge():void
-        {
-            initCheckOption(Lang.OPTIONS_MP_JUDGE, _gvars.activeUser.settings.displayMPJudge);
         }
 
         private function onDisplayMPComboChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayMPCombo = !_gvars.activeUser.settings.displayMPCombo;
+            _settings.displayMPCombo = !_settings.displayMPCombo;
             checkOption(e);
-        }
-
-        private function initDisplayMPCombo():void
-        {
-            initCheckOption(Lang.OPTIONS_MP_COMBO, _gvars.activeUser.settings.displayMPCombo);
         }
 
         private function onDisplayGenreFlagChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displayGenreFlag = !_gvars.activeUser.settings.displayGenreFlag;
+            _settings.displayGenreFlag = !_settings.displayGenreFlag;
             checkOption(e);
             _gvars.gameMain.activePanel.draw();
-        }
-
-        private function initDisplayGenreFlag():void
-        {
-            initCheckOption(Lang.OPTIONS_GENRE_FLAG, _gvars.activeUser.settings.displayGenreFlag);
         }
 
         private function onDisplaySongFlagChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displaySongFlag = !_gvars.activeUser.settings.displaySongFlag;
+            _settings.displaySongFlag = !_settings.displaySongFlag;
             checkOption(e);
             _gvars.gameMain.activePanel.draw();
-        }
-
-        private function initDisplaySongFlag():void
-        {
-            initCheckOption(Lang.OPTIONS_SONG_FLAG, _gvars.activeUser.settings.displaySongFlag);
         }
 
         private function onDisplaySongNoteChanged(e:MouseEvent):void
         {
-            _gvars.activeUser.settings.displaySongNote = !_gvars.activeUser.settings.displaySongNote;
+            _settings.displaySongNote = !_settings.displaySongNote;
             checkOption(e);
             _gvars.gameMain.activePanel.draw();
-        }
-
-        private function initDisplaySongNote():void
-        {
-            initCheckOption(Lang.OPTIONS_SONG_NOTE, _gvars.activeUser.settings.displaySongNote);
         }
     }
 }

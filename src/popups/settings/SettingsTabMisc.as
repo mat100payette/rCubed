@@ -4,6 +4,7 @@ package popups.settings
     import classes.Alert;
     import classes.Language;
     import classes.Playlist;
+    import classes.UserSettings;
     import classes.chart.parse.ChartFFRLegacy;
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
@@ -62,9 +63,9 @@ package popups.settings
         private var windowPositionReset:BoxButton;
         private var windowSavePositionCheck:BoxCheck;
 
-        public function SettingsTabMisc(settingsWindow:SettingsWindow):void
+        public function SettingsTabMisc(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
-            super(settingsWindow);
+            super(settingsWindow, settings);
         }
 
         override public function get name():String
@@ -93,7 +94,7 @@ package popups.settings
                 var lang:String = _lang.indexed[id];
                 var lang_name:String = _lang.string2Simple("_real_name", lang) + (_lang.data[lang]['_en_name'] != _lang.data[lang]['_real_name'] ? (' / ' + _lang.string2Simple("_en_name", lang)) : '');
                 optionGameLanguages.push({"label": lang_name, "data": lang});
-                if (lang == _gvars.activeUser.settings.language)
+                if (lang == _settings.language)
                 {
                     selectedLanguage = lang_name;
                 }
@@ -263,14 +264,14 @@ package popups.settings
         override public function setValues():void
         {
             // Set Framerate
-            optionFPS.text = _gvars.activeUser.settings.frameRate.toString();
+            optionFPS.text = _settings.frameRate.toString();
 
-            forceJudgeCheck.checked = _gvars.activeUser.settings.forceNewJudge;
+            forceJudgeCheck.checked = _settings.forceNewJudge;
 
-            timestampCheck.checked = _gvars.activeUser.settings.DISPLAY_MP_TIMESTAMP;
-            legacySongsCheck.checked = _gvars.activeUser.settings.DISPLAY_LEGACY_SONGS;
+            timestampCheck.checked = _settings.DISPLAY_MP_TIMESTAMP;
+            legacySongsCheck.checked = _settings.DISPLAY_LEGACY_SONGS;
             optionMPSize.text = _avars.configMPSize.toString();
-            startUpScreenCombo.selectedIndex = _gvars.activeUser.settings.startUpScreen;
+            startUpScreenCombo.selectedIndex = _settings.startUpScreen;
 
             setLanguage();
 
@@ -298,21 +299,21 @@ package popups.settings
             if (e.target == forceJudgeCheck)
             {
                 e.target.checked = !e.target.checked;
-                _gvars.activeUser.settings.forceNewJudge = !_gvars.activeUser.settings.forceNewJudge;
+                _settings.forceNewJudge = !_settings.forceNewJudge;
             }
 
             // MP Timestamp
             else if (e.target == timestampCheck)
             {
                 e.target.checked = !e.target.checked;
-                _gvars.activeUser.settings.DISPLAY_MP_TIMESTAMP = !_gvars.activeUser.settings.DISPLAY_MP_TIMESTAMP;
+                _settings.DISPLAY_MP_TIMESTAMP = !_settings.DISPLAY_MP_TIMESTAMP;
             }
 
             // Legacy Songs
             else if (e.target == legacySongsCheck)
             {
                 e.target.checked = !e.target.checked;
-                _gvars.activeUser.settings.DISPLAY_LEGACY_SONGS = !_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS;
+                _settings.DISPLAY_LEGACY_SONGS = !_settings.DISPLAY_LEGACY_SONGS;
             }
 
             //- Auto Save Local Replays
@@ -385,7 +386,7 @@ package popups.settings
             }
             else if (e.target == windowPositionSet)
             {
-                parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
+                _parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
 
                 _gvars.air_windowProperties["x"] = windowXBox.validate(Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5));
                 _gvars.air_windowProperties["y"] = windowYBox.validate(Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5));
@@ -407,7 +408,7 @@ package popups.settings
             }
             else if (e.target == windowSizeSet)
             {
-                parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
+                _parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
 
                 _gvars.air_windowProperties["width"] = windowWidthBox.validate(Main.GAME_WIDTH);
                 _gvars.air_windowProperties["height"] = windowHeightBox.validate(Main.GAME_HEIGHT);
@@ -425,8 +426,8 @@ package popups.settings
         {
             if (e.target == optionFPS)
             {
-                _gvars.activeUser.settings.frameRate = optionFPS.validate(60);
-                _gvars.activeUser.settings.frameRate = Math.max(Math.min(_gvars.activeUser.settings.frameRate, 1000), 10);
+                _settings.frameRate = optionFPS.validate(60);
+                _settings.frameRate = Math.max(Math.min(_settings.frameRate, 1000), 10);
                 _gvars.removeSongFiles();
             }
 
@@ -489,13 +490,13 @@ package popups.settings
 
         private function startUpScreenSelect(e:Event):void
         {
-            _gvars.activeUser.settings.startUpScreen = e.target.selectedItem.data as int;
+            _settings.startUpScreen = e.target.selectedItem.data as int;
         }
 
         private function setLanguage():void
         {
             languageComboIgnore = true;
-            languageCombo.selectedItemByData = _gvars.activeUser.settings.language;
+            languageCombo.selectedItemByData = _settings.language;
             languageComboIgnore = false;
         }
 
@@ -503,7 +504,7 @@ package popups.settings
         {
             if (!languageComboIgnore)
             {
-                _gvars.activeUser.settings.language = e.target.selectedItem.data as String;
+                _settings.language = e.target.selectedItem.data as String;
 
                 _gvars.gameMain.activePanel.draw();
                 _gvars.gameMain.buildContextMenu();
@@ -539,7 +540,7 @@ package popups.settings
             // Add Engine
             if (data == this)
             {
-                new Prompt(parent, 320, "Engine URL", 120, "Add Engine", e_addEngine);
+                new Prompt(_parent, 320, "Engine URL", 120, "Add Engine", e_addEngine);
             }
             // Clears Engines
             else if (data == engineCombo)
