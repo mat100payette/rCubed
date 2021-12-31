@@ -1,12 +1,12 @@
 package popups.settings
 {
     import classes.Language;
+    import classes.UserSettings;
     import classes.ui.BoxCheck;
     import classes.ui.BoxSlider;
     import classes.ui.Text;
     import flash.events.Event;
     import flash.events.MouseEvent;
-    import classes.UserSettings;
 
     public class SettingsTabVisuals extends SettingsTabBase
     {

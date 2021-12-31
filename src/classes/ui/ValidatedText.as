@@ -20,7 +20,7 @@ package classes.ui
         private var m_parseMode:uint = PARSE_INT;
         private var m_validator:RegExp;
 
-        private var _listener:Function = null;
+        private var _onChange:Function = null;
 
         /**
          * The ValidatedText constructor.
@@ -36,9 +36,11 @@ package classes.ui
          * @param restrict_mode Which restricted character set to be used
          * @param textformat TextFormat of the textfield
          */
-        public function ValidatedText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 0, height:int = 0, restrict_mode:uint = 0, listener:Function = null, textformat:TextFormat = null)
+        public function ValidatedText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 0, height:int = 0, restrict_mode:uint = 0, onChange:Function = null, textformat:TextFormat = null)
         {
-            super(parent, xpos, ypos, width, height, textformat);
+            super(parent, xpos, ypos, width, height, textformat, onTextFieldChange);
+            this._onChange = onChange;
+
             switch (restrict_mode)
             {
                 case R_FLOAT_P:
@@ -67,18 +69,22 @@ package classes.ui
                     break;
             }
 
-            if (listener != null)
-            {
-                this._listener = listener;
-                this.addEventListener(Event.CHANGE, listener);
-            }
+            if (_onChange != null)
+                addEventListener(Event.CHANGE, _onChange);
         }
 
         override public function dispose():void
         {
-            if (this._listener != null)
-                this.removeEventListener(Event.CHANGE, this._listener);
+            if (_onChange != null)
+                removeEventListener(Event.CHANGE, _onChange);
             super.dispose();
+        }
+
+        private function onTextFieldChange(event:Event):void
+        {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            dispatchEvent(new Event(Event.CHANGE));
         }
 
         private function renderValid():void

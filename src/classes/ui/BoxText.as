@@ -13,10 +13,14 @@ package classes.ui
         private var _input:TextField;
         private var _isFocused:Boolean = false;
 
-        public function BoxText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 100, height:int = 20, textformat:TextFormat = null)
+        private var _onChange:Function;
+
+        public function BoxText(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 100, height:int = 20, textformat:TextFormat = null, onChange:Function = null)
         {
             if (textformat)
                 _textFormat = textformat;
+
+            _onChange = onChange;
 
             super(parent, xpos, ypos, false, false);
             super.setSize(width + 1, height + 1);
@@ -42,8 +46,10 @@ package classes.ui
 
             _input.addEventListener(FocusEvent.FOCUS_IN, onFocus);
             _input.addEventListener(FocusEvent.FOCUS_OUT, onFocus);
-            _input.addEventListener(Event.CHANGE, onChange);
-            this.addChild(_input);
+            if (_onChange != null)
+                _input.addEventListener(Event.CHANGE, _onChange);
+
+            addChild(_input);
         }
 
         override public function dispose():void
@@ -51,7 +57,9 @@ package classes.ui
             super.dispose();
             _input.removeEventListener(FocusEvent.FOCUS_IN, onFocus);
             _input.removeEventListener(FocusEvent.FOCUS_OUT, onFocus);
-            _input.removeEventListener(Event.CHANGE, onChange);
+
+            if (_onChange != null)
+                _input.removeEventListener(Event.CHANGE, _onChange);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -60,11 +68,6 @@ package classes.ui
         {
             _isFocused = (e.type == FocusEvent.FOCUS_IN);
             draw();
-        }
-
-        private function onChange(e:Event):void
-        {
-            this.dispatchEvent(e);
         }
 
         override public function get highlight():Boolean
