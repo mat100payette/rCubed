@@ -104,7 +104,7 @@ package popups.settings
             }
         }
 
-        override public function clickHandler(e:MouseEvent):void
+        public function clickHandler(e:MouseEvent):void
         {
             //- Visual Mods
             if (e.target.hasOwnProperty("visual_mod"))

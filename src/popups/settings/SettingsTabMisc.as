@@ -293,7 +293,7 @@ package popups.settings
             windowSaveSizeCheck.checked = _gvars.air_saveWindowSize;
         }
 
-        override public function clickHandler(e:MouseEvent):void
+        public function clickHandler(e:MouseEvent):void
         {
             // Force Judge Mode
             if (e.target == forceJudgeCheck)
@@ -422,7 +422,7 @@ package popups.settings
             }
         }
 
-        override public function changeHandler(e:Event):void
+        public function changeHandler(e:Event):void
         {
             if (e.target == optionFPS)
             {

@@ -8,6 +8,9 @@ package classes.ui
 
     public class BoxSlider extends Sprite
     {
+        public static const TEXT_ALIGN_RIGHT:int = 0;
+        public static const TEXT_ALIGN_BOTTOM:int = 1;
+
         private var _width:Number;
         private var _height:Number;
         private var _slider:Sprite;
@@ -15,33 +18,44 @@ package classes.ui
         private var _minValue:Number = 0;
         private var _maxValue:Number = 1;
 
-        private var _listener:Function = null;
+        private var _valueText:Text;
+        private var _valueTextTransformer:Function;
+        private var _onSlide:Function;
 
-        public function BoxSlider(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 0, height:int = 0, listener:Function = null)
+        public function BoxSlider(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 0, height:int = 0, alignment:int = TEXT_ALIGN_RIGHT, onSlide:Function = null, valueTextTransformer:Function = null)
         {
+
+            const textXOff:int = alignment == TEXT_ALIGN_RIGHT ? width + 5 : 0;
+            const textYOff:int = alignment == TEXT_ALIGN_RIGHT ? -6 : 10;
+            _valueText = new Text(parent, xpos + textXOff, ypos + textYOff);
+            _valueTextTransformer = valueTextTransformer;
+
             if (parent)
+            {
                 parent.addChild(this);
+                parent.addChild(_valueText);
+            }
 
-            this.x = xpos;
-            this.y = ypos;
+            x = xpos;
+            y = ypos;
 
-            this._width = width;
-            this._height = height;
+            _width = width;
+            _height = height;
 
             init();
 
-            if (listener != null)
+            if (onSlide != null)
             {
-                this._listener = listener;
-                this.addEventListener(Event.CHANGE, listener);
+                _onSlide = onSlide;
+                addEventListener(Event.CHANGE, _onSlide);
             }
         }
 
         protected function init():void
         {
-            this.graphics.lineStyle(1, 0xFFFFFF, 0.2);
-            this.graphics.moveTo(0, _height / 2);
-            this.graphics.lineTo(_width, _height / 2);
+            graphics.lineStyle(1, 0xFFFFFF, 0.2);
+            graphics.moveTo(0, _height / 2);
+            graphics.lineTo(_width, _height / 2);
 
             _slider = new Sprite();
             _slider.graphics.lineStyle(1, 0xFFFFFF, 0.55);
@@ -52,6 +66,7 @@ package classes.ui
             _slider.useHandCursor = true;
             _slider.mouseChildren = false;
             _slider.addEventListener(MouseEvent.MOUSE_DOWN, e_startDrag);
+
             addChild(_slider);
         }
 
@@ -64,9 +79,9 @@ package classes.ui
 
         private function e_dragMove(e:MouseEvent):void
         {
-            _slideValue = (_slider.x / (_width - _slider.width)) * valueRange + _minValue;
+            setSliderValue((_slider.x / (_width - _slider.width)) * valueRange + _minValue);
 
-            this.dispatchEvent(new Event(Event.CHANGE));
+            dispatchEvent(new Event(Event.CHANGE));
         }
 
         private function e_stopDrag(e:MouseEvent):void
@@ -74,21 +89,28 @@ package classes.ui
             _slider.stopDrag();
             stage.removeEventListener(MouseEvent.MOUSE_MOVE, e_dragMove);
             stage.removeEventListener(MouseEvent.MOUSE_UP, e_stopDrag);
-            _slideValue = (_slider.x / (_width - _slider.width)) * valueRange + _minValue;
+
+            setSliderValue((_slider.x / (_width - _slider.width)) * valueRange + _minValue);
         }
 
         /**
-         * Returns the slider value and capped between the min and max values.
+         * Returns the slider value capped between the min and max values.
          */
         public function get slideValue():Number
         {
             return Math.max(Math.min(_slideValue, _maxValue), _minValue);
         }
 
-        public function set slideValue(value:Number):void
+        private function setSliderValue(value:Number):void
         {
             _slideValue = value;
-            var moveVal:Number = (slideValue - minValue) / valueRange;
+            _valueText.text = _valueTextTransformer != null ? _valueTextTransformer(_slideValue) : _slideValue.toString();
+        }
+
+        public function set slideValue(value:Number):void
+        {
+            setSliderValue(value);
+            const moveVal:Number = (slideValue - minValue) / valueRange;
             _slider.x = (_width - _slider.width) * moveVal;
         }
 
@@ -117,5 +139,4 @@ package classes.ui
             _maxValue = val;
         }
     }
-
 }

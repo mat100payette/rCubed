@@ -10,7 +10,6 @@ package popups.settings
     import classes.ui.Text;
     import classes.ui.ValidatedText;
     import com.flashfla.utils.ArrayUtil;
-    import com.flashfla.utils.StringUtil;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
     import flash.events.MouseEvent;
@@ -19,29 +18,44 @@ package popups.settings
 
     public class SettingsTabGeneral extends SettingsTabBase
     {
+        private static const SCROLL_DIRECTIONS:Array = ["up", "down", "left", "right", "split", "split_down", "plus"];
+
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
 
-        private var optionGameSpeed:ValidatedText;
-        private var optionReceptorSpacing:ValidatedText;
-        private var textNoteScale:Text;
-        private var optionNoteScale:BoxSlider;
-        private var textGameVolume:Text;
-        private var optionGameVolume:BoxSlider;
-        private var textMenuVolume:Text;
-        private var optionMenuVolume:BoxSlider;
+        private var _scrollOptionsGroup:Array = [];
 
-        private var optionOffset:ValidatedText;
-        private var optionJudgeOffset:ValidatedText;
-        private var optionJudgeOffsetAuto:BoxCheck;
-        private var optionAutofail:Array;
+        private var _optionScrollSpeed:ValidatedText;
+        private var _optionReceptorSpacing:ValidatedText;
+        private var _optionNoteScale:BoxSlider;
+        private var _optionGameVolume:BoxSlider;
+        private var _optionMenuVolume:BoxSlider;
 
-        private var optionScrollDirections:Vector.<BoxCheck>;
-        private var optionMirrorMod:BoxCheck;
-        private var optionRate:ValidatedText;
-        private var optionIsolation:ValidatedText;
-        private var optionIsolationTotal:ValidatedText;
+        private var _optionGlobalOffset:ValidatedText;
+        private var _optionJudgeOffset:ValidatedText;
+        private var _optionAutoJudgeOffset:BoxCheck;
+
+        private var _optionAutofailAmazing:ValidatedText;
+        private var _optionAutofailPerfect:ValidatedText;
+        private var _optionAutofailGood:ValidatedText;
+        private var _optionAutofailAverage:ValidatedText;
+        private var _optionAutofailMiss:ValidatedText;
+        private var _optionAutofailBoo:ValidatedText;
+        private var _optionAutofailRawGoods:ValidatedText;
+
+        private var _optionScrollDirectionUp:BoxCheck;
+        private var _optionScrollDirectionDown:BoxCheck;
+        private var _optionScrollDirectionLeft:BoxCheck;
+        private var _optionScrollDirectionRight:BoxCheck;
+        private var _optionScrollDirectionSplit:BoxCheck;
+        private var _optionScrollDirectionSplitDown:BoxCheck;
+        private var _optionScrollDirectionPlus:BoxCheck;
+
+        private var _optionMirrorMod:BoxCheck;
+        private var _optionRate:ValidatedText;
+        private var _optionIsolation:ValidatedText;
+        private var _optionIsolationTotal:ValidatedText;
 
         public function SettingsTabGeneral(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
@@ -55,6 +69,77 @@ package popups.settings
 
         override public function openTab():void
         {
+            /**
+             * Adds a new text option with a text type and change callback. Can be labeled or not.
+             */
+            function addTextOption(localStringName:String, textType:uint, labeled:Boolean = false, onTextChanged:Function = null, maxChars:int = 0):ValidatedText
+            {
+                if (labeled)
+                {
+                    new Text(container, xOff, yOff, _lang.string(localStringName));
+                    yOff += 22;
+                }
+
+                const textField:ValidatedText = new ValidatedText(container, xOff, yOff, 130, 20, textType, onTextChanged);
+                textField.field.maxChars = maxChars;
+                yOff += 30;
+
+                _options[localStringName] = textField;
+                return textField;
+            }
+
+            /**
+             * Adds a new checkbox option with a check callback.
+             */
+            function addCheckOption(textLocalStringName:String, onCheck:Function, tooltipText:String = null):BoxCheck
+            {
+                new Text(container, xOff + 22, yOff, _lang.string(textLocalStringName));
+                const boxCheck:BoxCheck = new BoxCheck(container, xOff + 2, yOff + 3, onCheck);
+
+                if (tooltipText != null)
+                {
+                    function onHover(e:Event):void
+                    {
+                        boxCheck.addEventListener(MouseEvent.MOUSE_OUT, onExit);
+                        displayToolTip(boxCheck.x, boxCheck.y + 25, tooltipText);
+                    }
+
+                    function onExit(e:Event):void
+                    {
+                        boxCheck.removeEventListener(MouseEvent.MOUSE_OUT, onExit);
+                        hideTooltip();
+                    }
+
+                    boxCheck.addEventListener(MouseEvent.MOUSE_OVER, onHover, false, 0, true);
+                }
+
+                yOff += 25;
+
+                _options[textLocalStringName] = boxCheck;
+                return boxCheck;
+            }
+
+            /**
+             * Adds a new slider option with a slide callback. Can be labeled or not.
+             */
+            function addSliderOption(localStringName:String, minValue:Number, maxValue:Number, labeled:Boolean = false, onSlide:Function = null, valueTextTransformer:Function = null):BoxSlider
+            {
+                if (labeled)
+                {
+                    new Text(container, xOff, yOff, _lang.string(localStringName));
+                    yOff += 22;
+                }
+
+                const slider:BoxSlider = new BoxSlider(container, xOff, yOff, 130, 10, BoxSlider.TEXT_ALIGN_RIGHT, onSlide, valueTextTransformer);
+                slider.minValue = minValue;
+                slider.maxValue = maxValue;
+
+                yOff += 25;
+
+                _options[localStringName] = slider;
+                return slider;
+            }
+
             container.graphics.beginFill(0, 0.05);
             container.graphics.drawRect(198, 0, 196, 418);
             container.graphics.endFill();
@@ -70,357 +155,269 @@ package popups.settings
             var yOff:int = 15;
 
             /// Col 1
-            //- Speed
-            new Text(container, xOff, yOff, _lang.string("options_speed"));
-            yOff += 22;
-
-            optionGameSpeed = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_FLOAT_P, changeHandler);
-            yOff += 30;
-
-            //- Receptor Spacing
-            new Text(container, xOff, yOff, _lang.string("options_receptor_spacing"));
-            yOff += 22;
-
-            optionReceptorSpacing = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_INT, changeHandler);
-            yOff += 30;
+            _optionScrollSpeed = addTextOption(Lang.OPTIONS_SCROLL_SPEED, ValidatedText.R_FLOAT_P, true, onScrollSpeedChanged);
+            _optionReceptorSpacing = addTextOption(Lang.OPTIONS_RECEPTOR_SPACING, ValidatedText.R_INT, true, onReceptorGapChanged);
 
             yOff += drawSeperator(container, xOff, 170, yOff, 2, 4);
 
-            //- Note Scale
-            new Text(container, xOff, yOff, _lang.string("options_note_scale"));
-            yOff += 22;
-
-            optionNoteScale = new BoxSlider(container, xOff, yOff, 130, 10, changeHandler);
-            optionNoteScale.minValue = 0.1;
-            optionNoteScale.maxValue = 1.5;
-            yOff += 10;
-
-            textNoteScale = new Text(container, xOff, yOff, Math.round(_settings.noteScale * 100) + "%");
-            yOff += 30;
+            _optionNoteScale = addSliderOption(Lang.OPTIONS_NOTE_SCALE, 0.1, 1.5, true, onNoteScaleChanged, toRoundedPercent);
 
             yOff += drawSeperator(container, xOff, 170, yOff, -4, 5);
 
-            // Game Volume
-            new Text(container, xOff, yOff, _lang.string("options_volume"));
-            yOff += 22;
-
-            optionGameVolume = new BoxSlider(container, xOff, yOff, 130, 10, changeHandler);
-            optionGameVolume.maxValue = 1.25;
-            yOff += 10;
-
-            textGameVolume = new Text(container, xOff, yOff, Math.round(_settings.gameVolume * 100) + "%");
-            yOff += 30;
-
-            // Menu Music Volume
-            new Text(container, xOff, yOff, _lang.string("air_options_menu_volume"));
-            yOff += 22;
-
-            optionMenuVolume = new BoxSlider(container, xOff, yOff, 130, 10, changeHandler);
-            optionMenuVolume.maxValue = 1.25;
-            yOff += 10;
-
-            textMenuVolume = new Text(container, xOff, yOff, Math.round(_gvars.menuMusicSoundVolume * 100) + "%");
-            yOff += 30;
+            _optionGameVolume = addSliderOption(Lang.OPTIONS_GAME_VOLUME, 0, 1.25, true, onGameVolumeChanged, toRoundedPercent);
+            _optionMenuVolume = addSliderOption(Lang.OPTIONS_MENU_VOLUME, 0, 1.25, true, onMenuVolumeChanged, toRoundedPercent);
 
             /// Col 2
             xOff = 211;
             yOff = 15;
 
-            //- Global Offset
-            new Text(container, xOff, yOff, _lang.string("options_global_offset"));
-            yOff += 22;
+            _optionGlobalOffset = addTextOption(Lang.OPTIONS_GLOBAL_OFFSET, ValidatedText.R_FLOAT, true, onGlobalOffsetChanged);
+            _optionJudgeOffset = addTextOption(Lang.OPTIONS_JUDGE_OFFSET, ValidatedText.R_FLOAT, true, onJudgeOffsetChanged);
+            // TODO: Refactor custom judge window option
+            //judgeOffsetText.mouseEnabled = true;
+            //judgeOffsetText.contextMenu = arcJudgeMenu(_parent);
 
-            optionOffset = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_FLOAT, changeHandler);
-            yOff += 30;
-
-            //- Judge Offset
-            var judgeOffsetText:Text = new Text(container, xOff, yOff, _lang.string("options_judge_offset"));
-            judgeOffsetText.mouseEnabled = true;
-            judgeOffsetText.contextMenu = arcJudgeMenu(_parent);
-            yOff += 22;
-
-            optionJudgeOffset = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_FLOAT, changeHandler);
-            yOff += 30;
-
-            //- Auto Judge Offset
-            new Text(container, xOff + 22, yOff, _lang.string("options_auto_judge_offset"));
-
-            optionJudgeOffsetAuto = new BoxCheck(container, xOff + 2, yOff + 3, clickHandler);
-            optionJudgeOffsetAuto.addEventListener(MouseEvent.MOUSE_OVER, e_autoJudgeMouseOver, false, 0, true);
-            yOff += 25;
+            _optionAutoJudgeOffset = addCheckOption(Lang.OPTIONS_AUTO_JUDGE_OFFSET, onAutoJudgeOffsetChanged, _lang.string(Lang.OPTIONS_POPUP_AUTO_JUDGE_OFFSET));
 
             yOff += drawSeperator(container, xOff, 170, yOff, 3, 5);
 
-            // Autofail
-            optionAutofail = [];
-
-            new Text(container, xOff, yOff, _lang.string("options_autofail"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_AUTOFAIL));
             yOff += 22;
 
-            for (i = 0; i < JUDGE_TITLES.length; i++)
-            {
-                new Text(container, xOff + 72, yOff + 1, _lang.string("game_" + JUDGE_TITLES[i]));
-
-                var optionAutofailInput:ValidatedText = new ValidatedText(container, xOff, yOff, 65, 20, ValidatedText.R_INT_P, changeHandler);
-                optionAutofailInput.autofail = JUDGE_TITLES[i];
-                optionAutofailInput.field.maxChars = 5;
-                optionAutofail.push(optionAutofailInput);
-                yOff += 25;
-            }
-            // raw goods aren't a judge title, and is two words - so separate accordingly
-            new Text(container, xOff + 72, yOff + 1, _lang.string("game_raw_goods"));
-
-            optionAutofailInput = new ValidatedText(container, xOff, yOff, 65, 20, ValidatedText.R_FLOAT_P, changeHandler);
-            optionAutofailInput.autofail = "rawGoods";
-            optionAutofailInput.field.maxChars = 6;
-            optionAutofail.push(optionAutofailInput);
-            yOff += 22;
+            _optionAutofailAmazing = addTextOption(Lang.GAME_AMAZING, ValidatedText.R_INT_P, true, onAutofailAmazingChanged, 5);
+            _optionAutofailPerfect = addTextOption(Lang.GAME_PERFECT, ValidatedText.R_INT_P, true, onAutofailPerfectChanged, 5);
+            _optionAutofailGood = addTextOption(Lang.GAME_GOOD, ValidatedText.R_INT_P, true, onAutofailGoodChanged, 5);
+            _optionAutofailAverage = addTextOption(Lang.GAME_AVERAGE, ValidatedText.R_INT_P, true, onAutofailAverageChanged, 5);
+            _optionAutofailMiss = addTextOption(Lang.GAME_MISS, ValidatedText.R_INT_P, true, onAutofailMissChanged, 5);
+            _optionAutofailBoo = addTextOption(Lang.GAME_BOO, ValidatedText.R_INT_P, true, onAutofailBooChanged, 5);
+            _optionAutofailRawGoods = addTextOption(Lang.OPTIONS_RAW_GOODS, ValidatedText.R_FLOAT_P, true, onAutofailRawGoodsChanged, 6);
 
             /// Col 3
             xOff = 407;
             yOff = 15;
 
-            //- Direction
-            optionScrollDirections = new <BoxCheck>[];
-
-            new Text(container, xOff, yOff, _lang.string("options_scroll"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_SCROLL));
             yOff += 20;
 
-            var directionData:Array = _gvars.SCROLL_DIRECTIONS;
-            for (i = 0; i < directionData.length; i++)
-            {
-                new Text(container, xOff + 22, yOff - 1, _lang.string("options_scroll_" + directionData[i]));
-
-                var optionScrollCheck:BoxCheck = new BoxCheck(container, xOff + 2, yOff + 3, clickHandler);
-                optionScrollCheck.scrollDirection = directionData[i];
-                optionScrollDirections.push(optionScrollCheck);
-                yOff += 21;
-            }
+            _optionScrollDirectionUp = addCheckOption(Lang.OPTIONS_SCROLL_UP, onScrollDirectionChanged);
+            _optionScrollDirectionDown = addCheckOption(Lang.OPTIONS_SCROLL_DOWN, onScrollDirectionChanged);
+            _optionScrollDirectionLeft = addCheckOption(Lang.OPTIONS_SCROLL_LEFT, onScrollDirectionChanged);
+            _optionScrollDirectionRight = addCheckOption(Lang.OPTIONS_SCROLL_RIGHT, onScrollDirectionChanged);
+            _optionScrollDirectionSplit = addCheckOption(Lang.OPTIONS_SCROLL_SPLIT, onScrollDirectionChanged);
+            _optionScrollDirectionSplitDown = addCheckOption(Lang.OPTIONS_SCROLL_SPLIT_DOWN, onScrollDirectionChanged);
+            _optionScrollDirectionPlus = addCheckOption(Lang.OPTIONS_SCROLL_PLUS, onScrollDirectionChanged);
 
             yOff += drawSeperator(container, xOff, 170, yOff, 5, 6);
 
-            // Mirror Mod
-            new Text(container, xOff + 22, yOff - 1, _lang.string("options_mod_mirror"));
-
-            optionMirrorMod = new BoxCheck(container, xOff + 2, yOff + 3, clickHandler);
-            optionMirrorMod.visual_mod = "mirror";
-            yOff += 25;
+            _optionMirrorMod = addCheckOption(Lang.OPTIONS_MIRROR, onMirrorChanged);
 
             yOff += drawSeperator(container, xOff, 170, yOff, 1);
 
-            // Song Rate
-            new Text(container, xOff, yOff, _lang.string("options_rate"));
-            yOff += 22;
+            _optionRate = addTextOption(Lang.OPTIONS_RATE, ValidatedText.R_FLOAT_P, true, onSongRateChanged);
 
-            optionRate = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_FLOAT_P, changeHandler);
-            yOff += 30;
+            _optionIsolation = addTextOption(Lang.OPTIONS_ISOLATION_START, ValidatedText.R_INT_P, true, onIsolationStartChanged);
+            _optionIsolationTotal = addTextOption(Lang.OPTIONS_ISOLATION_NOTES, ValidatedText.R_INT_P, true, onIsolationNotesChanged);
 
-            //- Isolation
-            new Text(container, xOff, yOff, _lang.string("options_isolation_start"));
-            yOff += 22;
-
-            optionIsolation = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_INT_P, changeHandler);
-            yOff += 30;
-
-            new Text(container, xOff, yOff, _lang.string("options_isolation_notes"));
-            yOff += 22;
-
-            optionIsolationTotal = new ValidatedText(container, xOff, yOff, 130, 20, ValidatedText.R_INT_P, changeHandler);
-            yOff += 30;
-
-            // set Text class max width
             setTextMaxWidth(166);
         }
 
         override public function setValues():void
         {
-            var i:int;
-            var item:*;
+            _optionScrollSpeed.text = _settings.scrollSpeed.toString();
+            _optionReceptorSpacing.text = _settings.receptorGap.toString();
 
-            // Set Speed
-            optionGameSpeed.text = _settings.scrollSpeed.toString();
+            _optionNoteScale.slideValue = _settings.noteScale;
 
-            // Set Scroll
-            for each (item in optionScrollDirections)
-            {
-                item.checked = (_settings.scrollDirection == item.scrollDirection);
-            }
+            _optionGameVolume.slideValue = _settings.gameVolume;
+            _optionMenuVolume.slideValue = _gvars.menuMusicSoundVolume;
 
-            // Set Offset
-            optionOffset.text = _settings.GLOBAL_OFFSET.toString();
+            _optionGlobalOffset.text = _settings.GLOBAL_OFFSET.toString();
+            _optionJudgeOffset.text = _settings.JUDGE_OFFSET.toString();
+            _optionAutoJudgeOffset.text = _settings.AUTO_JUDGE_OFFSET;
 
-            // Set Judge Offset
-            optionJudgeOffset.text = _settings.JUDGE_OFFSET.toString();
+            updateJudgeOffsetState();
 
-            // Set Auto Judge Offset
-            optionJudgeOffsetAuto.checked = _settings.AUTO_JUDGE_OFFSET;
-            optionJudgeOffset.selectable = !_settings.AUTO_JUDGE_OFFSET;
-            optionJudgeOffset.alpha = _settings.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
+            _optionAutofailAmazing.text = _settings.autofailAmazing.toString();
+            _optionAutofailPerfect.text = _settings.autofailPerfect.toString();
+            _optionAutofailGood.text = _settings.autofailGood.toString();
+            _optionAutofailAverage.text = _settings.autofailAverage.toString();
+            _optionAutofailMiss.text = _settings.autofailMiss.toString();
+            _optionAutofailBoo.text = _settings.autofailBoo.toString();
+            _optionAutofailRawGoods.text = _settings.autofailRawGoods.toString();
 
-            // Set Receptor Spacing
-            optionReceptorSpacing.text = _settings.receptorGap.toString();
+            _optionScrollDirectionUp.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[0];
+            _optionScrollDirectionDown.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[1];
+            _optionScrollDirectionLeft.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[2];
+            _optionScrollDirectionRight.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[3];
+            _optionScrollDirectionSplit.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[4];
+            _optionScrollDirectionSplitDown.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[5];
+            _optionScrollDirectionPlus.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[6];
 
-            // Set Note Scale
-            optionNoteScale.slideValue = _settings.noteScale;
+            _optionMirrorMod.checked = _settings.activeVisualMods.indexOf("mirror") != -1;
 
-            // Set Volume
-            optionGameVolume.slideValue = _settings.gameVolume;
+            _optionRate.text = _settings.songRate.toString();
 
-            // Set Menu Volume
-            optionMenuVolume.slideValue = _gvars.menuMusicSoundVolume;
-
-            // Set Song Rate
-            optionRate.text = _settings.songRate.toString();
-
-            // Mirror Mod
-            optionMirrorMod.checked = (_settings.activeVisualMods.indexOf(optionMirrorMod.visual_mod) != -1);
-
-            // Set Autofails
-            for each (item in optionAutofail)
-            {
-                item.text = _settings["autofail" + StringUtil.upperCase(item.autofail)];
-            }
-
-            optionIsolation.text = (_avars.configIsolationStart + 1).toString();
-            optionIsolationTotal.text = _avars.configIsolationLength.toString();
+            _optionIsolation.text = (_avars.configIsolationStart + 1).toString();
+            _optionIsolationTotal.text = _avars.configIsolationLength.toString();
         }
 
-        override public function clickHandler(e:MouseEvent):void
+        private function toRoundedPercent(val:Number):String
         {
-            var item:*;
+            return Math.round(val * 100) + "%";
+        }
 
-            if (e.target == optionJudgeOffsetAuto)
+        private function onScrollSpeedChanged(e:Event):void
+        {
+            _settings.scrollSpeed = _optionScrollSpeed.validate(1, 0.1);
+        }
+
+        private function onReceptorGapChanged(e:Event):void
+        {
+            _settings.scrollSpeed = _optionReceptorSpacing.validate(80);
+        }
+
+        private function onNoteScaleChanged(e:Event):void
+        {
+            var sliderValue:int = Math.round(Math.max(Math.min(_optionNoteScale.slideValue, _optionNoteScale.maxValue), _optionNoteScale.minValue) * 100);
+
+            // Snap to larger value when close.
+            var snapTarget:int = 25;
+            var snapValue:int = sliderValue % snapTarget;
+            if (snapValue == 1 || snapValue == snapTarget - 1)
+                sliderValue = Math.round(sliderValue / snapTarget) * snapTarget;
+
+            _settings.noteScale = sliderValue / 100;
+        }
+
+        private function onGameVolumeChanged(e:Event):void
+        {
+            _settings.gameVolume = _optionGameVolume.slideValue;
+        }
+
+        private function onMenuVolumeChanged(e:Event):void
+        {
+            if (isNaN(_gvars.menuMusicSoundVolume))
+                _gvars.menuMusicSoundVolume = 1;
+
+            _gvars.menuMusicSoundVolume = Math.max(Math.min(_optionMenuVolume.slideValue, _optionMenuVolume.maxValue), _optionMenuVolume.minValue);
+            _gvars.menuMusicSoundTransform.volume = _optionMenuVolume.slideValue;
+
+            if (_gvars.menuMusic && _gvars.menuMusic.isPlaying)
+                _gvars.menuMusic.soundChannel.soundTransform = _gvars.menuMusicSoundTransform;
+        }
+
+        private function onGlobalOffsetChanged(e:Event):void
+        {
+            _settings.GLOBAL_OFFSET = _optionGlobalOffset.validate(0);
+        }
+
+        private function onJudgeOffsetChanged(e:Event):void
+        {
+            _settings.JUDGE_OFFSET = _optionJudgeOffset.validate(0);
+        }
+
+        private function onAutoJudgeOffsetChanged(e:Event):void
+        {
+            _settings.AUTO_JUDGE_OFFSET = !_settings.AUTO_JUDGE_OFFSET;
+            updateJudgeOffsetState();
+        }
+
+        private function updateJudgeOffsetState():void
+        {
+            _optionJudgeOffset.selectable = !_settings.AUTO_JUDGE_OFFSET;
+            _optionJudgeOffset.alpha = _settings.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
+        }
+
+        private function onAutofailAmazingChanged(e:Event):void
+        {
+            _settings.autofailAmazing = _optionAutofailAmazing.validate(0, 0);
+        }
+
+        private function onAutofailPerfectChanged(e:Event):void
+        {
+            _settings.autofailPerfect = _optionAutofailPerfect.validate(0, 0);
+        }
+
+        private function onAutofailGoodChanged(e:Event):void
+        {
+            _settings.autofailGood = _optionAutofailGood.validate(0, 0);
+        }
+
+        private function onAutofailAverageChanged(e:Event):void
+        {
+            _settings.autofailAverage = _optionAutofailAverage.validate(0, 0);
+        }
+
+        private function onAutofailMissChanged(e:Event):void
+        {
+            _settings.autofailMiss = _optionAutofailMiss.validate(0, 0);
+        }
+
+        private function onAutofailBooChanged(e:Event):void
+        {
+            _settings.autofailBoo = _optionAutofailBoo.validate(0, 0);
+        }
+
+        private function onAutofailRawGoodsChanged(e:Event):void
+        {
+            _settings.autofailRawGoods = _optionAutofailRawGoods.validate(0, 0);
+        }
+
+        private function onScrollDirectionChanged(e:Event):void
+        {
+            for (var scrollOption:BoxCheck in _scrollOptionsGroup)
             {
-                _settings.AUTO_JUDGE_OFFSET = !_settings.AUTO_JUDGE_OFFSET;
-                optionJudgeOffset.selectable = !_settings.AUTO_JUDGE_OFFSET;
-                optionJudgeOffset.alpha = _settings.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
-                optionJudgeOffsetAuto.checked = _settings.AUTO_JUDGE_OFFSET;
+                if (e.target != scrollOption)
+                    scrollOption.checked = false;
             }
 
-            else if (e.target.hasOwnProperty("scrollDirection"))
-            {
-                var dir:String = e.target.scrollDirection;
-                _settings.scrollDirection = dir;
+            // TODO: This badly needs radiobuttons
+            if (e.target == _optionScrollDirectionUp)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[0];
+            else if (e.target == _optionScrollDirectionDown)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[1];
+            else if (e.target == _optionScrollDirectionLeft)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[2];
+            else if (e.target == _optionScrollDirectionRight)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[3];
+            else if (e.target == _optionScrollDirectionSplit)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[4];
+            else if (e.target == _optionScrollDirectionSplitDown)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[5];
+            else if (e.target == _optionScrollDirectionPlus)
+                _settings.scrollDirection = SCROLL_DIRECTIONS[6];
+        }
 
-                for each (item in optionScrollDirections)
-                {
-                    item.checked = (_settings.scrollDirection == item.scrollDirection);
-                }
-            }
+        private function onMirrorChanged(e:Event):void
+        {
+            if (_settings.activeVisualMods.indexOf("mirror") != -1)
+                ArrayUtil.removeValue("mirror", _settings.activeVisualMods);
+            else
+                _settings.activeVisualMods.push("mirror");
+        }
 
-            else if (e.target == optionMirrorMod)
-            {
-                var visual_mod:String = optionMirrorMod.visual_mod;
-                if (_settings.activeVisualMods.indexOf(visual_mod) != -1)
-                {
-                    ArrayUtil.removeValue(visual_mod, _settings.activeVisualMods);
-                }
-                else
-                {
-                    _settings.activeVisualMods.push(visual_mod);
-                }
-                optionMirrorMod.checked = !optionMirrorMod.checked;
-            }
+        private function onSongRateChanged(e:Event):void
+        {
+            _settings.songRate = _optionRate.validate(1, 0.1);
+            _gvars.removeSongFiles();
 
             _parent.checkValidMods();
         }
 
-        override public function changeHandler(e:Event):void
+        private function onIsolationStartChanged(e:Event):void
         {
-            if (e.target == optionGameSpeed)
-            {
-                _settings.scrollSpeed = optionGameSpeed.validate(1, 0.1);
-            }
-
-            else if (e.target == optionOffset)
-            {
-                _settings.GLOBAL_OFFSET = optionOffset.validate(0);
-            }
-
-            else if (e.target == optionJudgeOffset)
-            {
-                _settings.JUDGE_OFFSET = optionJudgeOffset.validate(0);
-            }
-
-            else if (e.target == optionReceptorSpacing)
-            {
-                _settings.receptorGap = optionReceptorSpacing.validate(80);
-            }
-
-            else if (e.target == optionNoteScale)
-            {
-                var sliderValue:int = Math.round(Math.max(Math.min(optionNoteScale.slideValue, optionNoteScale.maxValue), optionNoteScale.minValue) * 100);
-
-                // Snap to larger value when close.
-                var snapTarget:int = 25;
-                var snapValue:int = sliderValue % snapTarget;
-                if (snapValue == 1 || snapValue == snapTarget - 1)
-                    sliderValue = Math.round(sliderValue / snapTarget) * snapTarget;
-
-                _settings.noteScale = sliderValue / 100;
-                textNoteScale.text = sliderValue + "%";
-            }
-
-            else if (e.target == optionGameVolume)
-            {
-                _settings.gameVolume = optionGameVolume.slideValue;
-                textGameVolume.text = Math.round(_settings.gameVolume * 100) + "%";
-            }
-
-            else if (e.target == optionRate)
-            {
-                _settings.songRate = optionRate.validate(1, 0.1);
-                _gvars.removeSongFiles();
-            }
-
-            else if (e.target == optionIsolation)
-            {
-                _avars.configIsolationStart = optionIsolation.validate(1, 1) - 1;
-                _avars.configIsolation = _avars.configIsolationStart > 0 || _avars.configIsolationLength > 0;
-            }
-
-            else if (e.target == optionIsolationTotal)
-            {
-                _avars.configIsolationLength = optionIsolationTotal.validate(0);
-                _avars.configIsolation = _avars.configIsolationStart > 0 || _avars.configIsolationLength > 0;
-            }
-
-            else if (e.target == optionMenuVolume)
-            {
-                _gvars.menuMusicSoundVolume = optionMenuVolume.slideValue;
-                if (isNaN(_gvars.menuMusicSoundVolume))
-                {
-                    _gvars.menuMusicSoundVolume = 1;
-                }
-                _gvars.menuMusicSoundVolume = Math.max(Math.min(_gvars.menuMusicSoundVolume, optionMenuVolume.maxValue), optionMenuVolume.minValue);
-                textMenuVolume.text = Math.round(_gvars.menuMusicSoundVolume * 100) + "%";
-                _gvars.menuMusicSoundTransform.volume = _gvars.menuMusicSoundVolume;
-
-                if (_gvars.menuMusic && _gvars.menuMusic.isPlaying)
-                {
-                    _gvars.menuMusic.soundChannel.soundTransform = _gvars.menuMusicSoundTransform;
-                }
-            }
-
-            else if (e.target.hasOwnProperty("autofail"))
-            {
-                var autofail:String = StringUtil.upperCase(e.target.autofail);
-                _settings["autofail" + autofail] = e.target.validate(0, 0);
-            }
+            _avars.configIsolationStart = _optionIsolation.validate(1, 1) - 1;
+            _avars.configIsolation = _avars.configIsolationStart > 0 || _avars.configIsolationLength > 0;
 
             _parent.checkValidMods();
         }
 
-        private function e_autoJudgeMouseOver(e:Event):void
+        private function onIsolationNotesChanged(e:Event):void
         {
-            optionJudgeOffsetAuto.addEventListener(MouseEvent.MOUSE_OUT, e_autoJudgeMouseOut);
-            displayToolTip(optionJudgeOffsetAuto.x, optionJudgeOffsetAuto.y + 25, _lang.string("popup_auto_judge_offset"));
-        }
+            _avars.configIsolationLength = _optionIsolationTotal.validate(0);
+            _avars.configIsolation = _avars.configIsolationStart > 0 || _avars.configIsolationLength > 0;
 
-        private function e_autoJudgeMouseOut(e:Event):void
-        {
-            optionJudgeOffsetAuto.removeEventListener(MouseEvent.MOUSE_OUT, e_autoJudgeMouseOut);
-            hideTooltip();
+            _parent.checkValidMods();
         }
 
         private function arcJudgeMenu(parent:SettingsWindow):ContextMenu
@@ -429,13 +426,13 @@ package popups.settings
             var judgeItem:ContextMenuItem = new ContextMenuItem("Custom Judge Windows");
             judgeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
             {
-                new Prompt(parent, 320, "Judge Window", 100, "SUBMIT", e_changeJudgeWindow);
+                new Prompt(parent, 320, "Judge Window", 100, "SUBMIT", onCustomJudgeWindowSubmit);
             });
             judgeMenu.customItems.push(judgeItem);
             return judgeMenu;
         }
 
-        private function e_changeJudgeWindow(judgeWindow:String):void
+        private function onCustomJudgeWindowSubmit(judgeWindow:String):void
         {
             _avars.configJudge = null;
             var judge:Array;
@@ -443,6 +440,7 @@ package popups.settings
             {
                 if (!judge)
                     judge = new Array();
+
                 var items:Array = item.split(",");
                 if (items.length != 2)
                 {
@@ -455,13 +453,9 @@ package popups.settings
             _avars.configJudge = judge;
 
             if (judge)
-            {
                 Alert.add(_lang.string("judge_window_set"));
-            }
             else
-            {
                 Alert.add(_lang.string("judge_window_cleared"));
-            }
         }
     }
 }

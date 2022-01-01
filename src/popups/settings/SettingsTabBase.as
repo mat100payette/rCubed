@@ -9,6 +9,9 @@ package popups.settings
     import flash.events.MouseEvent;
     import flash.events.Event;
     import flash.display.DisplayObject;
+    import classes.ui.BoxCheck;
+    import classes.ui.BoxSlider;
+    import classes.ui.ValidatedText;
 
     public class SettingsTabBase
     {
@@ -20,6 +23,7 @@ package popups.settings
 
         protected var _parent:SettingsWindow;
         protected var _settings:UserSettings;
+        protected var _options:Object = {};
         private var _hoverMessage:MouseTooltip;
 
         public function SettingsTabBase(settingsWindow:SettingsWindow, settings:UserSettings):void
@@ -45,22 +49,14 @@ package popups.settings
             for (var index:int = container.numChildren - 1; index >= 0; index--)
             {
                 const olditem:DisplayObject = container.getChildAt(index);
-                olditem.removeEventListener(MouseEvent.CLICK, clickHandler);
-                olditem.removeEventListener(Event.CHANGE, changeHandler);
+
+                    // TODO: Remove the listeners in a `dispose()` function on the widgets
+                    //olditem.removeEventListener(MouseEvent.CLICK, clickHandler);
+                    //olditem.removeEventListener(Event.CHANGE, changeHandler);
             }
         }
 
         public function setValues():void
-        {
-
-        }
-
-        public function clickHandler(e:MouseEvent):void
-        {
-
-        }
-
-        public function changeHandler(e:Event):void
         {
 
         }

@@ -150,7 +150,7 @@ package popups.settings
             }
         }
 
-        override public function clickHandler(e:MouseEvent):void
+        public function clickHandler(e:MouseEvent):void
         {
             setValues();
             keyListenerTarget = (e.target as BoxText);

@@ -236,7 +236,7 @@ package popups.settings
             }
         }
 
-        override public function clickHandler(e:MouseEvent):void
+        public function clickHandler(e:MouseEvent):void
         {
             //- Noteskin
             if (e.target.hasOwnProperty("skin"))

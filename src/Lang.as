@@ -3,16 +3,43 @@ package
 
     public class Lang
     {
+        // JUDGES
+        public static const GAME_AMAZING:String = "game_amazing";
+        public static const GAME_PERFECT:String = "game_perfect";
+        public static const GAME_GOOD:String = "game_good";
+        public static const GAME_AVERAGE:String = "game_average";
+        public static const GAME_MISS:String = "game_miss";
+        public static const GAME_BOO:String = "game_boo";
+
+        // GENERAL SETTINGS TAB
+        public static const OPTIONS_SCROLL_SPEED:String = "options_speed";
+        public static const OPTIONS_RECEPTOR_SPACING:String = "options_receptor_spacing";
+        public static const OPTIONS_NOTE_SCALE:String = "options_note_scale";
+        public static const OPTIONS_GAME_VOLUME:String = "options_volume";
+        public static const OPTIONS_MENU_VOLUME:String = "air_options_menu_volume";
+        public static const OPTIONS_GLOBAL_OFFSET:String = "options_global_offset";
+        public static const OPTIONS_JUDGE_OFFSET:String = "options_judge_offset";
+        public static const OPTIONS_AUTO_JUDGE_OFFSET:String = "options_auto_judge_offset";
+        public static const OPTIONS_POPUP_AUTO_JUDGE_OFFSET:String = "popup_auto_judge_offset";
+        public static const OPTIONS_AUTOFAIL:String = "options_autofail";
+        public static const OPTIONS_RAW_GOODS:String = "game_raw_goods";
+        public static const OPTIONS_SCROLL:String = "options_scroll";
+        public static const OPTIONS_SCROLL_UP:String = "options_scroll_up";
+        public static const OPTIONS_SCROLL_DOWN:String = "options_scroll_down";
+        public static const OPTIONS_SCROLL_LEFT:String = "options_scroll_left";
+        public static const OPTIONS_SCROLL_RIGHT:String = "options_scroll_right";
+        public static const OPTIONS_SCROLL_SPLIT:String = "options_scroll_split";
+        public static const OPTIONS_SCROLL_SPLIT_DOWN:String = "options_scroll_split_down";
+        public static const OPTIONS_SCROLL_PLUS:String = "options_scroll_plus";
+        public static const OPTIONS_MIRROR:String = "options_mod_mirror";
+        public static const OPTIONS_RATE:String = "options_rate";
+        public static const OPTIONS_ISOLATION_START:String = "options_isolation_start";
+        public static const OPTIONS_ISOLATION_NOTES:String = "options_isolation_notes";
+
         // COLOR SETTINGS TAB
         public static const OPTIONS_JUDGE_COLORS_DISPLAY:String = "options_judge_colors_title";
         public static const OPTIONS_GAME_COLORS_TITLE:String = "options_game_colors_title";
         public static const OPTIONS_COMBO_COLORS_TITLE:String = "options_combo_colors_title";
-        public static const OPTIONS_GAME_AMAZING:String = "game_amazing";
-        public static const OPTIONS_GAME_PERFECT:String = "game_perfect";
-        public static const OPTIONS_GAME_GOOD:String = "game_good";
-        public static const OPTIONS_GAME_AVERAGE:String = "game_average";
-        public static const OPTIONS_GAME_MISS:String = "game_miss";
-        public static const OPTIONS_GAME_BOO:String = "game_boo";
         public static const OPTIONS_GAME_COLOR_1:String = "options_game_colors_0";
         public static const OPTIONS_GAME_COLOR_2:String = "options_game_colors_1";
         public static const OPTIONS_GAME_COLOR_3:String = "options_game_colors_4";

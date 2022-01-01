@@ -4,6 +4,7 @@ package classes.ui
     import flash.display.DisplayObjectContainer;
     import flash.display.Sprite;
     import flash.events.MouseEvent;
+    import flash.events.Event;
 
     dynamic public class BoxCheck extends Sprite
     {
@@ -13,27 +14,27 @@ package classes.ui
         private var _highlight:Boolean = false;
         private var _active:Boolean = false;
 
-        private var _listener:Function = null;
+        private var _onClick:Function = null;
 
-        public function BoxCheck(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, listener:Function = null):void
+        public function BoxCheck(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, onClick:Function = null):void
         {
             if (parent)
                 parent.addChild(this);
 
             //- Set Button Mode
-            this.mouseChildren = false;
-            this.useHandCursor = true;
-            this.buttonMode = true;
+            mouseChildren = false;
+            useHandCursor = true;
+            buttonMode = true;
 
             //- Set position
-            this.x = xpos;
-            this.y = ypos;
+            x = xpos;
+            y = ypos;
 
             //- Set click event listener
-            if (listener != null)
+            if (onClick != null)
             {
-                this._listener = listener;
-                this.addEventListener(MouseEvent.CLICK, listener);
+                _onClick = onClick;
+                addEventListener(MouseEvent.CLICK, this.onClick);
             }
 
             draw();
@@ -41,25 +42,32 @@ package classes.ui
 
         public function dispose():void
         {
-            if (_listener != null)
-                this.removeEventListener(MouseEvent.CLICK, _listener);
+            if (_onClick != null)
+                removeEventListener(MouseEvent.CLICK, onClick);
+        }
+
+        private function onClick(event:Event):void
+        {
+            checked = !_active;
+            if (_onClick != null)
+                _onClick(event);
         }
 
         public function draw():void
         {
-            this.graphics.clear();
-            this.graphics.lineStyle(1, 0xFFFFFF, 0.75, true);
-            this.graphics.beginFill((highlight ? GameBackgroundColor.BG_LIGHT : 0xFFFFFF), (highlight ? 1 : 0.25));
-            this.graphics.drawRect(0, 0, width, height);
-            this.graphics.endFill();
+            graphics.clear();
+            graphics.lineStyle(1, 0xFFFFFF, 0.75, true);
+            graphics.beginFill((highlight ? GameBackgroundColor.BG_LIGHT : 0xFFFFFF), (highlight ? 1 : 0.25));
+            graphics.drawRect(0, 0, width, height);
+            graphics.endFill();
 
             // X
-            if (checked)
+            if (_active)
             {
-                this.graphics.lineStyle(0, 0, 0);
-                this.graphics.beginFill(0xFFFFFF, 0.75)
-                this.graphics.drawRect(5, 5, width - 9, height - 9);
-                this.graphics.endFill();
+                graphics.lineStyle(0, 0, 0);
+                graphics.beginFill(0xFFFFFF, 0.75)
+                graphics.drawRect(5, 5, width - 9, height - 9);
+                graphics.endFill();
             }
         }
 
