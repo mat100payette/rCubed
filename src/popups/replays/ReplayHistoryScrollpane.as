@@ -6,6 +6,7 @@ package popups.replays
     import flash.display.DisplayObject;
     import classes.Language;
     import classes.ui.Text;
+    import flash.text.TextFormatAlign;
 
     public class ReplayHistoryScrollpane extends Sprite
     {
@@ -36,7 +37,7 @@ package popups.replays
             this.graphics.endFill();
 
             _helper_text = new Text(this, 0, 0, Language.instance.string("replay_no_entries_visible"));
-            _helper_text.setAreaParams(_width, _height, "center");
+            _helper_text.setAreaParams(_width, _height, TextFormatAlign.CENTER);
         }
 
         /**

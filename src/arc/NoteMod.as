@@ -11,7 +11,7 @@ package arc
         private var shuffle:Array;
         private var lastChord:Object;
 
-        private const DIRECTIONS:Array = ['L', 'D', 'U', 'R'];
+        private const DIRECTIONS:Array = ["L", "D", "U", "R"];
         private const HALF_COLOR:Object = {"red": "red", "blue": "red", "purple": "purple", "yellow": "blue", "pink": "purple", "orange": "yellow", "cyan": "pink", "green": "orange", "white": "white"}
 
         public var options:GameOptions;

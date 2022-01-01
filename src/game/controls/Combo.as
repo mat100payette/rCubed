@@ -136,10 +136,10 @@ package game.controls
             }
         }
 
-        public function set alignment(value:String):void
+        public function set alignment(autosize:String):void
         {
-            field.autoSize = value;
-            fieldShadow.autoSize = value;
+            field.autoSize = autosize;
+            fieldShadow.autoSize = autosize;
         }
     }
 }

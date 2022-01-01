@@ -91,7 +91,7 @@ package classes.chart
                 editorSongInfo.chart_type = NoteChart.FFR_BEATBOX;
                 editorSongInfo.level = this.id;
 
-                chart = NoteChart.parseChart(NoteChart.FFR_BEATBOX, editorSongInfo, '_root.beatBox = [];');
+                chart = NoteChart.parseChart(NoteChart.FFR_BEATBOX, editorSongInfo, "_root.beatBox = [];");
             }
             else if (options.settings.songRate != 1 || options.settings.frameRate > 30 || rateReverse || options.settings.forceNewJudge)
                 this.type = NoteChart.FFR_MP3;

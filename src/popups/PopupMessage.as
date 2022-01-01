@@ -9,6 +9,7 @@ package popups
     import flash.display.Bitmap;
     import flash.events.MouseEvent;
     import menu.MenuPanel;
+    import flash.text.TextFormatAlign;
 
     public class PopupMessage extends MenuPanel
     {
@@ -49,12 +50,12 @@ package popups
 
             titleDisplay = new Text(box, 5, 5, displayTitle, 20);
             titleDisplay.width = box.width - 10;
-            titleDisplay.align = Text.CENTER;
+            titleDisplay.align = TextFormatAlign.CENTER;
 
             messageDisplay = new Text(box, 5, 0, dislayText, 14);
             messageDisplay.height = box.height;
             messageDisplay.width = box.width - 10;
-            messageDisplay.align = Text.CENTER;
+            messageDisplay.align = TextFormatAlign.CENTER;
 
             //- Close
             closeOptions = new BoxButton(box, box.width - 94.5, box.height - 42, 79.5, 27, _lang.string("menu_close"), 12, clickHandler);

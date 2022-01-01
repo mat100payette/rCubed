@@ -14,6 +14,7 @@ package game
     import flash.text.TextField;
     import flash.text.TextFormat;
     import menu.MenuPanel;
+    import flash.text.TextFieldAutoSize;
 
     public class GameLoading extends MenuPanel
     {
@@ -78,7 +79,7 @@ package game
             namedisplay.selectable = false;
             namedisplay.embedFonts = true;
             namedisplay.antiAliasType = AntiAliasType.ADVANCED;
-            namedisplay.autoSize = "left";
+            namedisplay.autoSize = TextFieldAutoSize.LEFT;
             namedisplay.defaultTextFormat = _textFormat;
             namedisplay.htmlText = songName;
             this.addChild(namedisplay);

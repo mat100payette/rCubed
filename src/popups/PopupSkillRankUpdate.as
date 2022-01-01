@@ -16,6 +16,7 @@ package popups
     import flash.text.AntiAliasType;
     import flash.text.TextField;
     import menu.MenuPanel;
+    import flash.text.TextFieldAutoSize;
 
     public class PopupSkillRankUpdate extends MenuPanel
     {
@@ -90,7 +91,7 @@ package popups
             tf.multiline = true;
             tf.embedFonts = true;
             tf.selectable = false;
-            tf.autoSize = "left";
+            tf.autoSize = TextFieldAutoSize.LEFT;
             tf.antiAliasType = AntiAliasType.ADVANCED;
             tf.defaultTextFormat = Constant.TEXT_FORMAT_12;
             tf.htmlText = messages.join("\n");

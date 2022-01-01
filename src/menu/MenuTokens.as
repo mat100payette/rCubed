@@ -50,7 +50,7 @@ package menu
         {
             //- Setup Settings
             options = new Object();
-            options.active_type = 'ski';
+            options.active_type = "ski";
             options.filter_complete = false;
 
             //- Add Background
@@ -99,9 +99,9 @@ package menu
 
         private function onNormalSelect(e:Event):void
         {
-            if (options.active_type != 'has')
+            if (options.active_type != "has")
             {
-                options.active_type = 'has';
+                options.active_type = "has";
                 normalTokenButton.active = true;
                 skillTokenButton.active = false;
                 buildTokens();
@@ -110,9 +110,9 @@ package menu
 
         private function onSkillSelect(e:Event):void
         {
-            if (options.active_type != 'ski')
+            if (options.active_type != "ski")
             {
-                options.active_type = 'ski';
+                options.active_type = "ski";
                 normalTokenButton.active = false;
                 skillTokenButton.active = true;
                 buildTokens();
@@ -166,7 +166,7 @@ package menu
             var token:TokenItem;
             for each (var item:Object in _gvars.TOKENS_TYPE[options.active_type])
             {
-                if (options.filter_complete && item['unlock'])
+                if (options.filter_complete && item["unlock"])
                     continue;
 
                 token = new TokenItem(item);
@@ -215,7 +215,7 @@ package menu
 
         private function addTokenImageLoader(token_info:Object, token_ui:TokenItem):void
         {
-            var imageHash:String = MD5.hash(token_info['picture']);
+            var imageHash:String = MD5.hash(token_info["picture"]);
             if (loadedTokenImages[imageHash] != null)
             {
                 token_ui.addTokenImage(loadedTokenImages[imageHash] as Bitmap, false);
@@ -223,7 +223,7 @@ package menu
             }
 
             // Load Image
-            loadQueue.push({"hash": imageHash, "url": token_info['picture'], "ui": token_ui});
+            loadQueue.push({"hash": imageHash, "url": token_info["picture"], "ui": token_ui});
         }
 
         private function downloadTokenImage():void
@@ -236,15 +236,15 @@ package menu
             // Load Avatar
             var loader:Loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, downloadTokenImageComplete);
-            loader.load(new URLRequest(ACTIVE_DOWNLOAD['url']));
+            loader.load(new URLRequest(ACTIVE_DOWNLOAD["url"]));
         }
 
         private function downloadTokenImageComplete(e:Event):void
         {
-            loadedTokenImages[ACTIVE_DOWNLOAD['hash']] = e.target.content as Bitmap;
+            loadedTokenImages[ACTIVE_DOWNLOAD["hash"]] = e.target.content as Bitmap;
 
-            if ((ACTIVE_DOWNLOAD['ui'] as TokenItem).parent != null)
-                (ACTIVE_DOWNLOAD['ui'] as TokenItem).addTokenImage(e.target.content as Bitmap);
+            if ((ACTIVE_DOWNLOAD["ui"] as TokenItem).parent != null)
+                (ACTIVE_DOWNLOAD["ui"] as TokenItem).addTokenImage(e.target.content as Bitmap);
 
             ACTIVE_DOWNLOAD = null;
 

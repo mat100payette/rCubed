@@ -46,7 +46,7 @@ package com.flashfla.utils
             bytes = data as ByteArray;
         }
         else
-            throw new ArgumentError('Error #1001: The specified data is invalid');
+            throw new ArgumentError("Error #1001: The specified data is invalid");
 
         var position:uint = bytes.position;
         var finder:Finder = new Finder(bytes);
@@ -58,7 +58,6 @@ package com.flashfla.utils
 import flash.utils.ByteArray;
 import flash.utils.Endian;
 import flash.geom.Rectangle;
-import flash.system.ApplicationDomain;
 
 /**
  * @private
@@ -122,9 +121,9 @@ internal class Finder
                     {
                         this._data.readUnsignedShort(); // Object ID
                         name = this._data.readString();
-                        index = name.lastIndexOf('.');
+                        index = name.lastIndexOf(".");
                         if (index >= 0)
-                            name = name.substr(0, index) + '::' + name.substr(index + 1); // Fast. Simple. Cheat ;)
+                            name = name.substr(0, index) + "::" + name.substr(index + 1); // Fast. Simple. Cheat ;)
                         definitions.push(name);
                     }
                 }
@@ -273,7 +272,7 @@ internal class Finder
 
                             if (name)
                             { // not the best method, i know
-                                name = name + '.<' + this.getName(paramID) + '>';
+                                name = name + ".<" + this.getName(paramID) + ">";
                                 names.push(name);
                             }
                         }
@@ -456,8 +455,8 @@ internal class Finder
         var ns:uint = mn[0] as uint;
         var nsName:String = this._stringTable[this._namespaceTable[ns] as uint] as String;
         var name:String = mn[1] is String ? mn[1] : (this._stringTable[mn[1] as uint] as String);
-        if (nsName && nsName.indexOf('__AS3__') < 0 /* cheat! */)
-            name = nsName + '::' + name;
+        if (nsName && nsName.indexOf("__AS3__") < 0 /* cheat! */)
+            name = nsName + "::" + name;
         return name;
     }
 
@@ -469,12 +468,12 @@ internal class SWFByteArray extends ByteArray
     /**
      * @private
      */
-    private static const TAG_SWF:String = 'FWS';
+    private static const TAG_SWF:String = "FWS";
 
     /**
      * @private
      */
-    private static const TAG_SWF_COMPRESSED:String = 'CWS';
+    private static const TAG_SWF_COMPRESSED:String = "CWS";
 
     public function SWFByteArray(data:ByteArray = null):void
     {
@@ -501,7 +500,7 @@ internal class SWFByteArray extends ByteArray
                         super.uncompress();
                 }
                 else
-                    throw new ArgumentError('Error #2124: Loaded file is an unknown type.');
+                    throw new ArgumentError("Error #2124: Loaded file is an unknown type.");
 
                 this.readHeader();
             }
@@ -613,7 +612,7 @@ internal class SWFByteArray extends ByteArray
     public function readString():String
     {
         var i:uint = super.position;
-        while (this[i] && (i += 1))
+        while (this[i] && (i++))
         {
         }
         var str:String = super.readUTFBytes(i - super.position);
@@ -623,7 +622,7 @@ internal class SWFByteArray extends ByteArray
 
     public function traceArray(array:ByteArray):String
     { // for debug
-        var out:String = '';
+        var out:String = "";
         var pos:uint = array.position;
         var i:uint = 0;
         array.position = 0;
@@ -631,8 +630,8 @@ internal class SWFByteArray extends ByteArray
         while (array.bytesAvailable)
         {
             var str:String = array.readUnsignedByte().toString(16).toUpperCase();
-            str = str.length < 2 ? '0' + str : str;
-            out += str + ' ';
+            str = str.length < 2 ? "0" + str : str;
+            out += str + " ";
         }
 
         array.position = pos;

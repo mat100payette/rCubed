@@ -6,13 +6,10 @@ package classes.ui
     import flash.text.AntiAliasType;
     import flash.text.TextField;
     import flash.text.TextFormat;
+    import flash.text.TextFormatAlign;
 
     public dynamic class Text extends Sprite
     {
-        public static const LEFT:String = "left";
-        public static const CENTER:String = "center";
-        public static const RIGHT:String = "right";
-
         private var _textTF:TextField;
         private var _textTFormat:TextFormat;
         private var _message:String;
@@ -21,7 +18,7 @@ package classes.ui
         private var _fontSize:Number;
         private var _fontColor:String;
         private var _useArea:Boolean = false;
-        private var _align:String = LEFT;
+        private var _align:String = TextFormatAlign.LEFT;
         private var _isUnicode:Boolean = false;
 
         ///- Constructor
@@ -52,7 +49,7 @@ package classes.ui
             draw();
         }
 
-        public function setAreaParams(width:Number, height:Number, align:String = LEFT):void
+        public function setAreaParams(width:Number, height:Number, align:String = TextFormatAlign.LEFT):void
         {
             _width = width;
             _height = height;
@@ -168,15 +165,15 @@ package classes.ui
                 _textTF.y = ((_height - _textTF.height) / 2);
 
                 //- Text Alignment to Area
-                if (_align == LEFT)
+                if (_align == TextFormatAlign.LEFT)
                 {
                     _textTF.x = 0;
                 }
-                else if (_align == CENTER)
+                else if (_align == TextFormatAlign.CENTER)
                 {
                     _textTF.x = ((_width - _textTF.width) / 2);
                 }
-                else if (_align == RIGHT)
+                else if (_align == TextFormatAlign.RIGHT)
                 {
                     _textTF.x = (_width - _textTF.width);
                 }

@@ -6,18 +6,12 @@ package popups.settings
     import classes.ui.Text;
     import game.GameOptions;
     import flash.geom.Point;
-    import flash.events.MouseEvent;
-    import flash.events.Event;
     import flash.display.DisplayObject;
-    import classes.ui.BoxCheck;
-    import classes.ui.BoxSlider;
-    import classes.ui.ValidatedText;
+    import flash.text.TextFormatAlign;
 
     public class SettingsTabBase
     {
         protected static const DEFAULT_OPTIONS:GameOptions = new GameOptions(null);
-        protected static const JUDGE_TITLES:Array = ["amazing", "perfect", "good", "average", "miss", "boo"];
-        protected static const RECEPTOR_ROTATIONS:Array = [1, 0, 2, -1];
 
         public var container:ScrollPaneContent;
 
@@ -80,7 +74,7 @@ package popups.settings
             }
         }
 
-        public function displayToolTip(tx:Number, ty:Number, text:String, align:String = "left"):void
+        public function displayToolTip(tx:Number, ty:Number, text:String, align:String = TextFormatAlign.LEFT):void
         {
             if (!_hoverMessage)
                 _hoverMessage = new MouseTooltip();
@@ -91,11 +85,11 @@ package popups.settings
             switch (align)
             {
                 default:
-                case "left":
+                case TextFormatAlign.LEFT:
                     _hoverMessage.x = messagePoint.x;
                     _hoverMessage.y = messagePoint.y;
                     break;
-                case "right":
+                case TextFormatAlign.RIGHT:
                     _hoverMessage.x = messagePoint.x - _hoverMessage.width;
                     _hoverMessage.y = messagePoint.y;
                     break;

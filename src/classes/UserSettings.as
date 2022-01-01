@@ -108,7 +108,7 @@ package classes
                     return settings.exportFilters();
 
                 // No need to expose internal state
-                if (name == 'isLiteUser' || name == '_compatSettings')
+                if (name == "isLiteUser" || name == "_compatSettings")
                     return undefined;
 
                 return val;

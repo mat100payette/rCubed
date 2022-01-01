@@ -12,6 +12,7 @@ package popups.settings
     import com.flashfla.utils.ColorUtil;
     import flash.events.Event;
     import flash.events.Event;
+    import flash.text.TextFormatAlign;
 
     public class SettingsTabColors extends SettingsTabBase
     {
@@ -131,14 +132,13 @@ package popups.settings
             container.graphics.moveTo(295, 15);
             container.graphics.lineTo(295, 405);
 
-            var i:int;
             var xOff:int = 15;
             var yOff:int = 15;
 
             /// Col 1
             const gameJudgeColorTitle:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_JUDGE_COLORS_DISPLAY), 14);
             gameJudgeColorTitle.width = 265;
-            gameJudgeColorTitle.align = Text.CENTER;
+            gameJudgeColorTitle.align = TextFormatAlign.CENTER;
 
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
@@ -154,7 +154,7 @@ package popups.settings
 
             const gameColorTitle:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAME_COLORS_TITLE), 14);
             gameColorTitle.width = 265;
-            gameColorTitle.align = Text.CENTER;
+            gameColorTitle.align = TextFormatAlign.CENTER;
 
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
@@ -169,7 +169,7 @@ package popups.settings
 
             const gameComboColorTitle:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_COMBO_COLORS_TITLE), 14);
             gameComboColorTitle.width = 265;
-            gameComboColorTitle.align = Text.CENTER;
+            gameComboColorTitle.align = TextFormatAlign.CENTER;
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 

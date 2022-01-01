@@ -314,14 +314,14 @@ package classes.replay
         {
             switch (noteDir)
             {
-                case 'W':
-                    return 'L';
-                case 'X':
-                    return 'D';
-                case 'Y':
-                    return 'U';
-                case 'Z':
-                    return 'R';
+                case "W":
+                    return "L";
+                case "X":
+                    return "D";
+                case "Y":
+                    return "U";
+                case "Z":
+                    return "R";
                 default:
                     return noteDir;
             }
@@ -438,14 +438,14 @@ package classes.replay
 
         public static function getReplayChar(dir:String):String
         {
-            if (dir == 'L')
-                return 'W';
-            if (dir == 'D')
-                return 'X';
-            if (dir == 'U')
-                return 'Y';
-            if (dir == 'R')
-                return 'Z';
+            if (dir == "L")
+                return "W";
+            if (dir == "D")
+                return "X";
+            if (dir == "U")
+                return "Y";
+            if (dir == "R")
+                return "Z";
             return dir;
         }
     }

@@ -57,6 +57,7 @@ package game
     import menu.MenuPanel;
     import menu.MenuSongSelection;
     import sql.SQLSongUserInfo;
+    import flash.text.TextFieldAutoSize;
 
     public class GameplayDisplay extends MenuPanel
     {
@@ -532,7 +533,7 @@ package game
             {
                 player1Combo = new Combo(options);
                 if (!sideScroll)
-                    player1Combo.alignment = "right";
+                    player1Combo.alignment = TextFieldAutoSize.RIGHT;
                 this.addChild(player1Combo);
 
                 comboStatic = new TextStatic(_lang.string("game_combo"));
@@ -543,7 +544,7 @@ package game
             {
                 comboTotal = new Combo(options);
                 if (sideScroll)
-                    comboTotal.alignment = "right";
+                    comboTotal.alignment = TextFieldAutoSize.RIGHT;
                 this.addChild(comboTotal);
 
                 comboTotalStatic = new TextStatic(_lang.string("game_combo_total"));

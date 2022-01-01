@@ -6,6 +6,7 @@ package classes.ui
     import flash.events.TimerEvent;
     import flash.geom.Point;
     import flash.utils.Timer;
+    import flash.text.TextFormatAlign;
 
     dynamic public class BoxButton extends Box
     {
@@ -29,7 +30,7 @@ package classes.ui
             _text = new Text(this, 0, 0, text, size, "#FFFFFF");
             _text.height = height + 1;
             _text.width = width;
-            _text.align = Text.CENTER;
+            _text.align = TextFormatAlign.CENTER;
 
             //- Set Defaults
             this.mouseEnabled = true;

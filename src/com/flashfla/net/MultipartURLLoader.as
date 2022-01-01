@@ -99,8 +99,8 @@ package com.flashfla.net
          */
         public function load(path:String, async:Boolean = false):void
         {
-            if (path == null || path == '')
-                throw new IllegalOperationError('You cant load without specifing PATH');
+            if (path == null || path == "")
+                throw new IllegalOperationError("You cant load without specifing PATH");
 
             _path = path;
             _async = async;
@@ -128,10 +128,10 @@ package com.flashfla.net
          */
         public function startLoad():void
         {
-            if (_path == null || _path == '' || _async == false)
-                throw new IllegalOperationError('You can use this method only if loading asynchronous.');
+            if (_path == null || _path == "" || _async == false)
+                throw new IllegalOperationError("You can use this method only if loading asynchronous.");
             if (!_prepared && _async)
-                throw new IllegalOperationError('You should prepare data before sending when using asynchronous.');
+                throw new IllegalOperationError("You should prepare data before sending when using asynchronous.");
 
             doSend();
         }
@@ -165,7 +165,7 @@ package com.flashfla.net
          * @param	name	Variable name
          * @param	value	Variable value
          */
-        public function addVariable(name:String, value:Object = ''):void
+        public function addVariable(name:String, value:Object = ""):void
         {
             if (_variableNames.indexOf(name) == -1)
             {
@@ -184,7 +184,7 @@ package com.flashfla.net
          * @param	dataField	Name of the field containg file data
          * @param	contentType	MIME type of the uploading file
          */
-        public function addFile(fileContent:ByteArray, fileName:String, dataField:String = 'Filedata', contentType:String = 'application/octet-stream'):void
+        public function addFile(fileContent:ByteArray, fileName:String, dataField:String = "Filedata", contentType:String = "application/octet-stream"):void
         {
             if (_fileNames.indexOf(fileName) == -1)
             {
@@ -258,7 +258,7 @@ package com.flashfla.net
         {
             if (_boundary == null)
             {
-                _boundary = '';
+                _boundary = "";
                 for (var i:int = 0; i < 0x20; i++)
                 {
                     _boundary += String.fromCharCode(int(97 + Math.random() * 25));
@@ -286,7 +286,7 @@ package com.flashfla.net
         {
             if (format != URLLoaderDataFormat.BINARY && format != URLLoaderDataFormat.TEXT && format != URLLoaderDataFormat.VARIABLES)
             {
-                throw new IllegalOperationError('Illegal URLLoader Data Format');
+                throw new IllegalOperationError("Illegal URLLoader Data Format");
             }
             _loader.dataFormat = format;
         }
@@ -300,11 +300,11 @@ package com.flashfla.net
         {
             var urlRequest:URLRequest = new URLRequest();
             urlRequest.url = _path;
-            //urlRequest.contentType = 'multipart/form-data; boundary=' + getBoundary();
+            //urlRequest.contentType = "multipart/form-data; boundary=" + getBoundary();
             urlRequest.method = URLRequestMethod.POST;
             urlRequest.data = _data;
 
-            urlRequest.requestHeaders.push(new URLRequestHeader('Content-type', 'multipart/form-data; boundary=' + getBoundary()));
+            urlRequest.requestHeaders.push(new URLRequestHeader("Content-type", "multipart/form-data; boundary=" + getBoundary()));
 
             if (requestHeaders.length)
             {
@@ -423,7 +423,7 @@ package com.flashfla.net
             }
             postData = LINEBREAK(postData);
             postData = LINEBREAK(postData);
-            bytes = 'Submit Query';
+            bytes = "Submit Query";
             for (i = 0; i < bytes.length; i++)
             {
                 postData.writeByte(bytes.charCodeAt(i));
@@ -460,7 +460,7 @@ package com.flashfla.net
             postData.writeUTFBytes(part.fileName);
             postData = QUOTATIONMARK(postData);
             postData = LINEBREAK(postData);
-            bytes = 'Content-Type: ' + part.contentType;
+            bytes = "Content-Type: " + part.contentType;
             for (i = 0; i < bytes.length; i++)
             {
                 postData.writeByte(bytes.charCodeAt(i));
@@ -614,7 +614,7 @@ internal class FilePart
     public var dataField:String;
     public var contentType:String;
 
-    public function FilePart(fileContent:ByteArray, fileName:String, dataField:String = 'Filedata', contentType:String = 'application/octet-stream')
+    public function FilePart(fileContent:ByteArray, fileName:String, dataField:String = "Filedata", contentType:String = "application/octet-stream")
     {
         this.fileContent = fileContent;
         this.fileName = fileName;

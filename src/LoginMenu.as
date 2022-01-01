@@ -251,7 +251,7 @@ package
             Constant.addDefaultRequestVariables(requestVars);
             requestVars.username = input_user.text;
             requestVars.password = input_pass.text;
-            requestVars.rememberPassword = (this.rememberPassword ? 'true' : 'false');
+            requestVars.rememberPassword = (this.rememberPassword ? "true" : "false");
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
@@ -403,19 +403,19 @@ package
         {
             var out:Object = {"state": STORED_NONE};
 
-            var username:String = LocalStore.getVariable("uUsername", '');
-            var sessionToken:String = LocalStore.getVariable("uSessionToken", '');
+            var username:String = LocalStore.getVariable("uUsername", "");
+            var sessionToken:String = LocalStore.getVariable("uSessionToken", "");
 
-            if (sessionToken != '')
+            if (sessionToken != "")
             {
                 out["state"] = STORED_SESSION;
                 out["username"] = Crypt.Decode(username);
                 out["token"] = Crypt.Decode(sessionToken);
                 out["avatar"] = LocalStore.getVariable("uAvatar", null);
             }
-            else if (username != '')
+            else if (username != "")
             {
-                var password:String = LocalStore.getVariable("uPassword", '');
+                var password:String = LocalStore.getVariable("uPassword", "");
 
                 out["state"] = STORED_PASSWORD;
                 out["username"] = Crypt.Decode(username);

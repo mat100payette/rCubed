@@ -35,8 +35,6 @@ package com.flashfla.net
     import flash.events.SecurityErrorEvent;
     import flash.net.URLRequest;
     import flash.net.URLStream;
-    import flash.system.ApplicationDomain;
-    import flash.system.LoaderContext;
     import flash.utils.ByteArray;
     import flash.utils.Endian;
 
@@ -47,7 +45,7 @@ package com.flashfla.net
      * <pre>
      * var loader:Loader = Loader(addChild(new Loader()));
      * var fLoader:ForcibleLoader = new ForcibleLoader(loader);
-     * fLoader.load(new URLRequest('swf7.swf'));
+     * fLoader.load(new URLRequest("swf7.swf"));
      * </pre>
      *
      * @author yossy:beinteractive

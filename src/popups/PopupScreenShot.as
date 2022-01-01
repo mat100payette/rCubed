@@ -4,9 +4,9 @@
 
 package popups
 {
-    import classes.Box;
-    import classes.BoxButton;
-    import classes.Text;
+    import classes.ui.Box;
+    import classes.ui.BoxButton;
+    import classes.ui.Text;
     import com.flashfla.utils.SystemUtil;
     import com.flashfla.utils.TimeUtil;
     import flash.events.Event;
@@ -17,6 +17,7 @@ package popups
     import flash.text.TextFormat;
     import menu.MenuPanel;
     import classes.Language;
+    import flash.text.TextFormatAlign;
 
     public class PopupScreenShot extends MenuPanel
     {
@@ -112,7 +113,7 @@ package popups
             var closeText:Text = new Text("CLOSE");
             closeText.y = 7;
             closeText.width = closeBox.width;
-            closeText.align = Text.CENTER;
+            closeText.align = TextFormatAlign.CENTER;
             closeBox.addChild(closeText);
         }
 

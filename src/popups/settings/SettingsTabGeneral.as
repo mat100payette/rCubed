@@ -150,7 +150,6 @@ package popups.settings
             container.graphics.moveTo(394, 0);
             container.graphics.lineTo(394, 418);
 
-            var i:int;
             var xOff:int = 15;
             var yOff:int = 15;
 

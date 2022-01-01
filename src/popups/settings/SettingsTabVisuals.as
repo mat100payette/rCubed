@@ -98,7 +98,6 @@ package popups.settings
             container.graphics.moveTo(295, 15);
             container.graphics.lineTo(295, 405);
 
-            var i:int;
             var xOff:int;
             var yOff:int;
 

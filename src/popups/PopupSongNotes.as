@@ -27,6 +27,9 @@ package popups
     import menu.MenuPanel;
     import menu.MenuSongSelection;
     import sql.SQLSongUserInfo;
+    import flash.text.TextFormatAlign;
+    import fl.controls.TextInput;
+    import flash.text.TextFieldType;
 
     public class PopupSongNotes extends MenuPanel
     {
@@ -88,7 +91,7 @@ package popups
 
             var titleDisplay:Text = new Text(box, 5, 20, "- " + songInfo["name"] + " -", 20);
             titleDisplay.width = box.width - 10;
-            titleDisplay.align = Text.CENTER;
+            titleDisplay.align = TextFormatAlign.CENTER;
 
             // Divider
             box.graphics.lineStyle(1, 0xffffff);
@@ -97,13 +100,13 @@ package popups
 
             var lblSongRating:Text = new Text(box, 20, 69, _lang.string("song_rating_label"), 14);
             lblSongRating.width = 145;
-            lblSongRating.align = Text.LEFT;
+            lblSongRating.align = TextFormatAlign.LEFT;
 
             sRating = new StarSelector(box, 22, 95);
 
             var lblSongFavorite:Text = new Text(box, box.width - 165, 68, _lang.string("song_favorite_label"), 14);
             lblSongFavorite.width = 145;
-            lblSongFavorite.align = Text.RIGHT;
+            lblSongFavorite.align = TextFormatAlign.RIGHT;
 
             sFavorite = new HeartSelector(box, box.width - 52, 93);
 
@@ -119,7 +122,7 @@ package popups
             var notesLabel:Text = new Text(box, xOff, yOff, _lang.string("song_notes"));
 
             notesLength = new Text(box, box.width - xOff, yOff, "(0 / 250)");
-            notesLength.align = "right";
+            notesLength.align = TextFormatAlign.RIGHT;
             yOff += 20;
 
             box.graphics.lineStyle(1, 0xffffff, 0.5);
@@ -131,7 +134,7 @@ package popups
             notesField.wordWrap = true;
             notesField.multiline = true;
             notesField.maxChars = 250;
-            notesField.type = "input";
+            notesField.type = TextFieldType.INPUT;
             notesField.antiAliasType = AntiAliasType.ADVANCED;
             notesField.embedFonts = true;
             notesField.defaultTextFormat = Constant.TEXT_FORMAT_UNICODE;

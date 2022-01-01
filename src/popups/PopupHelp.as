@@ -13,6 +13,7 @@ package popups
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
     import menu.MenuPanel;
+    import flash.text.TextFormatAlign;
 
     public class PopupHelp extends MenuPanel
     {
@@ -51,7 +52,7 @@ package popups
 
             titleDisplay = new Text(box, 5, 5, _lang.string("popup_help_title"), 20);
             titleDisplay.width = box.width - 10;
-            titleDisplay.align = Text.CENTER;
+            titleDisplay.align = TextFormatAlign.CENTER;
 
             //- Message
             var style:StyleSheet = new StyleSheet();

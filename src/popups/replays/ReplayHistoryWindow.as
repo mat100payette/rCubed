@@ -19,6 +19,7 @@ package popups.replays
     import flash.events.MouseEvent;
     import game.GameOptions;
     import menu.MenuPanel;
+    import flash.text.TextFormatAlign;
 
     public class ReplayHistoryWindow extends MenuPanel
     {
@@ -118,7 +119,7 @@ package popups.replays
 
             // Search
             search_field_placeholder = new Text(box, 405, 17, _lang.string("replay_search"));
-            search_field_placeholder.setAreaParams(210, 27, "left");
+            search_field_placeholder.setAreaParams(210, 27, TextFormatAlign.LEFT);
             search_field_placeholder.alpha = 0.6;
 
             search_field = new BoxText(box, 400, 15, 220, 29);

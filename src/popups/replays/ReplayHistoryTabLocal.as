@@ -16,7 +16,7 @@ package popups.replays
     import com.flashfla.utils.SpriteUtil;
     import flash.display.Bitmap;
     import classes.Language;
-    import classes.UserSettings;
+    import flash.text.TextFormatAlign;
 
     public class ReplayHistoryTabLocal extends ReplayHistoryTabBase
     {
@@ -42,10 +42,10 @@ package popups.replays
             // UI Lock
             uiLock = new Sprite();
             var lockUIText:Text = new Text(uiLock, 0, 200, _lang.string("replay_loading_external"), 24);
-            lockUIText.setAreaParams(780, 30, "center");
+            lockUIText.setAreaParams(780, 30, TextFormatAlign.CENTER);
 
             loadingIndex = new Text(uiLock, 0, 340, "", 20);
-            loadingIndex.setAreaParams(780, 30, "center");
+            loadingIndex.setAreaParams(780, 30, TextFormatAlign.CENTER);
 
             loadingProgress = new ProgressBar(uiLock, (Main.GAME_WIDTH - 450) / 2, 380, 450);
 
@@ -130,7 +130,7 @@ package popups.replays
                 r.boo = cacheObj["judge"][4];
                 r.maxcombo = cacheObj["judge"][5];
 
-                r.user.settings.update({'songRate': cacheObj["rate"]});
+                r.user.settings.update({"songRate": cacheObj["rate"]});
                 if (cacheObj["engine"] != null)
                 {
                     var engine:Object = _avars.legacyEngine(cacheObj["engine"]);
@@ -169,7 +169,7 @@ package popups.replays
 
             function e_startFileSearch():void
             {
-                loadingIndex.text = '';
+                loadingIndex.text = "";
                 loadingProgress.update(0);
 
                 loadTimer = new Timer(20, 1);
@@ -304,10 +304,10 @@ package popups.replays
                         {
                             REPLAYS[REPLAYS.length] = r;
 
-                            cacheObj = {'name': r.song.name,
-                                    'rate': r.user.settings.songRate,
-                                    'score': r.score,
-                                    'judge': [r.perfect, r.good, r.average, r.miss, r.boo, r.maxcombo]}
+                            cacheObj = {"name": r.song.name,
+                                    "rate": r.user.settings.songRate,
+                                    "score": r.score,
+                                    "judge": [r.perfect, r.good, r.average, r.miss, r.boo, r.maxcombo]}
 
                             if (r.arc_engine != null)
                                 cacheObj["engine"] = r.song.engine.id;

@@ -4,6 +4,7 @@ package classes.ui
     import flash.display.Sprite;
     import flash.text.AntiAliasType;
     import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
 
     public class MouseTooltip extends Sprite
     {
@@ -20,7 +21,7 @@ package classes.ui
             msg.selectable = false;
             msg.embedFonts = true;
             msg.antiAliasType = AntiAliasType.ADVANCED;
-            msg.autoSize = "left";
+            msg.autoSize = TextFieldAutoSize.LEFT;
             msg.defaultTextFormat = Constant.TEXT_FORMAT_12;
             addChild(msg);
 

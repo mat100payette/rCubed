@@ -17,7 +17,7 @@ package com.flashfla.utils
                 return "";
             var month:String = (date.getMonth() < 9 ? "0" : "") + (date.getMonth() + 1);
             var day:String = (date.getDate() < 10 ? "0" : "") + date.getDate();
-            return date.getFullYear() + '/' + month + '/' + day + ' ' + date.toLocaleTimeString();
+            return date.getFullYear() + "/" + month + "/" + day + " " + date.toLocaleTimeString();
         }
 
         public static function getTimezoneOffset():Number

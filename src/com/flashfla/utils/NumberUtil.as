@@ -19,7 +19,7 @@ package com.flashfla.utils
             return str.substr(0, sep - i) + ret;
         }
 
-        public static var fileSizes:Array = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        public static var fileSizes:Array = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
         public static function bytesToString(bytes:Number):String
         {

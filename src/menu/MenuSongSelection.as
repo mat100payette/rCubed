@@ -50,6 +50,7 @@ package menu
     import popups.PopupFilterManager;
     import popups.PopupQueueManager;
     import popups.PopupSongNotes;
+    import flash.text.TextFormatAlign;
 
     public class MenuSongSelection extends MenuPanel
     {
@@ -132,7 +133,7 @@ package menu
                 Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD_SKIP] = true;
 
                 var loadTextEngine:Text = new Text(this, 0, Main.GAME_HEIGHT / 2 - 15, _lang.string("song_selection_load_default_engine"));
-                loadTextEngine.setAreaParams(Main.GAME_WIDTH, 30, Text.CENTER);
+                loadTextEngine.setAreaParams(Main.GAME_WIDTH, 30, TextFormatAlign.CENTER);
             }
 
             Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD] = true;
@@ -236,7 +237,7 @@ package menu
                 SELECTED_GENRE_BACKGROUND = new GenreSelection();
 
                 GENRE_MODE_TEXT = new Text(this, 17, 106, _lang.string("genre_mode_" + GENRE_SONGFLAGS));
-                GENRE_MODE_TEXT.align = Text.CENTER;
+                GENRE_MODE_TEXT.align = TextFormatAlign.CENTER;
                 GENRE_MODE_TEXT.width = 109;
                 GENRE_MODE_TEXT.fontSize = 16;
 
@@ -309,7 +310,7 @@ package menu
             if (pane_filter_text == null)
             {
                 pane_filter_text = new Text(this, 155, 64, "");
-                pane_filter_text.setAreaParams(401, 351, "center");
+                pane_filter_text.setAreaParams(401, 351, TextFormatAlign.CENTER);
                 pane_filter_text.visible = false;
             }
 
@@ -1303,8 +1304,8 @@ package menu
                 {
                     if (highscores[r])
                     {
-                        var username:String = highscores[r]['name'];
-                        var score:Number = highscores[r]['score'];
+                        var username:String = highscores[r]["name"];
+                        var score:Number = highscores[r]["score"];
                         var isMyPB:Boolean = (!_gvars.activeUser.isGuest) && (_gvars.activeUser.name == username);
 
                         if (score < lastScore)
@@ -1313,7 +1314,7 @@ package menu
                             lastRank = r;
                         }
 
-                        infoPAHover = new HoverPABox(5, tY, highscores[r]['av']);
+                        infoPAHover = new HoverPABox(5, tY, highscores[r]["av"]);
 
                         // Username
                         infoTitle = new Text(infoBox, 5, tY, "#" + lastRank + ": " + username, 14);
@@ -2255,6 +2256,7 @@ import flash.text.AntiAliasType;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 import flash.utils.Timer;
+import flash.text.TextFormatAlign;
 
 internal class PageBox extends Sprite
 {
@@ -2301,7 +2303,7 @@ internal class PageBox extends Sprite
             page_text = new Text(this, 0, 0, str, draw_height - 4);
             page_text.width = draw_width;
             page_text.height = draw_height;
-            page_text.align = Text.CENTER;
+            page_text.align = TextFormatAlign.CENTER;
         }
         else
         {

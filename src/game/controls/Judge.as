@@ -44,7 +44,7 @@ package game.controls
             labelDesc[-5] = {color: options.settings.judgeColors[5], title: "BOO!!"};
             labelDesc[-10] = {color: options.settings.judgeColors[4], title: "MISS!"};
 
-            var textFormat:TextFormat = new TextFormat(new AachenLight().fontName, 42, 0xffffff, true);
+            const textFormat:TextFormat = new TextFormat(new AachenLight().fontName, 42, 0xffffff, true);
 
             field = new TextField();
             field.defaultTextFormat = textFormat;

@@ -12,6 +12,7 @@ package game.graph
     import flash.geom.Rectangle;
     import game.GameScoreResult;
     import classes.replay.ReplayBinFrame;
+    import flash.text.TextFormatAlign;
 
     public class GraphAccuracy extends GraphBase
     {
@@ -90,11 +91,11 @@ package game.graph
 
             maxNotes = new Text(buttons, graphWidth - 2, -3, sprintf(_lang.string("game_results_graph_note_count"), {"notes": result.note_count}));
             maxNotes.alpha = 0.2;
-            maxNotes.align = "right";
+            maxNotes.align = TextFormatAlign.RIGHT;
 
             // Hover Text
             hover_text = new Text(null, 30, 270, "", 14);
-            hover_text.align = "center";
+            hover_text.align = TextFormatAlign.CENTER;
             hover_text.width = 300;
             hover_text.mouseEnabled = false;
             hover_text.mouseChildren = false;

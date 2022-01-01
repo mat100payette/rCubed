@@ -26,6 +26,7 @@ package popups.settings
     import menu.MainMenu;
     import menu.MenuPanel;
     import menu.MenuSongSelection;
+    import flash.text.TextFormatAlign;
 
 
     public class SettingsWindow extends MenuPanel
@@ -133,7 +134,7 @@ package popups.settings
             _txtSettings = new Text(_box, 15, 5, _lang.string("settings_title"), 32);
 
             _txtModWarning = new Text(_box, 215, 18, _lang.string("options_warning_save"), 14, "#f06868");
-            _txtModWarning.setAreaParams(265, 24, "right");
+            _txtModWarning.setAreaParams(265, 24, TextFormatAlign.RIGHT);
 
             btnReset = new BoxButton(_box, 495, 15, 80, 29, _lang.string("menu_reset"), 12, clickHandler);
             btnReset.color = 0xff0000;

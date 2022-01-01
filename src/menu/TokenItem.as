@@ -36,10 +36,10 @@ package menu
             this.useHandCursor = true;
 
             //- Message
-            var messageString:String = token_info['info'].replace(/\r\n/gi, "\n");
+            var messageString:String = token_info["info"].replace(/\r\n/gi, "\n");
 
             // Token Levels
-            token_levels = (token_info['sources'] as String).split(",");
+            token_levels = (token_info["sources"] as String).split(",");
 
             if (!(token_levels is Array) || token_levels.length == 0)
                 token_levels = [0];
@@ -54,7 +54,7 @@ package menu
                     messageString += "\r\r" + _lang.string("menu_tokens_unlock_by_playing");
                     for each (var item:int in token_levels)
                     {
-                        messageString += "\r&gt; " + Playlist.instanceCanon.playList[item]['name'];
+                        messageString += "\r&gt; " + Playlist.instanceCanon.playList[item]["name"];
                     }
                 }
             }
@@ -88,10 +88,10 @@ package menu
 
         public function addTokenImage(image:Bitmap, doFade:Boolean = true):void
         {
-            var bmd:BitmapData = token_info['unlock'] ? image.bitmapData : image.bitmapData.clone();
+            var bmd:BitmapData = token_info["unlock"] ? image.bitmapData : image.bitmapData.clone();
 
             token_image = new Sprite();
-            if (token_info['unlock'] == 0)
+            if (token_info["unlock"] == 0)
             {
                 const rc:Number = 0.1, gc:Number = 0.1, bc:Number = 0.1;
                 bmd.applyFilter(bmd, bmd.rect, new Point(), new ColorMatrixFilter([rc, gc, bc, 0, 0, rc, gc, bc, 0, 0, rc, gc, bc, 0, 0, 0, 0, 0, 1, 0]));
@@ -107,10 +107,10 @@ package menu
             if (doFade)
             {
                 token_image.alpha = 0;
-                TweenLite.to(token_image, 1.25, {"alpha": token_info['unlock'] ? 1 : 0.7});
+                TweenLite.to(token_image, 1.25, {"alpha": token_info["unlock"] ? 1 : 0.7});
             }
             else
-                token_image.alpha = token_info['unlock'] ? 1 : 0.7;
+                token_image.alpha = token_info["unlock"] ? 1 : 0.7;
         }
     }
 }

@@ -8,8 +8,8 @@ package com.flashfla.net.events
      */
     public class MultipartURLLoaderEvent extends Event
     {
-        public static const DATA_PREPARE_PROGRESS:String = 'dataPrepareProgress';
-        public static const DATA_PREPARE_COMPLETE:String = 'dataPrepareComplete';
+        public static const DATA_PREPARE_PROGRESS:String = "dataPrepareProgress";
+        public static const DATA_PREPARE_COMPLETE:String = "dataPrepareComplete";
 
         public var bytesWritten:uint = 0;
         public var bytesTotal:uint = 0;

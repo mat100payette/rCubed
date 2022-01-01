@@ -1,7 +1,6 @@
 package popups.replays
 {
     import flash.display.Sprite;
-    import classes.ui.ScrollPane;
     import flash.display.GradientType;
     import flash.geom.Matrix;
     import classes.ui.Text;
@@ -9,6 +8,7 @@ package popups.replays
     import assets.menu.icons.fa.iconCopy;
     import classes.replay.Replay;
     import classes.SongInfo;
+    import flash.text.TextFormatAlign;
 
     public class ReplayHistoryEntry extends Sprite
     {
@@ -81,7 +81,7 @@ package popups.replays
                 field_plane.graphics.endFill();
 
                 field_txt = new Text(field_plane, X_OFF + 2, 0, "");
-                field_txt.setAreaParams(score_field[1] - 4, 20, "center");
+                field_txt.setAreaParams(score_field[1] - 4, 20, TextFormatAlign.CENTER);
                 fields[index] = field_txt;
                 X_OFF += score_field[1];
             }
@@ -91,11 +91,11 @@ package popups.replays
             title.setAreaParams(536, 20);
 
             rate = new Text(this, X_OFF + 5, 6, "", 14);
-            rate.setAreaParams(181, 20, "right");
+            rate.setAreaParams(181, 20, TextFormatAlign.RIGHT);
             rate.alpha = 0.4;
 
             engine = new Text(this, X_OFF + 5, ENTRY_HEIGHT - 20, "");
-            engine.setAreaParams(181, 20, "right");
+            engine.setAreaParams(181, 20, TextFormatAlign.RIGHT);
             engine.alpha = 0.4;
 
             // Buttons

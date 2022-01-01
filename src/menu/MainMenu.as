@@ -31,6 +31,7 @@ package menu
     import popups.PopupFilterManager;
     import popups.PopupSkillRankUpdate;
     import popups.replays.ReplayHistoryWindow;
+    import flash.text.TextFormatAlign;
 
     public class MainMenu extends MenuPanel
     {
@@ -220,7 +221,7 @@ package menu
                     "avg_rank": NumberUtil.numberFormat(_gvars.activeUser.averageRank, 3, true)}));
             user_text.width = 594;
             user_text.height = 28;
-            user_text.align = Text.CENTER;
+            user_text.align = TextFormatAlign.CENTER;
 
             if (!_gvars.activeUser.isGuest)
             {
@@ -454,7 +455,7 @@ package menu
             removeChild(hover_message);
         }
 
-        private function displayToolTip(tx:Number, ty:Number, text:String, align:String = "center"):void
+        private function displayToolTip(tx:Number, ty:Number, text:String, align:String = TextFormatAlign.CENTER):void
         {
             if (!hover_message)
                 hover_message = new MouseTooltip("", 500)
@@ -463,15 +464,15 @@ package menu
             switch (align)
             {
                 default:
-                case "left":
+                case TextFormatAlign.LEFT:
                     hover_message.x = tx;
                     hover_message.y = ty;
                     break;
-                case "right":
+                case TextFormatAlign.RIGHT:
                     hover_message.x = tx - hover_message.width;
                     hover_message.y = ty;
                     break;
-                case "center":
+                case TextFormatAlign.CENTER:
                     hover_message.x = tx - (hover_message.width / 2);
                     hover_message.y = ty;
                     break;

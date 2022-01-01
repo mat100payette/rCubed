@@ -20,6 +20,7 @@ package popups.settings
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     import flash.system.Capabilities;
+    import flash.text.TextFormatAlign;
     import menu.MainMenu;
 
     public class SettingsTabMisc extends SettingsTabBase
@@ -92,7 +93,7 @@ package popups.settings
             for (var id:String in _lang.indexed)
             {
                 var lang:String = _lang.indexed[id];
-                var lang_name:String = _lang.string2Simple("_real_name", lang) + (_lang.data[lang]['_en_name'] != _lang.data[lang]['_real_name'] ? (' / ' + _lang.string2Simple("_en_name", lang)) : '');
+                var lang_name:String = _lang.string2Simple("_real_name", lang) + (_lang.data[lang]["_en_name"] != _lang.data[lang]["_real_name"] ? (" / " + _lang.string2Simple("_en_name", lang)) : "");
                 optionGameLanguages.push({"label": lang_name, "data": lang});
                 if (lang == _settings.language)
                 {
@@ -460,7 +461,7 @@ package popups.settings
         private function e_legacyEngineMouseOver(e:Event):void
         {
             legacySongsCheck.addEventListener(MouseEvent.MOUSE_OUT, e_legacyEngineMouseOut);
-            displayToolTip(legacySongsCheck.x, legacySongsCheck.y + 22, _lang.string("popup_legacy_songs"), "left");
+            displayToolTip(legacySongsCheck.x, legacySongsCheck.y + 22, _lang.string("popup_legacy_songs"), TextFormatAlign.LEFT);
         }
 
         private function e_legacyEngineMouseOut(e:Event):void
@@ -621,6 +622,8 @@ import flash.events.Event;
 import flash.events.TimerEvent;
 import flash.utils.Timer;
 import popups.settings.SettingsTabMisc;
+import flash.text.TextFieldAutoSize;
+import flash.text.TextFormatAlign;
 
 internal class WindowSettingConfirm extends Sprite
 {
@@ -659,10 +662,10 @@ internal class WindowSettingConfirm extends Sprite
         confirmTimer.start();
 
         window_text = new Text(this, 0, 200, _lang.string("option_window_settings_confirm_text"), 24);
-        window_text.setAreaParams(Main.GAME_WIDTH, 30, "center");
+        window_text.setAreaParams(Main.GAME_WIDTH, 30, TextFormatAlign.CENTER);
 
         window_timer_text = new Text(this, 0, 250, "10", 38);
-        window_timer_text.setAreaParams(Main.GAME_WIDTH, 30, "center");
+        window_timer_text.setAreaParams(Main.GAME_WIDTH, 30, TextFormatAlign.CENTER);
 
         confirm_btn = new BoxButton(this, Main.GAME_WIDTH / 2 - 50, 400, 100, 30, _lang.string("menu_confirm"), 12, e_confirm);
     }

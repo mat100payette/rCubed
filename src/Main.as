@@ -49,6 +49,8 @@ package
     import popups.PopupHelp;
     import popups.replays.ReplayHistoryWindow;
     import popups.settings.SettingsWindow;
+    import flash.text.TextFieldAutoSize;
+    import flash.text.TextFormatAlign;
 
     public class Main extends MenuPanel
     {
@@ -188,7 +190,7 @@ package
             //- Add Debug Tracking
             ver = new Text(this, stage.width - 5, 2, Capabilities.version.replace(/,/g, ".") + " - Build " + CONFIG::timeStamp + " - " + Constant.AIR_VERSION);
             ver.alpha = 0.15;
-            ver.align = Text.RIGHT;
+            ver.align = TextFormatAlign.RIGHT;
             ver.mouseEnabled = false;
             ver.cacheAsBitmap = true;
 
@@ -303,7 +305,7 @@ package
             loadStatus.selectable = false;
             loadStatus.embedFonts = true;
             loadStatus.antiAliasType = AntiAliasType.ADVANCED;
-            loadStatus.autoSize = "left";
+            loadStatus.autoSize = TextFieldAutoSize.LEFT;
             loadStatus.defaultTextFormat = Constant.TEXT_FORMAT;
             this.addChild(loadStatus);
 

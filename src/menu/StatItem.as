@@ -10,6 +10,7 @@ package menu
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.text.TextFormatAlign;
 
     public class StatItem extends Sprite
     {
@@ -35,7 +36,7 @@ package menu
             //- Score
             scoreText = new Text(this, 14, 0, NumberUtil.numberFormat(sO["score"]));
             scoreText.x = 70;
-            scoreText.setAreaParams(500, 27, Text.RIGHT);
+            scoreText.setAreaParams(500, 27, TextFormatAlign.RIGHT);
             box.addChild(scoreText);
 
             //- Results
@@ -49,7 +50,7 @@ package menu
             rankText = new Text(this, 14, 0, "Rank: " + NumberUtil.numberFormat(sO["rank"]));
             rankText.x = 70;
             rankText.y = 27;
-            rankText.setAreaParams(500, 27, Text.RIGHT);
+            rankText.setAreaParams(500, 27, TextFormatAlign.RIGHT);
             box.addChild(rankText);
 
             this.addChild(box);

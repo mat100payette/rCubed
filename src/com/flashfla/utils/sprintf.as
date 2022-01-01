@@ -82,7 +82,7 @@ package com.flashfla.utils
             padding = result["padding"];
             paddingNum = 0;
             paddingChar = null;
-            //trace('formater:', formater, ', varName:', varName, ', precision:', precision, 'padding:', padding);
+            //trace("formater:", formater, ", varName:", varName, ", precision:", precision, "padding:", padding);
             if (padding)
             {
                 if (padding.length == 1)

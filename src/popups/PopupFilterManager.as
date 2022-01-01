@@ -23,6 +23,7 @@ package popups
     import menu.MainMenu;
     import menu.MenuPanel;
     import menu.MenuSongSelection;
+    import flash.text.TextFormatAlign;
 
     public class PopupFilterManager extends MenuPanel
     {
@@ -122,7 +123,7 @@ package popups
 
             var typeSelectorTitle:Text = new Text(typeSelector, Main.GAME_WIDTH / 2 - 200, 5, _lang.string("filter_editor_add_filter"));
             typeSelectorTitle.width = 400;
-            typeSelectorTitle.align = Text.CENTER;
+            typeSelectorTitle.align = TextFormatAlign.CENTER;
 
             var typeButton:BoxButton;
             var typeOptions:Array = EngineLevelFilter.createOptions(EngineLevelFilter.FILTERS, "type");

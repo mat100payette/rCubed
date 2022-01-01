@@ -36,6 +36,18 @@ package
         public static const OPTIONS_ISOLATION_START:String = "options_isolation_start";
         public static const OPTIONS_ISOLATION_NOTES:String = "options_isolation_notes";
 
+        // INPUT SETTINGS TAB
+        public static const OPTIONS_KEY_LEFT:String = "options_scroll_left";
+        public static const OPTIONS_KEY_DOWN:String = "options_scroll_down";
+        public static const OPTIONS_KEY_UP:String = "options_scroll_up";
+        public static const OPTIONS_KEY_RIGHT:String = "options_scroll_right";
+        public static const OPTIONS_KEY_RESTART:String = "options_scroll_restart";
+        public static const OPTIONS_KEY_QUIT:String = "options_scroll_quit";
+        public static const OPTIONS_KEY_OPTIONS:String = "options_scroll_options";
+        public static const OPTIONS_INPUT_TESTER:String = "options_input_tester";
+        public static const OPTIONS_INPUT_TESTER_DESC:String = "options_input_tester_description";
+        public static const OPTIONS_KEY_PICK:String = "options_key_pick";
+
         // COLOR SETTINGS TAB
         public static const OPTIONS_JUDGE_COLORS_DISPLAY:String = "options_judge_colors_title";
         public static const OPTIONS_GAME_COLORS_TITLE:String = "options_game_colors_title";

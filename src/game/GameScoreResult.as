@@ -199,10 +199,10 @@ package game
          */
         public function get replay_cache_object():Object
         {
-            var out:Object = {'name': song.songInfo.name,
-                    'rate': options.settings.songRate,
-                    'score': score,
-                    'judge': [(amazing + perfect), good, average, miss, boo, max_combo]}
+            var out:Object = {"name": song.songInfo.name,
+                    "rate": options.settings.songRate,
+                    "score": score,
+                    "judge": [(amazing + perfect), good, average, miss, boo, max_combo]}
 
             if (songInfo.engine != null)
                 out["engine"] = song.songInfo.engine.id;

@@ -110,9 +110,9 @@ package com.flashfla.utils
         {
             if (str == null)
                 return "";
-            while (str.length && str.charAt(str.length - 1) == '\n')
+            while (str.length && str.charAt(str.length - 1) == "\n")
                 str = str.substr(0, str.length - 1);
-            while (str.length && str.charAt(0) == '\n')
+            while (str.length && str.charAt(0) == "\n")
                 str = str.substr(1);
             return str;
         }

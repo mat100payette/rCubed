@@ -94,8 +94,8 @@ package com.flashdynamix.utils
         {
             try
             {
-                new LocalConnection().connect('foo');
-                new LocalConnection().connect('foo');
+                new LocalConnection().connect("foo");
+                new LocalConnection().connect("foo");
             }
             catch (e:Error)
             {

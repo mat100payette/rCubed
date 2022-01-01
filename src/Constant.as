@@ -141,9 +141,9 @@ package
          */
         public static function addDefaultRequestVariables(requestVars:URLVariables):void
         {
-            requestVars['ver'] = Constant.ENGINE_VERSION;
-            requestVars['is_air'] = true;
-            requestVars['air_ver'] = Constant.AIR_VERSION;
+            requestVars["ver"] = Constant.ENGINE_VERSION;
+            requestVars["is_air"] = true;
+            requestVars["air_ver"] = Constant.AIR_VERSION;
         }
     }
 }

@@ -18,6 +18,7 @@ package popups.settings
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     import game.noteskins.ExternalNoteskin;
+    import flash.text.TextFormatAlign;
 
     public class SettingsTabNoteskin extends SettingsTabBase
     {
@@ -140,7 +141,7 @@ package popups.settings
 
             var gameNoteColorTitle:Text = new Text(container, xOff + 5, yOff, _lang.string("options_note_colors_title"), 14);
             gameNoteColorTitle.width = 265;
-            gameNoteColorTitle.align = Text.CENTER;
+            gameNoteColorTitle.align = TextFormatAlign.CENTER;
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 

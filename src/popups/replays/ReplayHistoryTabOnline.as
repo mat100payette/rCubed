@@ -12,6 +12,7 @@ package popups.replays
     import com.flashfla.net.WebRequest;
     import flash.events.Event;
     import classes.Alert;
+    import flash.text.TextFormatAlign;
 
     public class ReplayHistoryTabOnline extends ReplayHistoryTabBase
     {
@@ -34,7 +35,7 @@ package popups.replays
             // UI Lock
             uiLock = new Sprite();
             var lockUIText:Text = new Text(uiLock, 0, 200, _lang.string("replay_loading_online"), 24);
-            lockUIText.setAreaParams(780, 30, "center");
+            lockUIText.setAreaParams(780, 30, TextFormatAlign.CENTER);
 
             loadingCancelButton = new BoxButton(uiLock, 390 - 40, 440, 80, 30, _lang.string("menu_cancel"), 12, clickHandler);
         }
@@ -120,7 +121,7 @@ package popups.replays
             catch (error:Error)
             {
                 // TODO: Add localised string
-                Alert.add('Error parsing online replays', 120, Alert.RED);
+                Alert.add("Error parsing online replays", 120, Alert.RED);
             }
 
             webLoadComplete();

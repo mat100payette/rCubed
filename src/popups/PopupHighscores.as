@@ -16,6 +16,7 @@ package popups
     import flash.display.Sprite;
     import flash.events.MouseEvent;
     import menu.MenuPanel;
+    import flash.text.TextFormatAlign;
 
     public class PopupHighscores extends MenuPanel
     {
@@ -64,7 +65,7 @@ package popups
 
             var titleDisplay:Text = new Text(box, 5, 8, songInfo.name, 20);
             titleDisplay.width = box.width - 10;
-            titleDisplay.align = Text.CENTER;
+            titleDisplay.align = TextFormatAlign.CENTER;
 
             pageText = new Text(box, 200, box.height - 42, sprintf(_lang.string("popup_highscores_page_number"), {"page": page + 1}));
 
@@ -146,9 +147,9 @@ package popups
                     var r:int = (10 * page) + vr;
                     if (highscores[r])
                     {
-                        var username:String = highscores[r]['name'];
-                        var score:Number = highscores[r]['score'];
-                        var av:String = highscores[r]['av'];
+                        var username:String = highscores[r]["name"];
+                        var score:Number = highscores[r]["score"];
+                        var av:String = highscores[r]["av"];
                         var isMyPB:Boolean = (!_gvars.activeUser.isGuest) && (_gvars.activeUser.name == username);
 
                         // Username

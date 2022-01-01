@@ -23,6 +23,7 @@ package
     import flash.text.TextField;
     import flash.utils.ByteArray;
     import menu.MenuPanel;
+    import flash.text.TextFormatAlign;
 
     public class AirUpdater extends MenuPanel
     {
@@ -60,11 +61,11 @@ package
 
             titleDisplay = new Text(this, 5, 35, _lang.string("air_game_update"), 20);
             titleDisplay.width = Main.GAME_WIDTH - 10;
-            titleDisplay.align = Text.CENTER;
+            titleDisplay.align = TextFormatAlign.CENTER;
 
             messageDisplay = new Text(this, 5, 65, Constant.AIR_VERSION + " -> " + _site.data["game_r3air_version"], 14);
             messageDisplay.width = Main.GAME_WIDTH - 10;
-            messageDisplay.align = Text.CENTER;
+            messageDisplay.align = TextFormatAlign.CENTER;
 
             actionButton = new BoxButton(this, 25, Main.GAME_HEIGHT - 25 - 25, Main.GAME_WIDTH - 50, 25, "---", 12, e_actionButton);
             actionButtonState(false);

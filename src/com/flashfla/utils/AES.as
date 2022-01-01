@@ -63,7 +63,7 @@ package com.flashfla.utils
                 counterBlock[i] = (nonceSec >>> i * 8) & 0xff;
             for (i = 0; i < 4; i++)
                 counterBlock[i + 4] = nonceMs & 0xff;
-            var ctrTxt:String = '';
+            var ctrTxt:String = "";
             for (i = 0; i < 8; i++)
                 ctrTxt += String.fromCharCode(counterBlock[i]);
 
@@ -89,10 +89,10 @@ package com.flashfla.utils
                     cipherChar[i] = String.fromCharCode(cipherChar[i]);
                 }
 
-                ciphertxt[b] = cipherChar.join('');
+                ciphertxt[b] = cipherChar.join("");
             }
 
-            var ciphertext:String = ctrTxt + ciphertxt.join('');
+            var ciphertext:String = ctrTxt + ciphertxt.join("");
             ciphertext = Base64.encode(ciphertext);
 
             return ciphertext;
@@ -148,11 +148,11 @@ package com.flashfla.utils
                     plaintxtByte[i] = cipherCntr[i] ^ String(ciphertextArr[b]).charCodeAt(i);
                     plaintxtByte[i] = String.fromCharCode(plaintxtByte[i]);
                 }
-                plaintxt[b] = plaintxtByte.join('');
+                plaintxt[b] = plaintxtByte.join("");
             }
 
 
-            var plaintext:String = plaintxt.join('');
+            var plaintext:String = plaintxt.join("");
             plaintext = Utf8.decode(plaintext);
 
             return plaintext;
@@ -315,7 +315,7 @@ internal class Base64
 
     public static function encode(str:String, utf8encode:Boolean = false):String
     {
-        var o1:int, o2:int, o3:int, bits:int, h1:int, h2:int, h3:int, h4:int, e:Array = [], pad:String = '', c:int, plain:String, coded:String;
+        var o1:int, o2:int, o3:int, bits:int, h1:int, h2:int, h3:int, h4:int, e:Array = [], pad:String = "", c:int, plain:String, coded:String;
         var b64:String = Base64.code;
 
         plain = utf8encode ? Utf8.encode(str) : str;
@@ -325,8 +325,8 @@ internal class Base64
         {
             while (c++ < 3)
             {
-                pad += '=';
-                plain += '\0';
+                pad += "=";
+                plain += "\0";
             }
         }
         for (c = 0; c < plain.length; c += 3)
@@ -344,7 +344,7 @@ internal class Base64
 
             e[c / 3] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
         }
-        coded = e.join('');
+        coded = e.join("");
 
         coded = coded.slice(0, coded.length - pad.length) + pad;
 
@@ -377,7 +377,7 @@ internal class Base64
             if (h3 == 0x40)
                 d[c / 4] = String.fromCharCode(o1);
         }
-        plain = d.join('');
+        plain = d.join("");
 
         return utf8decode ? Utf8.decode(plain) : plain;
     }

@@ -18,6 +18,7 @@ package menu
     import flash.utils.Timer;
     import sql.SQLSongUserInfo;
     import classes.SongInfo;
+    import flash.text.TextFormatAlign;
 
     public class SongItem extends Sprite
     {
@@ -316,14 +317,14 @@ package menu
 
                 // Song Difficulty
                 _lblSongDifficulty = new Text(this, 1, 0, getDifficultyText(), 14);
-                _lblSongDifficulty.setAreaParams(30, 27, Text.CENTER);
+                _lblSongDifficulty.setAreaParams(30, 27, TextFormatAlign.CENTER);
 
                 // Song Flag
                 var FLAG_TEXT:String = GlobalVariables.getSongIcon(_songInfo, rank);
                 if (FLAG_TEXT != "" && GlobalVariables.instance.activeUser.settings.displaySongFlag)
                 {
                     _lblSongFlag = new Text(this, 296, 0, FLAG_TEXT, 14);
-                    _lblSongFlag.setAreaParams(100, 27, Text.RIGHT);
+                    _lblSongFlag.setAreaParams(100, 27, TextFormatAlign.RIGHT);
 
                     // Adjust Song Name to not overlap song flag.
                     _lblSongName.setAreaParams(347 - _lblSongFlag.textfield.textWidth, 27);
@@ -346,7 +347,7 @@ package menu
 
         public function getDifficultyText():String
         {
-            return isFavorite ? '<font color="#f7b9e4">' + _songInfo["difficulty"] + '</font>' : _songInfo["difficulty"];
+            return isFavorite ? '<font color="#f7b9e4">' + _songInfo["difficulty"] + "</font>" : _songInfo["difficulty"];
         }
 
         public function getSongLockText():String
