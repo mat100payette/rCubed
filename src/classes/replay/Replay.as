@@ -154,8 +154,8 @@ package classes.replay
                         jsonSettings.activeVisualMods.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
                     }
                 }
-                jsonSettings.GLOBAL_OFFSET = 0;
-                jsonSettings.JUDGE_OFFSET = 0;
+                jsonSettings.globalOffset = 0;
+                jsonSettings.judgeOffset = 0;
                 this.user.settings.update(jsonSettings);
             }
             else if (data.replayversion == "R^2")
@@ -179,8 +179,8 @@ package classes.replay
                 }
                 jsonSettings.receptorGap = Number(tempSettings[2][0]);
                 jsonSettings.activeNoteskin = Number(tempSettings[2][3]);
-                jsonSettings.GLOBAL_OFFSET = 0;
-                jsonSettings.JUDGE_OFFSET = 0;
+                jsonSettings.globalOffset = 0;
+                jsonSettings.judgeOffset = 0;
 
                 this.user.settings.update(jsonSettings);
             }

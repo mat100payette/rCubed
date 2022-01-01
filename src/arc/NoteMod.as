@@ -56,7 +56,7 @@ package arc
             modHalfTime = options.modEnabled("halftime");
             modNoBackground = options.modEnabled("nobackground");
             modIsolation = options.isolation;
-            modOffset = options.settings.GLOBAL_OFFSET != 0;
+            modOffset = options.settings.globalOffset != 0;
             modRate = options.settings.songRate != 1;
             modFPS = options.settings.frameRate > 30;
             modJudgeWindow = Boolean(options.judgeWindow);
@@ -151,7 +151,7 @@ package arc
 
             if (modOffset)
             {
-                var goffset:int = Math.round(options.settings.GLOBAL_OFFSET);
+                var goffset:int = Math.round(options.settings.globalOffset);
                 frame += goffset;
                 pos += goffset / 30;
             }

@@ -244,8 +244,8 @@ package popups
             else if (e.target == populateOffsets)
             {
                 setCustomOffsets.checked = true;
-                optionMusicOffset.text = _gvars.activeUser.settings.GLOBAL_OFFSET.toString();
-                optionJudgeOffset.text = _gvars.activeUser.settings.JUDGE_OFFSET.toString();
+                optionMusicOffset.text = _gvars.activeUser.settings.globalOffset.toString();
+                optionJudgeOffset.text = _gvars.activeUser.settings.judgeOffset.toString();
                 optionMusicOffset.validate(0);
                 optionJudgeOffset.validate(0);
             }

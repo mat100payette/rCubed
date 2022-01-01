@@ -29,13 +29,13 @@ package compat
                 settings.language = newSettings.language;
 
             if (newSettings.viewOffset != null)
-                settings.GLOBAL_OFFSET = newSettings.viewOffset;
+                settings.globalOffset = newSettings.viewOffset;
 
             if (newSettings.judgeOffset != null)
-                settings.JUDGE_OFFSET = newSettings.judgeOffset;
+                settings.judgeOffset = newSettings.judgeOffset;
 
             if (newSettings.autoJudgeOffset != null)
-                settings.AUTO_JUDGE_OFFSET = newSettings.autoJudgeOffset;
+                settings.autoJudgeOffset = newSettings.autoJudgeOffset;
 
             if (newSettings.viewHealth != null)
                 settings.displayHealth = newSettings.viewHealth;

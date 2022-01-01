@@ -599,11 +599,11 @@ package game
          */
         private function updateJudgeOffset(result:GameScoreResult):void
         {
-            if (_gvars.activeUser.settings.AUTO_JUDGE_OFFSET && // Auto Judge Offset enabled 
+            if (_gvars.activeUser.settings.autoJudgeOffset && // Auto Judge Offset enabled 
                 (result.amazing + result.perfect + result.good + result.average >= 50) && // Accuracy data is reliable
                 result.accuracy !== 0)
             {
-                _gvars.activeUser.settings.JUDGE_OFFSET = Number(result.accuracy_frames.toFixed(3));
+                _gvars.activeUser.settings.judgeOffset = Number(result.accuracy_frames.toFixed(3));
                 // Save settings
                 _gvars.activeUser.saveSettingsLocally();
                 _gvars.activeUser.saveSettingsOnline();

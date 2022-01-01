@@ -25,9 +25,9 @@ package classes
         public var displaySongNote:Boolean = true;
 
         //- Game Data
-        public var GLOBAL_OFFSET:Number = 0;
-        public var JUDGE_OFFSET:Number = 0;
-        public var AUTO_JUDGE_OFFSET:Boolean = false;
+        public var globalOffset:Number = 0;
+        public var judgeOffset:Number = 0;
+        public var autoJudgeOffset:Boolean = false;
         public var displayJudge:Boolean = true;
         public var displayJudgeAnimations:Boolean = true;
         public var displayReceptorAnimations:Boolean = true;
@@ -175,14 +175,14 @@ package classes
             if (settings.language != null)
                 this.language = settings.language;
 
-            if (settings.GLOBAL_OFFSET != null)
-                this.GLOBAL_OFFSET = settings.GLOBAL_OFFSET;
+            if (settings.globalOffset != null)
+                this.globalOffset = settings.globalOffset;
 
-            if (settings.JUDGE_OFFSET != null)
-                this.JUDGE_OFFSET = settings.JUDGE_OFFSET;
+            if (settings.judgeOffset != null)
+                this.judgeOffset = settings.judgeOffset;
 
-            if (settings.AUTO_JUDGE_OFFSET != null)
-                this.AUTO_JUDGE_OFFSET = settings.AUTO_JUDGE_OFFSET;
+            if (settings.autoJudgeOffset != null)
+                this.autoJudgeOffset = settings.autoJudgeOffset;
 
             if (settings.DISPLAY_SONG_FLAG != null)
                 this.displaySongFlag = settings.DISPLAY_SONG_FLAG;

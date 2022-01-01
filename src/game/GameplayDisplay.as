@@ -227,8 +227,8 @@ package game
                 // Custom Offsets
                 if (perSongOptions.set_custom_offsets)
                 {
-                    options.settings.JUDGE_OFFSET = perSongOptions.offset_judge;
-                    options.settings.GLOBAL_OFFSET = perSongOptions.offset_music;
+                    options.settings.judgeOffset = perSongOptions.offset_judge;
+                    options.settings.globalOffset = perSongOptions.offset_music;
                 }
 
                 // Invert Mirror Mod
@@ -611,23 +611,23 @@ package game
             // Force no Judge on SongPreviews
             if (options.replay && options.replay.isPreview)
             {
-                options.settings.JUDGE_OFFSET = 0;
-                options.settings.GLOBAL_OFFSET = 0;
+                options.settings.judgeOffset = 0;
+                options.settings.globalOffset = 0;
                 options.isAutoplay = true;
             }
 
             reverseMod = options.modEnabled("reverse");
             sideScroll = (options.settings.scrollDirection == "left" || options.settings.scrollDirection == "right");
-            player1JudgeOffset = Math.round(options.settings.JUDGE_OFFSET);
-            globalOffsetRounded = Math.round(options.settings.GLOBAL_OFFSET);
-            globalOffset = (options.settings.GLOBAL_OFFSET - globalOffsetRounded) * 1000 / 30;
+            player1JudgeOffset = Math.round(options.settings.judgeOffset);
+            globalOffsetRounded = Math.round(options.settings.globalOffset);
+            globalOffset = (options.settings.globalOffset - globalOffsetRounded) * 1000 / 30;
 
             if (options.judgeWindow)
                 judgeSettings = buildJudgeNodes(options.judgeWindow);
             else
                 judgeSettings = buildJudgeNodes(Constant.JUDGE_WINDOW);
-            judgeOffset = options.settings.JUDGE_OFFSET * 1000 / 30;
-            autoJudgeOffset = options.settings.AUTO_JUDGE_OFFSET;
+            judgeOffset = options.settings.judgeOffset * 1000 / 30;
+            autoJudgeOffset = options.settings.autoJudgeOffset;
 
             mpSpectate = (options.mpRoom && !options.mpRoom.connection.currentUser.isPlayer);
             if (mpSpectate)

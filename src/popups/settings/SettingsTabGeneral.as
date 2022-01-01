@@ -231,9 +231,9 @@ package popups.settings
             _optionGameVolume.slideValue = _settings.gameVolume;
             _optionMenuVolume.slideValue = _gvars.menuMusicSoundVolume;
 
-            _optionGlobalOffset.text = _settings.GLOBAL_OFFSET.toString();
-            _optionJudgeOffset.text = _settings.JUDGE_OFFSET.toString();
-            _optionAutoJudgeOffset.text = _settings.AUTO_JUDGE_OFFSET;
+            _optionGlobalOffset.text = _settings.globalOffset.toString();
+            _optionJudgeOffset.text = _settings.judgeOffset.toString();
+            _optionAutoJudgeOffset.text = _settings.autoJudgeOffset;
 
             updateJudgeOffsetState();
 
@@ -308,24 +308,24 @@ package popups.settings
 
         private function onGlobalOffsetChanged(e:Event):void
         {
-            _settings.GLOBAL_OFFSET = _optionGlobalOffset.validate(0);
+            _settings.globalOffset = _optionGlobalOffset.validate(0);
         }
 
         private function onJudgeOffsetChanged(e:Event):void
         {
-            _settings.JUDGE_OFFSET = _optionJudgeOffset.validate(0);
+            _settings.judgeOffset = _optionJudgeOffset.validate(0);
         }
 
         private function onAutoJudgeOffsetChanged(e:Event):void
         {
-            _settings.AUTO_JUDGE_OFFSET = !_settings.AUTO_JUDGE_OFFSET;
+            _settings.autoJudgeOffset = !_settings.autoJudgeOffset;
             updateJudgeOffsetState();
         }
 
         private function updateJudgeOffsetState():void
         {
-            _optionJudgeOffset.selectable = !_settings.AUTO_JUDGE_OFFSET;
-            _optionJudgeOffset.alpha = _settings.AUTO_JUDGE_OFFSET ? 0.55 : 1.0;
+            _optionJudgeOffset.selectable = !_settings.autoJudgeOffset;
+            _optionJudgeOffset.alpha = _settings.autoJudgeOffset ? 0.55 : 1.0;
         }
 
         private function onAutofailAmazingChanged(e:Event):void
