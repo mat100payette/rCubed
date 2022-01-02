@@ -1,7 +1,7 @@
 package popups.settings
 {
     import classes.Language;
-    import classes.Noteskins;
+    import classes.NoteskinsList;
     import classes.UserSettings;
     import classes.ui.BoxText;
     import classes.ui.Text;
@@ -15,7 +15,7 @@ package popups.settings
     public class SettingsTabInput extends SettingsTabBase
     {
         private var _lang:Language = Language.instance;
-        private var _noteskins:Noteskins = Noteskins.instance;
+        private var _noteskins:NoteskinsList = NoteskinsList.instance;
 
         private var _optionLeftReceptor:BoxText;
         private var _optionDownReceptor:BoxText;

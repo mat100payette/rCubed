@@ -12,12 +12,10 @@ package
     import assets.GameBackgroundColor;
     import classes.Alert;
     import classes.Language;
-    import classes.Noteskins;
+    import classes.NoteskinsList;
     import classes.Playlist;
     import classes.Site;
-    import classes.SongPreview;
     import classes.User;
-    import classes.replay.Replay;
     import classes.ui.BoxButton;
     import classes.ui.ProgressBar;
     import classes.ui.Text;
@@ -38,19 +36,18 @@ package
     import flash.system.Capabilities;
     import flash.text.AntiAliasType;
     import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
+    import flash.text.TextFormatAlign;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
     import game.GameMenu;
-    import game.GameOptions;
     import menu.MainMenu;
     import menu.MenuPanel;
     import popups.PopupContextMenu;
     import popups.PopupHelp;
     import popups.replays.ReplayHistoryWindow;
     import popups.settings.SettingsWindow;
-    import flash.text.TextFieldAutoSize;
-    import flash.text.TextFormatAlign;
 
     public class Main extends MenuPanel
     {
@@ -73,7 +70,7 @@ package
         public var _site:Site = Site.instance;
         public var _playlist:Playlist = Playlist.instance;
         //public var _friends:Friends = Friends.instance;
-        public var _noteskins:Noteskins = Noteskins.instance;
+        public var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
         public var loadTimer:int = 0;
         public var preloader:ProgressBar;
@@ -338,10 +335,10 @@ package
             {
                 _lang.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
                 _lang.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _noteskins.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _noteskins.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                _noteskinList.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
+                _noteskinList.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
                 _lang.load();
-                _noteskins.load();
+                _noteskinList.load();
             }
 
             //_friends.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
@@ -375,7 +372,7 @@ package
         {
             if (loadStatus != null)
             {
-                loadStatus.htmlText = "Total: " + loadScripts + " / " + loadTotal + "\n" + "Playlist: " + getLoadText(_playlist.isLoaded(), _playlist.isError()) + "\n" + "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n" + "Site Data: " + getLoadText(_site.isLoaded(), _site.isError()) + ((!isLoginLoad) ? ("\n" + "Noteskin Data: " + getLoadText(_noteskins.isLoaded(), _noteskins.isError()) + "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())) : "");
+                loadStatus.htmlText = "Total: " + loadScripts + " / " + loadTotal + "\n" + "Playlist: " + getLoadText(_playlist.isLoaded(), _playlist.isError()) + "\n" + "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n" + "Site Data: " + getLoadText(_site.isLoaded(), _site.isError()) + ((!isLoginLoad) ? ("\n" + "Noteskin Data: " + getLoadText(_noteskinList.isLoaded(), _noteskinList.isError()) + "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())) : "");
             }
         }
 
@@ -487,11 +484,11 @@ package
              */
             if (!isLoginLoad)
             {
-                if (!_noteskins.isLoaded())
+                if (!_noteskinList.isLoaded())
                 {
-                    _noteskins.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                    _noteskins.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                    _noteskins.load();
+                    _noteskinList.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
+                    _noteskinList.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                    _noteskinList.load();
                 }
                 if (!_lang.isLoaded())
                 {

@@ -1,11 +1,10 @@
 package classes
 {
-    import flash.display.MovieClip;
     import flash.display.Sprite;
 
     public class GameNote extends Sprite
     {
-        private static var _noteskins:Noteskins = Noteskins.instance;
+        private static var _noteskins:NoteskinsList = NoteskinsList.instance;
 
         private var _note:Sprite;
         public var NOTESKIN:int = 0;
@@ -28,7 +27,7 @@ package classes
             this.PLAYER = player;
 
             var _noteInfo:Object = _noteskins.getInfo(activeNoteSkin);
-            _note = _noteskins.getNote(activeNoteSkin, this.COLOR, this.DIR);
+            _note = _noteskins.getNoteSprite(activeNoteSkin, this.COLOR, this.DIR);
             _note.x = -(_noteInfo.width >> 1);
             _note.y = -(_noteInfo.height >> 1);
             this.addChild(_note);
@@ -37,13 +36,9 @@ package classes
         public function dispose():void
         {
             if (_note != null && this.contains(_note))
-            {
                 this.removeChild(_note);
-            }
 
             _note = null;
         }
-
     }
-
 }

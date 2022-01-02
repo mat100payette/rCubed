@@ -9,7 +9,7 @@ package game
     import classes.GameNote;
     import classes.Gameplay;
     import classes.Language;
-    import classes.Noteskins;
+    import classes.NoteskinsList;
     import classes.User;
     import classes.chart.LevelScriptRuntime;
     import classes.chart.Note;
@@ -87,7 +87,7 @@ package game
 
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
-        private var _noteskins:Noteskins = Noteskins.instance;
+        private var _noteskins:NoteskinsList = NoteskinsList.instance;
         private var _lang:Language = Language.instance;
         private var _loader:URLLoader;
         private var _keys:Array;

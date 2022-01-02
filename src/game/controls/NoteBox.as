@@ -2,7 +2,7 @@ package game.controls
 {
     import classes.GameNote;
     import classes.GameReceptor;
-    import classes.Noteskins;
+    import classes.NoteskinsList;
     import classes.chart.Song;
     import classes.chart.Note;
     import flash.utils.getTimer;
@@ -14,7 +14,7 @@ package game.controls
     public class NoteBox extends Sprite
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
-        private var _noteskins:Noteskins = Noteskins.instance;
+        private var _noteskins:NoteskinsList = NoteskinsList.instance;
         private var options:GameOptions;
         private var song:Song;
 
@@ -41,7 +41,7 @@ package game.controls
 
             // Create Object Pools
             notePool = [];
-            for each (var item:Object in _noteskins.data)
+            for each (var item:Object in _noteskins.noteskins)
             {
                 notePool[item.id] = {"L": [], "D": [], "U": [], "R": []};
                 for each (var direction:String in GameOptions.NOTE_DIRECTIONS)
@@ -113,7 +113,7 @@ package game.controls
 
         public function noteRealSpawnRotation(dir:String, noteskin:int):Number
         {
-            var rot:Number = _noteskins.data[noteskin]["rotation"];
+            var rot:Number = _noteskins.noteskins[noteskin]["rotation"];
             switch (dir)
             {
                 case "D":
