@@ -69,48 +69,48 @@ package popups.settings
 
             /// Col 1
 
-            new Text(container, xOff, yOff, _lang.string("options_game_mods"), 14);
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAME_MODS), 14);
             yOff += 25;
 
-            _optionHidden = addCheckOption("options_mod_hidden", onHiddenChecked);
-            _optionSudden = addCheckOption("options_mod_sudden", onSuddenChecked);
-            _optionBlink = addCheckOption("options_mod_blink", onBlinkChecked);
+            _optionHidden = addCheckOption(Lang.OPTIONS_MOD_HIDDEN, onHiddenChecked);
+            _optionSudden = addCheckOption(Lang.OPTIONS_MOD_SUDDEN, onSuddenChecked);
+            _optionBlink = addCheckOption(Lang.OPTIONS_MOD_BLINK, onBlinkChecked);
 
             yOff += drawSeperator(container, xOff, 200, yOff, 2, 3);
 
-            _optionRotating = addCheckOption("options_mod_rotating", onRotatingChecked);
-            _optionRotateCW = addCheckOption("options_mod_rotate_cw", onRotateCWChecked);
-            _optionRotateCCW = addCheckOption("options_mod_rotate_ccw", onRotateCCWChecked);
-            _optionWave = addCheckOption("options_mod_wave", onWaveChecked);
-            _optionDrunk = addCheckOption("options_mod_drunk", onDrunkChecked);
-            _optionTornado = addCheckOption("options_mod_tornado", onTornadoChecked);
-            _optionMiniResize = addCheckOption("options_mod_mini_resize", onMiniResizeChecked);
-            _optionTapPulse = addCheckOption("options_mod_tap_pulse", onTapPulseChecked);
+            _optionRotating = addCheckOption(Lang.OPTIONS_MOD_ROTATING, onRotatingChecked);
+            _optionRotateCW = addCheckOption(Lang.OPTIONS_MOD_ROTATE_CW, onRotateCWChecked);
+            _optionRotateCCW = addCheckOption(Lang.OPTIONS_MOD_ROTATE_CCW, onRotateCCWChecked);
+            _optionWave = addCheckOption(Lang.OPTIONS_MOD_WAVE, onWaveChecked);
+            _optionDrunk = addCheckOption(Lang.OPTIONS_MOD_DRUNK, onDrunkChecked);
+            _optionTornado = addCheckOption(Lang.OPTIONS_MOD_TORNADO, onTornadoChecked);
+            _optionMiniResize = addCheckOption(Lang.OPTIONS_MOD_MINI_RESIZE, onMiniResizeChecked);
+            _optionTapPulse = addCheckOption(Lang.OPTIONS_MOD_TAP_PULSE, onTapPulseChecked);
 
             yOff += drawSeperator(container, xOff, 200, yOff, 2, 3);
 
-            _optionRandom = addCheckOption("options_mod_random", onRandomChecked);
-            _optionScramble = addCheckOption("options_mod_scramble", onScrambleChecked);
-            _optionShuffle = addCheckOption("options_mod_shuffle", onShuffleChecked);
-            _optionReverse = addCheckOption("options_mod_reverse", onReverseChecked);
+            _optionRandom = addCheckOption(Lang.OPTIONS_MOD_RANDOM, onRandomChecked);
+            _optionScramble = addCheckOption(Lang.OPTIONS_MOD_SCRAMBLE, onScrambleChecked);
+            _optionShuffle = addCheckOption(Lang.OPTIONS_MOD_SHUFFLE, onShuffleChecked);
+            _optionReverse = addCheckOption(Lang.OPTIONS_MOD_REVERSE, onReverseChecked);
 
             /// Col 2
             xOff = 310;
             yOff = 15;
 
-            new Text(container, xOff, yOff, _lang.string("options_visual_mods"), 14);
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_VISUAL_MODS), 14);
             yOff += 25;
 
-            _optionMirror = addCheckOption("options_mod_mirror", onMirrorChecked);
-            _optionDark = addCheckOption("options_mod_dark", onDarkChecked);
-            _optionHide = addCheckOption("options_mod_hide", onHideChecked);
-            _optionMini = addCheckOption("options_mod_mini", onMiniChecked);
-            _optionColumnColor = addCheckOption("options_mod_columncolour", onColumnColorChecked);
-            _optionHalftime = addCheckOption("options_mod_halftime", onHalftimeChecked);
+            _optionMirror = addCheckOption(Lang.OPTIONS_MOD_MIRROR, onMirrorChecked);
+            _optionDark = addCheckOption(Lang.OPTIONS_MOD_DARK, onDarkChecked);
+            _optionHide = addCheckOption(Lang.OPTIONS_MOD_HIDE, onHideChecked);
+            _optionMini = addCheckOption(Lang.OPTIONS_MOD_MINI, onMiniChecked);
+            _optionColumnColor = addCheckOption(Lang.OPTIONS_MOD_COLUMN_COLOR, onColumnColorChecked);
+            _optionHalftime = addCheckOption(Lang.OPTIONS_MOD_HALFTIME, onHalftimeChecked);
 
             yOff += drawSeperator(container, xOff, 200, yOff, 2, 3);
 
-            _optionNoBackground = addCheckOption("options_mod_nobackground", onNoBackgroundChecked);
+            _optionNoBackground = addCheckOption(Lang.OPTIONS_MOD_NO_BACKGROUND, onNoBackgroundChecked);
         }
 
         override public function setValues():void

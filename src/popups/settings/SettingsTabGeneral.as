@@ -208,7 +208,7 @@ package popups.settings
 
             yOff += drawSeperator(container, xOff, 170, yOff, 5, 6);
 
-            _optionMirrorMod = addCheckOption(Lang.OPTIONS_MIRROR, onMirrorChanged);
+            _optionMirrorMod = addCheckOption(Lang.OPTIONS_MOD_MIRROR, onMirrorChanged);
 
             yOff += drawSeperator(container, xOff, 170, yOff, 1);
 

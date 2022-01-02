@@ -31,7 +31,6 @@ package
         public static const OPTIONS_SCROLL_SPLIT:String = "options_scroll_split";
         public static const OPTIONS_SCROLL_SPLIT_DOWN:String = "options_scroll_split_down";
         public static const OPTIONS_SCROLL_PLUS:String = "options_scroll_plus";
-        public static const OPTIONS_MIRROR:String = "options_mod_mirror";
         public static const OPTIONS_RATE:String = "options_rate";
         public static const OPTIONS_ISOLATION_START:String = "options_isolation_start";
         public static const OPTIONS_ISOLATION_NOTES:String = "options_isolation_notes";
@@ -47,6 +46,33 @@ package
         public static const OPTIONS_INPUT_TESTER:String = "options_input_tester";
         public static const OPTIONS_INPUT_TESTER_DESC:String = "options_input_tester_description";
         public static const OPTIONS_KEY_PICK:String = "options_key_pick";
+
+        // MODS SETTINGS TAB
+        public static const OPTIONS_GAME_MODS:String = "options_game_mods";
+        public static const OPTIONS_VISUAL_MODS:String = "options_visual_mods";
+        public static const OPTIONS_MOD_HIDDEN:String = "options_mod_hidden";
+        public static const OPTIONS_MOD_SUDDEN:String = "options_mod_sudden";
+        public static const OPTIONS_MOD_BLINK:String = "options_mod_blink";
+        public static const OPTIONS_MOD_ROTATING:String = "options_mod_rotating";
+        public static const OPTIONS_MOD_ROTATE_CW:String = "options_mod_rotate_cw";
+        public static const OPTIONS_MOD_ROTATE_CCW:String = "options_mod_rotate_ccw";
+        public static const OPTIONS_MOD_WAVE:String = "options_mod_wave";
+        public static const OPTIONS_MOD_DRUNK:String = "options_mod_drunk";
+        public static const OPTIONS_MOD_TORNADO:String = "options_mod_tornado";
+        public static const OPTIONS_MOD_MINI_RESIZE:String = "options_mod_mini_resize";
+        public static const OPTIONS_MOD_TAP_PULSE:String = "options_mod_tap_pulse";
+        public static const OPTIONS_MOD_RANDOM:String = "options_mod_random";
+        public static const OPTIONS_MOD_SCRAMBLE:String = "options_mod_scramble";
+        public static const OPTIONS_MOD_SHUFFLE:String = "options_mod_shuffle";
+        public static const OPTIONS_MOD_REVERSE:String = "options_mod_reverse";
+        public static const OPTIONS_MOD_MIRROR:String = "options_mod_mirror";
+        public static const OPTIONS_MOD_DARK:String = "options_mod_dark";
+        public static const OPTIONS_MOD_HIDE:String = "options_mod_hide";
+        public static const OPTIONS_MOD_MINI:String = "options_mod_mini";
+        public static const OPTIONS_MOD_COLUMN_COLOR:String = "options_mod_columncolour";
+        public static const OPTIONS_MOD_HALFTIME:String = "options_mod_halftime";
+        public static const OPTIONS_MOD_NO_BACKGROUND:String = "options_mod_nobackground";
+
 
         // COLOR SETTINGS TAB
         public static const OPTIONS_JUDGE_COLORS_DISPLAY:String = "options_judge_colors_title";
