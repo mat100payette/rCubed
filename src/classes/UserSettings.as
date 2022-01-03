@@ -74,7 +74,7 @@ package classes
         public var keyQuit:int = Keyboard.CONTROL;
         public var keyOptions:int = 145; // Scrolllock
 
-        public var activeNoteskin:int = 1;
+        public var noteskinId:int = 1;
         public var activeMods:Array = [];
         public var activeVisualMods:Array = [];
         public var scrollDirection:String = "up";
@@ -281,7 +281,7 @@ package classes
                 this.keyOptions = settings.keyOptions;
 
             if (settings.activeNoteskin != null)
-                this.activeNoteskin = settings.activeNoteskin;
+                this.noteskinId = settings.activeNoteskin;
 
             if (settings.scrollDirection != null)
                 this.scrollDirection = settings.scrollDirection;
@@ -347,7 +347,7 @@ package classes
                 if (settings.filters is Vector.<*>)
                     this.filters = importFilters(settings.filters);
                 else
-                    this.filters = importFilters(VectorUtil.fromArr(settings.filters));
+                    this.filters = importFilters(VectorUtil.fromArray(settings.filters));
 
             if (settings.songQueues != null)
             {

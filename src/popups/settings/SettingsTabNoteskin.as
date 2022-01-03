@@ -3,6 +3,7 @@ package popups.settings
     import assets.menu.icons.fa.iconRefresh;
     import classes.Alert;
     import classes.Language;
+    import classes.Noteskin;
     import classes.NoteskinsList;
     import classes.UserSettings;
     import classes.ui.BoxButton;
@@ -10,53 +11,47 @@ package popups.settings
     import classes.ui.BoxIcon;
     import classes.ui.Prompt;
     import classes.ui.Text;
+    import classes.ui.NoteColorOption;
+    import classes.ui.NoteColorComboBoxItem;
     import com.bit101.components.ComboBox;
+    import com.flashfla.utils.VectorUtil;
     import com.flashfla.utils.SystemUtil;
     import flash.display.Sprite;
     import flash.events.Event;
-    import flash.events.MouseEvent;
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     import flash.text.TextFormatAlign;
     import game.noteskins.ExternalNoteskin;
-    import classes.Noteskin;
 
     public class SettingsTabNoteskin extends SettingsTabBase
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _noteskinsList:NoteskinsList = NoteskinsList.instance;
 
+        private var _ignoreNoteskinCombo:Boolean = false;
+        private var _noteskinPreview:Sprite;
+        private var _previousNoteskinId:int;
+        private var _noteColorComboItems:Vector.<NoteColorComboBoxItem> = new <NoteColorComboBoxItem>[];
+
         private var _optionUseCustomNoteskin:BoxCheck;
-
-        private var noteColorComboArray:Array = [];
-        private var optionNoteskins:Array;
-        private var optionNoteskinPreview:Sprite;
-        private var optionNoteSkinCombo:ComboBox;
-        private var optionNoteSkinComboIgnore:Boolean = false;
-        private var optionNoteskinComboRefresh:BoxIcon;
-
-        private var optionOpenCustomNoteskinEditor:BoxButton;
-        private var optionOpenNoteskinFolder:BoxButton;
-        private var optionImportCustomNoteskin:BoxButton;
-        private var optionExportCustomNoteskin:BoxButton;
-
-        private var optionNoteColors:Array;
-        private var arrayColorSprites:Array;
-        private var arrayColorSpritesReplace:Array;
-
-        private var lastNoteskin:int;
+        private var _optionNoteskinCombo:ComboBox;
+        private var _optionOpenCustomNoteskinEditor:BoxButton;
+        private var _optionOpenNoteskinFolder:BoxButton;
+        private var _optionImportCustomNoteskin:BoxButton;
+        private var _optionExportCustomNoteskin:BoxButton;
+        private var _noteskinCheckOptions:Array = [];
+        private var _noteColorOptions:Vector.<NoteColorOption> = new <NoteColorOption>[];
 
         public function SettingsTabNoteskin(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
             super(settingsWindow, settings);
 
-            lastNoteskin = _gvars.activeUser.settings.activeNoteskin;
+            _previousNoteskinId = _settings.noteskinId;
 
-            noteColorComboArray = [];
             for (var i:int = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
             {
-                noteColorComboArray.push({"label": _lang.stringSimple("note_colors_" + DEFAULT_OPTIONS.settings.noteColors[i]), "data": DEFAULT_OPTIONS.settings.noteColors[i]});
+                const defaultColorName:String = DEFAULT_OPTIONS.settings.noteColors[i];
+                _noteColorComboItems.push(new NoteColorComboBoxItem(_lang.stringSimple("note_colors_" + defaultColorName), defaultColorName));
             }
         }
 
@@ -67,15 +62,49 @@ package popups.settings
 
         override public function openTab():void
         {
-            function addCheckOption(noteskin:Noteskin, onCheck:Function):BoxCheck
+            function addCheckOption(noteskinId:int, noteskinName:String, onCheck:Function):void
             {
-                new Text(container, xOff + 23, yOff, noteskin.name);
-                const checkBox:BoxCheck = new BoxCheck(container, xOff + 3, yOff + 3, onCheck);
+                new Text(container, xOff + 23, yOff, noteskinName);
+                const checkBox:BoxCheck = new BoxCheck(container, xOff + 3, yOff + 3, function(e:Event):void
+                {
+                    onNoteskinChecked(noteskinId);
+                });
+                // TODO: Refactor in typed class
+                checkBox.noteskinId = noteskinId;
 
                 yOff += 20;
 
-                _options[noteskin.id] = checkBox;
-                return checkBox;
+                _noteskinCheckOptions.push(checkBox)
+                _options[noteskinId] = checkBox;
+            }
+
+            function addNoteskinColorOption(colorIndex:int):void
+            {
+                const defaultColor:String = DEFAULT_OPTIONS.settings.noteColors[colorIndex];
+                const currentColor:String = _settings.noteColors[colorIndex];
+                const textLocalStringName:String = "note_colors_" + defaultColor;
+
+                const noteDefaultColorSprite:Sprite = getNoteSprite(xOff + 11, yOff + 11, 22, defaultColor);
+
+                const noteColor:Text = new Text(container, xOff + 25, yOff, _lang.string(textLocalStringName));
+                noteColor.width = 95;
+
+                const noteColorCombo:ComboBox = new ComboBox(container, xOff + 125, yOff, _lang.stringSimple(textLocalStringName), VectorUtil.toArray(_noteColorComboItems));
+                noteColorCombo.setSize(114, 22);
+                noteColorCombo.openPosition = ComboBox.BOTTOM;
+                noteColorCombo.fontSize = 11;
+                noteColorCombo.numVisibleItems = DEFAULT_OPTIONS.settings.noteColors.length;
+                noteColorCombo.addEventListener(Event.SELECT, function(e:Event):void
+                {
+                    onNoteColorSelected(colorIndex, (noteColorCombo.selectedItem as NoteColorComboBoxItem).colorName);
+                });
+
+                const noteColorSprite:Sprite = getNoteSprite(xOff + 255, yOff + 11, 22, currentColor);
+
+                _noteColorOptions[colorIndex] = new NoteColorOption(noteDefaultColorSprite, noteColorSprite, noteColorCombo);
+
+                yOff += 20;
+                yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
             }
 
             container.graphics.lineStyle(1, 0xFFFFFF, 0.35);
@@ -87,7 +116,7 @@ package popups.settings
             var xOff:int = 15;
             var yOff:int = 15;
 
-            optionNoteskinPreview = addNoteImage(xOff + 233, yOff + 32, 64, "blue");
+            _noteskinPreview = getNoteSprite(xOff + 233, yOff + 32, 64, "blue");
 
             //- Noteskins
             const textNoteskinGroup:Text = new Text(container, xOff, yOff, _lang.string("options_noteskin"), 14);
@@ -106,85 +135,65 @@ package popups.settings
             for each (var noteskinId:String in noteskinIds)
             {
                 noteskin = noteskins[noteskinId];
-                addCheckOption(noteskin, clickHandler);
+                // TODO: This also desperately needs Radio buttons logic
+                addCheckOption(noteskin.id, noteskin.name, onNoteskinChecked);
             }
 
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
             // Custom
-            new Text(container, xOff + 23, yOff, _lang.string("options_noteskin_custom"));
-            _optionUseCustomNoteskin = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
-            _options[0] = _optionUseCustomNoteskin;
+            noteskin = noteskins[0];
+            addCheckOption(0, _lang.string("options_noteskin_custom"), onNoteskinChecked);
 
             yOff += 30;
 
-            optionNoteSkinCombo = new ComboBox(container, xOff, yOff, "-- Change Custom Noteskin --");
-            optionNoteSkinCombo.setSize(240, 22);
-            optionNoteSkinCombo.openPosition = ComboBox.BOTTOM;
-            optionNoteSkinCombo.fontSize = 11;
-            optionNoteSkinCombo.numVisibleItems = 10;
-            optionNoteSkinCombo.addEventListener(Event.SELECT, gameNoteSkinSelect);
+            _optionNoteskinCombo = new ComboBox(container, xOff, yOff, "-- Change Custom Noteskin --");
+            _optionNoteskinCombo.setSize(240, 22);
+            _optionNoteskinCombo.openPosition = ComboBox.BOTTOM;
+            _optionNoteskinCombo.fontSize = 11;
+            _optionNoteskinCombo.numVisibleItems = 10;
+            _optionNoteskinCombo.addEventListener(Event.SELECT, onCustomNoteskinSelected);
             setCustomNoteskinCombo();
 
-            optionNoteskinComboRefresh = new BoxIcon(container, xOff + 240, yOff + 1, 20, 20, new iconRefresh(), clickHandler);
-            optionNoteskinComboRefresh.padding = 7;
+            const noteskinComboRefresh:BoxIcon = new BoxIcon(container, xOff + 240, yOff + 1, 20, 20, new iconRefresh(), onNoteskinComboRefresh);
+            noteskinComboRefresh.padding = 7;
 
             yOff += 31;
 
-            optionOpenCustomNoteskinEditor = new BoxButton(container, xOff, yOff, 125, 29, _lang.string("options_open_noteskin_editor"), 12, clickHandler);
-            optionImportCustomNoteskin = new BoxButton(container, xOff + 135, yOff, 125, 29, _lang.string("options_import_noteskin_json"), 12, clickHandler);
+            new BoxButton(container, xOff, yOff, 125, 29, _lang.string("options_open_noteskin_editor"), 12, onOpenCustomNoteskinEditor);
+            new BoxButton(container, xOff + 135, yOff, 125, 29, _lang.string("options_import_noteskin_json"), 12, onImportCustomNoteskinClicked);
 
             yOff += 39;
 
-            optionOpenNoteskinFolder = new BoxButton(container, xOff, yOff, 125, 29, _lang.string("options_open_noteskin_folder"), 12, clickHandler);
-            optionExportCustomNoteskin = new BoxButton(container, xOff + 135, yOff, 125, 29, _lang.string("options_copy_noteskin_data"), 12, clickHandler);
+            new BoxButton(container, xOff, yOff, 125, 29, _lang.string("options_open_noteskin_folder"), 12, onOpenNoteskinFolder);
+            new BoxButton(container, xOff + 135, yOff, 125, 29, _lang.string("options_copy_noteskin_data"), 12, onExportCustomNoteskinClicked);
 
             /// Col 2
             xOff = 310;
             yOff = 15;
 
-            var gameNoteColorTitle:Text = new Text(container, xOff + 5, yOff, _lang.string("options_note_colors_title"), 14);
+            const gameNoteColorTitle:Text = new Text(container, xOff + 5, yOff, _lang.string("options_note_colors_title"), 14);
             gameNoteColorTitle.width = 265;
             gameNoteColorTitle.align = TextFormatAlign.CENTER;
+
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
-            optionNoteColors = [];
-            arrayColorSprites = [];
-            arrayColorSpritesReplace = [];
             for (i = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
-            {
-                arrayColorSprites.push(addNoteImage(xOff + 11, yOff + 11, 22, DEFAULT_OPTIONS.settings.noteColors[i]));
-
-                var gameNoteColor:Text = new Text(container, xOff + 25, yOff, _lang.string("note_colors_" + DEFAULT_OPTIONS.settings.noteColors[i]));
-                gameNoteColor.width = 95;
-
-                var gameNoteColorCombo:ComboBox = new ComboBox(container, xOff + 125, yOff, _lang.stringSimple("note_colors_" + DEFAULT_OPTIONS.settings.noteColors[i]), noteColorComboArray);
-                gameNoteColorCombo.setSize(114, 22);
-                gameNoteColorCombo.openPosition = ComboBox.BOTTOM;
-                gameNoteColorCombo.fontSize = 11;
-                gameNoteColorCombo.numVisibleItems = DEFAULT_OPTIONS.settings.noteColors.length;
-                gameNoteColorCombo.addEventListener(Event.SELECT, gameNoteColorSelect);
-                optionNoteColors.push(gameNoteColorCombo);
-
-                arrayColorSpritesReplace.push(addNoteImage(xOff + 255, yOff + 11, 22, _gvars.activeUser.settings.noteColors[i]));
-
-                yOff += 20;
-                yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
-            }
+                addNoteskinColorOption(i);
         }
 
-        private function addNoteImage(xOff:Number, yOff:Number, receptorSize:Number, color:String):Sprite
+        private function getNoteSprite(xOff:Number, yOff:Number, receptorSize:Number, color:String):Sprite
         {
-            var data:Object = _noteskinsList.getInfo(_gvars.activeUser.settings.activeNoteskin);
-            var hasRotation:Boolean = (data.rotation != 0);
+            const data:Object = _noteskinsList.getInfo(_settings.noteskinId);
+            const hasRotation:Boolean = (data.rotation != 0);
 
-            var noteHolder:Sprite = new Sprite();
+            const noteHolder:Sprite = new Sprite();
             noteHolder.x = xOff;
             noteHolder.y = yOff;
             container.addChild(noteHolder);
 
-            var noteSprite:Sprite = _noteskinsList.getNoteSprite(data.id, color, "U");
+            const noteSprite:Sprite = _noteskinsList.getNoteSprite(data.id, color, "U");
             noteSprite.x = -(data.width >> 1);
             noteSprite.y = -(data.height >> 1);
             noteHolder.addChild(noteSprite);
@@ -193,7 +202,7 @@ package popups.settings
             if (hasRotation)
                 noteHolder.rotation = data.rotation * 2;
 
-            var noteScale:Number = Math.min(1, (receptorSize / Math.max(noteHolder.width, noteHolder.height)));
+            const noteScale:Number = Math.min(1, (receptorSize / Math.max(noteHolder.width, noteHolder.height)));
             noteHolder.scaleX = noteHolder.scaleY = noteScale;
             noteHolder.visible = true;
 
@@ -202,110 +211,91 @@ package popups.settings
 
         private function replaceNoteImage(oldSprite:Sprite, receptorSize:Number, color:String):Sprite
         {
-            var xOff:Number = oldSprite.x;
-            var yOff:Number = oldSprite.y;
+            const xOff:Number = oldSprite.x;
+            const yOff:Number = oldSprite.y;
 
             oldSprite.parent.removeChild(oldSprite);
 
-            return addNoteImage(xOff, yOff, receptorSize, color);
+            return getNoteSprite(xOff, yOff, receptorSize, color);
         }
 
         private function updateNoteImages():void
         {
             for (var i:int = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
             {
-                arrayColorSprites[i] = replaceNoteImage(arrayColorSprites[i], 22, DEFAULT_OPTIONS.settings.noteColors[i]);
-                arrayColorSpritesReplace[i] = replaceNoteImage(arrayColorSpritesReplace[i], 22, _gvars.activeUser.settings.noteColors[i]);
+                const noteColorOption:NoteColorOption = _noteColorOptions[i];
+                const defaultColor:String = DEFAULT_OPTIONS.settings.noteColors[i];
+                const replacedColor:String = _settings.noteColors[i];
+
+                noteColorOption.defaultSprite = replaceNoteImage(noteColorOption.defaultSprite, 22, defaultColor);
+                noteColorOption.replacedSprite = replaceNoteImage(noteColorOption.replacedSprite, 22, replacedColor);
             }
 
-            optionNoteskinPreview = replaceNoteImage(optionNoteskinPreview, 64, "blue");
+            _noteskinPreview = replaceNoteImage(_noteskinPreview, 64, "blue");
         }
 
         override public function setValues():void
         {
             // Set Noteskin
-            for each (var item:BoxCheck in optionNoteskins)
-            {
-                item.checked = (item.skin == _gvars.activeUser.settings.activeNoteskin);
-            }
+            for each (var checkOption:BoxCheck in _noteskinCheckOptions)
+                checkOption.checked = (checkOption.noteskinId == _settings.noteskinId);
 
             for (var i:int = 0; i < DEFAULT_OPTIONS.settings.noteColors.length; i++)
-            {
-                (optionNoteColors[i] as ComboBox).selectedItemByData = _gvars.activeUser.settings.noteColors[i];
-            }
+                (_noteColorOptions[i] as NoteColorOption).comboBox.selectedItemByData = _settings.noteColors[i];
 
-            if (lastNoteskin != _gvars.activeUser.settings.activeNoteskin)
+            if (_previousNoteskinId != _settings.noteskinId)
             {
-                lastNoteskin = _gvars.activeUser.settings.activeNoteskin;
+                _previousNoteskinId = _settings.noteskinId;
                 updateNoteImages();
             }
         }
 
-        public function clickHandler(e:MouseEvent):void
+        private function onNoteskinChecked(noteskinId:int):void
         {
-            //- Noteskin
-            if (e.target.hasOwnProperty("skin"))
-            {
-                _gvars.activeUser.settings.activeNoteskin = e.target.skin;
-            }
-
-            //- Custom Refresh
-            if (e.target == optionNoteskinComboRefresh)
-            {
-                _noteskinsList.loadExternalNoteskins();
-                setCustomNoteskinCombo();
-            }
-
-            //- Custom Noteskin Editor
-            else if (e.target == optionOpenCustomNoteskinEditor)
-            {
-                navigateToURL(new URLRequest(Constant.NOTESKIN_EDITOR_URL), "_blank");
-                return;
-            }
-
-            //- Custom Noteskin Folder
-            else if (e.target == optionOpenNoteskinFolder)
-            {
-                AirContext.STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH).openWithDefaultApplication();
-                return;
-            }
-
-            //- Import Custom Noteskin
-            else if (e.target == optionImportCustomNoteskin)
-            {
-                new Prompt(_parent, 320, _lang.string("popup_noteskin_import_json"), 100, _lang.string("popup_noteskin_import"), e_importNoteskin);
-                return;
-            }
-
-            //- Export Custom Noteskin
-            else if (e.target == optionExportCustomNoteskin)
-            {
-                var nsString:String = noteskinsString();
-                if (nsString != null)
-                {
-                    var success:Boolean = SystemUtil.setClipboard(nsString);
-                    if (success)
-                        Alert.add(_lang.string("clipboard_success"), 120, Alert.GREEN);
-                    else
-                        Alert.add(_lang.string("clipboard_failure"), 120, Alert.RED);
-                }
-                return;
-            }
-
+            _settings.noteskinId = noteskinId;
             setValues();
         }
 
-        private function gameNoteColorSelect(e:Event):void
+        private function onNoteskinComboRefresh(e:Event):void
         {
-            var data:Object = e.target.selectedItem.data;
-            for (var i:int = 0; i < optionNoteColors.length; i++)
-            {
-                if (optionNoteColors[i] == e.target)
-                {
-                    _gvars.activeUser.settings.noteColors[i] = data;
-                    arrayColorSpritesReplace[i] = replaceNoteImage(arrayColorSpritesReplace[i], 22, _gvars.activeUser.settings.noteColors[i]);
-                }
-            }
+            _noteskinsList.loadExternalNoteskins();
+            setCustomNoteskinCombo();
+        }
+
+        private function onOpenCustomNoteskinEditor(e:Event):void
+        {
+            navigateToURL(new URLRequest(Constant.NOTESKIN_EDITOR_URL), "_blank");
+        }
+
+        private function onOpenNoteskinFolder(e:Event):void
+        {
+            AirContext.STORAGE_PATH.resolvePath(Constant.NOTESKIN_PATH).openWithDefaultApplication();
+        }
+
+        private function onImportCustomNoteskinClicked(e:Event):void
+        {
+            new Prompt(_parent, 320, _lang.string("popup_noteskin_import_json"), 100, _lang.string("popup_noteskin_import"), e_importNoteskin);
+        }
+
+        private function onExportCustomNoteskinClicked(e:Event):void
+        {
+            const noteskinString:String = LocalStore.getVariable("custom_noteskin", null);
+            if (noteskinString == null)
+                return;
+
+            const success:Boolean = SystemUtil.setClipboard(noteskinString);
+            if (success)
+                Alert.add(_lang.string("clipboard_success"), 120, Alert.GREEN);
+            else
+                Alert.add(_lang.string("clipboard_failure"), 120, Alert.RED);
+        }
+
+        private function onNoteColorSelected(colorIndex:int, newColor:String):void
+        {
+            const noteColorOption:NoteColorOption = _noteColorOptions[colorIndex];
+
+            _settings.noteColors[colorIndex] = newColor;
+            noteColorOption.replacedSprite = replaceNoteImage(noteColorOption.replacedSprite, 22, newColor);
         }
 
         private function setCustomNoteskinCombo():void
@@ -324,7 +314,7 @@ package popups.settings
                 {
                     ns = extList[i];
 
-                    var nsName:String = ns.data.name.indexOf("Custom Export") != -1 ? ns.file.substr(0, ns.file.length - 4) : ns.data.name;
+                    const nsName:String = ns.data.name.indexOf("Custom Export") != -1 ? ns.file.substr(0, ns.file.length - 4) : ns.data.name;
 
                     noteskinList.push({"label": nsName, "data": extList[i]});
                 }
@@ -336,11 +326,11 @@ package popups.settings
                 if (extList.length > 0)
                     noteskinList.unshift({"label": "------------------------------------", "data": null});
 
-                noteskinList.unshift({"label": "Imported Noteskin", "data": optionNoteSkinCombo});
+                noteskinList.unshift({"label": "Imported Noteskin", "data": _optionNoteskinCombo});
             }
 
-            optionNoteSkinComboIgnore = true;
-            optionNoteSkinCombo.items = noteskinList;
+            _ignoreNoteskinCombo = true;
+            _optionNoteskinCombo.items = noteskinList;
 
             // select combo box index
             if (noteskinFilename != null)
@@ -349,43 +339,43 @@ package popups.settings
                 {
                     if (noteskinList[i].data != null && (noteskinList[i].data is ExternalNoteskin) && noteskinList[i].data.file == noteskinFilename)
                     {
-                        optionNoteSkinCombo.selectedIndex = i;
+                        _optionNoteskinCombo.selectedIndex = i;
                         break;
                     }
                 }
             }
             else
             {
-                optionNoteSkinCombo.selectedIndex = 0;
+                _optionNoteskinCombo.selectedIndex = 0;
             }
-            optionNoteSkinComboIgnore = false;
+            _ignoreNoteskinCombo = false;
         }
 
-        private function gameNoteSkinSelect(e:Event):void
+        private function onCustomNoteskinSelected(e:Event):void
         {
-            if (optionNoteSkinComboIgnore)
+            if (_ignoreNoteskinCombo)
                 return;
 
-            var data:Object = e.target.selectedItem.data;
+            const data:Object = e.target.selectedItem.data;
             if (data == null)
                 return;
 
-            else if (data == optionNoteSkinCombo)
+            else if (data == _optionNoteskinCombo)
             {
-                var json:String = LocalStore.getVariable(NoteskinsList.CUSTOM_NOTESKIN_IMPORT, null);
+                const json:String = LocalStore.getVariable(NoteskinsList.CUSTOM_NOTESKIN_IMPORT, null);
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_DATA, json);
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_FILE, null);
             }
             else
             {
-                var extNS:ExternalNoteskin = data as ExternalNoteskin;
+                const extNS:ExternalNoteskin = data as ExternalNoteskin;
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_DATA, extNS.json);
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_FILE, extNS.file);
             }
 
-            if (_gvars.activeUser.settings.activeNoteskin != 0)
+            if (_settings.noteskinId != 0)
             {
-                _gvars.activeUser.settings.activeNoteskin = 0;
+                _settings.noteskinId = 0;
                 setValues();
             }
 
@@ -398,7 +388,7 @@ package popups.settings
         {
             try
             {
-                var json:Object = JSON.parse(noteskinJSON);
+                const json:Object = JSON.parse(noteskinJSON);
 
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_DATA, noteskinJSON);
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_IMPORT, noteskinJSON);
@@ -419,15 +409,13 @@ package popups.settings
         private function e_delayCustomUpdate(e:Event):void
         {
             // reload images, custom noteskins are async loaded so we just check for them to load
-            if (_gvars.activeUser.settings.activeNoteskin == 0)
+            if (_settings.noteskinId == 0)
             {
                 if (_noteskinsList.noteskins[0]["notes"]["blue"] != null)
                 {
                     _parent.removeEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
                     if (_parent != null && _parent.stage != null)
-                    {
                         updateNoteImages();
-                    }
                 }
             }
         }

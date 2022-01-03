@@ -270,7 +270,7 @@ package classes
             // Public
             this.name = data["name"];
             this.siteId = data["id"];
-            this.groups = Vector.<Number>(VectorUtil.fromArr(data["groups"]));
+            this.groups = Vector.<Number>(VectorUtil.fromArray(data["groups"]));
             this.joinDate = data["joinDate"];
             this.gameRank = data["gameRank"];
             this.gamesPlayed = data["gamesPlayed"];

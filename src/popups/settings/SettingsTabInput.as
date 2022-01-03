@@ -116,7 +116,7 @@ package popups.settings
             const INPUT_WIDTH:int = 60;
             const RECEPTOR_SIZE:Number = 38;
 
-            const noteskinData:Object = _noteskins.getInfo(_settings.activeNoteskin);
+            const noteskinData:Object = _noteskins.getInfo(_settings.noteskinId);
             // This is true if the current noteskin isn't symmetric
             const hasRotation:Boolean = (noteskinData.rotation != 0);
 

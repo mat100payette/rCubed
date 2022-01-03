@@ -54,9 +54,9 @@ package game.controls
             }
 
             // Check for invalid Noteskin / Pool
-            if (notePool[options.settings.activeNoteskin] == null)
+            if (notePool[options.settings.noteskinId] == null)
             {
-                options.settings.activeNoteskin = 1;
+                options.settings.noteskinId = 1;
             }
 
             // Prefill Object Pools for active noteskin.
@@ -66,11 +66,11 @@ package game.controls
             {
                 for each (var pre_color:String in options.settings.noteColors)
                 {
-                    var pool:ObjectPool = notePool[options.settings.activeNoteskin][pre_dir][pre_color];
+                    var pool:ObjectPool = notePool[options.settings.noteskinId][pre_dir][pre_color];
 
                     for (i = 0; i < preLoadCount; i++)
                     {
-                        var gameNote:GameNote = pool.addObject(new GameNote(0, pre_dir, pre_color, 1 * 1000, 0, 0, options.settings.activeNoteskin));
+                        var gameNote:GameNote = pool.addObject(new GameNote(0, pre_dir, pre_color, 1 * 1000, 0, 0, options.settings.noteskinId));
                         gameNote.visible = false;
                         pool.unmarkObject(gameNote);
                         addChild(gameNote);
@@ -79,13 +79,13 @@ package game.controls
             }
 
             // Setup Receptors
-            leftReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "L");
+            leftReceptor = _noteskins.getReceptor(options.settings.noteskinId, "L");
             leftReceptor.KEY = "Left";
-            downReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "D");
+            downReceptor = _noteskins.getReceptor(options.settings.noteskinId, "D");
             downReceptor.KEY = "Down";
-            upReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "U");
+            upReceptor = _noteskins.getReceptor(options.settings.noteskinId, "U");
             upReceptor.KEY = "Up";
-            rightReceptor = _noteskins.getReceptor(options.settings.activeNoteskin, "R");
+            rightReceptor = _noteskins.getReceptor(options.settings.noteskinId, "R");
             rightReceptor.KEY = "Right";
 
             if (leftReceptor is GameReceptor)
@@ -134,14 +134,14 @@ package game.controls
             var color:String = options.getNewNoteColor(note.color);
             if (options.disableNotePool)
             {
-                var gameNote:GameNote = new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.activeNoteskin);
+                var gameNote:GameNote = new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.noteskinId);
             }
             else
             {
-                var spawnPoolRef:ObjectPool = notePool[options.settings.activeNoteskin][direction][color];
+                var spawnPoolRef:ObjectPool = notePool[options.settings.noteskinId][direction][color];
                 if (!spawnPoolRef)
                 {
-                    spawnPoolRef = notePool[options.settings.activeNoteskin][direction][color] = new ObjectPool();
+                    spawnPoolRef = notePool[options.settings.noteskinId][direction][color] = new ObjectPool();
                 }
 
                 gameNote = spawnPoolRef.getObject();
@@ -155,7 +155,7 @@ package game.controls
                 }
                 else
                 {
-                    gameNote = spawnPoolRef.addObject(new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.activeNoteskin));
+                    gameNote = spawnPoolRef.addObject(new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.noteskinId));
                     addChild(gameNote);
                 }
             }
@@ -164,7 +164,7 @@ package game.controls
             gameNote.rotation = getReceptor(direction).rotation;
 
             if (options.modEnabled("_spawn_noteskin_data_rotation"))
-                gameNote.rotation = noteRealSpawnRotation(direction, options.settings.activeNoteskin);
+                gameNote.rotation = noteRealSpawnRotation(direction, options.settings.noteskinId);
 
             if (options.settings.noteScale != 1.0)
             {
@@ -445,7 +445,7 @@ package game.controls
 
         public function position():void
         {
-            var data:Object = _noteskins.getInfo(options.settings.activeNoteskin);
+            var data:Object = _noteskins.getInfo(options.settings.noteskinId);
             var rotation:Number = data.rotation;
             var gap:int = options.settings.receptorGap;
             var noteScale:Number = options.settings.noteScale;

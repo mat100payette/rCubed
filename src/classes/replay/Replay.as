@@ -178,7 +178,7 @@ package classes.replay
                     jsonSettings.activeVisualMods.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
                 }
                 jsonSettings.receptorGap = Number(tempSettings[2][0]);
-                jsonSettings.activeNoteskin = Number(tempSettings[2][3]);
+                jsonSettings.noteskinId = Number(tempSettings[2][3]);
                 jsonSettings.globalOffset = 0;
                 jsonSettings.judgeOffset = 0;
 

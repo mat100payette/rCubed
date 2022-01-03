@@ -193,8 +193,8 @@ package classes
             if (_noteskins[noteskinId] == null)
                 noteskinId = 1;
 
-            var noteskin:Noteskin = _noteskins[noteskinId];
-            var notes:Object = noteskin.notes;
+            const noteskin:Noteskin = _noteskins[noteskinId];
+            const notes:Object = noteskin.notes;
 
             if (noteskin.type == Noteskin.TYPE_BITMAP)
                 return drawBitmapNote(notes[color][direction]);
@@ -220,11 +220,12 @@ package classes
                 noteskinId = 1;
 
             const noteskin:Noteskin = _noteskins[noteskinId];
+            const receptor:Object = noteskin.receptor;
 
             if (noteskin.type == Noteskin.TYPE_BITMAP)
-                return new GameReceptor(direction, noteskin.receptor[direction]);
+                return new GameReceptor(direction, receptor[direction]);
             else if (noteskin.type == Noteskin.TYPE_SWF)
-                return new noteskin.receptor[direction];
+                return new receptor[direction];
 
             return null;
         }

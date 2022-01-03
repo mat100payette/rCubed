@@ -67,7 +67,7 @@ package classes.chart
 
         public function setNoteskin(id:int):void
         {
-            options.settings.activeNoteskin = id;
+            options.settings.noteskinId = id;
         }
 
         public function setNotePool(enabled:Boolean):void

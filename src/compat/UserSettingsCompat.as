@@ -80,7 +80,7 @@ package compat
             }
 
             if (newSettings.noteskin != null)
-                settings.activeNoteskin = newSettings.noteskin;
+                settings.noteskinId = newSettings.noteskin;
 
             if (newSettings.direction != null)
                 settings.scrollDirection = newSettings.direction;
