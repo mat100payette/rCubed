@@ -3,6 +3,10 @@ package
 
     public class Lang
     {
+        // VARIOUS
+        public static const CLIPBOARD_SUCCESS:String = "clipboard_success";
+        public static const CLIPBOARD_FAILURE:String = "clipboard_failure";
+
         // JUDGES
         public static const GAME_AMAZING:String = "game_amazing";
         public static const GAME_PERFECT:String = "game_perfect";
@@ -73,7 +77,6 @@ package
         public static const OPTIONS_MOD_HALFTIME:String = "options_mod_halftime";
         public static const OPTIONS_MOD_NO_BACKGROUND:String = "options_mod_nobackground";
 
-
         // COLOR SETTINGS TAB
         public static const OPTIONS_JUDGE_COLORS_DISPLAY:String = "options_judge_colors_title";
         public static const OPTIONS_GAME_COLORS_TITLE:String = "options_game_colors_title";
@@ -90,6 +93,20 @@ package
         public static const OPTIONS_BOOFLAG_COMBO:String = "options_combo_colors_6";
         public static const OPTIONS_MISSFLAG_COMBO:String = "options_combo_colors_7";
         public static const OPTIONS_RAWGOODS_TRACKER:String = "options_raw_goods_tracker";
+
+        // NOTESKINS SETTINGS TAB
+        public static const OPTIONS_NOTE_COLOR_PREFIX:String = "note_colors_";
+        public static const OPTIONS_NOTESKIN:String = "options_noteskin";
+        public static const OPTIONS_CUSTOM_NOTESKIN:String = "options_noteskin_custom";
+        public static const OPTIONS_CHANGE_CUSTOM_NOTESKIN:String = "options_noteskin_custom_change"; // US: "-- Change Custom Noteskin --"
+        public static const OPTIONS_NOTESKIN_EDITOR:String = "options_open_noteskin_editor";
+        public static const OPTIONS_IMPORT_NOTESKIN:String = "options_import_noteskin_json";
+        public static const OPTIONS_NOTESKIN_FOLDER:String = "options_open_noteskin_folder";
+        public static const OPTIONS_COPY_NOTESKIN_DATA:String = "options_copy_noteskin_data";
+        public static const OPTIONS_NOTE_COLORS_TITLE:String = "options_note_colors_title";
+        public static const OPTIONS_POPUP_NOTESKIN_IMPORT_JSON:String = "popup_noteskin_import_json";
+        public static const OPTIONS_POPUP_NOTESKIN_IMPORT:String = "popup_noteskin_import";
+        public static const OPTIONS_POPUP_NOTESKIN_SAVED:String = "popup_noteskin_saved";
 
         // VISUAL SETTINGS TAB
         public static const OPTIONS_GAMEPLAY_DISPLAY:String = "options_gameplay_display";

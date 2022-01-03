@@ -38,9 +38,7 @@ package classes
 
         // Map of `Noteskin` objects
         private var _noteskins:Object = {};
-
-        public var totalNoteskins:int = 0;
-        public var totalLoaded:int = 0;
+        private var _loadedNoteskinCount:int = 0;
 
         //******************************************************************************************//
         // Core Class Functions
@@ -57,6 +55,16 @@ package classes
             if (_instance == null)
                 _instance = new NoteskinsList(new SingletonEnforcer());
             return _instance;
+        }
+
+        public function getNoteskin(noteskinId:uint):Noteskin
+        {
+            return _noteskins[noteskinId];
+        }
+
+        public function get noteskinCount():int
+        {
+            return _loadedNoteskinCount;
         }
 
         /**
@@ -107,7 +115,7 @@ package classes
                 return;
 
             // All Noteskins loaded.
-            if (totalLoaded > 0 && !_loadError)
+            if (_loadedNoteskinCount > 0 && !_loadError)
             {
                 _isLoaded = true;
                 dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
@@ -301,7 +309,7 @@ package classes
             if (verifyNoteSkin(noteskin))
             {
                 _noteskins[noteskin.id] = noteskin;
-                totalLoaded++;
+                _loadedNoteskinCount++;
             }
 
             delete _pendingSWFNoteskins[noteskinId];
@@ -445,7 +453,7 @@ package classes
             if (verifyNoteSkin(noteskin))
             {
                 _noteskins[noteskin.id] = noteskin;
-                totalLoaded++;
+                _loadedNoteskinCount++;
             }
 
             delete _pendingBitmapNoteskinData[noteskinId];

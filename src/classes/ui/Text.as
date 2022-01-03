@@ -7,6 +7,7 @@ package classes.ui
     import flash.text.TextField;
     import flash.text.TextFormat;
     import flash.text.TextFormatAlign;
+    import flash.text.TextFieldAutoSize;
 
     public dynamic class Text extends Sprite
     {
@@ -41,7 +42,7 @@ package classes.ui
             _textTF.selectable = false;
             _textTF.embedFonts = true;
             _textTF.antiAliasType = AntiAliasType.ADVANCED;
-            _textTF.autoSize = "left";
+            _textTF.autoSize = TextFieldAutoSize.LEFT;
             //_textTF.border = true;
             //_textTF.borderColor = 0xFF0000;
             this.addChild(_textTF);
