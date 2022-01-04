@@ -1296,7 +1296,7 @@ package game
                 return;
 
             var nR:Replay = new Replay(_gvars.gameIndex);
-            nR.user = _gvars.playerUser;
+            nR.user.settings.update(_gvars.playerUser.settings);
             nR.level = result.songInfo.level;
             if (result.songInfo.engine)
                 nR.arc_engine = _avars.legacyEncode(result.songInfo);

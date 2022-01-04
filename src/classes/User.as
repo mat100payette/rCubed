@@ -290,15 +290,16 @@ package classes
             if (this.isGuest || data["settings"] == null)
                 loadedSettings = _loadLocalSettings();
             else
+            {
                 loadedSettings = data.settings;
-
-            try
-            {
-                settings.update(JSON.parse(data.settings));
-            }
-            catch (err:Error)
-            {
-                Logger.error(this, "Settings Parse Failure: " + Logger.exception_error(err));
+                try
+                {
+                    settings.update(JSON.parse(data.settings));
+                }
+                catch (err:Error)
+                {
+                    Logger.error(this, "Settings Parse Failure: " + Logger.exception_error(err));
+                }
             }
         }
 
