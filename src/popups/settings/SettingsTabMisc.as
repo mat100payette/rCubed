@@ -11,6 +11,7 @@ package popups.settings
     import classes.ui.Prompt;
     import classes.ui.Text;
     import classes.ui.ValidatedText;
+    import classes.ui.WindowOptionConfirm;
     import com.bit101.components.ComboBox;
     import com.bit101.components.Style;
     import com.flashfla.utils.sprintf;
@@ -31,38 +32,42 @@ package popups.settings
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _playlist:Playlist = Playlist.instance;
 
-        private var optionGameLanguages:Array;
-        private var languageCombo:ComboBox;
-        private var languageComboIgnore:Boolean;
-        private var startUpScreenSelections:Array = [];
-        private var startUpScreenCombo:ComboBox;
+        private var _languagesComboItems:Array = [];
+        private var _startUpScreenComboItems:Array = [];
 
-        private var optionMPSize:ValidatedText;
-        private var timestampCheck:BoxCheck;
+        private var _ignoreEngineCombo:Boolean;
+        private var _ignoreLanguageCombo:Boolean;
 
-        private var forceJudgeCheck:BoxCheck;
-        private var useCacheCheckbox:BoxCheck;
-        private var autoSaveLocalCheckbox:BoxCheck;
-        private var useVSyncCheckbox:BoxCheck;
-        private var useWebsocketCheckbox:BoxCheck;
-        private var openWebsocketOverlay:BoxButton;
+        private var _optionLanguage:ComboBox;
+        private var _optionStartUpScreen:ComboBox;
 
-        private var engineCombo:ComboBox;
-        private var engineDefaultCombo:ComboBox;
-        private var engineComboIgnore:Boolean;
-        private var legacySongsCheck:BoxCheck;
-        private var optionFPS:ValidatedText;
+        private var _optionMPTextSize:ValidatedText;
+        private var _optionMPTimestamp:BoxCheck;
 
-        private var windowWidthBox:ValidatedText;
-        private var windowHeightBox:ValidatedText;
-        private var windowSizeSet:BoxButton;
-        private var windowSizeReset:BoxButton;
-        private var windowSaveSizeCheck:BoxCheck;
-        private var windowXBox:ValidatedText;
-        private var windowYBox:ValidatedText;
-        private var windowPositionSet:BoxButton;
-        private var windowPositionReset:BoxButton;
-        private var windowSavePositionCheck:BoxCheck;
+        private var _optionForceJudge:BoxCheck;
+        private var _optionUseCache:BoxCheck;
+        private var _optionAutosaveLocal:BoxCheck;
+        private var _optionUseVSync:BoxCheck;
+        private var _optionUseWebsockets:BoxCheck;
+        private var _optionWebsocketOverlay:BoxButton;
+
+        private var _optionEngine:ComboBox;
+        private var _optionEngineDefault:ComboBox;
+
+        private var _optionIncludeLegacy:BoxCheck;
+        private var _optionFramerate:ValidatedText;
+
+        private var _optionWindowX:ValidatedText;
+        private var _optionWindowY:ValidatedText;
+        private var _optionWindowWidth:ValidatedText;
+        private var _optionWindowHeight:ValidatedText;
+        private var _optionWindowSaveSize:BoxCheck;
+        private var _optionWindowSavePosition:BoxCheck;
+
+        private var _setWindowSizeBtn:BoxButton;
+        private var _resetWindowSizeBtn:BoxButton;
+        private var _setWindowPositionBtn:BoxButton;
+        private var _resetWindowPositionBtn:BoxButton;
 
         public function SettingsTabMisc(settingsWindow:SettingsWindow, settings:UserSettings):void
         {
@@ -76,8 +81,8 @@ package popups.settings
 
         override public function openTab():void
         {
-            _gvars.gameMain.stage.nativeWindow.addEventListener(NativeWindowBoundsEvent.MOVE, e_windowPropertyChange);
-            _gvars.gameMain.stage.nativeWindow.addEventListener(NativeWindowBoundsEvent.RESIZE, e_windowPropertyChange);
+            _gvars.gameMain.stage.nativeWindow.addEventListener(NativeWindowBoundsEvent.MOVE, onWindowPropertyChanged);
+            _gvars.gameMain.stage.nativeWindow.addEventListener(NativeWindowBoundsEvent.RESIZE, onWindowPropertyChanged);
 
             var i:int;
             var xOff:int = 15;
@@ -85,87 +90,85 @@ package popups.settings
 
             /// Col 1
             //- Game Languages
-            optionGameLanguages = [];
-            var gameLanguageLabel:Text = new Text(container, xOff, yOff, _lang.string("options_game_language"));
+            _languagesComboItems = [];
+            const languageLabel:Text = new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAME_LANGUAGE));
             yOff += 20;
 
             var selectedLanguage:String = "";
-            for (var id:String in _lang.indexed)
+            for (var languageId:String in _lang.indexed)
             {
-                var lang:String = _lang.indexed[id];
+                var lang:String = _lang.indexed[languageId];
                 var lang_name:String = _lang.string2Simple("_real_name", lang) + (_lang.data[lang]["_en_name"] != _lang.data[lang]["_real_name"] ? (" / " + _lang.string2Simple("_en_name", lang)) : "");
-                optionGameLanguages.push({"label": lang_name, "data": lang});
+
+                _languagesComboItems.push({"label": lang_name, "data": lang});
+
                 if (lang == _settings.language)
-                {
                     selectedLanguage = lang_name;
-                }
             }
 
-            languageCombo = new ComboBox(container, xOff, yOff, selectedLanguage, optionGameLanguages);
-            languageCombo.x = xOff;
-            languageCombo.y = yOff;
-            languageCombo.width = 200;
-            languageCombo.openPosition = ComboBox.BOTTOM;
-            languageCombo.fontSize = 11;
-            languageCombo.addEventListener(Event.SELECT, languageSelect);
+            _optionLanguage = new ComboBox(container, xOff, yOff, selectedLanguage, _languagesComboItems);
+            _optionLanguage.x = xOff;
+            _optionLanguage.y = yOff;
+            _optionLanguage.width = 200;
+            _optionLanguage.openPosition = ComboBox.BOTTOM;
+            _optionLanguage.fontSize = 11;
+            _optionLanguage.addEventListener(Event.SELECT, onLanguageSelected);
             setLanguage();
             yOff += 30;
 
             // Start Up Screen
-            new Text(container, xOff, yOff, _lang.string("options_startup_screen"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_STARTUP_SCREEN));
             yOff += 20;
 
-            startUpScreenSelections = [];
+            _startUpScreenComboItems = [];
             for (i = 0; i <= 2; i++)
-            {
-                startUpScreenSelections.push({"label": _lang.stringSimple("options_startup_" + i), "data": i});
-            }
+                _startUpScreenComboItems.push({"label": _lang.stringSimple(Lang.OPTIONS_STARTUP_SCREEN_PREFIX + i), "data": i});
 
-            startUpScreenCombo = new ComboBox(container, xOff, yOff, "Selection...", startUpScreenSelections);
-            startUpScreenCombo.x = xOff;
-            startUpScreenCombo.y = yOff;
-            startUpScreenCombo.width = 200;
-            startUpScreenCombo.openPosition = ComboBox.BOTTOM;
-            startUpScreenCombo.fontSize = 11;
-            startUpScreenCombo.addEventListener(Event.SELECT, startUpScreenSelect);
+            _optionStartUpScreen = new ComboBox(container, xOff, yOff, "Selection...", _startUpScreenComboItems);
+            _optionStartUpScreen.x = xOff;
+            _optionStartUpScreen.y = yOff;
+            _optionStartUpScreen.width = 200;
+            _optionStartUpScreen.openPosition = ComboBox.BOTTOM;
+            _optionStartUpScreen.fontSize = 11;
+            _optionStartUpScreen.addEventListener(Event.SELECT, onStartUpScreenSelected);
             yOff += 30;
 
             yOff += drawSeperator(container, xOff, 250, yOff, 0, 0);
 
             // Multiplayer - Text Size
-            new Text(container, xOff, yOff, _lang.string("options_mp_textsize"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_MP_TEXT_SIZE));
             yOff += 20;
 
-            optionMPSize = new ValidatedText(container, xOff + 3, yOff + 3, 120, 20, ValidatedText.R_INT_P, changeHandler);
+            _optionMPTextSize = new ValidatedText(container, xOff + 3, yOff + 3, 120, 20, ValidatedText.R_INT_P, onMPTextSizeChanged);
             yOff += 30;
 
             // Multiplayer - Timestamps
-            new Text(container, xOff + 23, yOff, _lang.string("options_mp_timestamp"));
-            timestampCheck = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_MP_TIMESTAMP));
+            _optionMPTimestamp = new BoxCheck(container, xOff + 3, yOff + 3, onMPTimestampClicked);
             yOff += 30;
 
             yOff += drawSeperator(container, xOff, 250, yOff, 0, 0);
 
             // Force engine Judge Mode
-            new Text(container, xOff + 23, yOff, _lang.string("options_force_judge_mode"));
-            forceJudgeCheck = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_FORCE_JUDGE_MODE));
+            _optionForceJudge = new BoxCheck(container, xOff + 3, yOff + 3, onForceJudgeClicked);
             yOff += 30;
 
-            new Text(container, xOff + 23, yOff, _lang.string("air_options_save_local_replays"));
-            autoSaveLocalCheckbox = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_AUTO_SAVE_LOCAL_REPLAYS));
+            _optionAutosaveLocal = new BoxCheck(container, xOff + 3, yOff + 3, onAutosaveLocalClicked);
             yOff += 30;
 
-            new Text(container, xOff + 23, yOff, _lang.string("air_options_use_cache"));
-            useCacheCheckbox = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_USE_CACHE));
+            _optionUseCache = new BoxCheck(container, xOff + 3, yOff + 3, onUseCacheClicked);
             yOff += 30;
 
-            new Text(container, xOff + 23, yOff, _lang.string("air_options_use_websockets"));
-            useWebsocketCheckbox = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
-            useWebsocketCheckbox.addEventListener(MouseEvent.MOUSE_OVER, e_websocketMouseOver, false, 0, true);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_USE_WEBSOCKETS));
+            _optionUseWebsockets = new BoxCheck(container, xOff + 3, yOff + 3, onUseWebsocketsClicked);
+            _optionUseWebsockets.addEventListener(MouseEvent.MOUSE_OVER, onUseWebsocketMouseOver, false, 0, true);
             yOff += 30;
 
             // https://github.com/flashflashrevolution/web-stream-overlay
-            openWebsocketOverlay = new BoxButton(container, xOff, yOff, 200, 27, _lang.string("options_overlay_instructions"), 12, clickHandler);
+            _optionWebsocketOverlay = new BoxButton(container, xOff, yOff, 200, 27, _lang.string(Lang.OPTIONS_WEBSOCKET_OVERLAY), 12, onWebsocketOverlayClicked);
             yOff += 30;
 
             /// Col 2
@@ -173,84 +176,84 @@ package popups.settings
             yOff = 15;
 
             // Game Engine
-            new Text(container, xOff, yOff, _lang.string("options_game_engine"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_GAME_ENGINE));
             yOff += 20;
 
-            engineCombo = new ComboBox();
-            engineCombo.x = xOff;
-            engineCombo.y = yOff;
-            engineCombo.width = 200;
-            engineCombo.openPosition = ComboBox.BOTTOM;
-            engineCombo.fontSize = 11;
-            engineCombo.addEventListener(Event.SELECT, engineSelect);
-            container.addChild(engineCombo);
+            _optionEngine = new ComboBox();
+            _optionEngine.x = xOff;
+            _optionEngine.y = yOff;
+            _optionEngine.width = 200;
+            _optionEngine.openPosition = ComboBox.BOTTOM;
+            _optionEngine.fontSize = 11;
+            _optionEngine.addEventListener(Event.SELECT, onEngineSelected);
+            container.addChild(_optionEngine);
             yOff += 30;
 
             // Default Game Engine
-            new Text(container, xOff, yOff, _lang.string("options_default_game_engine"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_DEFAULT_GAME_ENGINE));
             yOff += 20;
 
-            engineDefaultCombo = new ComboBox();
-            engineDefaultCombo.x = xOff;
-            engineDefaultCombo.y = yOff;
-            engineDefaultCombo.width = 200;
-            engineDefaultCombo.openPosition = ComboBox.BOTTOM;
-            engineDefaultCombo.fontSize = 11;
-            engineDefaultCombo.addEventListener(Event.SELECT, engineDefaultSelect);
-            container.addChild(engineDefaultCombo);
+            _optionEngineDefault = new ComboBox();
+            _optionEngineDefault.x = xOff;
+            _optionEngineDefault.y = yOff;
+            _optionEngineDefault.width = 200;
+            _optionEngineDefault.openPosition = ComboBox.BOTTOM;
+            _optionEngineDefault.fontSize = 11;
+            _optionEngineDefault.addEventListener(Event.SELECT, onEngineDefaultSelected);
+            container.addChild(_optionEngineDefault);
             engineRefresh();
             yOff += 30;
 
             // Legacy Song Display
-            new Text(container, xOff + 23, yOff, _lang.string("options_include_legacy_songs"));
-            legacySongsCheck = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
-            legacySongsCheck.addEventListener(MouseEvent.MOUSE_OVER, e_legacyEngineMouseOver, false, 0, true);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_INCLUDE_LEGACY_SONGS));
+            _optionIncludeLegacy = new BoxCheck(container, xOff + 3, yOff + 3, onDisplayLegacyClicked);
+            _optionIncludeLegacy.addEventListener(MouseEvent.MOUSE_OVER, onLegacyEngineMouseOver, false, 0, true);
             yOff += 30;
 
             yOff += drawSeperator(container, xOff, 250, yOff, 0, 0);
 
             // Engine Framerate
-            new Text(container, xOff, yOff, _lang.string("options_framerate"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_FRAMERATE));
             yOff += 20;
 
-            optionFPS = new ValidatedText(container, xOff + 3, yOff + 3, 120, 20, ValidatedText.R_INT_P, changeHandler);
+            _optionFramerate = new ValidatedText(container, xOff + 3, yOff + 3, 120, 20, ValidatedText.R_INT_P, onFramerateChanged);
             CONFIG::vsync
             {
-                new Text(container, xOff + 163, yOff + 4, _lang.string("air_options_use_vsync"));
-                useVSyncCheckbox = new BoxCheck(container, xOff + 143, yOff + 7, clickHandler);
+                new Text(container, xOff + 163, yOff + 4, _lang.string(Lang.OPTIONS_USE_VSYNC));
+                _optionUseVSync = new BoxCheck(container, xOff + 143, yOff + 7, onVSyncClicked);
             }
             yOff += 30;
 
             yOff += drawSeperator(container, xOff, 250, yOff, 0, 0);
 
             // Window Size
-            new Text(container, xOff, yOff, _lang.string("air_options_window_size"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_WINDOW_SIZE));
             yOff += 20;
 
-            windowWidthBox = new ValidatedText(container, xOff + 3, yOff + 3, 60, 20, ValidatedText.R_INT);
+            _optionWindowWidth = new ValidatedText(container, xOff + 3, yOff + 3, 60, 20, ValidatedText.R_INT);
             new Text(container, xOff + 73, yOff + 3, "X");
-            windowHeightBox = new ValidatedText(container, xOff + 93, yOff + 3, 60, 20, ValidatedText.R_INT);
-            windowSizeSet = new BoxButton(container, xOff + 163, yOff + 3, 51, 21, "Set", 12, clickHandler);
-            windowSizeReset = new BoxButton(container, xOff + 223, yOff + 3, 21, 21, "R", 12, clickHandler);
+            _optionWindowHeight = new ValidatedText(container, xOff + 93, yOff + 3, 60, 20, ValidatedText.R_INT);
+            _setWindowSizeBtn = new BoxButton(container, xOff + 163, yOff + 3, 51, 21, "Set", 12, onWindowSetSizeClicked);
+            _resetWindowSizeBtn = new BoxButton(container, xOff + 223, yOff + 3, 21, 21, "R", 12, onWindowResetSizeClicked);
             yOff += 30;
 
-            new Text(container, xOff + 23, yOff, _lang.string("air_options_save_window_size"));
-            windowSaveSizeCheck = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_SAVE_WINDOW_SIZE));
+            _optionWindowSaveSize = new BoxCheck(container, xOff + 3, yOff + 3, onWindowRememberSizeClicked);
             yOff += 30;
 
             // Window Position
-            new Text(container, xOff, yOff, _lang.string("air_options_window_position"));
+            new Text(container, xOff, yOff, _lang.string(Lang.OPTIONS_WINDOW_POSITION));
             yOff += 20;
 
-            windowXBox = new ValidatedText(container, xOff + 3, yOff + 3, 60, 20, ValidatedText.R_INT);
+            _optionWindowX = new ValidatedText(container, xOff + 3, yOff + 3, 60, 20, ValidatedText.R_INT);
             new Text(container, xOff + 73, yOff + 3, "X");
-            windowYBox = new ValidatedText(container, xOff + 93, yOff + 3, 60, 20, ValidatedText.R_INT);
-            windowPositionSet = new BoxButton(container, xOff + 163, yOff + 3, 51, 21, "Set", 12, clickHandler);
-            windowPositionReset = new BoxButton(container, xOff + 223, yOff + 3, 21, 21, "R", 12, clickHandler);
+            _optionWindowY = new ValidatedText(container, xOff + 93, yOff + 3, 60, 20, ValidatedText.R_INT);
+            _setWindowPositionBtn = new BoxButton(container, xOff + 163, yOff + 3, 51, 21, "Set", 12, onWindowSetPositionClicked);
+            _resetWindowPositionBtn = new BoxButton(container, xOff + 223, yOff + 3, 21, 21, "R", 12, onWindowResetPositionClicked);
             yOff += 30;
 
-            new Text(container, xOff + 23, yOff, _lang.string("air_options_save_window_position"));
-            windowSavePositionCheck = new BoxCheck(container, xOff + 3, yOff + 3, clickHandler);
+            new Text(container, xOff + 23, yOff, _lang.string(Lang.OPTIONS_SAVE_WINDOW_POSITION));
+            _optionWindowSavePosition = new BoxCheck(container, xOff + 3, yOff + 3, onWindowRememberPositionClicked);
             yOff += 30;
 
             setTextMaxWidth(245);
@@ -258,252 +261,228 @@ package popups.settings
 
         override public function closeTab():void
         {
-            _gvars.gameMain.stage.nativeWindow.removeEventListener(NativeWindowBoundsEvent.MOVE, e_windowPropertyChange);
-            _gvars.gameMain.stage.nativeWindow.removeEventListener(NativeWindowBoundsEvent.RESIZE, e_windowPropertyChange);
+            _gvars.gameMain.stage.nativeWindow.removeEventListener(NativeWindowBoundsEvent.MOVE, onWindowPropertyChanged);
+            _gvars.gameMain.stage.nativeWindow.removeEventListener(NativeWindowBoundsEvent.RESIZE, onWindowPropertyChanged);
         }
 
         override public function setValues():void
         {
             // Set Framerate
-            optionFPS.text = _settings.frameRate.toString();
+            _optionFramerate.text = _settings.frameRate.toString();
 
-            forceJudgeCheck.checked = _settings.forceNewJudge;
+            _optionForceJudge.checked = _settings.forceNewJudge;
 
-            timestampCheck.checked = _settings.DISPLAY_MP_TIMESTAMP;
-            legacySongsCheck.checked = _settings.DISPLAY_LEGACY_SONGS;
-            optionMPSize.text = _avars.configMPSize.toString();
-            startUpScreenCombo.selectedIndex = _settings.startUpScreen;
+            _optionMPTimestamp.checked = _settings.DISPLAY_MP_TIMESTAMP;
+            _optionIncludeLegacy.checked = _settings.DISPLAY_LEGACY_SONGS;
+            _optionMPTextSize.text = _avars.configMPSize.toString();
+            _optionStartUpScreen.selectedIndex = _settings.startUpScreen;
 
             setLanguage();
 
-            autoSaveLocalCheckbox.checked = _gvars.air_autoSaveLocalReplays;
-            useCacheCheckbox.checked = _gvars.air_useLocalFileCache;
-            useWebsocketCheckbox.checked = _gvars.air_useWebsockets;
+            _optionAutosaveLocal.checked = _gvars.air_autoSaveLocalReplays;
+            _optionUseCache.checked = _gvars.air_useLocalFileCache;
+            _optionUseWebsockets.checked = _gvars.air_useWebsockets;
 
             CONFIG::vsync
             {
-                useVSyncCheckbox.checked = _gvars.air_useVSync;
+                _optionUseVSync.checked = _gvars.air_useVSync;
             }
 
-            windowWidthBox.text = _gvars.air_windowProperties.width;
-            windowHeightBox.text = _gvars.air_windowProperties.height;
-            windowXBox.text = _gvars.air_windowProperties.x;
-            windowYBox.text = _gvars.air_windowProperties.y;
+            _optionWindowWidth.text = _gvars.airWindowProperties.width.toString();
+            _optionWindowHeight.text = _gvars.airWindowProperties.height.toString();
+            _optionWindowX.text = _gvars.airWindowProperties.x.toString();
+            _optionWindowY.text = _gvars.airWindowProperties.y.toString();
 
-            windowSavePositionCheck.checked = _gvars.air_saveWindowPosition;
-            windowSaveSizeCheck.checked = _gvars.air_saveWindowSize;
+            _optionWindowSavePosition.checked = _gvars.air_saveWindowPosition;
+            _optionWindowSaveSize.checked = _gvars.air_saveWindowSize;
         }
 
-        public function clickHandler(e:MouseEvent):void
+        private function onForceJudgeClicked(e:Event):void
         {
-            // Force Judge Mode
-            if (e.target == forceJudgeCheck)
-            {
-                e.target.checked = !e.target.checked;
-                _settings.forceNewJudge = !_settings.forceNewJudge;
-            }
-
-            // MP Timestamp
-            else if (e.target == timestampCheck)
-            {
-                e.target.checked = !e.target.checked;
-                _settings.DISPLAY_MP_TIMESTAMP = !_settings.DISPLAY_MP_TIMESTAMP;
-            }
-
-            // Legacy Songs
-            else if (e.target == legacySongsCheck)
-            {
-                e.target.checked = !e.target.checked;
-                _settings.DISPLAY_LEGACY_SONGS = !_settings.DISPLAY_LEGACY_SONGS;
-            }
-
-            //- Auto Save Local Replays
-            else if (e.target == autoSaveLocalCheckbox)
-            {
-                e.target.checked = !e.target.checked;
-                _gvars.air_autoSaveLocalReplays = !_gvars.air_autoSaveLocalReplays;
-                LocalOptions.setVariable("auto_save_local_replays", _gvars.air_autoSaveLocalReplays);
-            }
-
-            //- Auto Save Local Replays
-            else if (e.target == useCacheCheckbox)
-            {
-                e.target.checked = !e.target.checked;
-                _gvars.air_useLocalFileCache = !_gvars.air_useLocalFileCache;
-                LocalOptions.setVariable("use_local_file_cache", _gvars.air_useLocalFileCache);
-            }
-
-            //- Vsync Toggle
-            else if (e.target == useVSyncCheckbox)
-            {
-                e.target.checked = !e.target.checked;
-                CONFIG::vsync
-                {
-                    _gvars.gameMain.stage.vsyncEnabled = _gvars.air_useVSync = !_gvars.air_useVSync;
-                    LocalOptions.setVariable("vsync", _gvars.air_useVSync);
-                }
-            }
-
-            // Use HTTP Websockets
-            else if (e.target == useWebsocketCheckbox)
-            {
-                if (_gvars.air_useWebsockets)
-                {
-                    _gvars.destroyWebsocketServer();
-                    _gvars.air_useWebsockets = false;
-                    useWebsocketCheckbox.checked = false;
-                    LocalOptions.setVariable("use_websockets", _gvars.air_useWebsockets);
-                }
-                else
-                {
-                    if (_gvars.initWebsocketServer())
-                    {
-                        _gvars.air_useWebsockets = true;
-                        useWebsocketCheckbox.checked = true;
-                        LocalOptions.setVariable("use_websockets", _gvars.air_useWebsockets);
-                        e_websocketMouseOver();
-                    }
-                    else
-                    {
-                        useWebsocketCheckbox.checked = false;
-                        Alert.add(_lang.string("air_options_unable_to_start_websockets"), 120, Alert.RED);
-                    }
-                }
-            }
-
-            // HTTP Websockets Instructions
-            else if (e.target == openWebsocketOverlay)
-            {
-                navigateToURL(new URLRequest(Constant.WEBSOCKET_OVERLAY_URL), "_blank");
-                return;
-            }
-
-            //- Window Position
-            else if (e.target == windowSavePositionCheck)
-            {
-                e.target.checked = !e.target.checked;
-                _gvars.air_saveWindowPosition = !_gvars.air_saveWindowPosition;
-                LocalOptions.setVariable("save_window_position", _gvars.air_saveWindowPosition);
-            }
-            else if (e.target == windowPositionSet)
-            {
-                _parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
-
-                _gvars.air_windowProperties["x"] = windowXBox.validate(Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5));
-                _gvars.air_windowProperties["y"] = windowYBox.validate(Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5));
-                e_windowSetUpdate();
-            }
-            else if (e.target == windowPositionReset)
-            {
-                _gvars.air_windowProperties["x"] = Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5);
-                _gvars.air_windowProperties["y"] = Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5);
-                e_windowSetUpdate();
-            }
-
-            //- Window Size
-            else if (e.target == windowSaveSizeCheck)
-            {
-                e.target.checked = !e.target.checked;
-                _gvars.air_saveWindowSize = !_gvars.air_saveWindowSize;
-                LocalOptions.setVariable("save_window_size", _gvars.air_saveWindowSize);
-            }
-            else if (e.target == windowSizeSet)
-            {
-                _parent.addChild(new WindowSettingConfirm(this, _gvars.air_windowProperties));
-
-                _gvars.air_windowProperties["width"] = windowWidthBox.validate(Main.GAME_WIDTH);
-                _gvars.air_windowProperties["height"] = windowHeightBox.validate(Main.GAME_HEIGHT);
-                e_windowSetUpdate();
-            }
-            else if (e.target == windowSizeReset)
-            {
-                _gvars.air_windowProperties["width"] = Main.GAME_WIDTH;
-                _gvars.air_windowProperties["height"] = Main.GAME_HEIGHT;
-                e_windowSetUpdate();
-            }
+            _settings.forceNewJudge = !_settings.forceNewJudge;
         }
 
-        public function changeHandler(e:Event):void
+        private function onMPTimestampClicked(e:Event):void
         {
-            if (e.target == optionFPS)
+            _settings.DISPLAY_MP_TIMESTAMP = !_settings.DISPLAY_MP_TIMESTAMP;
+        }
+
+        private function onDisplayLegacyClicked(e:Event):void
+        {
+            _settings.DISPLAY_LEGACY_SONGS = !_settings.DISPLAY_LEGACY_SONGS;
+        }
+
+        private function onAutosaveLocalClicked(e:Event):void
+        {
+            _gvars.air_autoSaveLocalReplays = !_gvars.air_autoSaveLocalReplays;
+            LocalOptions.setVariable("auto_save_local_replays", _gvars.air_autoSaveLocalReplays);
+        }
+
+        private function onUseCacheClicked(e:Event):void
+        {
+            _gvars.air_useLocalFileCache = !_gvars.air_useLocalFileCache;
+            LocalOptions.setVariable("use_local_file_cache", _gvars.air_useLocalFileCache);
+        }
+
+        private function onVSyncClicked(e:Event):void
+        {
+            CONFIG::vsync
             {
-                _settings.frameRate = optionFPS.validate(60);
-                _settings.frameRate = Math.max(Math.min(_settings.frameRate, 1000), 10);
-                _gvars.removeSongFiles();
-            }
-
-            else if (e.target == optionMPSize)
-            {
-                Style.fontSize = _avars.configMPSize = optionMPSize.validate(10);
-                _avars.mpSave();
+                _gvars.gameMain.stage.vsyncEnabled = _gvars.air_useVSync = !_gvars.air_useVSync;
+                LocalOptions.setVariable("vsync", _gvars.air_useVSync);
             }
         }
 
-        private function e_windowPropertyChange(e:Event):void
-        {
-            windowWidthBox.text = _gvars.air_windowProperties["width"];
-            windowHeightBox.text = _gvars.air_windowProperties["height"];
-
-            windowXBox.text = _gvars.air_windowProperties["x"];
-            windowYBox.text = _gvars.air_windowProperties["y"];
-        }
-
-        public function e_windowSetUpdate():void
-        {
-            _gvars.gameMain.ignoreWindowChanges = true;
-            _gvars.gameMain.stage.nativeWindow.x = _gvars.air_windowProperties["x"];
-            _gvars.gameMain.stage.nativeWindow.y = _gvars.air_windowProperties["y"];
-            _gvars.gameMain.stage.nativeWindow.width = _gvars.air_windowProperties["width"] + Main.WINDOW_WIDTH_EXTRA;
-            _gvars.gameMain.stage.nativeWindow.height = _gvars.air_windowProperties["height"] + Main.WINDOW_HEIGHT_EXTRA;
-            _gvars.gameMain.ignoreWindowChanges = false;
-        }
-
-        private function e_legacyEngineMouseOver(e:Event):void
-        {
-            legacySongsCheck.addEventListener(MouseEvent.MOUSE_OUT, e_legacyEngineMouseOut);
-            displayToolTip(legacySongsCheck.x, legacySongsCheck.y + 22, _lang.string("popup_legacy_songs"), TextFormatAlign.LEFT);
-        }
-
-        private function e_legacyEngineMouseOut(e:Event):void
-        {
-            legacySongsCheck.removeEventListener(MouseEvent.MOUSE_OUT, e_legacyEngineMouseOut);
-            hideTooltip();
-        }
-
-        private function e_websocketMouseOver(e:Event = null):void
+        private function onUseWebsocketsClicked(e:Event):void
         {
             if (_gvars.air_useWebsockets)
             {
-                var activePort:uint = _gvars.websocketPortNumber("websocket");
-                if (activePort > 0)
+                _gvars.destroyWebsocketServer();
+                _gvars.air_useWebsockets = false;
+                LocalOptions.setVariable("use_websockets", _gvars.air_useWebsockets);
+            }
+            else
+            {
+                if (_gvars.initWebsocketServer())
                 {
-                    useWebsocketCheckbox.addEventListener(MouseEvent.MOUSE_OUT, e_websocketMouseOut);
-                    displayToolTip(useWebsocketCheckbox.x, useWebsocketCheckbox.y + 22, sprintf(_lang.string("air_options_active_port"), {"port": _gvars.websocketPortNumber("websocket").toString()}));
+                    _gvars.air_useWebsockets = true;
+                    LocalOptions.setVariable("use_websockets", _gvars.air_useWebsockets);
+                    onUseWebsocketMouseOver(null);
+                }
+                else
+                {
+                    _optionUseWebsockets.checked = false;
+                    Alert.add(_lang.string(Lang.OPTIONS_UNABLE_TO_START_WEBSOCKETS), 120, Alert.RED);
                 }
             }
         }
 
-        private function e_websocketMouseOut(e:Event):void
+        private function onWebsocketOverlayClicked(e:Event):void
         {
-            useWebsocketCheckbox.removeEventListener(MouseEvent.MOUSE_OUT, e_websocketMouseOut);
+            navigateToURL(new URLRequest(Constant.WEBSOCKET_OVERLAY_URL), "_blank");
+        }
+
+        private function onWindowRememberPositionClicked(e:Event):void
+        {
+            _gvars.air_saveWindowPosition = !_gvars.air_saveWindowPosition;
+            LocalOptions.setVariable("save_window_position", _gvars.air_saveWindowPosition);
+        }
+
+        private function onWindowSetPositionClicked(e:Event):void
+        {
+            _parent.addChild(new WindowOptionConfirm(_gvars.airWindowProperties, onWindowOptionUpdated));
+
+            _gvars.airWindowProperties.x = _optionWindowX.validate(Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5));
+            _gvars.airWindowProperties.y = _optionWindowY.validate(Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5));
+            onWindowOptionUpdated();
+        }
+
+        private function onWindowResetPositionClicked(e:Event):void
+        {
+            _gvars.airWindowProperties.x = Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5);
+            _gvars.airWindowProperties.y = Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5);
+            onWindowOptionUpdated();
+        }
+
+        private function onWindowRememberSizeClicked(e:Event):void
+        {
+            _gvars.air_saveWindowSize = !_gvars.air_saveWindowSize;
+            LocalOptions.setVariable("save_window_size", _gvars.air_saveWindowSize);
+        }
+
+        private function onWindowSetSizeClicked(e:Event):void
+        {
+            _parent.addChild(new WindowOptionConfirm(_gvars.airWindowProperties, onWindowOptionUpdated));
+
+            _gvars.airWindowProperties.width = _optionWindowWidth.validate(Main.GAME_WIDTH);
+            _gvars.airWindowProperties.height = _optionWindowHeight.validate(Main.GAME_HEIGHT);
+            onWindowOptionUpdated();
+        }
+
+        private function onWindowResetSizeClicked(e:Event):void
+        {
+            _gvars.airWindowProperties.width = Main.GAME_WIDTH;
+            _gvars.airWindowProperties.height = Main.GAME_HEIGHT;
+            onWindowOptionUpdated();
+        }
+
+        private function onFramerateChanged(e:Event):void
+        {
+            _settings.frameRate = _optionFramerate.validate(60);
+            _settings.frameRate = Math.max(Math.min(_settings.frameRate, 1000), 10);
+            _gvars.removeSongFiles();
+        }
+
+        private function onMPTextSizeChanged(e:Event):void
+        {
+            Style.fontSize = _avars.configMPSize = _optionMPTextSize.validate(10);
+            _avars.mpSave();
+        }
+
+        private function onWindowPropertyChanged(e:Event):void
+        {
+            _optionWindowX.text = _gvars.airWindowProperties.x.toString();
+            _optionWindowY.text = _gvars.airWindowProperties.y.toString();
+            _optionWindowWidth.text = _gvars.airWindowProperties.width.toString();
+            _optionWindowHeight.text = _gvars.airWindowProperties.height.toString();
+        }
+
+        public function onWindowOptionUpdated():void
+        {
+            _gvars.gameMain.ignoreWindowChanges = true;
+            _gvars.gameMain.stage.nativeWindow.x = _gvars.airWindowProperties.x;
+            _gvars.gameMain.stage.nativeWindow.y = _gvars.airWindowProperties.y;
+            _gvars.gameMain.stage.nativeWindow.width = _gvars.airWindowProperties.width + Main.WINDOW_WIDTH_EXTRA;
+            _gvars.gameMain.stage.nativeWindow.height = _gvars.airWindowProperties.height + Main.WINDOW_HEIGHT_EXTRA;
+            _gvars.gameMain.ignoreWindowChanges = false;
+        }
+
+        private function onLegacyEngineMouseOver(e:Event):void
+        {
+            _optionIncludeLegacy.addEventListener(MouseEvent.MOUSE_OUT, onLegacyEngineMouseOut);
+            displayToolTip(_optionIncludeLegacy.x, _optionIncludeLegacy.y + 22, _lang.string("popup_legacy_songs"), TextFormatAlign.LEFT);
+        }
+
+        private function onLegacyEngineMouseOut(e:Event):void
+        {
+            _optionIncludeLegacy.removeEventListener(MouseEvent.MOUSE_OUT, onLegacyEngineMouseOut);
             hideTooltip();
         }
 
-        private function startUpScreenSelect(e:Event):void
+        private function onUseWebsocketMouseOver(e:Event):void
+        {
+            if (!_gvars.air_useWebsockets)
+                return;
+
+            const activePort:uint = _gvars.websocketPortNumber("websocket");
+            if (activePort == 0)
+                return;
+
+            _optionUseWebsockets.addEventListener(MouseEvent.MOUSE_OUT, onUseWebsocketMouseOut);
+            displayToolTip(_optionUseWebsockets.x, _optionUseWebsockets.y + 22, sprintf(_lang.string(Lang.OPTIONS_ACTIVE_PORT), {"port": _gvars.websocketPortNumber("websocket").toString()}));
+        }
+
+        private function onUseWebsocketMouseOut(e:Event):void
+        {
+            _optionUseWebsockets.removeEventListener(MouseEvent.MOUSE_OUT, onUseWebsocketMouseOut);
+            hideTooltip();
+        }
+
+        private function onStartUpScreenSelected(e:Event):void
         {
             _settings.startUpScreen = e.target.selectedItem.data as int;
         }
 
         private function setLanguage():void
         {
-            languageComboIgnore = true;
-            languageCombo.selectedItemByData = _settings.language;
-            languageComboIgnore = false;
+            _ignoreLanguageCombo = true;
+            _optionLanguage.selectedItemByData = _settings.language;
+            _ignoreLanguageCombo = false;
         }
 
-        private function languageSelect(e:Event):void
+        private function onLanguageSelected(e:Event):void
         {
-            if (!languageComboIgnore)
+            if (!_ignoreLanguageCombo)
             {
                 _settings.language = e.target.selectedItem.data as String;
 
@@ -512,7 +491,7 @@ package popups.settings
 
                 if (_gvars.gameMain.activePanel is MainMenu)
                 {
-                    var mmpanel:MainMenu = (_gvars.gameMain.activePanel as MainMenu);
+                    const mmpanel:MainMenu = (_gvars.gameMain.activePanel as MainMenu);
                     mmpanel.updateMenuMusicControls();
                 }
 
@@ -521,37 +500,37 @@ package popups.settings
             }
         }
 
-        private function engineDefaultSelect(e:Event):void
+        private function onEngineDefaultSelected(e:Event):void
         {
-            if (!engineComboIgnore)
+            if (!_ignoreEngineCombo)
             {
                 _avars.legacyDefaultEngine = (e.target as ComboBox).selectedItem.data;
                 _avars.legacyDefaultSave();
             }
         }
 
-        private function e_addEngine(url:String):void
+        private function onAddEngine(url:String):void
         {
-            ChartFFRLegacy.parseEngine(url, engineAdd);
+            ChartFFRLegacy.parseEngine(url, onEngineAdded);
         }
 
-        private function engineSelect(e:Event):void
+        private function onEngineSelected(e:Event):void
         {
-            var data:Object = engineCombo.selectedItem.data;
+            const data:Object = _optionEngine.selectedItem.data;
             // Add Engine
             if (data == this)
             {
-                new Prompt(_parent, 320, "Engine URL", 120, "Add Engine", e_addEngine);
+                new Prompt(_parent, 320, "Engine URL", 120, "Add Engine", onAddEngine);
             }
             // Clears Engines
-            else if (data == engineCombo)
+            else if (data == _optionEngine)
             {
                 _avars.legacyEngines = [];
                 _avars.legacySave();
                 engineRefresh();
             }
             // Change Engine
-            else if (!engineComboIgnore && data != _avars.configLegacy)
+            else if (!_ignoreEngineCombo && data != _avars.configLegacy)
             {
                 _avars.configLegacy = data;
                 _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, _playlist.engineChangeHandler);
@@ -560,7 +539,7 @@ package popups.settings
             }
         }
 
-        private function engineAdd(engine:Object):void
+        private function onEngineAdded(engine:Object):void
         {
             Alert.add("Engine Loaded: " + engine.name, 80);
             for (var i:int = 0; i < _avars.legacyEngines.length; i++)
@@ -572,130 +551,53 @@ package popups.settings
                     break;
                 }
             }
+
             if (i == _avars.legacyEngines.length)
                 _avars.legacyEngines.push(engine);
+
             _avars.legacySave();
             engineRefresh();
         }
 
         private function engineRefresh():void
         {
-            engineComboIgnore = true;
+            _ignoreEngineCombo = true;
 
-            // engine Playlist Select
-            engineCombo.removeAll();
-            engineDefaultCombo.removeAll();
-            engineCombo.addItem({label: Constant.BRAND_NAME_LONG, data: null});
-            engineDefaultCombo.addItem({label: Constant.BRAND_NAME_LONG, data: null});
-            engineCombo.selectedIndex = 0;
-            engineDefaultCombo.selectedIndex = 0;
+            // Engine Playlist Select
+            _optionEngine.removeAll();
+            _optionEngineDefault.removeAll();
+            _optionEngine.addItem({label: Constant.BRAND_NAME_LONG, data: null});
+            _optionEngineDefault.addItem({label: Constant.BRAND_NAME_LONG, data: null});
+            _optionEngine.selectedIndex = 0;
+            _optionEngineDefault.selectedIndex = 0;
+
             for each (var engine:Object in _avars.legacyEngines)
             {
-                var item:Object = {label: engine.name, data: engine};
+                const item:Object = {label: engine.name, data: engine};
                 if (!ChartFFRLegacy.validURL(engine["playlistURL"]))
                     continue;
+
                 if (engine["config_url"] == null)
                 {
                     Alert.add("Please re-add " + engine["name"] + ", missing required information.", 240, Alert.RED);
                     continue;
                 }
-                engineCombo.addItem(item);
-                engineDefaultCombo.addItem(item);
+
+                _optionEngine.addItem(item);
+                _optionEngineDefault.addItem(item);
+
                 if (engine == _avars.configLegacy || (_avars.configLegacy && engine["id"] == _avars.configLegacy["id"]))
-                    engineCombo.selectedItem = item;
+                    _optionEngine.selectedItem = item;
+
                 if (engine == _avars.legacyDefaultEngine || (_avars.legacyDefaultEngine && engine["id"] == _avars.legacyDefaultEngine["id"]))
-                    engineDefaultCombo.selectedItem = item;
+                    _optionEngineDefault.selectedItem = item;
             }
-            engineCombo.addItem({label: "Add Engine...", data: this});
-            if (_avars.legacyEngines.length > 0 && engineCombo.items.length > 2)
-                engineCombo.addItem({label: "Clear Engines", data: engineCombo});
-            engineComboIgnore = false;
+
+            _optionEngine.addItem({label: "Add Engine...", data: this});
+            if (_avars.legacyEngines.length > 0 && _optionEngine.items.length > 2)
+                _optionEngine.addItem({label: "Clear Engines", data: _optionEngine});
+
+            _ignoreEngineCombo = false;
         }
-    }
-}
-
-import classes.Language;
-import classes.ui.BoxButton;
-import classes.ui.Text;
-import flash.display.Sprite;
-import flash.events.Event;
-import flash.events.TimerEvent;
-import flash.utils.Timer;
-import popups.settings.SettingsTabMisc;
-import flash.text.TextFieldAutoSize;
-import flash.text.TextFormatAlign;
-
-internal class WindowSettingConfirm extends Sprite
-{
-    private var _lang:Language = Language.instance;
-
-    private var tab:SettingsTabMisc;
-    private var properties:Object;
-    private var previousWidth:int;
-    private var previousHeight:int;
-    private var previousX:int;
-    private var previousY:int;
-
-    private var confirmTimer:Timer;
-
-    private var window_text:Text;
-    private var window_timer_text:Text;
-    private var confirm_btn:BoxButton;
-
-    public function WindowSettingConfirm(tab:SettingsTabMisc, properties:Object):void
-    {
-        this.tab = tab;
-        this.properties = properties;
-
-        this.previousX = properties["x"];
-        this.previousY = properties["y"];
-        this.previousWidth = properties["width"];
-        this.previousHeight = properties["height"];
-
-        this.graphics.lineStyle(0, 0, 0);
-        this.graphics.beginFill(0, 0.95);
-        this.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
-        this.graphics.endFill();
-
-        confirmTimer = new Timer(1000, 10);
-        confirmTimer.addEventListener(TimerEvent.TIMER, e_timerTick);
-        confirmTimer.start();
-
-        window_text = new Text(this, 0, 200, _lang.string("option_window_settings_confirm_text"), 24);
-        window_text.setAreaParams(Main.GAME_WIDTH, 30, TextFormatAlign.CENTER);
-
-        window_timer_text = new Text(this, 0, 250, "10", 38);
-        window_timer_text.setAreaParams(Main.GAME_WIDTH, 30, TextFormatAlign.CENTER);
-
-        confirm_btn = new BoxButton(this, Main.GAME_WIDTH / 2 - 50, 400, 100, 30, _lang.string("menu_confirm"), 12, e_confirm);
-    }
-
-    private function e_timerTick(e:TimerEvent):void
-    {
-        window_timer_text.text = (confirmTimer.repeatCount - confirmTimer.currentCount).toString();
-
-        if (confirmTimer.currentCount >= confirmTimer.repeatCount)
-        {
-            e_cancel();
-        }
-    }
-
-    private function e_confirm(e:Event):void
-    {
-        confirmTimer.stop();
-        this.parent.removeChild(this);
-    }
-
-    private function e_cancel():void
-    {
-        properties["width"] = previousWidth;
-        properties["height"] = previousHeight;
-        properties["x"] = previousX;
-        properties["y"] = previousY;
-
-        confirmTimer.stop();
-        this.parent.removeChild(this);
-
-        this.tab.e_windowSetUpdate();
     }
 }

@@ -172,9 +172,9 @@ package popups.settings
 
             _optionGlobalOffset = addTextOption(Lang.OPTIONS_GLOBAL_OFFSET, ValidatedText.R_FLOAT, true, onGlobalOffsetChanged);
             _optionJudgeOffset = addTextOption(Lang.OPTIONS_JUDGE_OFFSET, ValidatedText.R_FLOAT, true, onJudgeOffsetChanged);
-            // TODO: Refactor custom judge window option
-            //judgeOffsetText.mouseEnabled = true;
-            //judgeOffsetText.contextMenu = arcJudgeMenu(_parent);
+
+            _optionJudgeOffset.mouseEnabled = true;
+            _optionJudgeOffset.contextMenu = arcJudgeMenu(_parent);
 
             _optionAutoJudgeOffset = addCheckOption(Lang.OPTIONS_AUTO_JUDGE_OFFSET, onAutoJudgeOffsetChanged, _lang.string(Lang.OPTIONS_POPUP_AUTO_JUDGE_OFFSET));
 
@@ -205,6 +205,8 @@ package popups.settings
             _optionScrollDirectionSplit = addCheckOption(Lang.OPTIONS_SCROLL_SPLIT, onScrollDirectionChanged);
             _optionScrollDirectionSplitDown = addCheckOption(Lang.OPTIONS_SCROLL_SPLIT_DOWN, onScrollDirectionChanged);
             _optionScrollDirectionPlus = addCheckOption(Lang.OPTIONS_SCROLL_PLUS, onScrollDirectionChanged);
+
+            _scrollOptionsGroup.push(_optionScrollDirectionUp, _optionScrollDirectionDown, _optionScrollDirectionLeft, _optionScrollDirectionRight, _optionScrollDirectionSplit, _optionScrollDirectionSplitDown, _optionScrollDirectionPlus);
 
             yOff += drawSeperator(container, xOff, 170, yOff, 5, 6);
 
@@ -280,8 +282,8 @@ package popups.settings
             var sliderValue:int = Math.round(Math.max(Math.min(_optionNoteScale.slideValue, _optionNoteScale.maxValue), _optionNoteScale.minValue) * 100);
 
             // Snap to larger value when close.
-            var snapTarget:int = 25;
-            var snapValue:int = sliderValue % snapTarget;
+            const snapTarget:int = 25;
+            const snapValue:int = sliderValue % snapTarget;
             if (snapValue == 1 || snapValue == snapTarget - 1)
                 sliderValue = Math.round(sliderValue / snapTarget) * snapTarget;
 
@@ -364,7 +366,7 @@ package popups.settings
 
         private function onScrollDirectionChanged(e:Event):void
         {
-            for (var scrollOption:BoxCheck in _scrollOptionsGroup)
+            for each (var scrollOption:BoxCheck in _scrollOptionsGroup)
             {
                 if (e.target != scrollOption)
                     scrollOption.checked = false;
@@ -421,8 +423,8 @@ package popups.settings
 
         private function arcJudgeMenu(parent:SettingsWindow):ContextMenu
         {
-            var judgeMenu:ContextMenu = new ContextMenu();
-            var judgeItem:ContextMenuItem = new ContextMenuItem("Custom Judge Windows");
+            const judgeMenu:ContextMenu = new ContextMenu();
+            const judgeItem:ContextMenuItem = new ContextMenuItem("Custom Judge Windows");
             judgeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
             {
                 new Prompt(parent, 320, "Judge Window", 100, "SUBMIT", onCustomJudgeWindowSubmit);
@@ -440,7 +442,7 @@ package popups.settings
                 if (!judge)
                     judge = new Array();
 
-                var items:Array = item.split(",");
+                const items:Array = item.split(",");
                 if (items.length != 2)
                 {
                     judge = null;

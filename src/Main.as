@@ -149,13 +149,13 @@ package
             ignoreWindowChanges = true;
             if (_gvars.air_saveWindowPosition)
             {
-                stage.nativeWindow.x = _gvars.air_windowProperties.x;
-                stage.nativeWindow.y = _gvars.air_windowProperties.y;
+                stage.nativeWindow.x = _gvars.airWindowProperties.x;
+                stage.nativeWindow.y = _gvars.airWindowProperties.y;
             }
             if (_gvars.air_saveWindowSize)
             {
-                stage.nativeWindow.width = Math.max(100, _gvars.air_windowProperties.width + WINDOW_WIDTH_EXTRA);
-                stage.nativeWindow.height = Math.max(100, _gvars.air_windowProperties.height + WINDOW_HEIGHT_EXTRA);
+                stage.nativeWindow.width = Math.max(100, _gvars.airWindowProperties.width + WINDOW_WIDTH_EXTRA);
+                stage.nativeWindow.height = Math.max(100, _gvars.airWindowProperties.height + WINDOW_HEIGHT_EXTRA);
             }
             ignoreWindowChanges = false;
 
@@ -259,11 +259,11 @@ package
 
         private function e_onNativeWindowClosing(e:Event):void
         {
-            _gvars.air_windowProperties["width"] = stage.nativeWindow.width - Main.WINDOW_WIDTH_EXTRA;
-            _gvars.air_windowProperties["height"] = stage.nativeWindow.height - Main.WINDOW_HEIGHT_EXTRA;
-            _gvars.air_windowProperties["x"] = stage.nativeWindow.x;
-            _gvars.air_windowProperties["y"] = stage.nativeWindow.y;
-            LocalOptions.setVariable("window_properties", _gvars.air_windowProperties);
+            _gvars.airWindowProperties.width = stage.nativeWindow.width - Main.WINDOW_WIDTH_EXTRA;
+            _gvars.airWindowProperties.height = stage.nativeWindow.height - Main.WINDOW_HEIGHT_EXTRA;
+            _gvars.airWindowProperties.x = stage.nativeWindow.x;
+            _gvars.airWindowProperties.y = stage.nativeWindow.y;
+            LocalOptions.setVariable("window_properties", _gvars.airWindowProperties);
         }
 
         private function e_onNativeWindowPropertyChange(e:NativeWindowBoundsEvent):void
@@ -271,10 +271,10 @@ package
             if (ignoreWindowChanges)
                 return;
 
-            _gvars.air_windowProperties["width"] = e.afterBounds.width - Main.WINDOW_WIDTH_EXTRA;
-            _gvars.air_windowProperties["height"] = e.afterBounds.height - Main.WINDOW_HEIGHT_EXTRA;
-            _gvars.air_windowProperties["x"] = e.afterBounds.x;
-            _gvars.air_windowProperties["y"] = e.afterBounds.y;
+            _gvars.airWindowProperties.width = e.afterBounds.width - Main.WINDOW_WIDTH_EXTRA;
+            _gvars.airWindowProperties.height = e.afterBounds.height - Main.WINDOW_HEIGHT_EXTRA;
+            _gvars.airWindowProperties.x = e.afterBounds.x;
+            _gvars.airWindowProperties.y = e.afterBounds.y;
         }
 
         CONFIG::vsync

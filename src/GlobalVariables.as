@@ -31,6 +31,7 @@ package
     import flash.utils.ByteArray;
     import game.GameOptions;
     import game.GameScoreResult;
+    import classes.ui.WindowProperties;
 
     public class GlobalVariables extends EventDispatcher
     {
@@ -105,7 +106,7 @@ package
         public var air_saveWindowPosition:Boolean = false;
         public var air_saveWindowSize:Boolean = false;
 
-        public var air_windowProperties:Object;
+        public var airWindowProperties:WindowProperties;
         public var file_replay_cache:FileCache = new FileCache("replays/cache.json", 1);
 
         private var websocket_server:AIRServer;
@@ -129,12 +130,17 @@ package
             air_saveWindowPosition = LocalOptions.getVariable("save_window_position", false);
             air_saveWindowSize = LocalOptions.getVariable("save_window_size", false);
 
-            air_windowProperties = LocalOptions.getVariable("window_properties", {"x": 0, "y": 0, "width": 0, "height": 0});
+            airWindowProperties = parseWindowProperties(LocalOptions.getVariable("window_properties", {"x": 0, "y": 0, "width": 0, "height": 0}));
 
             if (air_useWebsockets)
             {
                 initWebsocketServer();
             }
+        }
+
+        private function parseWindowProperties(properties:Object):WindowProperties
+        {
+            return new WindowProperties(properties["x"], properties["y"], properties["width"], properties["height"]);
         }
 
         public function loadUserSongData():void

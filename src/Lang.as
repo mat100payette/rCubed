@@ -135,5 +135,30 @@ package
         public static const OPTIONS_GENRE_FLAG:String = "options_genre_flag";
         public static const OPTIONS_SONG_FLAG:String = "options_song_flag";
         public static const OPTIONS_SONG_NOTE:String = "options_song_note";
+
+        // MISC SETTINGS TAB
+        public static const OPTIONS_WINDOW_SETTINGS_CONFIRM_TEXT:String = "option_window_settings_confirm_text";
+        public static const OPTIONS_WINDOW_SETTINGS_CONFIRM:String = "menu_confirm";
+        public static const OPTIONS_GAME_LANGUAGE:String = "options_game_language";
+        public static const OPTIONS_STARTUP_SCREEN:String = "options_startup_screen";
+        public static const OPTIONS_STARTUP_SCREEN_PREFIX:String = "options_startup_";
+        public static const OPTIONS_MP_TEXT_SIZE:String = "options_mp_textsize";
+        public static const OPTIONS_MP_TIMESTAMP:String = "options_mp_timestamp";
+        public static const OPTIONS_FORCE_JUDGE_MODE:String = "options_force_judge_mode";
+        public static const OPTIONS_AUTO_SAVE_LOCAL_REPLAYS:String = "air_options_save_local_replays";
+        public static const OPTIONS_USE_CACHE:String = "air_options_use_cache";
+        public static const OPTIONS_USE_WEBSOCKETS:String = "air_options_use_websockets";
+        public static const OPTIONS_WEBSOCKET_OVERLAY:String = "options_overlay_instructions";
+        public static const OPTIONS_GAME_ENGINE:String = "options_game_engine";
+        public static const OPTIONS_DEFAULT_GAME_ENGINE:String = "options_default_game_engine";
+        public static const OPTIONS_INCLUDE_LEGACY_SONGS:String = "options_include_legacy_songs";
+        public static const OPTIONS_FRAMERATE:String = "options_framerate";
+        public static const OPTIONS_USE_VSYNC:String = "air_options_use_vsync";
+        public static const OPTIONS_WINDOW_SIZE:String = "air_options_window_size";
+        public static const OPTIONS_SAVE_WINDOW_SIZE:String = "air_options_save_window_size";
+        public static const OPTIONS_WINDOW_POSITION:String = "air_options_window_position";
+        public static const OPTIONS_SAVE_WINDOW_POSITION:String = "air_options_save_window_position";
+        public static const OPTIONS_UNABLE_TO_START_WEBSOCKETS:String = "air_options_unable_to_start_websockets";
+        public static const OPTIONS_ACTIVE_PORT:String = "air_options_active_port";
     }
 }
