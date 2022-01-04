@@ -8,7 +8,7 @@ package classes.ui
         public var width:int;
         public var height:int;
 
-        public function WindowProperties(x:int = 0, y:int = 0, width:int = 640, height:int = 480):void
+        public function WindowProperties(x:int = 0, y:int = 0, width:int = Main.GAME_WIDTH, height:int = Main.GAME_HEIGHT):void
         {
             this.x = x;
             this.y = y;

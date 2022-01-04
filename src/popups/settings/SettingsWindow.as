@@ -22,21 +22,22 @@ package popups.settings
     import flash.events.MouseEvent;
     import flash.media.SoundMixer;
     import flash.media.SoundTransform;
+    import flash.text.TextFormatAlign;
     import game.GameOptions;
     import menu.MainMenu;
     import menu.MenuPanel;
     import menu.MenuSongSelection;
-    import flash.text.TextFormatAlign;
 
 
     public class SettingsWindow extends MenuPanel
     {
-        public var scrollbar:ScrollBar;
         public var pane:ScrollPane;
 
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
+
+        private var _scrollbar:ScrollBar;
 
         private var _user:User;
 
@@ -53,18 +54,26 @@ package popups.settings
         private var _txtSettings:Text;
         private var _txtModWarning:Text;
 
-        // buttons
-        private var btnClose:BoxButton;
-        private var btnManage:BoxButton;
-        private var btnReset:BoxButton;
+        private var _btnClose:BoxButton;
+        private var _btnManage:BoxButton;
+        private var _btnReset:BoxButton;
 
-        private var btnEditorGameplay:TabButton;
-        private var btnEditorMultiplayer:TabButton;
-        private var btnEditorSpectator:TabButton;
+        private var _btnEditorGameplay:TabButton;
+        private var _btnEditorMultiplayer:TabButton;
+        private var _btnEditorSpectator:TabButton;
 
-        private var gameOptionsTest:GameOptions = new GameOptions(null);
+        private var _gameOptionsTest:GameOptions = new GameOptions(null);
 
-        private var winManage:ManageSettingsWindow;
+        private var _editorFakeDataCreated:Boolean = false;
+        private var _fakePlayer1:User;
+        private var _fakePlayer2:User;
+        private var _fakeSpectator:User;
+        private var _fakeMP1:Multiplayer;
+        private var _fakeMPRoom1:Room;
+        private var _fakeMP2:Multiplayer;
+        private var _fakeMPRoom2:Room;
+
+        private var _windowManage:ManageSettingsWindow;
 
         public function SettingsWindow(myParent:MenuPanel, user:User)
         {
@@ -125,8 +134,8 @@ package popups.settings
             // scroll pane
             pane = new ScrollPane(this, 175, 61, 589, Main.GAME_HEIGHT - 61);
             pane.addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false, 0, false);
-            scrollbar = new ScrollBar(this, Main.GAME_WIDTH - 16, 61, 16, Main.GAME_HEIGHT - 61, null, new Sprite());
-            scrollbar.addEventListener(Event.CHANGE, scrollBarMoved, false, 0, false);
+            _scrollbar = new ScrollBar(this, Main.GAME_WIDTH - 16, 61, 16, Main.GAME_HEIGHT - 61, null, new Sprite());
+            _scrollbar.addEventListener(Event.CHANGE, scrollBarMoved, false, 0, false);
 
             // ui
             buildTabs();
@@ -136,13 +145,12 @@ package popups.settings
             _txtModWarning = new Text(_box, 215, 18, _lang.string("options_warning_save"), 14, "#f06868");
             _txtModWarning.setAreaParams(265, 24, TextFormatAlign.RIGHT);
 
-            btnReset = new BoxButton(_box, 495, 15, 80, 29, _lang.string("menu_reset"), 12, clickHandler);
-            btnReset.color = 0xff0000;
+            _btnReset = new BoxButton(_box, 495, 15, 80, 29, _lang.string("menu_reset"), 12, onResetSettingsClicked);
+            _btnReset.color = 0xff0000;
 
-            btnManage = new BoxButton(_box, 590, 15, 80, 29, _lang.string("menu_manage"), 12, clickHandler);
+            _btnManage = new BoxButton(_box, 590, 15, 80, 29, _lang.string("menu_manage"), 12, onManageSettingsClicked);
 
-            btnClose = new BoxButton(_box, 685, 15, 80, 29, _lang.string("menu_close"), 12, clickHandler);
-            //btn_close.contextMenu = _contextImportExport;
+            _btnClose = new BoxButton(_box, 685, 15, 80, 29, _lang.string("menu_close"), 12, onCloseClicked);
 
             changeTab(_lastIndex);
         }
@@ -150,7 +158,7 @@ package popups.settings
         override public function stageRemove():void
         {
             _currentTab.closeTab();
-            scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
+            _scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
             pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
         }
 
@@ -164,63 +172,18 @@ package popups.settings
 
                 tabBox = new TabButton(_box, -1, 60 + 33 * idx, idx, _lang.string("settings_tab_" + _tabs[idx].name));
                 tabBox.tabIndex = idx;
-                tabBox.addEventListener(MouseEvent.CLICK, tabHandler);
+                tabBox.addEventListener(MouseEvent.CLICK, onTabClicked);
 
                 _tabButtons.push(tabBox);
             }
 
             // editor buttons
-            btnEditorGameplay = new TabButton(_box, -1, 364, -1, _lang.string("settings_tab_editor_gameplay"), true);
-            btnEditorGameplay.addEventListener(MouseEvent.CLICK, clickHandler);
-            btnEditorMultiplayer = new TabButton(_box, -1, 397, -1, _lang.string("settings_tab_editor_multiplayer"));
-            btnEditorMultiplayer.addEventListener(MouseEvent.CLICK, clickHandler);
-            btnEditorSpectator = new TabButton(_box, -1, 430, -1, _lang.string("settings_tab_editor_spectator"));
-            btnEditorSpectator.addEventListener(MouseEvent.CLICK, clickHandler);
-
-            // editor options, fake entities for filling gameplay elements
-            const fakePlayer1:User = new User();
-            fakePlayer1.id = 1;
-            fakePlayer1.playerIdx = 1;
-            fakePlayer1.isPlayer = true;
-            fakePlayer1.name = "Player 1";
-            fakePlayer1.siteId = 1830376;
-
-            const fakePlayer2:User = new User();
-            fakePlayer2.id = 2
-            fakePlayer2.playerIdx = 2;
-            fakePlayer2.isPlayer = true;
-            fakePlayer2.name = "Player 2";
-            fakePlayer2.siteId = 249481;
-
-            const fakeSpectator:User = new User();
-            fakeSpectator.id = 3;
-            fakeSpectator.playerIdx = 3;
-            fakeSpectator.isPlayer = false;
-            fakeSpectator.name = "Spectator";
-            fakeSpectator.siteId = 0;
-
-            // Editor - MP
-            const fakeMP1:Multiplayer = new Multiplayer();
-            fakeMP1.currentUser = fakePlayer1;
-
-            const mpEditorRoom:Room = new Room(0);
-            mpEditorRoom.connection = fakeMP1;
-            mpEditorRoom.addUser(fakePlayer1);
-            mpEditorRoom.addUser(fakePlayer2);
-            mpEditorRoom.addPlayer(fakePlayer1);
-            mpEditorRoom.addPlayer(fakePlayer2);
-
-            // Editor - MP Spectate
-            const fakeMP2:Multiplayer = new Multiplayer();
-            fakeMP2.currentUser = fakeSpectator;
-
-            const mpSpectateEditorRoom:Room = new Room(0);
-            mpSpectateEditorRoom.connection = fakeMP2;
-            mpSpectateEditorRoom.addUser(fakePlayer1);
-            mpSpectateEditorRoom.addUser(fakePlayer2);
-            mpSpectateEditorRoom.addUser(fakeSpectator);
-            mpSpectateEditorRoom.addPlayer(fakePlayer1);
-            mpSpectateEditorRoom.addPlayer(fakePlayer2);
+            _btnEditorGameplay = new TabButton(_box, -1, 364, -1, _lang.string("settings_tab_editor_gameplay"), true);
+            _btnEditorGameplay.addEventListener(MouseEvent.CLICK, onSoloEditorTabClicked);
+            _btnEditorMultiplayer = new TabButton(_box, -1, 397, -1, _lang.string("settings_tab_editor_multiplayer"));
+            _btnEditorMultiplayer.addEventListener(MouseEvent.CLICK, onMPEditorTabClicked);
+            _btnEditorSpectator = new TabButton(_box, -1, 430, -1, _lang.string("settings_tab_editor_spectator"));
+            _btnEditorSpectator.addEventListener(MouseEvent.CLICK, onMPSpectatorEditorTabClicked);
         }
 
         public function changeTab(idx:int):void
@@ -244,9 +207,9 @@ package popups.settings
             pane.update();
 
             pane.scrollTo(0, false);
-            scrollbar.scrollTo(0, false);
+            _scrollbar.scrollTo(0, false);
 
-            scrollbar.visible = (pane.content.height > 425);
+            _scrollbar.visible = (pane.content.height > 425);
 
             // update buttons
             for each (var tabButton:TabButton in _tabButtons)
@@ -255,15 +218,15 @@ package popups.settings
             checkValidMods();
         }
 
-        private function tabHandler(e:MouseEvent):void
+        private function onTabClicked(e:MouseEvent):void
         {
             changeTab((e.currentTarget as TabButton).index);
         }
 
         public function checkValidMods():void
         {
-            gameOptionsTest.fill();
-            _txtModWarning.visible = !gameOptionsTest.isScoreValid();
+            _gameOptionsTest.fill();
+            _txtModWarning.visible = !_gameOptionsTest.isScoreValid();
         }
 
         private function onManageSettingsWindowClosed(window:ManageSettingsWindow):void
@@ -271,102 +234,168 @@ package popups.settings
             removeChild(window);
         }
 
-        private function clickHandler(e:MouseEvent):void
+        private function onResetSettingsClicked(e:Event):void
         {
-            if (e.currentTarget == btnEditorGameplay || e.currentTarget == btnEditorMultiplayer || e.currentTarget == btnEditorSpectator)
+            const confirmWindow:Window = new Window(this, 0, 0, "Confirm Settings Reset");
+            confirmWindow.hasMinimizeButton = false;
+            confirmWindow.hasCloseButton = false;
+            confirmWindow.setSize(110, 105);
+            confirmWindow.x = (Main.GAME_WIDTH / 2 - confirmWindow.width / 2);
+            confirmWindow.y = (Main.GAME_HEIGHT / 2 - confirmWindow.height / 2);
+
+            function onConfirmResetClicked(e:Event):void
             {
-                _gvars.options = new GameOptions(_user);
-                _gvars.options.isEditor = true;
-                _gvars.options.mpRoom = e.currentTarget.editor;
-
-                const tempSongInfo:SongInfo = new SongInfo();
-                tempSongInfo.level = 1337;
-                tempSongInfo.chart_type = "EDITOR";
-                _gvars.options.song = new Song(tempSongInfo);
-
-                _gvars.options.fill();
-                removePopup();
-                _gvars.gameMain.switchTo(Main.GAME_PLAY_PANEL);
-                return;
-            }
-
-            else if (e.target == btnManage)
-            {
-                winManage = new ManageSettingsWindow(this.stage, onManageSettingsWindowClosed);
-                addChild(winManage);
-            }
-
-            else if (e.target == btnReset)
-            {
-                const confirmWindow:Window = new Window(this, 0, 0, "Confirm Settings Reset");
-                confirmWindow.hasMinimizeButton = false;
-                confirmWindow.hasCloseButton = false;
-                confirmWindow.setSize(110, 105);
-                confirmWindow.x = (Main.GAME_WIDTH / 2 - confirmWindow.width / 2);
-                confirmWindow.y = (Main.GAME_HEIGHT / 2 - confirmWindow.height / 2);
-
-                function doReset(e:Event):void
-                {
-                    confirmWindow.parent.removeChild(confirmWindow);
-                    if (_user == _gvars.playerUser)
-                    {
-                        _user.settings = new User().settings;
-                        _avars.resetSettings();
-                    }
-                    changeTab(_currentIndex);
-                }
-
-                function closeReset(e:Event):void
-                {
-                    confirmWindow.parent.removeChild(confirmWindow);
-                }
-
-                const resB:BoxButton = new BoxButton(confirmWindow, 5, 5, 100, 35, _lang.string("menu_reset"), 12, doReset);
-                resB.color = 0x330000;
-                resB.textColor = "#990000";
-
-                const conB:BoxButton = new BoxButton(confirmWindow, 5, 45, 100, 35, _lang.string("menu_close"), 12, closeReset);
-                conB.color = 0;
-                conB.textColor = "#000000";
-            }
-
-            else if (e.target == btnClose)
-            {
+                confirmWindow.parent.removeChild(confirmWindow);
                 if (_user == _gvars.playerUser)
                 {
-                    _user.saveSettingsLocally();
-                    _user.saveSettingsOnline();
-
-                    // Setup Background Colors
-                    GameBackgroundColor.BG_LIGHT = _user.settings.gameColors[0];
-                    GameBackgroundColor.BG_DARK = _user.settings.gameColors[1];
-                    GameBackgroundColor.BG_STATIC = _user.settings.gameColors[2];
-                    GameBackgroundColor.BG_POPUP = _user.settings.gameColors[3];
-                    GameBackgroundColor.BG_STAGE = _user.settings.gameColors[4];
-                    (_gvars.gameMain.getChildAt(0) as GameBackgroundColor).redraw();
-
-                    if (_gvars.gameMain.activePanel is MainMenu && ((_gvars.gameMain.activePanel as MainMenu).panel is MenuSongSelection))
-                    {
-                        const panel:MenuSongSelection = ((_gvars.gameMain.activePanel as MainMenu).panel as MenuSongSelection);
-                        panel.buildGenreList();
-                        panel.drawPages();
-                    }
+                    _user.settings = new User().settings;
+                    _avars.resetSettings();
                 }
-                SoundMixer.soundTransform = new SoundTransform(_user.settings.gameVolume);
-                LocalOptions.setVariable("menu_music_volume", _gvars.menuMusicSoundVolume);
-                removePopup();
-                return;
+                changeTab(_currentIndex);
             }
+
+            function onCancelResetClicked(e:Event):void
+            {
+                confirmWindow.parent.removeChild(confirmWindow);
+            }
+
+            const confirmBtn:BoxButton = new BoxButton(confirmWindow, 5, 5, 100, 35, _lang.string("menu_reset"), 12, onConfirmResetClicked);
+            confirmBtn.color = 0x330000;
+            confirmBtn.textColor = "#990000";
+
+            const cancelBtn:BoxButton = new BoxButton(confirmWindow, 5, 45, 100, 35, _lang.string("menu_close"), 12, onCancelResetClicked);
+            cancelBtn.color = 0;
+            cancelBtn.textColor = "#000000";
+        }
+
+        private function createEditorFakeData():void
+        {
+            if (_editorFakeDataCreated)
+                return;
+
+            _fakePlayer1 = new User();
+            _fakePlayer1.settings.update(_user.settings);
+            _fakePlayer1.id = 1;
+            _fakePlayer1.playerIdx = 1;
+            _fakePlayer1.isPlayer = true;
+            _fakePlayer1.name = "Player 1";
+            _fakePlayer1.siteId = 1830376;
+
+            _fakePlayer2 = new User();
+            _fakePlayer2.settings.update(_user.settings);
+            _fakePlayer2.id = 2
+            _fakePlayer2.playerIdx = 2;
+            _fakePlayer2.isPlayer = true;
+            _fakePlayer2.name = "Player 2";
+            _fakePlayer2.siteId = 249481;
+
+            _fakeSpectator = new User();
+            _fakeSpectator.settings.update(_user.settings);
+            _fakeSpectator.id = 3;
+            _fakeSpectator.playerIdx = 3;
+            _fakeSpectator.isPlayer = false;
+            _fakeSpectator.name = "Spectator";
+            _fakeSpectator.siteId = 0;
+
+            // Editor - MP
+            _fakeMP1 = new Multiplayer();
+            _fakeMP1.currentUser = _fakePlayer1;
+
+            _fakeMPRoom1 = new Room(0);
+            _fakeMPRoom1.connection = _fakeMP1;
+            _fakeMPRoom1.addUser(_fakePlayer1);
+            _fakeMPRoom1.addUser(_fakePlayer2);
+            _fakeMPRoom1.addPlayer(_fakePlayer1);
+            _fakeMPRoom1.addPlayer(_fakePlayer2);
+
+            // Editor - MP Spectate
+            _fakeMP2 = new Multiplayer();
+            _fakeMP2.currentUser = _fakeSpectator;
+
+            _fakeMPRoom2 = new Room(0);
+            _fakeMPRoom2.connection = _fakeMP2;
+            _fakeMPRoom2.addUser(_fakePlayer1);
+            _fakeMPRoom2.addUser(_fakePlayer2);
+            _fakeMPRoom2.addUser(_fakeSpectator);
+            _fakeMPRoom2.addPlayer(_fakePlayer1);
+            _fakeMPRoom2.addPlayer(_fakePlayer2);
+        }
+
+        private function onSoloEditorTabClicked(e:Event):void
+        {
+            openEditor(null);
+        }
+
+        private function onMPEditorTabClicked(e:Event):void
+        {
+            openEditor(_fakeMPRoom1);
+        }
+
+        private function onMPSpectatorEditorTabClicked(e:Event):void
+        {
+            openEditor(_fakeMPRoom2);
+        }
+
+        private function openEditor(fakeMPRoom:Room):void
+        {
+            createEditorFakeData();
+
+            _gvars.options = new GameOptions(_user);
+            _gvars.options.isEditor = true;
+            _gvars.options.mpRoom = fakeMPRoom;
+
+            const tempSongInfo:SongInfo = new SongInfo();
+            tempSongInfo.level = 1337;
+            tempSongInfo.chart_type = "EDITOR";
+            _gvars.options.song = new Song(tempSongInfo);
+
+            _gvars.options.fill();
+            removePopup();
+            _gvars.gameMain.switchTo(Main.GAME_PLAY_PANEL);
+        }
+
+        private function onManageSettingsClicked(e:Event):void
+        {
+            _windowManage = new ManageSettingsWindow(this.stage, onManageSettingsWindowClosed);
+            addChild(_windowManage);
+        }
+
+        private function onCloseClicked(e:Event):void
+        {
+            if (_user == _gvars.playerUser)
+            {
+                _user.saveSettingsLocally();
+                _user.saveSettingsOnline();
+
+                // Setup Background Colors
+                GameBackgroundColor.BG_LIGHT = _user.settings.gameColors[0];
+                GameBackgroundColor.BG_DARK = _user.settings.gameColors[1];
+                GameBackgroundColor.BG_STATIC = _user.settings.gameColors[2];
+                GameBackgroundColor.BG_POPUP = _user.settings.gameColors[3];
+                GameBackgroundColor.BG_STAGE = _user.settings.gameColors[4];
+                (_gvars.gameMain.getChildAt(0) as GameBackgroundColor).redraw();
+
+                if (_gvars.gameMain.activePanel is MainMenu && ((_gvars.gameMain.activePanel as MainMenu).panel is MenuSongSelection))
+                {
+                    const panel:MenuSongSelection = ((_gvars.gameMain.activePanel as MainMenu).panel as MenuSongSelection);
+                    panel.buildGenreList();
+                    panel.drawPages();
+                }
+            }
+
+            SoundMixer.soundTransform = new SoundTransform(_user.settings.gameVolume);
+            LocalOptions.setVariable("menu_music_volume", _gvars.menuMusicSoundVolume);
+            removePopup();
         }
 
         private function mouseWheelMoved(e:MouseEvent):void
         {
-            if (!scrollbar.visible)
+            if (!_scrollbar.visible)
                 return;
 
-            const dist:Number = scrollbar.scroll + (pane.scrollFactorVertical / 2) * (e.delta > 0 ? -1 : 1);
+            const dist:Number = _scrollbar.scroll + (pane.scrollFactorVertical / 2) * (e.delta > 0 ? -1 : 1);
             pane.scrollTo(dist, false);
-            scrollbar.scrollTo(dist, false);
+            _scrollbar.scrollTo(dist, false);
         }
 
         private function scrollBarMoved(e:Event):void

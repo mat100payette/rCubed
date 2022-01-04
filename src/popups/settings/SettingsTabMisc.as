@@ -272,8 +272,8 @@ package popups.settings
 
             _optionForceJudge.checked = _settings.forceNewJudge;
 
-            _optionMPTimestamp.checked = _settings.DISPLAY_MP_TIMESTAMP;
-            _optionIncludeLegacy.checked = _settings.DISPLAY_LEGACY_SONGS;
+            _optionMPTimestamp.checked = _settings.displayMPTimestamp;
+            _optionIncludeLegacy.checked = _settings.displayLegacySongs;
             _optionMPTextSize.text = _avars.configMPSize.toString();
             _optionStartUpScreen.selectedIndex = _settings.startUpScreen;
 
@@ -304,12 +304,12 @@ package popups.settings
 
         private function onMPTimestampClicked(e:Event):void
         {
-            _settings.DISPLAY_MP_TIMESTAMP = !_settings.DISPLAY_MP_TIMESTAMP;
+            _settings.displayMPTimestamp = !_settings.displayMPTimestamp;
         }
 
         private function onDisplayLegacyClicked(e:Event):void
         {
-            _settings.DISPLAY_LEGACY_SONGS = !_settings.DISPLAY_LEGACY_SONGS;
+            _settings.displayLegacySongs = !_settings.displayLegacySongs;
         }
 
         private function onAutosaveLocalClicked(e:Event):void

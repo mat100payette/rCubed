@@ -19,7 +19,7 @@ package classes
 
         public var startUpScreen:int = 0; // 0 = MP Connect + MP Screen   |   1 = MP Connect + Song List   |   2 = Song List
 
-        public var DISPLAY_LEGACY_SONGS:Boolean = false;
+        public var displayLegacySongs:Boolean = false;
         public var displayGenreFlag:Boolean = true;
         public var displaySongFlag:Boolean = true;
         public var displaySongNote:Boolean = true;
@@ -50,7 +50,7 @@ package classes
         public var displayMPJudge:Boolean = true;
         public var displayMPCombo:Boolean = true;
 
-        public var DISPLAY_MP_TIMESTAMP:Boolean = false;
+        public var displayMPTimestamp:Boolean = false;
         public var judgeColors:Array = [0x78ef29, 0x12e006, 0x01aa0f, 0xf99800, 0xfe0000, 0x804100];
         public var comboColors:Array = [0x0099CC, 0x00AD00, 0xFCC200, 0xC7FB30, 0x6C6C6C, 0xF99800, 0xB06100, 0x990000, 0xDC00C2]; // Normal, FC, AAA, SDG, BlackFlag, AvFlag, BooFlag, MissFlag, RawGood
         public var enableComboColors:Vector.<Boolean> = new <Boolean>[true, true, true, false, false, false, false, false, false];
@@ -96,7 +96,7 @@ package classes
 
         public function UserSettings(isLiteUser:Boolean = false)
         {
-            this._isLiteUser = isLiteUser;
+            _isLiteUser = isLiteUser;
         }
 
         // This replacer manages the filters to avoid circular dependencies
@@ -125,11 +125,13 @@ package classes
          */
         public function stringify():String
         {
-            var preStringified:String = JSON.stringify(this, replacer(this));
-            var json:Object = JSON.parse(preStringified);
+            const preStringified:String = JSON.stringify(this, replacer(this));
+            const json:Object = JSON.parse(preStringified);
+
             for (var key:String in json._compatSettings)
                 json[key] = json._compatSettings[key];
-            var stringified:String = JSON.stringify(json);
+
+            const stringified:String = JSON.stringify(json);
 
             return stringified;
         }
@@ -156,7 +158,7 @@ package classes
             // For backwards compatibility
             for (var key:String in settings)
             {
-                var isCompatSetting:Boolean = this._compatSettings[key] !== undefined;
+                var isCompatSetting:Boolean = _compatSettings[key] !== undefined;
                 var isKeyNotFound:Boolean = false;
 
                 try
@@ -169,170 +171,170 @@ package classes
                 }
 
                 if (isCompatSetting || isKeyNotFound)
-                    this._compatSettings[key] = settings[key];
+                    _compatSettings[key] = settings[key];
             }
 
             if (settings.language != null)
-                this.language = settings.language;
+                language = settings.language;
 
             if (settings.globalOffset != null)
-                this.globalOffset = settings.globalOffset;
+                globalOffset = settings.globalOffset;
 
             if (settings.judgeOffset != null)
-                this.judgeOffset = settings.judgeOffset;
+                judgeOffset = settings.judgeOffset;
 
             if (settings.autoJudgeOffset != null)
-                this.autoJudgeOffset = settings.autoJudgeOffset;
+                autoJudgeOffset = settings.autoJudgeOffset;
 
-            if (settings.DISPLAY_SONG_FLAG != null)
-                this.displaySongFlag = settings.DISPLAY_SONG_FLAG;
+            if (settings.displaySongFlag != null)
+                displaySongFlag = settings.displaySongFlag;
 
-            if (settings.DISPLAY_GENRE_FLAG != null)
-                this.displayGenreFlag = settings.DISPLAY_GENRE_FLAG;
+            if (settings.displayGenreFlag != null)
+                displayGenreFlag = settings.displayGenreFlag;
 
-            if (settings.DISPLAY_SONG_NOTE != null)
-                this.displaySongNote = settings.DISPLAY_SONG_NOTE;
+            if (settings.displaySongNote != null)
+                displaySongNote = settings.displaySongNote;
 
-            if (settings.DISPLAY_JUDGE != null)
-                this.displayJudge = settings.DISPLAY_JUDGE;
+            if (settings.displayJudge != null)
+                displayJudge = settings.displayJudge;
 
-            if (settings.DISPLAY_JUDGE_ANIMATIONS != null)
-                this.displayJudgeAnimations = settings.DISPLAY_JUDGE_ANIMATIONS;
+            if (settings.displayJudgeAnimations != null)
+                displayJudgeAnimations = settings.displayJudgeAnimations;
 
-            if (settings.DISPLAY_RECEPTOR_ANIMATIONS != null)
-                this.displayReceptorAnimations = settings.DISPLAY_RECEPTOR_ANIMATIONS;
+            if (settings.displayReceptorAnimations != null)
+                displayReceptorAnimations = settings.displayReceptorAnimations;
 
-            if (settings.DISPLAY_HEALTH != null)
-                this.displayHealth = settings.DISPLAY_HEALTH;
+            if (settings.displayHealth != null)
+                displayHealth = settings.displayHealth;
 
-            if (settings.DISPLAY_GAME_TOP_BAR != null)
-                this.displayGameTopBar = settings.DISPLAY_GAME_TOP_BAR;
+            if (settings.displayGameTopBar != null)
+                displayGameTopBar = settings.displayGameTopBar;
 
-            if (settings.DISPLAY_GAME_BOTTOM_BAR != null)
-                this.displayGameBottomBar = settings.DISPLAY_GAME_BOTTOM_BAR;
+            if (settings.displayGameBottomBar != null)
+                displayGameBottomBar = settings.displayGameBottomBar;
 
-            if (settings.DISPLAY_SCORE != null)
-                this.displayScore = settings.DISPLAY_SCORE;
+            if (settings.displayScore != null)
+                displayScore = settings.displayScore;
 
-            if (settings.DISPLAY_COMBO != null)
-                this.displayCombo = settings.DISPLAY_COMBO;
+            if (settings.displayCombo != null)
+                displayCombo = settings.displayCombo;
 
-            if (settings.DISPLAY_PACOUNT != null)
-                this.displayPACount = settings.DISPLAY_PACOUNT;
+            if (settings.displayPACount != null)
+                displayPACount = settings.displayPACount;
 
-            if (settings.DISPLAY_ACCURACY_BAR != null)
-                this.displayAccuracyBar = settings.DISPLAY_ACCURACY_BAR;
+            if (settings.displayAccuracyBar != null)
+                displayAccuracyBar = settings.displayAccuracyBar;
 
-            if (settings.DISPLAY_AMAZING != null)
-                this.displayAmazing = settings.DISPLAY_AMAZING;
+            if (settings.displayAmazing != null)
+                displayAmazing = settings.displayAmazing;
 
-            if (settings.DISPLAY_PERFECT != null)
-                this.displayPerfect = settings.DISPLAY_PERFECT;
+            if (settings.displayPerfect != null)
+                displayPerfect = settings.displayPerfect;
 
-            if (settings.DISPLAY_TOTAL != null)
-                this.displayTotal = settings.DISPLAY_TOTAL;
+            if (settings.displayTotal != null)
+                displayTotal = settings.displayTotal;
 
-            if (settings.DISPLAY_SCREENCUT != null)
-                this.displayScreencut = settings.DISPLAY_SCREENCUT;
+            if (settings.displayScreencut != null)
+                displayScreencut = settings.displayScreencut;
 
-            if (settings.DISPLAY_SONGPROGRESS != null)
-                this.displaySongProgress = settings.DISPLAY_SONGPROGRESS;
+            if (settings.displaySongProgress != null)
+                displaySongProgress = settings.displaySongProgress;
 
-            if (settings.DISPLAY_SONGPROGRESS_TEXT != null)
-                this.displaySongProgressText = settings.DISPLAY_SONGPROGRESS_TEXT;
+            if (settings.displaySongProgressText != null)
+                displaySongProgressText = settings.displaySongProgressText;
 
-            if (settings.DISPLAY_MP_UI != null)
-                this.displayMPUI = settings.DISPLAY_MP_UI;
+            if (settings.displayMPUI != null)
+                displayMPUI = settings.displayMPUI;
 
-            if (settings.DISPLAY_MP_PA != null)
-                this.displayMPPA = settings.DISPLAY_MP_PA;
+            if (settings.displayMPPA != null)
+                displayMPPA = settings.displayMPPA;
 
-            if (settings.DISPLAY_MP_COMBO != null)
-                this.displayMPCombo = settings.DISPLAY_MP_COMBO;
+            if (settings.displayMPCombo != null)
+                displayMPCombo = settings.displayMPCombo;
 
-            if (settings.DISPLAY_MP_JUDGE != null)
-                this.displayMPJudge = settings.DISPLAY_MP_JUDGE;
+            if (settings.displayMPJudge != null)
+                displayMPJudge = settings.displayMPJudge;
 
-            if (settings.DISPLAY_MP_TIMESTAMP != null)
-                this.DISPLAY_MP_TIMESTAMP = settings.DISPLAY_MP_TIMESTAMP;
+            if (settings.displayMPTimestamp != null)
+                displayMPTimestamp = settings.displayMPTimestamp;
 
-            if (settings.DISPLAY_LEGACY_SONGS != null)
-                this.DISPLAY_LEGACY_SONGS = settings.DISPLAY_LEGACY_SONGS;
+            if (settings.displayLegacySongs != null)
+                displayLegacySongs = settings.displayLegacySongs;
 
             if (settings.keyLeft != null)
-                this.keyLeft = settings.keyLeft;
+                keyLeft = settings.keyLeft;
 
             if (settings.keyDown != null)
-                this.keyDown = settings.keyDown;
+                keyDown = settings.keyDown;
 
             if (settings.keyUp != null)
-                this.keyUp = settings.keyUp;
+                keyUp = settings.keyUp;
 
             if (settings.keyRight != null)
-                this.keyRight = settings.keyRight;
+                keyRight = settings.keyRight;
 
             if (settings.keyRestart != null)
-                this.keyRestart = settings.keyRestart;
+                keyRestart = settings.keyRestart;
 
             if (settings.keyQuit != null)
-                this.keyQuit = settings.keyQuit;
+                keyQuit = settings.keyQuit;
 
             if (settings.keyOptions != null)
-                this.keyOptions = settings.keyOptions;
+                keyOptions = settings.keyOptions;
 
-            if (settings.activeNoteskin != null)
-                this.noteskinId = settings.activeNoteskin;
+            if (settings.noteskinId != null)
+                noteskinId = settings.noteskinId;
 
             if (settings.scrollDirection != null)
-                this.scrollDirection = settings.scrollDirection;
+                scrollDirection = settings.scrollDirection;
 
             if (settings.scrollSpeed != null)
-                this.scrollSpeed = settings.scrollSpeed;
+                scrollSpeed = settings.scrollSpeed;
 
             if (settings.judgeSpeed != null)
-                this.judgeSpeed = settings.judgeSpeed;
+                judgeSpeed = settings.judgeSpeed;
 
             if (settings.receptorGap != null)
-                this.receptorGap = settings.receptorGap;
+                receptorGap = settings.receptorGap;
 
             if (settings.noteScale != null)
-                this.noteScale = settings.noteScale;
+                noteScale = settings.noteScale;
 
             if (settings.screencutPosition != null)
-                this.screencutPosition = settings.screencutPosition;
+                screencutPosition = settings.screencutPosition;
 
             if (settings.frameRate != null)
-                this.frameRate = settings.frameRate;
+                frameRate = settings.frameRate;
 
             if (settings.songRate != null)
-                this.songRate = settings.songRate;
+                songRate = settings.songRate;
 
             if (settings.forceNewJudge != null)
-                this.forceNewJudge = settings.forceNewJudge;
+                forceNewJudge = settings.forceNewJudge;
 
             if (settings.activeVisualMods != null)
-                this.activeVisualMods = settings.activeVisualMods;
+                activeVisualMods = settings.activeVisualMods;
 
             if (settings.judgeColors != null)
-                mergeIntoArray(this.judgeColors, settings.judgeColors);
+                mergeIntoArray(judgeColors, settings.judgeColors);
 
             if (settings.comboColors != null)
-                mergeIntoArray(this.comboColors, settings.comboColors);
+                mergeIntoArray(comboColors, settings.comboColors);
 
             if (settings.enableComboColors != null)
-                mergeIntoArray(this.enableComboColors, settings.enableComboColors);
+                mergeIntoArray(enableComboColors, settings.enableComboColors);
 
             if (settings.gameColors != null)
-                mergeIntoArray(this.gameColors, settings.gameColors);
+                mergeIntoArray(gameColors, settings.gameColors);
 
             if (settings.noteColors != null)
-                mergeIntoArray(this.noteColors, settings.noteColors);
+                mergeIntoArray(noteColors, settings.noteColors);
 
             if (settings.rawGoodTracker != null)
-                this.rawGoodTracker = settings.rawGoodTracker;
+                rawGoodTracker = settings.rawGoodTracker;
 
             if (settings.gameVolume != null)
-                this.gameVolume = settings.gameVolume;
+                gameVolume = settings.gameVolume;
 
             if (settings.isolationOffset != null)
                 settings.isolationOffset = settings.isolationOffset;
@@ -341,26 +343,26 @@ package classes
                 settings.isolationLength = settings.isolationLength;
 
             if (settings.startUpScreen != null)
-                this.startUpScreen = Math.max(0, Math.min(2, settings.startUpScreen));
+                startUpScreen = Math.max(0, Math.min(2, settings.startUpScreen));
 
             if (settings.filters != null)
                 if (settings.filters is Vector.<*>)
-                    this.filters = importFilters(settings.filters);
+                    filters = importFilters(settings.filters);
                 else
-                    this.filters = importFilters(VectorUtil.fromArray(settings.filters));
+                    filters = importFilters(VectorUtil.fromArray(settings.filters));
 
             if (settings.songQueues != null)
             {
-                this.songQueues = new <Object>[];
+                songQueues = new <Object>[];
                 for each (var queueItem:Object in settings.songQueues)
                 {
-                    this.songQueues.push(new SongQueueItem(queueItem.name, queueItem.items));
+                    songQueues.push(new SongQueueItem(queueItem.name, queueItem.items));
                 }
             }
 
             if (!_isLiteUser)
             {
-                SoundMixer.soundTransform = new SoundTransform(this.gameVolume);
+                SoundMixer.soundTransform = new SoundTransform(gameVolume);
 
                 // Setup Background Colors
                 GameBackgroundColor.BG_LIGHT = gameColors[0];

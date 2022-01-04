@@ -466,7 +466,7 @@ package menu
                 // If displaying genres, and Legacy Genre isn't displayed, skip it.
                 if (GENRE_MODE == GENRE_GENRES)
                 {
-                    if (!_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS && !_playlist.engine && genre_index == (Constant.LEGACY_GENRE - 1))
+                    if (!_gvars.activeUser.settings.displayLegacySongs && !_playlist.engine && genre_index == (Constant.LEGACY_GENRE - 1))
                     {
                         continue;
                     }
@@ -558,7 +558,7 @@ package menu
                 case GENRE_SONGFLAGS:
                     return GlobalVariables.SONG_ICON_TEXT.length;
                 default:
-                    return (!_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS && !_playlist.engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
+                    return (!_gvars.activeUser.settings.displayLegacySongs && !_playlist.engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
             }
         }
 
@@ -844,7 +844,7 @@ package menu
          */
         private function filterSongListLegacy(songList:Array):Array
         {
-            if (!_playlist.engine && !_gvars.activeUser.settings.DISPLAY_LEGACY_SONGS)
+            if (!_playlist.engine && !_gvars.activeUser.settings.displayLegacySongs)
                 songList = songList.filter(filterSongListLegacyFilter);
 
             return songList;

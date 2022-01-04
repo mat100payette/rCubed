@@ -1,5 +1,8 @@
 package arc.mp
 {
+    import classes.Room;
+    import classes.User;
+    import classes.Gameplay;
     import com.bit101.components.Component;
     import com.bit101.components.InputText;
     import com.bit101.components.Style;
@@ -13,7 +16,7 @@ package arc.mp
     import com.flashfla.net.events.LoginEvent;
     import com.flashfla.net.events.RoomJoinedEvent;
     import com.flashfla.net.events.GameResultsEvent;
-    import com.flashfla.utils.StringUtil;
+    import com.flashfla.utils.HtmlUtil;
     import flash.display.DisplayObjectContainer;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
@@ -21,10 +24,6 @@ package arc.mp
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
-    import classes.Room;
-    import classes.User;
-    import classes.Gameplay;
-    import com.flashfla.utils.HtmlUtil;
 
     public class MultiplayerChat extends Component
     {
@@ -228,7 +227,7 @@ package arc.mp
             chatFrameDelay = 0;
 
             chatText += (chatText.length == 0 ? "" : "\n");
-            if (GlobalVariables.instance.activeUser.settings.DISPLAY_MP_TIMESTAMP)
+            if (GlobalVariables.instance.activeUser.settings.displayMPTimestamp)
             {
                 var date:Date = new Date();
                 var hoursStr:String = (date.hours == 0 ? 12 : (date.hours > 12 ? date.hours - 12 : date.hours)).toString();
