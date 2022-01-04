@@ -274,7 +274,6 @@ package popups.settings
                 return;
 
             _fakePlayer1 = new User();
-            _fakePlayer1.settings.update(_user.settings);
             _fakePlayer1.id = 1;
             _fakePlayer1.playerIdx = 1;
             _fakePlayer1.isPlayer = true;
@@ -282,7 +281,6 @@ package popups.settings
             _fakePlayer1.siteId = 1830376;
 
             _fakePlayer2 = new User();
-            _fakePlayer2.settings.update(_user.settings);
             _fakePlayer2.id = 2
             _fakePlayer2.playerIdx = 2;
             _fakePlayer2.isPlayer = true;
@@ -290,7 +288,6 @@ package popups.settings
             _fakePlayer2.siteId = 249481;
 
             _fakeSpectator = new User();
-            _fakeSpectator.settings.update(_user.settings);
             _fakeSpectator.id = 3;
             _fakeSpectator.playerIdx = 3;
             _fakeSpectator.isPlayer = false;
@@ -323,24 +320,25 @@ package popups.settings
 
         private function onSoloEditorTabClicked(e:Event):void
         {
+            createEditorFakeData();
             openEditor(null);
         }
 
         private function onMPEditorTabClicked(e:Event):void
         {
+            createEditorFakeData();
             openEditor(_fakeMPRoom1);
         }
 
         private function onMPSpectatorEditorTabClicked(e:Event):void
         {
+            createEditorFakeData();
             openEditor(_fakeMPRoom2);
         }
 
         private function openEditor(fakeMPRoom:Room):void
         {
-            createEditorFakeData();
-
-            _gvars.options = new GameOptions(_user);
+            _gvars.options = new GameOptions(null);
             _gvars.options.isEditor = true;
             _gvars.options.mpRoom = fakeMPRoom;
 
