@@ -125,13 +125,13 @@ package classes
          */
         public function stringify():String
         {
-            const preStringified:String = JSON.stringify(this, replacer(this));
-            const json:Object = JSON.parse(preStringified);
+            var preStringified:String = JSON.stringify(this, replacer(this));
+            var json:Object = JSON.parse(preStringified);
 
-            for (var key:String in json._compatSettings)
-                json[key] = json._compatSettings[key];
+            for (var key:String in _compatSettings)
+                json[key] = _compatSettings[key];
 
-            const stringified:String = JSON.stringify(json);
+            var stringified:String = JSON.stringify(json);
 
             return stringified;
         }

@@ -238,6 +238,7 @@ package classes.replay
             this.maxcombo = data.judgements["maxcombo"];
             this.score = (perfect * 50) + (good * 25) + (average * 5) - (miss * 10) - (boo * 5);
 
+            this.arc_engine = data.settings["arc_engine"];
             this.user.settings.update(data.settings);
 
             //- Replay

@@ -370,7 +370,7 @@ package classes.replay
                 settings.update({"arc_engine": ArcGlobals.instance.legacyEncode(options.song.songInfo)});
 
             var timestamp:Number = Math.floor(new Date().getTime() / 1000);
-            var settingsEncode:String = JSON.stringify(settings);
+            var settingsEncode:String = settings.stringify();
             var binReplay:ByteArray = new ByteArray();
             binReplay.writeUTFBytes(MAGIC);
             binReplay.writeByte(MAJOR_VER); // Major Version
