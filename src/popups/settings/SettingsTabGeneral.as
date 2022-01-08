@@ -274,7 +274,7 @@ package popups.settings
 
         private function onReceptorGapChanged(e:Event):void
         {
-            _settings.scrollSpeed = _optionReceptorSpacing.validate(80);
+            _settings.receptorGap = _optionReceptorSpacing.validate(80);
         }
 
         private function onNoteScaleChanged(e:Event):void
