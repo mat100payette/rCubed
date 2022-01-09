@@ -140,17 +140,17 @@ package popups.settings
             // ui
             buildTabs();
 
-            _txtSettings = new Text(_box, 15, 5, _lang.string("settings_title"), 32);
+            _txtSettings = new Text(_box, 15, 5, Lang.SETTINGS_TITLE, 32);
 
-            _txtModWarning = new Text(_box, 215, 18, _lang.string("options_warning_save"), 14, "#f06868");
+            _txtModWarning = new Text(_box, 215, 18, _lang.string(Lang.OPTIONS_WARNING_SAVE), 14, "#f06868");
             _txtModWarning.setAreaParams(265, 24, TextFormatAlign.RIGHT);
 
-            _btnReset = new BoxButton(_box, 495, 15, 80, 29, _lang.string("menu_reset"), 12, onResetSettingsClicked);
+            _btnReset = new BoxButton(_box, 495, 15, 80, 29, _lang.string(Lang.MENU_RESET), 12, onResetSettingsClicked);
             _btnReset.color = 0xff0000;
 
-            _btnManage = new BoxButton(_box, 590, 15, 80, 29, _lang.string("menu_manage"), 12, onManageSettingsClicked);
+            _btnManage = new BoxButton(_box, 590, 15, 80, 29, _lang.string(Lang.MENU_MANAGE), 12, onManageSettingsClicked);
 
-            _btnClose = new BoxButton(_box, 685, 15, 80, 29, _lang.string("menu_close"), 12, onCloseClicked);
+            _btnClose = new BoxButton(_box, 685, 15, 80, 29, _lang.string(Lang.MENU_CLOSE), 12, onCloseClicked);
 
             changeTab(_lastIndex);
         }
@@ -170,7 +170,7 @@ package popups.settings
             {
                 _tabs[idx].container = pane.content;
 
-                tabBox = new TabButton(_box, -1, 60 + 33 * idx, idx, _lang.string("settings_tab_" + _tabs[idx].name));
+                tabBox = new TabButton(_box, -1, 60 + 33 * idx, idx, _lang.string(Lang.SETTINGS_TAB_PREFIX + _tabs[idx].name));
                 tabBox.tabIndex = idx;
                 tabBox.addEventListener(MouseEvent.CLICK, onTabClicked);
 
@@ -178,11 +178,11 @@ package popups.settings
             }
 
             // editor buttons
-            _btnEditorGameplay = new TabButton(_box, -1, 364, -1, _lang.string("settings_tab_editor_gameplay"), true);
+            _btnEditorGameplay = new TabButton(_box, -1, 364, -1, _lang.string(Lang.SETTINGS_TAB_EDITOR_GAMEPLAY), true);
             _btnEditorGameplay.addEventListener(MouseEvent.CLICK, onSoloEditorTabClicked);
-            _btnEditorMultiplayer = new TabButton(_box, -1, 397, -1, _lang.string("settings_tab_editor_multiplayer"));
+            _btnEditorMultiplayer = new TabButton(_box, -1, 397, -1, _lang.string(Lang.SETTINGS_TAB_EDITOR_MULTIPLAYER));
             _btnEditorMultiplayer.addEventListener(MouseEvent.CLICK, onMPEditorTabClicked);
-            _btnEditorSpectator = new TabButton(_box, -1, 430, -1, _lang.string("settings_tab_editor_spectator"));
+            _btnEditorSpectator = new TabButton(_box, -1, 430, -1, _lang.string(Lang.SETTINGS_TAB_EDITOR_SPECTATOR));
             _btnEditorSpectator.addEventListener(MouseEvent.CLICK, onMPSpectatorEditorTabClicked);
         }
 
@@ -259,21 +259,19 @@ package popups.settings
                 confirmWindow.parent.removeChild(confirmWindow);
             }
 
-            const confirmBtn:BoxButton = new BoxButton(confirmWindow, 5, 5, 100, 35, _lang.string("menu_reset"), 12, onConfirmResetClicked);
+            const confirmBtn:BoxButton = new BoxButton(confirmWindow, 5, 5, 100, 35, _lang.string(Lang.MENU_RESET), 12, onConfirmResetClicked);
             confirmBtn.color = 0x330000;
             confirmBtn.textColor = "#990000";
 
-            const cancelBtn:BoxButton = new BoxButton(confirmWindow, 5, 45, 100, 35, _lang.string("menu_close"), 12, onCancelResetClicked);
+            const cancelBtn:BoxButton = new BoxButton(confirmWindow, 5, 45, 100, 35, _lang.string(Lang.MENU_CLOSE), 12, onCancelResetClicked);
             cancelBtn.color = 0;
             cancelBtn.textColor = "#000000";
         }
 
         private function createEditorFakeData():void
         {
-            if (_editorFakeDataCreated)
-                return;
-
             _fakePlayer1 = new User();
+            _fakePlayer1.settings.update(_user.settings);
             _fakePlayer1.id = 1;
             _fakePlayer1.playerIdx = 1;
             _fakePlayer1.isPlayer = true;
@@ -288,6 +286,7 @@ package popups.settings
             _fakePlayer2.siteId = 249481;
 
             _fakeSpectator = new User();
+            _fakeSpectator.settings.update(_user.settings);
             _fakeSpectator.id = 3;
             _fakeSpectator.playerIdx = 3;
             _fakeSpectator.isPlayer = false;
@@ -321,24 +320,24 @@ package popups.settings
         private function onSoloEditorTabClicked(e:Event):void
         {
             createEditorFakeData();
-            openEditor(null);
+            openEditor(_fakePlayer1, null);
         }
 
         private function onMPEditorTabClicked(e:Event):void
         {
             createEditorFakeData();
-            openEditor(_fakeMPRoom1);
+            openEditor(_fakePlayer1, _fakeMPRoom1);
         }
 
         private function onMPSpectatorEditorTabClicked(e:Event):void
         {
             createEditorFakeData();
-            openEditor(_fakeMPRoom2);
+            openEditor(_fakeSpectator, _fakeMPRoom2);
         }
 
-        private function openEditor(fakeMPRoom:Room):void
+        private function openEditor(user:User, fakeMPRoom:Room):void
         {
-            _gvars.options = new GameOptions(null);
+            _gvars.options = new GameOptions(user);
             _gvars.options.isEditor = true;
             _gvars.options.mpRoom = fakeMPRoom;
 

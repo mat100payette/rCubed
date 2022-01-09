@@ -15,6 +15,17 @@ package
         public static const GAME_MISS:String = "game_miss";
         public static const GAME_BOO:String = "game_boo";
 
+        // SETTINGS WINDOW
+        public static const SETTINGS_TITLE:String = "settings_title";
+        public static const OPTIONS_WARNING_SAVE:String = "options_warning_save";
+        public static const MENU_RESET:String = "menu_reset";
+        public static const MENU_MANAGE:String = "menu_manage";
+        public static const MENU_CLOSE:String = "menu_close";
+        public static const SETTINGS_TAB_PREFIX:String = "settings_tab_";
+        public static const SETTINGS_TAB_EDITOR_GAMEPLAY:String = "settings_tab_editor_gameplay";
+        public static const SETTINGS_TAB_EDITOR_MULTIPLAYER:String = "settings_tab_editor_multiplayer";
+        public static const SETTINGS_TAB_EDITOR_SPECTATOR:String = "settings_tab_editor_spectator";
+
         // GENERAL SETTINGS TAB
         public static const OPTIONS_SCROLL_SPEED:String = "options_speed";
         public static const OPTIONS_RECEPTOR_SPACING:String = "options_receptor_spacing";
