@@ -30,8 +30,7 @@ package classes
         public static const VETERAN_ID:int = 49;
 
         ///- Private Locals
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-        private var _avars:ArcGlobals = ArcGlobals.instance;
+        private var _loadFullListener:Function;
         private var _loader:URLLoader;
         private var _isLoaded:Boolean = false;
         private var _isLoading:Boolean = false;
@@ -111,30 +110,8 @@ package classes
             this.settings = new UserSettings(!isActiveUser);
         }
 
-        /**
-         * Initiates fetching the user's data from the database, including only the necessary data.
-         * @param includeProfile
-         * @param includeSettings
-         */
-        public function loadData(includeProfile:Boolean = true, includeSettings:Boolean = true):void
-        {
-            if (includeProfile)
-                if (includeSettings)
-                    _loadFullUser();
-                else
-                    _loadUserNoSettings();
-        }
-
-        public function refreshUser():void
-        {
-            _gvars.userSession = "0";
-            _gvars.playerUser = new User(true);
-            _gvars.playerUser.loadData(true, true);
-            _gvars.activeUser = _gvars.playerUser;
-        }
-
         ///- Public
-        public function calculateAverageRank():void
+        public function updateAverageRank(totalPublicSongs:uint):void
         {
             var rankTotal:int = 0;
             for each (var levelRank:Object in this.levelRanks)
@@ -145,7 +122,7 @@ package classes
                     rankTotal += levelRank.rank;
                 }
             }
-            this.averageRank = (rankTotal / _gvars.TOTAL_PUBLIC_SONGS);
+            averageRank = (rankTotal / totalPublicSongs);
         }
 
         ///- Profile Loading
@@ -159,7 +136,7 @@ package classes
             return _loadError;
         }
 
-        private function _loadFullUser():void
+        public function loadFull(userSession:String):void
         {
             // Kill old Loading Stream
             if (_loader && _isLoading)
@@ -172,21 +149,27 @@ package classes
             Logger.info(this, "User Load Requested");
             _isLoaded = false;
             _loadError = false;
+            _isLoading = true;
+
             _loader = new URLLoader();
-            _loader.addEventListener(Event.COMPLETE, _onFullUserDataLoaded);
+            _loadFullListener = function(e:Event):void
+            {
+                _onFullUserDataLoaded(e, userSession);
+            };
+            _loader.addEventListener(Event.COMPLETE, _loadFullListener);
             _addCommonLoaderListeners();
 
             var req:URLRequest = new URLRequest(Constant.USER_INFO_URL + "?d=" + new Date().getTime());
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = _gvars.userSession;
+            requestVars.session = userSession;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
-            _isLoading = true;
+
         }
 
-        private function _loadUserNoSettings():void
+        public function loadWithoutSettings():void
         {
             Logger.info(this, "User No Settings Load Requested");
             _isLoaded = false;
@@ -204,21 +187,21 @@ package classes
             _isLoading = true;
         }
 
-        private function _onFullUserDataLoaded(e:Event):void
+        private function _onFullUserDataLoaded(e:Event, userSession:String):void
         {
             Logger.info(this, "Full User Load Success");
-            _loader.removeEventListener(Event.COMPLETE, _onFullUserDataLoaded);
-            _onUserLoaded(e, true, true);
+            _loader.removeEventListener(Event.COMPLETE, _loadFullListener);
+            _onUserLoaded(e, true, userSession);
         }
 
         private function _onUserDataNoSettingsLoaded(e:Event):void
         {
             Logger.info(this, "User No Settings Load Success");
             _loader.removeEventListener(Event.COMPLETE, _onUserDataNoSettingsLoaded);
-            _onUserLoaded(e, true, false);
+            _onUserLoaded(e, false, null);
         }
 
-        private function _onUserLoaded(e:Event, includeProfile:Boolean, includeSettings:Boolean):void
+        private function _onUserLoaded(e:Event, includeSettings:Boolean, userSession:String):void
         {
             _removeCommonLoaderListeners();
 
@@ -246,7 +229,7 @@ package classes
 
             if (!_isLiteUser)
             {
-                loadLevelRanks();
+                loadLevelRanks(userSession);
             }
             else
             {
@@ -370,7 +353,7 @@ package classes
         }
 
         ///- Level Ranks
-        public function loadLevelRanks():void
+        public function loadLevelRanks(userSession:String):void
         {
             _loader = new URLLoader();
             addLoaderRanksListeners();
@@ -378,7 +361,7 @@ package classes
             var req:URLRequest = new URLRequest(Constant.USER_RANKS_URL);
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = _gvars.userSession;
+            requestVars.session = userSession;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
@@ -446,7 +429,7 @@ package classes
             _loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, ranksLoadError);
         }
 
-        public function saveSettingsOnline():void
+        public function saveSettingsOnline(userSession:String):void
         {
             if (isGuest)
                 return;
@@ -458,7 +441,7 @@ package classes
             var req:URLRequest = new URLRequest(Constant.USER_SAVE_SETTINGS_URL);
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = _gvars.userSession;
+            requestVars.session = userSession;
 
             requestVars.settings = settings.stringify();
             requestVars.action = "save";

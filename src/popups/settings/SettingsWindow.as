@@ -363,7 +363,7 @@ package popups.settings
             if (_user == _gvars.playerUser)
             {
                 _user.saveSettingsLocally();
-                _user.saveSettingsOnline();
+                _user.saveSettingsOnline(_gvars.userSession);
 
                 // Setup Background Colors
                 GameBackgroundColor.BG_LIGHT = _user.settings.gameColors[0];

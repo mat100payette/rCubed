@@ -38,7 +38,6 @@ package arc.mp
     import menu.MainMenu;
     import menu.MenuPanel;
     import menu.MenuSongSelection;
-    import arc.ArcGlobals;
 
     public class MultiplayerState extends Object
     {
@@ -68,6 +67,14 @@ package arc.mp
             return instance;
         }
 
+        public function setUserCredentials(username:String, password:String):void
+        {
+            this.username = username;
+            _gvars.activeUser.name;
+            this.password = password;
+            _gvars.activeUser.hash;
+        }
+
         public static function destroyInstance():void
         {
             if (instance && instance.connection && instance.connection.connected)
@@ -88,9 +95,6 @@ package arc.mp
         public function MultiplayerState()
         {
             var self:MultiplayerState = this;
-
-            username = _gvars.activeUser.name;
-            password = _gvars.activeUser.hash;
 
             connection = new Multiplayer();
 

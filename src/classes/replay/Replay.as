@@ -113,7 +113,7 @@ package classes.replay
             this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
 
             if (loadUser)
-                this.user.loadData(true, true);
+                this.user.loadFull(_gvars.userSession);
             else
                 this.user.siteId = data.userid;
 
@@ -223,7 +223,7 @@ package classes.replay
             //- Level Details
             this.user = new User(false);
             if (loadUser)
-                this.user.loadData(true, false);
+                this.user.loadWithoutSettings();
             this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
             this.user.siteId = data.user_id;
             this.level = data.song_id;

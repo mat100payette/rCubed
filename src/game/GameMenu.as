@@ -84,7 +84,7 @@ package game
                 case GAME_PLAY:
                     _gvars.gameMain.bg.updateDisplay(true);
                     _gvars.gameMain.ver.visible = false;
-                    panel = new GameplayDisplay(this);
+                    panel = new GameplayDisplay(this, _gvars.options);
                     isFound = true;
                     break;
 

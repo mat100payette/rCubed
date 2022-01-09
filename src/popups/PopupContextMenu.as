@@ -13,6 +13,7 @@ package popups
     import flash.profiler.showRedrawRegions;
     import game.GameMenu;
     import menu.MenuPanel;
+    import classes.User;
 
     public class PopupContextMenu extends MenuPanel
     {
@@ -146,7 +147,10 @@ package popups
                 {
                     MultiplayerState.destroyInstance();
                     Flags.VALUES = {};
-                    _gvars.playerUser.refreshUser();
+                    _gvars.userSession = "0";
+                    _gvars.playerUser = new User(true);
+                    _gvars.playerUser.loadFull(_gvars.userSession);
+                    _gvars.activeUser = _gvars.playerUser;
                     _gvars.gameMain.switchTo(Main.GAME_LOGIN_PANEL);
                 }
             }

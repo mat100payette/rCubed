@@ -282,7 +282,7 @@ package popups
             if (_gvars.activeUser == _gvars.playerUser)
             {
                 _gvars.activeUser.saveSettingsLocally();
-                _gvars.activeUser.saveSettingsOnline();
+                _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
             }
 
             if (_gvars.gameMain.activePanel != null && _gvars.gameMain.activePanel is MainMenu)

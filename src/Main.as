@@ -319,7 +319,7 @@ package
             loadTotal = (!isLoginLoad) ? 5 : 3;
 
             _gvars.playerUser = new User(true);
-            _gvars.playerUser.loadData(true, true);
+            _gvars.playerUser.loadFull(_gvars.userSession);
             _gvars.activeUser = _gvars.playerUser;
             _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
             _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
@@ -473,7 +473,7 @@ package
             {
                 _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
                 _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _gvars.activeUser.loadData(true, true);
+                _gvars.activeUser.loadFull(_gvars.userSession);
             }
             /*
                if (!_friends.isLoaded()) {

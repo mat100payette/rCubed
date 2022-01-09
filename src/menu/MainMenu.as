@@ -211,7 +211,7 @@ package menu
             }
 
             //- User Info Display
-            _gvars.activeUser.calculateAverageRank();
+            _gvars.activeUser.updateAverageRank(_gvars.TOTAL_PUBLIC_SONGS);
             user_text = new Text(this, 153, 452, sprintf(_lang.string("main_menu_userbar"), {"player_name": _gvars.activeUser.name,
                     "games_played": NumberUtil.numberFormat(_gvars.activeUser.gamesPlayed),
                     "grand_total": NumberUtil.numberFormat(_gvars.activeUser.grandTotal),

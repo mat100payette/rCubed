@@ -197,21 +197,21 @@ package game
         private var GPU_PIXEL_BMD:BitmapData;
         private var GPU_PIXEL_BITMAP:Bitmap;
 
-        public function GameplayDisplay(myParent:MenuPanel)
+        public function GameplayDisplay(myParent:MenuPanel, gameOptions:GameOptions)
         {
             super(myParent);
+            options = gameOptions;
         }
 
         override public function init():Boolean
         {
-            options = _gvars.options;
             song = options.song;
             if (!options.isEditor && song.chart.Notes.length == 0)
             {
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
-                var screen:int = _gvars.activeUser.settings.startUpScreen;
-                if (!_gvars.activeUser.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
+                var screen:int = options.settings.startUpScreen;
+                if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
                 {
                     MultiplayerState.getInstance().connection.connect();
                 }
@@ -270,14 +270,14 @@ package game
             // Prebuild Websocket Message, this is updated instead of creating a new object every message.
             SOCKET_SONG_MESSAGE = {"player": {
                         "settings": options.settings.stringify(),
-                        "name": _gvars.activeUser.name,
-                        "userid": _gvars.activeUser.siteId,
-                        "avatar": Constant.USER_AVATAR_URL + "?uid=" + _gvars.activeUser.siteId,
-                        "skill_rating": _gvars.activeUser.skillRating,
-                        "skill_level": _gvars.activeUser.skillLevel,
-                        "game_rank": _gvars.activeUser.gameRank,
-                        "game_played": _gvars.activeUser.gamesPlayed,
-                        "game_grand_total": _gvars.activeUser.grandTotal
+                        "name": options.user.name,
+                        "userid": options.user.siteId,
+                        "avatar": Constant.USER_AVATAR_URL + "?uid=" + options.user.siteId,
+                        "skill_rating": options.user.skillRating,
+                        "skill_level": options.user.skillLevel,
+                        "game_rank": options.user.gameRank,
+                        "game_played": options.user.gamesPlayed,
+                        "game_grand_total": options.user.grandTotal
                     },
                     "engine": (song.songInfo.engine == null ? null : {"id": song.songInfo.engine.id,
                             "name": song.songInfo.engine.name,
@@ -305,7 +305,7 @@ package game
                         "note_count": song.totalNotes,
                         "nps_avg": (song.totalNotes / song.chartTime)
                     },
-                    "best_score": _gvars.activeUser.getLevelRank(song.songInfo)};
+                    "best_score": options.user.getLevelRank(song.songInfo)};
 
             SOCKET_SCORE_MESSAGE = {"amazing": 0,
                     "perfect": 0,
@@ -389,7 +389,7 @@ package game
             stage.frameRate = 60;
             if (options.isEditor)
             {
-                _gvars.activeUser.settings.screencutPosition = options.settings.screencutPosition;
+                options.settings.screencutPosition = options.settings.screencutPosition;
                 stage.removeEventListener(Event.ENTER_FRAME, editorOnEnterFrame);
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown);
             }
@@ -482,7 +482,7 @@ package game
                togglePause();
                var aa:Alert;
                for each(var rec:MovieClip in noteBox.receptorArray) {
-               aa = new Alert(StringUtil.keyCodeChar(_gvars.activeUser.settings["key" + rec.KEY]));
+               aa = new Alert(StringUtil.keyCodeChar(options.settings["key" + rec.KEY]));
                if(rec.VERTEX == "y") {
                aa.x = rec.x - (aa.width / 2);
                aa.y = rec.y - ((rec.height / 2) * rec.DIRECTION) - (10 * rec.DIRECTION);
@@ -589,8 +589,8 @@ package game
                     GAME_STATE = GAME_END;
                     if (!options.replay)
                     {
-                        _gvars.activeUser.saveSettingsLocally();
-                        _gvars.activeUser.saveSettingsOnline();
+                        options.user.saveSettingsLocally();
+                        options.user.saveSettingsOnline(_gvars.userSession);
                     }
                 }
 
@@ -644,7 +644,7 @@ package game
         private function initVars(postStart:Boolean = true):void
         {
             // Post Start Time
-            if (postStart && !_gvars.activeUser.isGuest && !options.replay && !options.isEditor && song.songInfo.engine == null && !mpSpectate)
+            if (postStart && !options.user.isGuest && !options.replay && !options.isEditor && song.songInfo.engine == null && !mpSpectate)
             {
                 Logger.debug(this, "Posting Start of level " + song.id);
                 _loader = new URLLoader();
@@ -1119,22 +1119,22 @@ package game
                     var dir:String = null;
                     switch (keyCode)
                     {
-                        case _gvars.activeUser.settings.keyLeft:
+                        case options.settings.keyLeft:
                             //case Keyboard.NUMPAD_4:
                             dir = "L";
                             break;
 
-                        case _gvars.activeUser.settings.keyRight:
+                        case options.settings.keyRight:
                             //case Keyboard.NUMPAD_6:
                             dir = "R";
                             break;
 
-                        case _gvars.activeUser.settings.keyUp:
+                        case options.settings.keyUp:
                             //case Keyboard.NUMPAD_8:
                             dir = "U";
                             break;
 
-                        case _gvars.activeUser.settings.keyDown:
+                        case options.settings.keyDown:
                             //case Keyboard.NUMPAD_2:
                             dir = "D";
                             break;
@@ -1364,7 +1364,7 @@ package game
                 newGameResults.replay_hit = gameReplayHit.concat();
                 newGameResults.replay_bin_notes = binReplayNotes;
                 newGameResults.replay_bin_boos = binReplayBoos;
-                newGameResults.user = options.replay ? options.replay.user : _gvars.activeUser;
+                newGameResults.user = options.replay ? options.replay.user : options.user;
                 newGameResults.restarts = options.replay ? 0 : _gvars.songRestarts;
                 newGameResults.start_time = _gvars.songStartTime;
                 newGameResults.start_hash = _gvars.songStartHash;
@@ -1499,8 +1499,8 @@ package game
 
             GAME_STATE = GAME_DISPOSE;
 
-            var screen:int = _gvars.activeUser.settings.startUpScreen;
-            if (!_gvars.activeUser.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
+            var screen:int = options.settings.startUpScreen;
+            if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
             {
                 MultiplayerState.getInstance().connection.connect();
             }

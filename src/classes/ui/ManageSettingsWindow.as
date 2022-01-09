@@ -42,7 +42,7 @@ package classes.ui
             _onClose = onClose;
 
             const userSettings:UserSettings = _gvars.activeUser.settings;
-            _gvars.activeUser.saveSettingsOnline();
+            _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
             _settingsJSONString = userSettings.stringify();
 
             _bmp = SpriteUtil.getBitmapSprite(stage);

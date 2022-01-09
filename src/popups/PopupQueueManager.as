@@ -367,7 +367,7 @@ internal class QueueBox extends Sprite
     {
         _gvars.playerUser.settings.songQueues.splice(_gvars.playerUser.settings.songQueues.indexOf(this.queueItem), 1);
         popup.renderQueues();
-        _gvars.playerUser.saveSettingsOnline();
+        _gvars.playerUser.saveSettingsOnline(_gvars.userSession);
     }
 
     private function playQueue():void
@@ -409,7 +409,7 @@ internal class QueueBox extends Sprite
     {
         queueItem.name = queueName;
         popup.renderQueues();
-        _gvars.playerUser.saveSettingsOnline();
+        _gvars.playerUser.saveSettingsOnline(_gvars.userSession);
     }
 
     private function renameQueue():void

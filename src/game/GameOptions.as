@@ -11,7 +11,7 @@ package game
     {
         public static const NOTE_DIRECTIONS:Array = ["D", "L", "U", "R"];
 
-        private var _user:User = new User();
+        public var user:User = new User();
 
         public var disableNotePool:Boolean = false;
 
@@ -35,12 +35,12 @@ package game
         public function GameOptions(user:User):void
         {
             if (user != null)
-                _user = user;
+                user = user;
         }
 
         public function get settings():UserSettings
         {
-            return _user.settings;
+            return user.settings;
         }
 
         public function get isolation():Boolean
@@ -65,7 +65,7 @@ package game
             if (!avars.configInterface[layoutKey])
                 avars.configInterface[layoutKey] = {};
             layout = avars.configInterface[layoutKey];
-            layoutKey = _user.settings.scrollDirection;
+            layoutKey = user.settings.scrollDirection;
             if (!layout[layoutKey])
                 layout[layoutKey] = {};
             layout = layout[layoutKey];
@@ -78,7 +78,7 @@ package game
             if (replay == null)
                 return;
 
-            _user.settings = replay.user.settings;
+            user.settings = replay.user.settings;
             modCache = null;
         }
 
@@ -92,7 +92,7 @@ package game
             if (!modCache)
             {
                 modCache = {};
-                for each (var gameMod:String in _user.settings.activeMods)
+                for each (var gameMod:String in user.settings.activeMods)
                     modCache[gameMod] = true;
             }
             return mod in modCache;
@@ -117,7 +117,7 @@ package game
         {
             var ret:Boolean = false;
             ret ||= score && (isAutoplay || modEnabled("shuffle") || modEnabled("random") || modEnabled("scramble") || judgeWindow);
-            ret ||= replay && (_user.settings.songRate != 1 || modEnabled("reverse") //||
+            ret ||= replay && (user.settings.songRate != 1 || modEnabled("reverse") //||
                 //modEnabled("nobackground") ||
                 //isolation
                 );

@@ -1646,7 +1646,7 @@ package menu
         private function refreshHighscoresClick(e:Event):void
         {
             _gvars.clearHighscores();
-            _gvars.activeUser.loadLevelRanks();
+            _gvars.activeUser.loadLevelRanks(_gvars.userSession);
             buildInfoBox();
         }
 
@@ -2094,7 +2094,7 @@ package menu
                 songArray[songArray.length] = _gvars.songQueue[songQueueI].level;
             }
             _gvars.playerUser.settings.songQueues.push(new SongQueueItem(queueName, songArray));
-            _gvars.playerUser.saveSettingsOnline();
+            _gvars.playerUser.saveSettingsOnline(_gvars.userSession);
         }
 
         /**

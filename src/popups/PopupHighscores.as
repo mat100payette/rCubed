@@ -262,7 +262,7 @@ package popups
             if (e.target == refreshBtn)
             {
                 _gvars.clearHighscores();
-                _gvars.activeUser.loadLevelRanks();
+                _gvars.activeUser.loadLevelRanks(_gvars.userSession);
                 refreshPersonalRanks();
                 renderHighscores();
             }

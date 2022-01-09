@@ -606,7 +606,7 @@ package game
                 _gvars.activeUser.settings.judgeOffset = Number(result.accuracy_frames.toFixed(3));
                 // Save settings
                 _gvars.activeUser.saveSettingsLocally();
-                _gvars.activeUser.saveSettingsOnline();
+                _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
             }
         }
 
