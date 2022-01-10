@@ -11,7 +11,7 @@ package
         public function ChangePanelEvent(panelName:String):void
         {
             _panelName = panelName;
-            super(EVENT_TYPE);
+            super(EVENT_TYPE, true);
         }
 
         public function get panelName():String

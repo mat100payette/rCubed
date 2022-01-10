@@ -42,7 +42,6 @@ package
     import game.GameMenu;
     import menu.MainMenu;
     import menu.MenuPanel;
-    import popups.PopupContextMenu;
     import popups.PopupHelp;
     import popups.replays.ReplayHistoryWindow;
     import popups.settings.SettingsWindow;
@@ -90,7 +89,7 @@ package
         {
             super();
 
-            _panelMediator = new PanelMediator(changePanel, addPopupr);
+            _panelMediator = new PanelMediator(changePanel, addPopup, this);
 
             //- Set GlobalVariables Stage
             _gvars.gameMain = this;
@@ -570,7 +569,7 @@ package
         }
 
         ///- Popups
-        public function addPopupr(popupName:String, overlay:Boolean = false):void
+        public function addPopup(popupName:String, overlay:Boolean = false):void
         {
             var popup:MenuPanel;
 

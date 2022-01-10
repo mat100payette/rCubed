@@ -24,15 +24,18 @@ package
         private var _panelCallback:Function;
         private var _popupCallback:Function;
 
+        private var _target:IEventDispatcher;
+
         public function PanelMediator(switchPanelCallback:Function, addPopupCallback:Function, target:IEventDispatcher = null)
         {
             super(target);
 
             _panelCallback = switchPanelCallback;
             _popupCallback = addPopupCallback
+            _target = target;
 
-            addEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
-            addEventListener(AddPopupEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.addEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.addEventListener(AddPopupEvent.EVENT_TYPE, onAddPopupEvent);
         }
 
         private function onChangePanelEvent(e:ChangePanelEvent):void
@@ -47,8 +50,8 @@ package
 
         public function dispose():void
         {
-            removeEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
-            removeEventListener(ChangePanelEvent.EVENT_TYPE, onAddPopupEvent);
+            _target.removeEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.removeEventListener(ChangePanelEvent.EVENT_TYPE, onAddPopupEvent);
         }
     }
 }
