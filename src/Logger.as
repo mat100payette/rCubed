@@ -14,6 +14,7 @@ package
     {
         private static var LOG_FILE:File;
         private static var LOG_STREAM:FileStream;
+
         public static const DEBUG_LINES:Array = ["Info: ", "Debug: ", "Warning: ", "Error: ", "Fatal: "];
         public static const INFO:Number = 0; // Gray
         public static const DEBUG:Number = 1; // Black

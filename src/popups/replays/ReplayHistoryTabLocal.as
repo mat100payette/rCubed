@@ -47,7 +47,7 @@ package popups.replays
             loadingIndex = new Text(uiLock, 0, 340, "", 20);
             loadingIndex.setAreaParams(780, 30, TextFormatAlign.CENTER);
 
-            loadingProgress = new ProgressBar(uiLock, (Main.GAME_WIDTH - 450) / 2, 380, 450);
+            loadingProgress = new ProgressBar((Main.GAME_WIDTH - 450) / 2, 380, 450);
 
             loadingCancelButton = new BoxButton(uiLock, 390 - 40, 440, 80, 30, _lang.string("menu_cancel"), 12, clickHandler);
         }

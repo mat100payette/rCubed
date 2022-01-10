@@ -33,9 +33,10 @@ package popups
 
         private var closeOptions:BoxButton;
 
-        public function PopupTokenUnlock(myParent:MenuPanel, tokenType:String, tokenID:String, unlockText:String, tokenName:String = null, tokenMessage:String = null)
+        public function PopupTokenUnlock(tokenType:String, tokenID:String, unlockText:String, tokenName:String = null, tokenMessage:String = null)
         {
-            super(myParent);
+            super();
+
             tType = tokenType;
             tID = tokenID;
             uText = unlockText;
@@ -194,7 +195,6 @@ package popups
             //- Close
             if (e.target == closeOptions)
             {
-                removePopup();
                 return;
             }
         }

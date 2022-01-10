@@ -61,14 +61,14 @@ package arc.mp
             // Room user list display
             controlUsers = new MultiplayerUsers(this, room, parent, controlChat);
             controlUsers.move(controlChat.x + controlChat.width, controlPlayer1.y);
-            controlUsers.setSize(controlUsers.width - 10, controlChat.y + controlChat.height - controlPlayer1.y - controlChat.controlInput.height);
+            controlUsers.setSize(controlUsers.width - 10, controlChat.y + controlChat.height - controlPlayer1.y - controlChat.inputHeight);
             controlUsers.resize();
             controlUsers.updateUsers();
 
             // Player spectate state button
             controlSpectate = new PushButton();
             controlSpectate.label = room.isPlayer(currentUser) ? "Spectate" : (room.playerCount < 2 ? "Join Game" : "Cannot Join Game");
-            controlSpectate.setSize(controlUsers.width, controlChat.controlInput.height);
+            controlSpectate.setSize(controlUsers.width, controlChat.inputHeight);
             controlSpectate.move(controlUsers.x, controlUsers.y + controlUsers.height);
             controlSpectate.addEventListener(MouseEvent.CLICK, onSpectateButtonClick);
             addChild(controlSpectate);
@@ -76,8 +76,8 @@ package arc.mp
             // Player state button
             controlState = new PushButton();
             controlState.label = room.isPlayer(currentUser) ? "Ready" : (currentUser.wantsToWatch ? "Stop Spectating" : "Start Spectating");
-            controlState.setSize(controlUsers.width, controlChat.controlInput.height);
-            controlState.move(controlUsers.x, controlUsers.y + controlUsers.height - controlChat.controlInput.height);
+            controlState.setSize(controlUsers.width, controlChat.inputHeight);
+            controlState.move(controlUsers.x, controlUsers.y + controlUsers.height - controlChat.inputHeight);
             controlState.addEventListener(MouseEvent.CLICK, onStateButtonClick);
             addChild(controlState);
 
@@ -166,7 +166,7 @@ package arc.mp
                 {
                     room.songInfo = room.getPlayersSong()
                     connection.lastRoomGamePlayerCount = room.playerCount;
-                    MultiplayerState.getInstance().spectateGame(room);
+                    MultiplayerState.instance.spectateGame(room);
                 }
             }
             updateRoomDisplay();
@@ -179,7 +179,7 @@ package arc.mp
             if (event.room == room && GlobalVariables.instance.gameMain.activePanel is MainMenu)
             {
                 connection.lastRoomGamePlayerCount = room.playerCount;
-                MultiplayerState.getInstance().spectateGame(room);
+                MultiplayerState.instance.spectateGame(room);
             }
         }
 

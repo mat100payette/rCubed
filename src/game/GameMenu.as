@@ -18,9 +18,8 @@ package game
 
         public var panel:MenuPanel;
 
-        public function GameMenu(myParent:MenuPanel)
+        public function GameMenu()
         {
-            super(myParent);
         }
 
         override public function init():Boolean
@@ -51,13 +50,13 @@ package game
             super.stageRemove();
         }
 
-        override public function switchTo(_panel:String, useNew:Boolean = false):Boolean
+        public function switchTo(_panel:String, useNew:Boolean = false):Boolean
         {
             //- Check Parent Function first.
-            if (super.switchTo(_panel, useNew))
+            if (true)
             {
                 _gvars.gameMain.bg.updateDisplay();
-                _gvars.gameMain.ver.visible = true;
+                _gvars.gameMain.versionText.visible = true;
                 return true;
             }
 
@@ -75,28 +74,28 @@ package game
             switch (_panel)
             {
                 case GAME_LOADING:
-                    panel = new GameLoading(this);
+                    panel = new GameLoading();
                     _gvars.gameMain.bg.updateDisplay();
-                    _gvars.gameMain.ver.visible = true;
+                    _gvars.gameMain.versionText.visible = true;
                     isFound = true;
                     break;
 
                 case GAME_PLAY:
                     _gvars.gameMain.bg.updateDisplay(true);
-                    _gvars.gameMain.ver.visible = false;
-                    panel = new GameplayDisplay(this, _gvars.options);
+                    _gvars.gameMain.versionText.visible = false;
+                    panel = new GameplayDisplay(_gvars.options);
                     isFound = true;
                     break;
 
                 case GAME_REPLAY:
                     _gvars.gameMain.bg.updateDisplay(true);
-                    _gvars.gameMain.ver.visible = false;
-                    panel = new GameReplay(this);
+                    _gvars.gameMain.versionText.visible = false;
+                    panel = new GameReplay();
                     isFound = true;
                     break;
 
                 case GAME_RESULTS:
-                    panel = new GameResults(this);
+                    panel = new GameResults();
                     isFound = true;
                     break;
             }

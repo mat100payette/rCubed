@@ -496,7 +496,7 @@ package popups.settings
                 }
 
                 // refresh popup
-                _gvars.gameMain.addPopup(Main.POPUP_OPTIONS);
+                _gvars.gameMain.dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
             }
         }
 

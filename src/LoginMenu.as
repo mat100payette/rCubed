@@ -50,10 +50,8 @@ package
 
         private var isLoading:Boolean = false;
 
-        public function LoginMenu(myParent:MenuPanel)
+        public function LoginMenu()
         {
-            super(myParent);
-
             savedInfos = loadLoginDetails();
         }
 
@@ -192,7 +190,7 @@ package
 
         public function playAsGuest(e:Event = null):void
         {
-            switchTo(Main.GAME_MENU_PANEL);
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
         public function registerOnline(e:Event = null):void
@@ -319,7 +317,7 @@ package
                 _gvars.userSession = _data.session;
                 _gvars.gameMain.loadComplete = false;
                 Playlist.clearCanon();
-                switchTo("none");
+                dispatchEvent(new ChangePanelEvent("none"));
             }
             else
             {

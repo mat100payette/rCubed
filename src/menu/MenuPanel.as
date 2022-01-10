@@ -5,33 +5,11 @@ package menu
     public class MenuPanel extends Sprite
     {
         private var _listeners:Array = [];
-        public var parentPanel:MenuPanel;
-        public var current_popup:MenuPanel;
         public var hasInit:Boolean = false;
 
-        public function MenuPanel(parent:MenuPanel)
+        public function MenuPanel()
         {
-            this.parentPanel = parent;
             super();
-        }
-
-        public function switchTo(panel:String, useNew:Boolean = false):Boolean
-        {
-            if (stage != null && this.stage != null)
-            {
-                stage.focus = this.stage;
-            }
-            return parentPanel.switchTo(panel, useNew);
-        }
-
-        public function addPopup(panel:*, newLayer:Boolean = false):void
-        {
-            return parentPanel.addPopup(panel, newLayer);
-        }
-
-        public function removePopup():void
-        {
-            return parentPanel.removePopup();
         }
 
         // Init status depended on use of switchTo in init function. If the function calls a switchTo, return false here. 
@@ -59,7 +37,6 @@ package menu
         override public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void
         {
             _listeners.push([type, listener]);
-            // trace("Added Listener:", this, _listeners.length - 1, type);
             super.addEventListener(type, listener, useCapture, priority, useWeakReference);
         }
 
@@ -69,10 +46,7 @@ package menu
             for (var i:int = 0; i < _listeners.length; i++)
             {
                 if (_listeners[i][0] == type && _listeners[i][1] == listener)
-                {
                     _listeners.splice(i, 1);
-                        // trace("Removed Listener:", this, i, type);
-                }
             }
             super.removeEventListener(type, listener, useCapture);
         }

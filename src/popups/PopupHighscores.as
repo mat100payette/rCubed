@@ -42,9 +42,10 @@ package popups
         private var closeBtn:BoxButton;
         private var refreshBtn:BoxButton;
 
-        public function PopupHighscores(myParent:MenuPanel, songInfo:SongInfo)
+        public function PopupHighscores(songInfo:SongInfo)
         {
-            super(myParent);
+            super();
+
             this.songInfo = songInfo;
         }
 
@@ -270,7 +271,6 @@ package popups
             //- Close
             if (e.target == closeBtn)
             {
-                removePopup();
                 return;
             }
         }

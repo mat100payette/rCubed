@@ -26,9 +26,9 @@ package popups
         private var closeBox:BoxButton;
         private var results:Object;
 
-        public function PopupSkillRankUpdate(myParent:MenuPanel, results:Object)
+        public function PopupSkillRankUpdate(results:Object)
         {
-            super(myParent);
+            super();
             this.results = results;
         }
 

@@ -74,7 +74,7 @@ package menu
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
         private var _playlist:Playlist = Playlist.instance;
-        private var _mp:MultiplayerState = MultiplayerState.getInstance();
+        private var _mp:MultiplayerState = MultiplayerState.instance;
 
         private var genreDisplay:Sprite;
         private var genreItems:Vector.<Text> = new <Text>[];
@@ -113,9 +113,9 @@ package menu
         public static var previewMusic:SongPlayerBytes;
 
         ///- Constructor
-        public function MenuSongSelection(myParent:MenuPanel)
+        public function MenuSongSelection()
         {
-            super(myParent);
+            super();
         }
 
         override public function init():Boolean
@@ -355,7 +355,8 @@ package menu
         {
             _playlist.removeEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
             _playlist.engineChangeHandler(e);
-            switchTo(MainMenu.MENU_SONGSELECTION, true);
+
+            dispatchEvent(new ChangePanelEvent(MainMenu.MENU_SONGSELECTION));
         }
 
         //******************************************************************************************//
@@ -982,7 +983,8 @@ package menu
             var songInfo:SongInfo = _playlist.getSongInfo(songItem.level);
 
             if (songInfo != null)
-                _gvars.gameMain.addPopup(new PopupSongNotes(this, songInfo));
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SONG_NOTES));
+            //_gvars.gameMain.addPopup(new PopupSongNotes(songInfo));
         }
 
         /**
@@ -1035,7 +1037,7 @@ package menu
 
                 // Switch to game
                 Alert.add(_lang.string("song_selection_load_play_chart_preview"));
-                switchTo(Main.GAME_PLAY_PANEL);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
             }
         }
 
@@ -1529,7 +1531,7 @@ package menu
 
             _mp.gameplayPicking(_playlist.getSongInfo(level));
             _mp.gameplayLoading();
-            switchTo(MainMenu.MENU_MULTIPLAYER);
+            dispatchEvent(new ChangePanelEvent(MainMenu.MENU_MULTIPLAYER));
         }
 
         /**
@@ -1573,7 +1575,7 @@ package menu
 
             _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
-            switchTo(Main.GAME_PLAY_PANEL);
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
         }
 
         /**
@@ -1892,7 +1894,8 @@ package menu
                     var songInfo:SongInfo = _playlist.getSongInfo(e.target.level);
 
                     if (songInfo != null)
-                        _gvars.gameMain.addPopup(new PopupSongNotes(this, songInfo));
+                        dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SKILL_RANK_UPDATE));
+                        //_gvars.gameMain.addPopup(new PopupSongNotes(songInfo));
                 }
                 else if (clickAction == "clearQueue")
                 {
@@ -1917,11 +1920,13 @@ package menu
                 }
                 else if (clickAction == "queueManager")
                 {
-                    addPopup(new PopupQueueManager(this));
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_QUEUE_MANAGER));
+                        //addPopup(new PopupQueueManager());
                 }
                 else if (clickAction == "filterManager")
                 {
-                    addPopup(new PopupFilterManager(this));
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
+                    //addPopup(new PopupFilterManager());
                 }
                 else if (clickAction == "doFilterRandom")
                 {
@@ -1953,10 +1958,6 @@ package menu
          */
         private function keyHandler(e:KeyboardEvent):void
         {
-            // Don't do anything with popups open.
-            if (_gvars.gameMain.current_popup != null)
-                return;
-
             if (searchBox != null && options.infoTab == TAB_SEARCH && searchBox.focus)
             {
                 switch (e.keyCode)
@@ -2198,9 +2199,11 @@ package menu
             Alert.add(_lang.string("song_selection_playing_menu_music"));
 
             LocalStore.setVariable("menu_music", song.songInfo.name);
-            var par:MainMenu = ((this.parentPanel) as MainMenu);
-            par.drawMenuMusicControls();
-            par.updateMenuMusicControls();
+
+            // TODO: refactor this to a callback
+            //var par:MainMenu = ((this.parentPanel) as MainMenu);
+            //par.drawMenuMusicControls();
+            //par.updateMenuMusicControls();
 
             if (_gvars.menuMusic)
                 _gvars.menuMusic.stop();

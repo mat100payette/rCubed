@@ -101,20 +101,20 @@ package classes
          */
         public function User(isActiveUser:Boolean = false, sfsId:int = -1):void
         {
-            this.id = sfsId;
-            this.variables = [];
-            this.isSpec = false;
-            this.wantsToWatch = false;
-            this._isLiteUser = !isActiveUser;
+            id = sfsId;
+            variables = [];
+            isSpec = false;
+            wantsToWatch = false;
+            _isLiteUser = !isActiveUser;
 
-            this.settings = new UserSettings(!isActiveUser);
+            settings = new UserSettings(!isActiveUser);
         }
 
         ///- Public
         public function updateAverageRank(totalPublicSongs:uint):void
         {
             var rankTotal:int = 0;
-            for each (var levelRank:Object in this.levelRanks)
+            for each (var levelRank:Object in levelRanks)
             {
                 var genre:int = levelRank.genre;
                 if (genre != 10 && genre != 12 && genre != 23)
@@ -136,7 +136,7 @@ package classes
             return _loadError;
         }
 
-        public function loadFull(userSession:String):void
+        public function loadFull(userSession:String, onCredentialsLoadedCallback:Function = null):void
         {
             // Kill old Loading Stream
             if (_loader && _isLoading)
@@ -154,7 +154,7 @@ package classes
             _loader = new URLLoader();
             _loadFullListener = function(e:Event):void
             {
-                _onFullUserDataLoaded(e, userSession);
+                _onFullUserDataLoaded(e, userSession, onCredentialsLoadedCallback);
             };
             _loader.addEventListener(Event.COMPLETE, _loadFullListener);
             _addCommonLoaderListeners();
@@ -187,11 +187,11 @@ package classes
             _isLoading = true;
         }
 
-        private function _onFullUserDataLoaded(e:Event, userSession:String):void
+        private function _onFullUserDataLoaded(e:Event, userSession:String, onCredentialsLoadedCallback:Function = null):void
         {
             Logger.info(this, "Full User Load Success");
             _loader.removeEventListener(Event.COMPLETE, _loadFullListener);
-            _onUserLoaded(e, true, userSession);
+            _onUserLoaded(e, true, userSession, onCredentialsLoadedCallback);
         }
 
         private function _onUserDataNoSettingsLoaded(e:Event):void
@@ -201,7 +201,7 @@ package classes
             _onUserLoaded(e, false, null);
         }
 
-        private function _onUserLoaded(e:Event, includeSettings:Boolean, userSession:String):void
+        private function _onUserLoaded(e:Event, includeSettings:Boolean, userSession:String, onCredentialsLoadedCallback:Function = null):void
         {
             _removeCommonLoaderListeners();
 
@@ -219,11 +219,14 @@ package classes
                 AirContext.writeTextFile(AirContext.getAppFile("logs/user_main.txt"), siteDataString);
 
                 _loadError = true;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
                 return;
             }
 
             _applyLoadedUserProfile(data);
+            if (onCredentialsLoadedCallback != null)
+                onCredentialsLoadedCallback(name, hash);
+
             if (includeSettings)
                 _applyLoadedUserSettings(data);
 
@@ -234,7 +237,7 @@ package classes
             else
             {
                 _isLoaded = true;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+                dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
             }
         }
 
@@ -243,23 +246,23 @@ package classes
             // Private
             if (!_isLiteUser)
             {
-                this.hash = data.hash;
-                this.credits = data.credits;
+                hash = data.hash;
+                credits = data.credits;
                 setPurchasedString(data["purchased"]);
                 if (data["song_ratings"] != null)
-                    this.songRatings = data["song_ratings"];
+                    songRatings = data["song_ratings"];
             }
 
             // Public
-            this.name = data["name"];
-            this.siteId = data["id"];
-            this.groups = Vector.<Number>(VectorUtil.fromArray(data["groups"]));
-            this.joinDate = data["joinDate"];
-            this.gameRank = data["gameRank"];
-            this.gamesPlayed = data["gamesPlayed"];
-            this.grandTotal = data["grandTotal"];
-            this.skillLevel = data["skillLevel"];
-            this.skillRating = data["skillRating"];
+            name = data["name"];
+            siteId = data["id"];
+            groups = Vector.<Number>(VectorUtil.fromArray(data["groups"]));
+            joinDate = data["joinDate"];
+            gameRank = data["gameRank"];
+            gamesPlayed = data["gamesPlayed"];
+            grandTotal = data["grandTotal"];
+            skillLevel = data["skillLevel"];
+            skillRating = data["skillRating"];
 
             setupPermissions();
 
@@ -270,7 +273,7 @@ package classes
         private function _applyLoadedUserSettings(data:Object):void
         {
             var loadedSettings:Object;
-            if (this.isGuest || data["settings"] == null)
+            if (isGuest || data["settings"] == null)
                 loadedSettings = _loadLocalSettings();
             else
             {
@@ -288,10 +291,10 @@ package classes
 
         public function setPurchasedString(str:String):void
         {
-            this.purchased = new <Boolean>[];
+            purchased = new <Boolean>[];
             for (var x:int = 1; x < str.length; x++)
             {
-                this.purchased.push(str.charAt(x) == "1");
+                purchased.push(str.charAt(x) == "1");
             }
         }
 
@@ -304,7 +307,7 @@ package classes
             _removeCommonLoaderListeners();
 
             _loadError = true;
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
         }
 
         private function _addCommonLoaderListeners():void
@@ -322,26 +325,26 @@ package classes
 
         private function setupPermissions():void
         {
-            this.isGuest = (this.siteId <= 2);
-            this.isVeteran = VectorUtil.inVector(this.groups, new <Number>[VETERAN_ID]);
-            this.isAdmin = VectorUtil.inVector(this.groups, new <Number>[ADMIN_ID]);
-            this.isDeveloper = VectorUtil.inVector(this.groups, new <Number>[DEVELOPER_ID])
-            this.isForumBanned = VectorUtil.inVector(this.groups, new <Number>[BANNED_ID]);
-            this.isModerator = VectorUtil.inVector(this.groups, new <Number>[ADMIN_ID, FORUM_MOD_ID, CHAT_MOD_ID, PROFILE_MOD_ID, MULTI_MOD_ID]);
-            this.isForumModerator = VectorUtil.inVector(this.groups, new <Number>[FORUM_MOD_ID, ADMIN_ID]);
-            this.isProfileModerator = VectorUtil.inVector(this.groups, new <Number>[PROFILE_MOD_ID, ADMIN_ID]);
-            this.isChatModerator = VectorUtil.inVector(this.groups, new <Number>[CHAT_MOD_ID, ADMIN_ID]);
-            this.isMultiModerator = VectorUtil.inVector(this.groups, new <Number>[MULTI_MOD_ID, ADMIN_ID]);
-            this.isMusician = VectorUtil.inVector(this.groups, new <Number>[MUSIC_PRODUCER_ID]);
-            this.isSimArtist = VectorUtil.inVector(this.groups, new <Number>[SIM_AUTHOR_ID]);
+            isGuest = (siteId <= 2);
+            isVeteran = VectorUtil.inVector(groups, new <Number>[VETERAN_ID]);
+            isAdmin = VectorUtil.inVector(groups, new <Number>[ADMIN_ID]);
+            isDeveloper = VectorUtil.inVector(groups, new <Number>[DEVELOPER_ID])
+            isForumBanned = VectorUtil.inVector(groups, new <Number>[BANNED_ID]);
+            isModerator = VectorUtil.inVector(groups, new <Number>[ADMIN_ID, FORUM_MOD_ID, CHAT_MOD_ID, PROFILE_MOD_ID, MULTI_MOD_ID]);
+            isForumModerator = VectorUtil.inVector(groups, new <Number>[FORUM_MOD_ID, ADMIN_ID]);
+            isProfileModerator = VectorUtil.inVector(groups, new <Number>[PROFILE_MOD_ID, ADMIN_ID]);
+            isChatModerator = VectorUtil.inVector(groups, new <Number>[CHAT_MOD_ID, ADMIN_ID]);
+            isMultiModerator = VectorUtil.inVector(groups, new <Number>[MULTI_MOD_ID, ADMIN_ID]);
+            isMusician = VectorUtil.inVector(groups, new <Number>[MUSIC_PRODUCER_ID]);
+            isSimArtist = VectorUtil.inVector(groups, new <Number>[SIM_AUTHOR_ID]);
         }
 
         public function loadAvatar():void
         {
-            this.avatar = new Loader();
+            avatar = new Loader();
             if (!_isLiteUser && !isGuest)
             {
-                this.avatar.contentLoaderInfo.addEventListener(Event.COMPLETE, avatarLoadComplete);
+                avatar.contentLoaderInfo.addEventListener(Event.COMPLETE, avatarLoadComplete);
 
                 function avatarLoadComplete(e:Event):void
                 {
@@ -349,7 +352,7 @@ package classes
                     avatar.removeEventListener(Event.COMPLETE, avatarLoadComplete);
                 }
             }
-            this.avatar.load(new URLRequest(Constant.USER_AVATAR_URL + "?uid=" + this.siteId + "&cHeight=99&cWidth=99"));
+            avatar.load(new URLRequest(Constant.USER_AVATAR_URL + "?uid=" + siteId + "&cHeight=99&cWidth=99"));
         }
 
         ///- Level Ranks
@@ -405,14 +408,14 @@ package classes
                 }
             }
             _isLoaded = true;
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
         }
 
         private function ranksLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Ranks Load Failure: " + Logger.event_error(err));
             removeLoaderRanksListeners();
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
         }
 
         private function addLoaderRanksListeners():void
@@ -454,14 +457,14 @@ package classes
         {
             Logger.debug(this, "Settings Save Success");
             removeLoaderSaveListeners();
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
         }
 
         private function settingLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Settings Save Failure: " + Logger.event_error(err));
             removeLoaderSaveListeners();
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
         }
 
         private function addLoaderSaveListeners():void
@@ -546,10 +549,10 @@ package classes
             {
                 var v:* = o[key];
                 if (v != null)
-                    this.variables[key] = v;
+                    variables[key] = v;
 
                 else
-                    delete this.variables[key];
+                    delete variables[key];
             }
         }
     }

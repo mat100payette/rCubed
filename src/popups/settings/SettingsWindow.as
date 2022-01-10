@@ -75,7 +75,7 @@ package popups.settings
 
         private var _windowManage:ManageSettingsWindow;
 
-        public function SettingsWindow(myParent:MenuPanel, user:User)
+        public function SettingsWindow(user:User)
         {
             _user = user;
 
@@ -90,7 +90,7 @@ package popups.settings
 
             _tabButtons = new <TabButton>[];
 
-            super(myParent);
+            super();
         }
 
         override public function stageAdd():void
@@ -347,8 +347,7 @@ package popups.settings
             _gvars.options.song = new Song(tempSongInfo);
 
             _gvars.options.fill();
-            removePopup();
-            _gvars.gameMain.switchTo(Main.GAME_PLAY_PANEL);
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
         }
 
         private function onManageSettingsClicked(e:Event):void
@@ -382,7 +381,6 @@ package popups.settings
 
             SoundMixer.soundTransform = new SoundTransform(_user.settings.gameVolume);
             LocalOptions.setVariable("menu_music_volume", _gvars.menuMusicSoundVolume);
-            removePopup();
         }
 
         private function mouseWheelMoved(e:MouseEvent):void

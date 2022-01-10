@@ -45,9 +45,9 @@ package popups
         private var importBtn:BoxButton;
         private var closeBtn:BoxButton;
 
-        public function PopupQueueManager(myParent:MenuPanel)
+        public function PopupQueueManager()
         {
-            super(myParent);
+            super();
         }
 
         override public function stageAdd():void
@@ -219,7 +219,6 @@ package popups
             //- Close
             if (e.target == closeBtn)
             {
-                removePopup();
                 return;
             }
         }
@@ -385,8 +384,6 @@ internal class QueueBox extends Sprite
                 }
             }
         }
-
-        popup.removePopup();
 
         if (newSongQueue.length <= 0)
             return;

@@ -26,9 +26,10 @@ package popups
         private var dislayText:String = _lang.string("popup_message_missing_error_text");
         private var closeOptions:BoxButton;
 
-        public function PopupMessage(myParent:MenuPanel, dislayText:String, displayTitle:String = "")
+        public function PopupMessage(dislayText:String, displayTitle:String = "")
         {
-            super(myParent);
+            super();
+
             this.dislayText = dislayText;
             this.displayTitle = displayTitle;
         }
@@ -78,7 +79,6 @@ package popups
             //- Close
             if (e.target == closeOptions)
             {
-                removePopup();
                 return;
             }
         }

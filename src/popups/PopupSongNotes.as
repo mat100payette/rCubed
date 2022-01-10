@@ -63,9 +63,9 @@ package popups
 
         public var songRatingValue:Number;
 
-        public function PopupSongNotes(myParent:MenuPanel, songInfo:SongInfo)
+        public function PopupSongNotes(songInfo:SongInfo)
         {
-            super(myParent);
+            super();
             this.songInfo = songInfo;
 
             var engineId:String = songInfo.engine != null ? songInfo.engine.id : Constant.BRAND_NAME_SHORT_LOWER;
@@ -272,7 +272,6 @@ package popups
             {
                 saveRatings();
                 saveDetails();
-                removePopup();
 
                 // Update the Note Hover Directly
                 if (_gvars.gameMain.activePanel != null && _gvars.gameMain.activePanel is MainMenu)
@@ -290,7 +289,6 @@ package popups
             //- Close
             else if (e.target == closeOptions)
             {
-                removePopup();
                 return;
             }
         }

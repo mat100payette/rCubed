@@ -57,9 +57,9 @@ package popups
 
         public var DRAW_TAB:int = TAB_FILTER;
 
-        public function PopupFilterManager(myParent:MenuPanel)
+        public function PopupFilterManager()
         {
-            super(myParent);
+            super();
         }
 
         override public function init():Boolean
@@ -278,7 +278,6 @@ package popups
 
         private function e_closeButton(e:Event):void
         {
-            removePopup();
             if (_gvars.activeUser == _gvars.playerUser)
             {
                 _gvars.activeUser.saveSettingsLocally();

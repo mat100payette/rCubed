@@ -28,9 +28,9 @@ package popups
 
         private var closeOptions:BoxButton;
 
-        public function PopupHelp(myParent:MenuPanel)
+        public function PopupHelp()
         {
-            super(myParent);
+            super();
         }
 
         override public function stageAdd():void
@@ -94,7 +94,6 @@ package popups
             //- Close
             if (e.target == closeOptions)
             {
-                removePopup();
                 return;
             }
         }

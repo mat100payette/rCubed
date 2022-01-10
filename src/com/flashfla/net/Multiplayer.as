@@ -406,7 +406,7 @@ package com.flashfla.net
                     {
                         room.songInfo = room.getPlayersSong()
                         lastRoomGamePlayerCount = room.playerCount;
-                        MultiplayerState.getInstance().spectateGame(room)
+                        MultiplayerState.instance.spectateGame(room)
                     }
                 }
                 else if (room.isAllPlayersInStatus(STATUS_RESULTS) && anyPlayerStatusChanged)

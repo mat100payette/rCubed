@@ -354,7 +354,7 @@ package
 
             songCache = [];
 
-            const mpInstance:MultiplayerState = MultiplayerState.getInstance();
+            const mpInstance:MultiplayerState = MultiplayerState.instance;
             if (mpInstance != null)
             {
                 mpInstance.clearStatus();

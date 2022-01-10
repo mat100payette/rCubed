@@ -13,9 +13,8 @@ package game
         private var _lang:Language = Language.instance;
         private var _playlist:Playlist = Playlist.instance;
 
-        public function GameReplay(myParent:MenuPanel)
+        public function GameReplay()
         {
-            super(myParent);
         }
 
         override public function init():Boolean
@@ -24,14 +23,10 @@ package game
             _gvars.activeUser = replay.user;
             _gvars.options.fill();
             _gvars.options.fillFromReplay();
-            switchTo(GameMenu.GAME_LOADING);
+
+            dispatchEvent(new ChangePanelEvent(GameMenu.GAME_LOADING));
 
             return false;
-        }
-
-        override public function stageAdd():void
-        {
-
         }
     }
 }

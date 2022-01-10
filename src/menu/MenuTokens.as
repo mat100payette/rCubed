@@ -41,9 +41,9 @@ package menu
         private static var loadQueue:Array = [];
         private static var ACTIVE_DOWNLOAD:Object = null;
 
-        public function MenuTokens(myParent:MenuPanel)
+        public function MenuTokens()
         {
-            super(myParent);
+            super();
         }
 
         override public function init():Boolean
@@ -207,7 +207,7 @@ package menu
             _gvars.songQueue = token_songs;
             MenuSongSelection.options.queuePlaylist = _gvars.songQueue;
 
-            switchTo(MainMenu.MENU_SONGSELECTION);
+            dispatchEvent(new ChangePanelEvent(MainMenu.MENU_SONGSELECTION));
             MenuSongSelection.options.infoTab = MenuSongSelection.TAB_QUEUE;
             var panel:MenuSongSelection = ((_gvars.gameMain.activePanel as MainMenu).panel as MenuSongSelection);
             panel.swapToQueue();

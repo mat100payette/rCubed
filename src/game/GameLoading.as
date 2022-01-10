@@ -33,9 +33,8 @@ package game
         private var song:Song;
         private var songName:String = "";
 
-        public function GameLoading(myParent:MenuPanel)
+        public function GameLoading()
         {
-            super(myParent);
         }
 
         override public function init():Boolean
@@ -54,12 +53,12 @@ package game
                 song = _gvars.options.song;
             else
             { // No songs in queue? Something went wrong...
-                switchTo(Main.GAME_MENU_PANEL);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
                 return false;
             }
             if (song && song.isLoaded)
             {
-                switchTo(GameMenu.GAME_PLAY);
+                dispatchEvent(new ChangePanelEvent(GameMenu.GAME_PLAY));
                 return false;
             }
             return true;
@@ -70,7 +69,7 @@ package game
             songName = _lang.wrapFont(song.songInfo.name ? song.songInfo.name : "Invalid Song / Replay");
 
             //- Preloader Display
-            preloader = new ProgressBar(this, 10, Main.GAME_HEIGHT - 30, Main.GAME_WIDTH - 20, 20);
+            preloader = new ProgressBar(10, Main.GAME_HEIGHT - 30, Main.GAME_WIDTH - 20, 20);
 
             //- Song Name Display
             namedisplay = new TextField();
@@ -139,7 +138,6 @@ package game
 
             if (preloader.isComplete && song.isLoaded)
             {
-                removePopup();
                 this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
                 preloader.addEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
                 preloader.remove();
@@ -158,13 +156,13 @@ package game
             _gvars.removeSongFile(song);
 
             removeEventListener(Event.ENTER_FRAME, updatePreloader);
-            switchTo(Main.GAME_MENU_PANEL);
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
         private function preloaderRemoved(e:Event = null):void
         {
             preloader.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
-            switchTo(GameMenu.GAME_PLAY);
+            dispatchEvent(new ChangePanelEvent(GameMenu.GAME_PLAY));
         }
     }
 }

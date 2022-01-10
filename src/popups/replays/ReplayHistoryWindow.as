@@ -51,7 +51,7 @@ package popups.replays
         // buttons
         private var btn_close:BoxButton;
 
-        public function ReplayHistoryWindow(myParent:MenuPanel):void
+        public function ReplayHistoryWindow():void
         {
             // build menus
             TABS = new <ReplayHistoryTabBase>[new ReplayHistoryTabSession(this),
@@ -62,7 +62,7 @@ package popups.replays
 
             TAB_BUTTONS = new <TabButton>[];
 
-            super(myParent);
+            super();
         }
 
         override public function stageAdd():void
@@ -189,7 +189,6 @@ package popups.replays
         {
             if (e.target == btn_close)
             {
-                removePopup();
                 return;
             }
         }
@@ -250,9 +249,9 @@ package popups.replays
                     _gvars.songResults.length = 0;
                     _gvars.songQueue = [replay.song];
 
-                    _gvars.gameMain.removePopup();
+                    //_gvars.gameMain.removePopup();
 
-                    _gvars.gameMain.switchTo(Main.GAME_PLAY_PANEL);
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
                 }
 
                 if (target == entry.btn_copy)

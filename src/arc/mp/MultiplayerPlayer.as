@@ -65,7 +65,7 @@ package arc.mp
             {
                 var gameplay:Gameplay = user.gameplay;
                 if (gameplay)
-                    MultiplayerState.getInstance().gameplayPick(gameplay.songInfo);
+                    MultiplayerState.instance.gameplayPick(gameplay.songInfo);
             }
         }
 
@@ -89,7 +89,7 @@ package arc.mp
 
         private function checkRedraw(event:Event):void
         {
-            canRedraw = (GlobalVariables.instance.gameMain.activePanelName == Main.GAME_MENU_PANEL);
+            canRedraw = (GlobalVariables.instance.gameMain.activePanelName == PanelMediator.PANEL_GAME_MENU);
             redraw();
         }
 

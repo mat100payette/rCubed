@@ -197,9 +197,8 @@ package game
         private var GPU_PIXEL_BMD:BitmapData;
         private var GPU_PIXEL_BITMAP:Bitmap;
 
-        public function GameplayDisplay(myParent:MenuPanel, gameOptions:GameOptions)
+        public function GameplayDisplay(gameOptions:GameOptions)
         {
-            super(myParent);
             options = gameOptions;
         }
 
@@ -211,11 +210,11 @@ package game
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
                 var screen:int = options.settings.startUpScreen;
-                if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
+                if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
                 {
-                    MultiplayerState.getInstance().connection.connect();
+                    MultiplayerState.instance.connection.connect();
                 }
-                switchTo(Main.GAME_MENU_PANEL);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
                 return false;
             }
 
@@ -342,7 +341,7 @@ package game
             // Setup MP Things
             if (options.mpRoom)
             {
-                MultiplayerState.getInstance().gameplayPlaying(this);
+                MultiplayerState.instance.gameplayPlaying(this);
                 if (!options.isEditor)
                 {
                     options.singleplayer = false; // Back to multiplayer lobby
@@ -470,10 +469,10 @@ package game
             noteBox.position();
             this.addChild(noteBox);
 
-            if (!options.isEditor && MultiplayerState.getInstance().connection.connected && !MultiplayerState.getInstance().isInRoom())
+            if (!options.isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
             {
                 var isInSoloMode:Boolean = true;
-                MultiplayerState.getInstance().connection.disconnect(isInSoloMode);
+                MultiplayerState.instance.connection.disconnect(isInSoloMode);
             }
 
             /*
@@ -559,7 +558,7 @@ package game
 
             if (options.settings.displaySongProgress || options.replay)
             {
-                progressDisplay = new ProgressBar(this, 161, 9, 458, 20, 4, 0x545454, 0.1);
+                progressDisplay = new ProgressBar(161, 9, 458, 20, 4, 0x545454, 0.1);
 
                 if (options.replay)
                     progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
@@ -1500,13 +1499,16 @@ package game
             GAME_STATE = GAME_DISPOSE;
 
             var screen:int = options.settings.startUpScreen;
-            if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.getInstance().connection.connected)
+            if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
             {
-                MultiplayerState.getInstance().connection.connect();
+                MultiplayerState.instance.connection.connect();
             }
 
             // Go to results
-            switchTo((options.isEditor || mpSpectate) ? Main.GAME_MENU_PANEL : GameMenu.GAME_RESULTS);
+            if (options.isEditor || mpSpectate)
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            else
+                dispatchEvent(new ChangePanelEvent(GameMenu.GAME_RESULTS));
         }
 
         private function restartGame():void

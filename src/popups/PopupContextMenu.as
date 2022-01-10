@@ -29,9 +29,9 @@ package popups
         private var box:Box;
         private var bmp:Bitmap;
 
-        public function PopupContextMenu(myParent:MenuPanel)
+        public function PopupContextMenu()
         {
-            super(myParent);
+            super();
         }
 
         override public function stageAdd():void
@@ -105,8 +105,6 @@ package popups
 
         private function clickHandler(e:MouseEvent):void
         {
-            removePopup();
-
             //- Debug Actions
             CONFIG::debug
             {
@@ -138,7 +136,7 @@ package popups
                     Flags.VALUES = {};
                     Playlist.clearCanon();
                     _gvars.gameMain.loadComplete = false;
-                    _gvars.gameMain.switchTo("none");
+                    dispatchEvent(new ChangePanelEvent("none"));
                 }
             }
             else if (e.target.action == "switch_profile")
@@ -151,7 +149,7 @@ package popups
                     _gvars.playerUser = new User(true);
                     _gvars.playerUser.loadFull(_gvars.userSession);
                     _gvars.activeUser = _gvars.playerUser;
-                    _gvars.gameMain.switchTo(Main.GAME_LOGIN_PANEL);
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
                 }
             }
         }

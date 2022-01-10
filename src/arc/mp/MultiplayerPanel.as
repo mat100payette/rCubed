@@ -39,40 +39,36 @@ package arc.mp
     {
         public var _lang:Language = Language.instance;
 
-        private var controlChat:MultiplayerChat;
-        private var controlUsers:MultiplayerUsers;
-        private var controlRooms:List;
-        private var controlCreate:PushButton;
+        private var _controlChat:MultiplayerChat;
+        private var _controlUsers:MultiplayerUsers;
+        private var _controlRooms:List;
+        private var _controlCreate:PushButton;
 
-        private var textLogin:Text;
-        private var buttonMP:BoxButton;
-        private var buttonDisconnect:BoxButton;
-        private var buttonLobby:BoxButton;
-        private var throbber:Throbber;
+        private var _textLogin:Text;
+        private var _buttonMP:BoxButton;
+        private var _buttonDisconnect:BoxButton;
+        private var _buttonLobby:BoxButton;
+        private var _throbber:Throbber;
 
-        private var updateTimer:Timer;
+        private var _updateTimer:Timer;
 
-        private var connection:Multiplayer;
+        private var _connection:Multiplayer;
 
         public var window:Window;
 
-        public function MultiplayerPanel(menuParent:MenuPanel)
+        public function MultiplayerPanel()
         {
-            super(menuParent);
-
-            var self:MultiplayerPanel = this;
-
-            connection = MultiplayerState.getInstance().connection;
+            _connection = MultiplayerState.instance.connection;
             // Connect immediately if logged in
             if (!GlobalVariables.instance.activeUser.isGuest && GlobalVariables.instance.activeUser.id != 2)
             {
-                connection.connect();
+                _connection.connect();
             }
             else
             {
-                textLogin = new Text(this, 0, 0, "Please Login or Register");
-                textLogin.x = Main.GAME_WIDTH / 2 - textLogin.width / 2;
-                textLogin.y = Main.GAME_HEIGHT / 2 - textLogin.height * 3 / 2;
+                _textLogin = new Text(this, 0, 0, "Please Login or Register");
+                _textLogin.x = Main.GAME_WIDTH / 2 - _textLogin.width / 2;
+                _textLogin.y = Main.GAME_HEIGHT / 2 - _textLogin.height * 3 / 2;
                 return;
             }
 
@@ -83,71 +79,71 @@ package arc.mp
             window.hasCloseButton = true;
             window.hasMinimizeButton = false;
 
-            controlRooms = new List();
-            controlRooms.listItemClass = ListItemDoubleClick;
-            controlRooms.autoHideScrollBar = true;
-            controlRooms.move(0, 0);
-            controlRooms.setSize(200, 350);
-            controlRooms.addEventListener(MouseEvent.DOUBLE_CLICK, onRoomDoubleClick);
-            window.addChild(controlRooms);
+            _controlRooms = new List();
+            _controlRooms.listItemClass = ListItemDoubleClick;
+            _controlRooms.autoHideScrollBar = true;
+            _controlRooms.move(0, 0);
+            _controlRooms.setSize(200, 350);
+            _controlRooms.addEventListener(MouseEvent.DOUBLE_CLICK, onRoomDoubleClick);
+            window.addChild(_controlRooms);
             buildContextMenu();
 
-            controlChat = new MultiplayerChat(window, connection.lobby);
-            controlChat.move(controlRooms.x + controlRooms.width, controlRooms.y);
-            controlChat.setSize(365, controlRooms.height + controlChat.controlInput.height);
-            controlChat.resize();
+            _controlChat = new MultiplayerChat(window, _connection.lobby);
+            _controlChat.move(_controlRooms.x + _controlRooms.width, _controlRooms.y);
+            _controlChat.setSize(365, _controlRooms.height + _controlChat.inputHeight);
+            _controlChat.resize();
 
-            controlUsers = new MultiplayerUsers(window, connection.lobby, this, controlChat);
-            controlUsers.move(controlChat.x + controlChat.width, controlChat.y);
-            controlUsers.setSize(controlUsers.width, controlChat.height);
-            controlUsers.resize();
+            _controlUsers = new MultiplayerUsers(window, _connection.lobby, this, _controlChat);
+            _controlUsers.move(_controlChat.x + _controlChat.width, _controlChat.y);
+            _controlUsers.setSize(_controlUsers.width, _controlChat.height);
+            _controlUsers.resize();
 
-            controlCreate = new PushButton();
-            controlCreate.label = "Create Room";
-            controlCreate.setSize(controlRooms.width, controlChat.controlInput.height);
-            controlCreate.move(controlRooms.x, controlRooms.y + controlRooms.height);
-            controlCreate.addEventListener(MouseEvent.CLICK, onCreateRoomClick);
-            window.addChild(controlCreate);
+            _controlCreate = new PushButton();
+            _controlCreate.label = "Create Room";
+            _controlCreate.setSize(_controlRooms.width, _controlChat.inputHeight);
+            _controlCreate.move(_controlRooms.x, _controlRooms.y + _controlRooms.height);
+            _controlCreate.addEventListener(MouseEvent.CLICK, onCreateRoomClick);
+            window.addChild(_controlCreate);
 
-            window.width = controlUsers.x + controlUsers.width;
-            window.height = window.titleBar.height + controlChat.y + controlChat.height;
+            window.width = _controlUsers.x + _controlUsers.width;
+            window.height = window.titleBar.height + _controlChat.y + _controlChat.height;
 
-            connection.addEventListener(Multiplayer.EVENT_SERVER_MESSAGE, onServerMessageEvent);
-            connection.addEventListener(Multiplayer.EVENT_CONNECTION, onConnectionEvent);
-            connection.addEventListener(Multiplayer.EVENT_LOGIN, onLoginEvent);
-            connection.addEventListener(Multiplayer.EVENT_ROOM_JOINED, onRoomJoinedEvent);
-            connection.addEventListener(Multiplayer.EVENT_ROOM_LEFT, onRoomLeftEvent);
-            connection.addEventListener(Multiplayer.EVENT_ROOM_LIST, onRoomListEvent);
-            connection.addEventListener(Multiplayer.EVENT_ROOM_USER_STATUS, onRoomUserStatusEvent);
-            connection.addGameUpdateCallback(onRoomUpdateEvent);
+            _connection.addEventListener(Multiplayer.EVENT_SERVER_MESSAGE, onServerMessageEvent);
+            _connection.addEventListener(Multiplayer.EVENT_CONNECTION, onConnectionEvent);
+            _connection.addEventListener(Multiplayer.EVENT_LOGIN, onLoginEvent);
+            _connection.addEventListener(Multiplayer.EVENT_ROOM_JOINED, onRoomJoinedEvent);
+            _connection.addEventListener(Multiplayer.EVENT_ROOM_LEFT, onRoomLeftEvent);
+            _connection.addEventListener(Multiplayer.EVENT_ROOM_LIST, onRoomListEvent);
+            _connection.addEventListener(Multiplayer.EVENT_ROOM_USER_STATUS, onRoomUserStatusEvent);
+            _connection.addGameUpdateCallback(onRoomUpdateEvent);
 
             window.addEventListener(Event.CLOSE, onCloseEvent);
 
-            buttonMP = new BoxButton(this, 5, Main.GAME_HEIGHT - 30, 130, 25, "Connect", 12, onClickMP);
-            showButton(buttonMP, false);
+            _buttonMP = new BoxButton(this, 5, Main.GAME_HEIGHT - 30, 130, 25, "Connect", 12, onClickMP);
+            showButton(_buttonMP, false);
 
-            buttonDisconnect = new BoxButton(null, buttonMP.x, buttonMP.y, buttonMP.width, buttonMP.height, "Disconnect", 12, onClickDisconnect);
+            _buttonDisconnect = new BoxButton(null, _buttonMP.x, _buttonMP.y, _buttonMP.width, _buttonMP.height, "Disconnect", 12, onClickDisconnect);
 
-            throbber = new Throbber();
-            throbber.x = Main.GAME_WIDTH / 2;
-            throbber.y = Main.GAME_HEIGHT / 2;
+            _throbber = new Throbber();
+            _throbber.x = Main.GAME_WIDTH / 2;
+            _throbber.y = Main.GAME_HEIGHT / 2;
             showThrobber();
-            addChild(throbber);
+            addChild(_throbber);
 
-            updateTimer = new Timer(5000);
-            updateTimer.addEventListener(TimerEvent.TIMER, onUpdateTimer);
+            _updateTimer = new Timer(5000);
+            _updateTimer.addEventListener(TimerEvent.TIMER, onUpdateTimer);
         }
 
         public function get currentUser():User
         {
-            return connection.currentUser;
+            return _connection.currentUser;
         }
 
         private function onRoomDoubleClick(event:MouseEvent):void
         {
-            if (controlRooms.selectedItem != null && controlRooms.selectedItem.data != null)
+            if (_controlRooms.selectedItem != null && _controlRooms.selectedItem.data != null)
             {
-                var room:Room = controlRooms.selectedItem.data;
+                var room:Room = _controlRooms.selectedItem.data;
                 joinRoom(room, true);
             }
         }
@@ -156,7 +152,7 @@ package arc.mp
         {
             function e_createRoom(roomName:String, password:String):void
             {
-                connection.createRoom(roomName, password);
+                _connection.createRoom(roomName, password);
             }
 
             new MPCreateRoomPrompt(this, 320, 120, e_createRoom);
@@ -169,9 +165,9 @@ package arc.mp
 
         private function onConnectionEvent(event:ConnectionEvent):void
         {
-            showButton(buttonDisconnect, connection.connected);
-            showButton(buttonMP, !connection.connected);
-            if (!connection.connected)
+            showButton(_buttonDisconnect, _connection.connected);
+            showButton(_buttonMP, !_connection.connected);
+            if (!_connection.connected)
                 hideThrobber();
         }
 
@@ -182,7 +178,7 @@ package arc.mp
 
         private function onRoomJoinedEvent(event:RoomJoinedEvent):void
         {
-            if (event.room == connection.lobby)
+            if (event.room == _connection.lobby)
             {
                 openWindow();
                 updateWindowTitle(event.room);
@@ -197,7 +193,7 @@ package arc.mp
 
         private function onRoomLeftEvent(event:RoomLeftEvent):void
         {
-            if (event.room == connection.lobby)
+            if (event.room == _connection.lobby)
                 closeWindow();
         }
 
@@ -205,8 +201,8 @@ package arc.mp
         {
             updateRooms();
 
-            controlChat.room = connection.lobby;
-            controlUsers.room = connection.lobby;
+            _controlChat.room = _connection.lobby;
+            _controlUsers.room = _connection.lobby;
         }
 
         private function onRoomUserStatusEvent(event:RoomUserStatusEvent):void
@@ -222,56 +218,56 @@ package arc.mp
 
         private function onCloseEvent(event:Event):void
         {
-            if (!connection.connected)
+            if (!_connection.connected)
             {
                 closeWindow();
                 return;
             }
 
             var inGame:Boolean = false;
-            for each (var room:Room in connection.rooms)
+            for each (var room:Room in _connection.rooms)
             {
-                if (room.hasUser(currentUser) && room != connection.lobby)
+                if (room.hasUser(currentUser) && room != _connection.lobby)
                     inGame = true;
             }
 
             if (inGame)
-                connection.leaveRoom(connection.lobby);
+                _connection.leaveRoom(_connection.lobby);
             else
             {
                 closeWindow();
-                connection.disconnect();
+                _connection.disconnect();
             }
         }
 
         private function onClickMP(event:MouseEvent):void
         {
-            if (connection.connected)
-                connection.disconnect();
+            if (_connection.connected)
+                _connection.disconnect();
 
-            connection.connect();
+            _connection.connect();
             showThrobber();
         }
 
         private function onClickDisconnect(event:MouseEvent):void
         {
-            if (connection.connected)
-                connection.disconnect();
+            if (_connection.connected)
+                _connection.disconnect();
         }
 
         private function onClickJoinLobby(event:MouseEvent):void
         {
-            connection.joinLobby();
+            _connection.joinLobby();
         }
 
         private function onUpdateTimer(event:TimerEvent):void
         {
-            if (connection.connected)
+            if (_connection.connected)
             {
-                updateWindowTitle(connection.lobby);
+                updateWindowTitle(_connection.lobby);
 
-                if (!MultiplayerState.getInstance().gameplayPlayingStatus())
-                    connection.refreshRooms();
+                if (!MultiplayerState.instance.gameplayPlayingStatus())
+                    _connection.refreshRooms();
             }
         }
 
@@ -297,7 +293,7 @@ package arc.mp
         private function nukeRoom(event:ContextMenuEvent):void
         {
             var room:Room = getContextMenuEventRoom(event);
-            connection.nukeRoom(room);
+            _connection.nukeRoom(room);
         }
 
         public function buildContextMenu():void
@@ -315,20 +311,20 @@ package arc.mp
                 contextMenu.customItems.push(nukeRoomItem);
             }
 
-            controlRooms.contextMenu = contextMenu;
+            _controlRooms.contextMenu = contextMenu;
         }
 
         private function joinRoom(room:Room, asPlayer:Boolean):void
         {
             function e_joinRoomPassword(password:String):void
             {
-                connection.joinRoom(room, asPlayer, password);
+                _connection.joinRoom(room, asPlayer, password);
             }
 
             if (room.isPrivate)
                 new Prompt(this, 320, "Password: " + room.name, 100, "SUBMIT", e_joinRoomPassword, true);
             else
-                connection.joinRoom(room, asPlayer);
+                _connection.joinRoom(room, asPlayer);
         }
 
         private function updateRoomPanel(room:Room):void
@@ -336,12 +332,12 @@ package arc.mp
             if (window.parent == null)
                 return;
 
-            for each (var item:Object in controlRooms.items)
+            for each (var item:Object in _controlRooms.items)
             {
                 if (item.data == room)
                 {
                     item.label = nameRoom(room);
-                    controlRooms.items = controlRooms.items;
+                    _controlRooms.items = _controlRooms.items;
                     break;
                 }
             }
@@ -353,20 +349,20 @@ package arc.mp
         private function updateRooms():void
         {
             var items:Array = [];
-            for each (var room:Room in connection.rooms)
+            for each (var room:Room in _connection.rooms)
             {
                 if (room.isGameRoom)
                     items.push({label: nameRoom(room), labelhtml: true, data: room});
             }
-            updateWindowTitle(connection.lobby);
-            controlRooms.items = items;
-            controlRooms.listItemClass = controlRooms.listItemClass;
+            updateWindowTitle(_connection.lobby);
+            _controlRooms.items = items;
+            _controlRooms.listItemClass = _controlRooms.listItemClass;
         }
 
         public function updateWindowTitle(room:Room):void
         {
             if (room != null)
-                window.title = Multiplayer.GAME_VERSION + " " + room.name + " - Rooms: " + (connection.rooms.length - 2) + " - Players: " + room.userCount;
+                window.title = Multiplayer.GAME_VERSION + " " + room.name + " - Rooms: " + (_connection.rooms.length - 2) + " - Players: " + room.userCount;
         }
 
         private function nameRoom(room:Room):String
@@ -389,11 +385,6 @@ package arc.mp
             return roomPopulationString + " " + HtmlUtil.escape(isPrivateString + room.name);
         }
 
-        public function setParent(value:MenuPanel):void
-        {
-            super.parentPanel = value;
-        }
-
         private function showButton(button:BoxButton, show:Boolean):void
         {
             if (button == null)
@@ -407,12 +398,12 @@ package arc.mp
 
         public function hideBackground(show:Boolean = false):void
         {
-            if (buttonMP != null)
-                buttonMP.visible = show;
-            if (buttonDisconnect != null)
-                buttonDisconnect.visible = show;
-            if (textLogin != null)
-                textLogin.visible = show;
+            if (_buttonMP != null)
+                _buttonMP.visible = show;
+            if (_buttonDisconnect != null)
+                _buttonDisconnect.visible = show;
+            if (_textLogin != null)
+                _textLogin.visible = show;
             if (window != null)
                 window.visible = show;
         }
@@ -458,33 +449,33 @@ package arc.mp
             window.y = 50; // Main.GAME_HEIGHT / 2 - window.height / 1.75;
 
             addChild(window);
-            controlChat.redraw();
-            controlChat.focus();
-            updateTimer.start();
+            _controlChat.redraw();
+            _controlChat.focus();
+            _updateTimer.start();
         }
 
         public function closeWindow():void
         {
             if (window.parent == this)
                 removeChild(window);
-            updateTimer.stop();
+            _updateTimer.stop();
         }
 
         private function showThrobber():void
         {
-            if (throbber != null)
+            if (_throbber != null)
             {
-                throbber.visible = true;
-                throbber.start();
+                _throbber.visible = true;
+                _throbber.start();
             }
         }
 
         private function hideThrobber():void
         {
-            if (throbber != null)
+            if (_throbber != null)
             {
-                throbber.visible = false;
-                throbber.stop();
+                _throbber.visible = false;
+                _throbber.stop();
             }
         }
     }

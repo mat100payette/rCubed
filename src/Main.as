@@ -9,6 +9,7 @@ package
         import flash.events.VsyncStateChangeAvailabilityEvent;
     }
 
+    import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import classes.Alert;
     import classes.Language;
@@ -17,8 +18,9 @@ package
     import classes.Site;
     import classes.User;
     import classes.ui.BoxButton;
-    import classes.ui.ProgressBar;
-    import classes.ui.Text;
+    import classes.ui.EpilepsyWarning;
+    import classes.ui.PreloaderStatusBar;
+    import classes.ui.VersionText;
     import com.flashdynamix.utils.SWFProfiler;
     import com.flashfla.utils.ObjectUtil;
     import com.flashfla.utils.SystemUtil;
@@ -33,11 +35,7 @@ package
     import flash.events.Event;
     import flash.events.KeyboardEvent;
     import flash.events.NativeWindowBoundsEvent;
-    import flash.system.Capabilities;
-    import flash.text.AntiAliasType;
     import flash.text.TextField;
-    import flash.text.TextFieldAutoSize;
-    import flash.text.TextFormatAlign;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
@@ -53,69 +51,63 @@ package
     {
         public static const GAME_WIDTH:int = 780;
         public static const GAME_HEIGHT:int = 480;
-        public static const GAME_UPDATE_PANEL:String = "GameAirUpdatePanel";
-        public static const GAME_LOGIN_PANEL:String = "GameLoginPanel";
-        public static const GAME_MENU_PANEL:String = "GameMenuPanel";
-        public static const GAME_PLAY_PANEL:String = "GamePlayPanel";
-        public static const POPUP_OPTIONS:String = "PopupOptions";
-        public static const POPUP_HELP:String = "PopupHelp";
-        public static const POPUP_REPLAY_HISTORY:String = "PopupReplayHistory";
+
         public static const EVENT_PANEL_SWITCHED:String = "MainEventSwitched";
 
         public static var WINDOW_WIDTH_EXTRA:Number = 0;
         public static var WINDOW_HEIGHT_EXTRA:Number = 0;
 
-        public var _lang:Language = Language.instance;
-        public var _gvars:GlobalVariables = GlobalVariables.instance;
-        public var _site:Site = Site.instance;
-        public var _playlist:Playlist = Playlist.instance;
-        //public var _friends:Friends = Friends.instance;
-        public var _noteskinList:NoteskinsList = NoteskinsList.instance;
+        private var _lang:Language = Language.instance;
+        private var _gvars:GlobalVariables = GlobalVariables.instance;
+        private var _site:Site = Site.instance;
+        private var _playlist:Playlist = Playlist.instance;
+        private var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
-        public var loadTimer:int = 0;
-        public var preloader:ProgressBar;
-        public var loadScripts:uint = 0;
-        public var loadTotal:uint;
-        public var isLoginLoad:Boolean = false;
-        public var loadComplete:Boolean = false;
-        public var retryLoadButton:BoxButton;
-        public var disablePopups:Boolean = false;
+        private var _loadTimer:int = 0;
+        private var _preloader:PreloaderStatusBar;
+        private var _loadScripts:uint = 0;
+        private var _loadTotal:uint;
+        private var _isLoginLoad:Boolean = false;
+        private var _retryLoadButton:BoxButton;
+        private var _epilepsyWarning:EpilepsyWarning;
+        private var _popupQueue:Array = [];
+        private var _lastPanel:MenuPanel;
+
+        private var _panelMediator:PanelMediator;
+
         public var ignoreWindowChanges:Boolean = false;
+        public var loadComplete:Boolean = false;
+        public var disablePopups:Boolean = false;
 
-        private var popupQueue:Array = [];
-        private var lastPanel:MenuPanel;
         public var activePanel:MenuPanel;
-
         public var activePanelName:String;
 
-        public var loadStatus:TextField;
-        public var epilepsyWarning:TextField;
-
-        public var ver:Text;
+        public var versionText:VersionText;
         public var bg:GameBackgroundColor
 
         ///- Constructor
         public function Main():void
         {
-            super(this);
+            super();
+
+            _panelMediator = new PanelMediator(changePanel, addPopupr);
 
             //- Set GlobalVariables Stage
             _gvars.gameMain = this;
 
+            // Sometimes AIR doesn't load the stage right away.
             if (stage)
                 gameInit();
             else
-                this.addEventListener(Event.ADDED_TO_STAGE, gameInit);
+                addEventListener(Event.ADDED_TO_STAGE, function _init(e:Event):void
+                {
+                    removeEventListener(Event.ADDED_TO_STAGE, _init);
+                    gameInit();
+                });
         }
 
-        private function gameInit(e:Event = null):void
+        private function gameInit():void
         {
-            //- Remove Stage Listener
-            if (e != null)
-            {
-                this.removeEventListener(Event.ADDED_TO_STAGE, gameInit);
-            }
-
             //- Static Class Init
             Logger.init();
             AirContext.initFolders();
@@ -163,44 +155,19 @@ package
             _gvars.loadMenuMusic();
 
             //- Background
-            this.stage.color = 0x000000;
-
+            stage.color = 0x000000;
             bg = new GameBackgroundColor();
-            this.addChild(bg);
+            addChild(bg);
 
             //- Epilepsy Warning
-            epilepsyWarning = new TextField();
-            epilepsyWarning.x = 10;
-            epilepsyWarning.y = stage.stageHeight * 0.15;
-            epilepsyWarning.width = GAME_WIDTH - 20;
-            epilepsyWarning.selectable = false;
-            epilepsyWarning.embedFonts = true;
-            epilepsyWarning.antiAliasType = AntiAliasType.ADVANCED;
-            epilepsyWarning.defaultTextFormat = Constant.TEXT_FORMAT_CENTER;
-            epilepsyWarning.textColor = 0xFFFFFF;
-            epilepsyWarning.alpha = 0.2;
-            epilepsyWarning.text = "WARNING: This game may potentially trigger seizures for people with photosensitive epilepsy.\nGamer discretion is advised."
-            this.addChild(epilepsyWarning);
+            _epilepsyWarning = new EpilepsyWarning(10, stage.stageHeight * 0.15, GAME_WIDTH - 20);
+            addChild(_epilepsyWarning);
 
-            TweenMax.to(epilepsyWarning, 1, {alpha: 0.6, ease: SineInOut, yoyo: true, repeat: -1});
+            TweenMax.to(_epilepsyWarning, 1, {alpha: 0.6, ease: SineInOut, yoyo: true, repeat: -1});
 
             //- Add Debug Tracking
-            ver = new Text(this, stage.width - 5, 2, Capabilities.version.replace(/,/g, ".") + " - Build " + CONFIG::timeStamp + " - " + Constant.AIR_VERSION);
-            ver.alpha = 0.15;
-            ver.align = TextFormatAlign.RIGHT;
-            ver.mouseEnabled = false;
-            ver.cacheAsBitmap = true;
-
-            // Holidays!
-            var d:Date = new Date();
-            if (d.getMonth() == 0 && d.getDate() == 1)
-                ver.text = "Happy New Year! - " + ver.text;
-            if (d.getMonth() == 9 && d.getDate() == 31)
-                ver.text = "Happy Halloween! - " + ver.text;
-            if (d.getMonth() == 11 && d.getDate() == 25)
-                ver.text = "Merry Christmas! - " + ver.text;
-            if (d.getMonth() == 10 && d.getDate() == 6)
-                ver.text = "Happy Birthday Velocity! - " + ver.text;
+            versionText = new VersionText(stage.width - 5, 2);
+            addChild(versionText);
 
             //- Build global right-click context menu
             buildContextMenu();
@@ -211,16 +178,11 @@ package
             //- Load Game Data
             loadGameData();
 
-            //- Flashvars
-            //CONFIG::debug { _gvars.flashvars = { replay: "366743"};} //, replaySkip: "1"
-            //CONFIG::debug { _gvars.flashvars = { preview_file: 2283};} //, replaySkip: "1"
-            //CONFIG::debug { _gvars.flashvars = { "__forceLogin": true };} // Login, then on the second go at the login screen, press guest. This should let me test multiple users without dealing with IE. :D
-
             //- Key listener
             stage.addEventListener(KeyboardEvent.KEY_DOWN, keyboardKeyDown, false, 0, true);
-            stage.focus = this.stage;
+            stage.focus = stage;
 
-            //- No Reason
+            //- Notify if running dev build
             CONFIG::debug
             {
                 Alert.add("Development Build - " + CONFIG::timeStamp + " - NOT FOR RELEASE", 120, Alert.RED);
@@ -238,7 +200,7 @@ package
             cm.customItems.push(fscmi);
 
             //- Assign Menu Context
-            this.contextMenu = cm;
+            contextMenu = cm;
 
             //- Profiler
             SWFProfiler.init(stage, this);
@@ -252,6 +214,8 @@ package
         ///- Window Methods
         private function e_onNativeShutdown(e:Event):void
         {
+            _panelMediator.dispose();
+
             Logger.destroy();
             LocalOptions.flush();
             _gvars.onNativeProcessClose(e);
@@ -263,6 +227,7 @@ package
             _gvars.airWindowProperties.height = stage.nativeWindow.height - Main.WINDOW_HEIGHT_EXTRA;
             _gvars.airWindowProperties.x = stage.nativeWindow.x;
             _gvars.airWindowProperties.y = stage.nativeWindow.y;
+
             LocalOptions.setVariable("window_properties", _gvars.airWindowProperties);
         }
 
@@ -280,46 +245,25 @@ package
         CONFIG::vsync
         public function e_onVsyncStateChangeAvailability(event:VsyncStateChangeAvailabilityEvent):void
         {
-            if (event.available)
-            {
-                stage.vsyncEnabled = _gvars.air_useVSync;
-            }
-            else
-            {
-                stage.vsyncEnabled = true;
-            }
+            stage.vsyncEnabled = event.available ? _gvars.air_useVSync : true;
         }
 
 
         ///- Preloader
         public function buildPreloader():void
         {
-            //- Status Display
-            loadStatus = new TextField();
-            loadStatus.x = 8;
-            loadStatus.y = GAME_HEIGHT - ((isLoginLoad) ? 118 : 155);
-            loadStatus.width = GAME_WIDTH - 20;
-            loadStatus.selectable = false;
-            loadStatus.embedFonts = true;
-            loadStatus.antiAliasType = AntiAliasType.ADVANCED;
-            loadStatus.autoSize = TextFieldAutoSize.LEFT;
-            loadStatus.defaultTextFormat = Constant.TEXT_FORMAT;
-            this.addChild(loadStatus);
-
-            //- Preloader Display
-            preloader = new ProgressBar(this, 10, GAME_HEIGHT - 30, GAME_WIDTH - 20, 20);
-
-            //- Frame Listener
-            this.addEventListener(Event.ENTER_FRAME, updatePreloader);
+            _preloader = new PreloaderStatusBar(8, GAME_HEIGHT - 30, GAME_WIDTH - 20, _isLoginLoad ? 88 : 125);
+            addChild(_preloader);
+            addEventListener(Event.ENTER_FRAME, updatePreloader);
         }
 
         ///- Game Data
         public function loadGameData():void
         {
-            loadTotal = (!isLoginLoad) ? 5 : 3;
+            _loadTotal = (!_isLoginLoad) ? 5 : 3;
 
             _gvars.playerUser = new User(true);
-            _gvars.playerUser.loadFull(_gvars.userSession);
+            _gvars.playerUser.loadFull(_gvars.userSession, onUserLoggedIn);
             _gvars.activeUser = _gvars.playerUser;
             _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
             _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
@@ -331,7 +275,7 @@ package
             _site.load();
             _playlist.load();
 
-            if (!isLoginLoad)
+            if (!_isLoginLoad)
             {
                 _lang.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
                 _lang.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
@@ -341,25 +285,26 @@ package
                 _noteskinList.load();
             }
 
-            //_friends.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            //_friends.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-            //_friends.load();
-
             // Update Text
             updateLoaderText();
         }
 
-        private function gameScriptLoad(e:Event = null):void
+        private function onUserLoggedIn(username:String, password:String):void
+        {
+            MultiplayerState.instance.setUserCredentials(username, password);
+        }
+
+        private function gameScriptLoad(e:Event):void
         {
             e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
             e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-            loadScripts++;
+            _loadScripts++;
 
             // Update Text
             updateLoaderText();
         }
 
-        private function gameScriptLoadError(e:Event = null):void
+        private function gameScriptLoadError(e:Event):void
         {
             e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
             e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
@@ -370,9 +315,22 @@ package
 
         private function updateLoaderText():void
         {
-            if (loadStatus != null)
+            if (_preloader.text != null)
             {
-                loadStatus.htmlText = "Total: " + loadScripts + " / " + loadTotal + "\n" + "Playlist: " + getLoadText(_playlist.isLoaded(), _playlist.isError()) + "\n" + "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n" + "Site Data: " + getLoadText(_site.isLoaded(), _site.isError()) + ((!isLoginLoad) ? ("\n" + "Noteskin Data: " + getLoadText(_noteskinList.isLoaded(), _noteskinList.isError()) + "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())) : "");
+                var updatedText:String = "";
+
+                updatedText += "Total: " + _loadScripts + " / " + _loadTotal + "\n";
+                updatedText += "Playlist: " + getLoadText(_playlist.isLoaded(), _playlist.isError()) + "\n";
+                updatedText += "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n";
+                updatedText += "Site Data: " + getLoadText(_site.isLoaded(), _site.isError());
+
+                if (!_isLoginLoad)
+                {
+                    updatedText += "\n" + "Noteskin Data: " + getLoadText(_noteskinList.isLoaded(), _noteskinList.isError());
+                    updatedText += "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())
+                }
+
+                _preloader.text.htmlText = updatedText;
             }
         }
 
@@ -384,7 +342,7 @@ package
                 return "<font color=\"#C4FFCD\">Complete</font>";
 
             var cycle:int = 35;
-            return "Loading." + ((loadTimer % cycle > cycle / 3) ? "." : "") + ((loadTimer % cycle > cycle / 1.5) ? "." : "");
+            return "Loading." + ((_loadTimer % cycle > cycle / 3) ? "." : "") + ((_loadTimer % cycle > cycle / 1.5) ? "." : "");
         }
 
         ///- PreloaderHandlers
@@ -393,20 +351,20 @@ package
             // Update Text
             updateLoaderText();
 
-            loadTimer++;
-            preloader.update(loadScripts / loadTotal);
-            if (loadTimer >= 300 && !retryLoadButton)
+            _loadTimer++;
+            _preloader.bar.update(_loadScripts / _loadTotal);
+            if (_loadTimer >= 300 && !_retryLoadButton)
             {
-                retryLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, preloader.y - 35, 75, 25, "RELOAD", 12, e_retryClick);
+                _retryLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, _preloader.y - 35, 75, 25, "RELOAD", 12, e_retryClick);
             }
 
-            if (preloader.isComplete)
+            if (_preloader.bar.isComplete)
             {
                 loadComplete = true;
-                if (retryLoadButton && this.contains(retryLoadButton))
+                if (_retryLoadButton && contains(_retryLoadButton))
                 {
-                    removeChild(retryLoadButton);
-                    retryLoadButton.dispose();
+                    removeChild(_retryLoadButton);
+                    _retryLoadButton.dispose();
                 }
 
                 buildContextMenu();
@@ -427,7 +385,7 @@ package
                                 preloader.remove();
                                 removeChild(loadStatus);
                                 removeChild(epilepsyWarning);
-                                this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
+                                removeEventListener(Event.ENTER_FRAME, updatePreloader);
 
                                 // Switch to game
                                 switchTo(GAME_UPDATE_PANEL);
@@ -441,15 +399,20 @@ package
                     }
                 }
 
-                loadScripts = 0;
-                preloader.remove();
-                removeChild(loadStatus);
-                this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
+                _loadScripts = 0;
+                _preloader.bar.remove();
+                removeChild(_preloader);
+                removeEventListener(Event.ENTER_FRAME, updatePreloader);
+
                 _playlist.updateSongAccess();
                 _playlist.updatePublicSongsCount();
                 _gvars.loadUserSongData();
+
                 // TODO: Validate this switchTo logic
-                switchTo(_gvars.activeUser.isGuest ? GAME_LOGIN_PANEL : GAME_MENU_PANEL);
+                if (_gvars.activeUser.isGuest)
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
+                else
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
             }
         }
 
@@ -475,14 +438,7 @@ package
                 _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
                 _gvars.activeUser.loadFull(_gvars.userSession);
             }
-            /*
-               if (!_friends.isLoaded()) {
-               _friends.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-               _friends.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-               _friends.load();
-               }
-             */
-            if (!isLoginLoad)
+            if (!_isLoginLoad)
             {
                 if (!_noteskinList.isLoaded())
                 {
@@ -503,23 +459,25 @@ package
         }
 
         ///- Panels
-        override public function switchTo(_panel:String, useNew:Boolean = false):Boolean
+        private function changePanel(e:ChangePanelEvent):Boolean
         {
+            var panelName:String = e.panelName;
+
             var isFound:Boolean = false;
             var nextPanel:MenuPanel;
 
-            if (_panel == "none")
+            if (panelName == "none")
             {
                 // Make background force displayed.
                 bg.updateDisplay();
-                ver.visible = true;
+                versionText.visible = true;
 
                 //- Remove last panel if exist
                 if (activePanel != null)
                     TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: removeLastPanel, onCompleteParams: [activePanel]});
 
                 // Only load data that depend on the global session token after logging in
-                this.isLoginLoad = true;
+                _isLoginLoad = true;
 
                 //- Build Preloader
                 buildPreloader();
@@ -531,40 +489,38 @@ package
             }
 
             //- Add Requested Panel
-            switch (_panel)
+            switch (panelName)
             {
-                case GAME_UPDATE_PANEL:
-                    nextPanel = new AirUpdater(this);
+                case PanelMediator.PANEL_GAME_UPDATE:
+                    nextPanel = new AirUpdater();
                     isFound = true;
                     break;
 
-                case GAME_LOGIN_PANEL:
-                    nextPanel = new LoginMenu(this);
+                case PanelMediator.PANEL_GAME_LOGIN:
+                    nextPanel = new LoginMenu();
                     isFound = true;
                     break;
 
-                case GAME_MENU_PANEL:
-                    nextPanel = new MainMenu(this);
+                case PanelMediator.PANEL_GAME_MENU:
+                    nextPanel = new MainMenu();
                     isFound = true;
 
-                    if (this.contains(epilepsyWarning))
-                    {
-                        removeChild(epilepsyWarning);
-                    }
+                    if (contains(_epilepsyWarning))
+                        removeChild(_epilepsyWarning);
 
                     break;
 
-                case GAME_PLAY_PANEL:
-                    nextPanel = new GameMenu(this);
+                case PanelMediator.PANEL_GAME_PLAY:
+                    nextPanel = new GameMenu();
                     isFound = true;
                     break;
             }
 
             // Show Background
-            if (_panel != GAME_PLAY_PANEL)
+            if (panelName != PanelMediator.PANEL_GAME_PLAY)
             {
                 bg.visible = true;
-                ver.visible = true;
+                versionText.visible = true;
             }
 
             if (isFound)
@@ -580,19 +536,20 @@ package
                 activePanel = nextPanel;
                 activePanel.alpha = 0;
 
-                this.addChildAt(activePanel, 2);
+                addChildAt(activePanel, 1);
                 if (!activePanel.hasInit)
                 {
                     activePanel.init();
                     activePanel.hasInit = true;
                 }
+
                 activePanel.stageAdd();
                 TweenLite.to(activePanel, 0.5, {alpha: 1});
             }
 
             if (isFound)
             {
-                this.activePanelName = _panel;
+                activePanelName = panelName;
                 dispatchEvent(new Event(EVENT_PANEL_SWITCHED));
             }
 
@@ -604,120 +561,71 @@ package
             if (removePanel)
             {
                 removePanel.dispose();
-                if (this.contains(removePanel))
-                {
-                    this.removeChild(removePanel);
-                }
+                if (contains(removePanel))
+                    removeChild(removePanel);
+
                 removePanel = null;
             }
             SystemUtil.gc();
         }
 
         ///- Popups
-        override public function addPopup(_panel:*, newLayer:Boolean = false):void
+        public function addPopupr(popupName:String, overlay:Boolean = false):void
         {
-            if (newLayer && _panel is MenuPanel)
-            {
-                removeChildClass(ObjectUtil.getClass(_panel));
-                this.addChild(_panel);
-                if (!_panel.hasInit)
-                {
-                    _panel.init();
-                    _panel.hasInit = true;
-                }
-                _panel.stageAdd();
-            }
-            else
-            {
-                if (current_popup)
-                {
-                    removePopup();
-                }
+            var popup:MenuPanel;
 
-                //- Add Requested Popop
-                if (_panel is String)
-                {
-                    switch (_panel)
-                    {
-                        case POPUP_OPTIONS:
-                            current_popup = new SettingsWindow(this, _gvars.activeUser);
-                            break;
-                        case POPUP_HELP:
-                            current_popup = new PopupHelp(this);
-                            break;
-                        case POPUP_REPLAY_HISTORY:
-                            current_popup = new ReplayHistoryWindow(this);
-                            break;
-                    }
-                }
-                else if (_panel is MenuPanel)
-                {
-                    current_popup = _panel;
-                }
-                this.addChildAt(current_popup, 3);
-                if (!current_popup.hasInit)
-                {
-                    current_popup.init();
-                    current_popup.hasInit = true;
-                }
-                current_popup.stageAdd();
+            switch (popupName)
+            {
+                case PanelMediator.POPUP_OPTIONS:
+                    popup = new SettingsWindow(_gvars.activeUser);
+                    break;
+                case PanelMediator.POPUP_HELP:
+                    popup = new PopupHelp();
+                    break;
+                case PanelMediator.POPUP_REPLAY_HISTORY:
+                    popup = new ReplayHistoryWindow();
+                    break;
             }
+
+            addChildAt(popup, 2);
+            if (!popup.hasInit)
+            {
+                popup.init();
+                popup.hasInit = true;
+            }
+
+            popup.stageAdd();
         }
 
         public function addPopupQueue(_panel:*, newLayer:Boolean = false):void
         {
-            popupQueue.push({"panel": _panel, "layer": newLayer});
+            _popupQueue.push({"panel": _panel, "layer": newLayer});
         }
 
-        public function displayPopupQueue():void
+        public function removePopudp():void
         {
-            if (popupQueue.length > 0)
-            {
-                var pop:Object = popupQueue.shift();
-                addPopup(pop["panel"], pop["layer"]);
-            }
-        }
-
-        override public function removePopup():void
-        {
-            if (current_popup)
-            {
-                current_popup.stageRemove();
-                if (this.contains(current_popup))
-                    this.removeChild(current_popup);
-                current_popup = null;
-            }
-            stage.focus = this.stage;
+            stage.focus = stage;
             SystemUtil.gc();
-            displayPopupQueue();
         }
 
         private function removeChildClass(clazz:Class):void
         {
-            for (var i:int = 0; i < this.numChildren; i++)
+            for (var i:int = 0; i < numChildren; i++)
             {
-                if (this.getChildAt(i) is clazz)
+                if (getChildAt(i) is clazz)
                 {
-                    this.removeChildAt(i);
+                    removeChildAt(i);
                     break;
                 }
             }
         }
 
         ///- Fullscreen Handling
-        private function toggleContextPopup(e:Event = null):void
+        private function toggleContextPopup(e:Event):void
         {
-            if (current_popup is PopupContextMenu)
-            {
-                removePopup();
-            }
-            else
-            {
-                if (!disablePopups)
-                {
-                    addPopup(new PopupContextMenu(this));
-                }
-            }
+            if (!disablePopups)
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_CONTEXT_MENU));
+            //addPopup(new PopupContextMenu());
         }
 
         ///- Key Handling
@@ -729,40 +637,19 @@ package
                 // Options
                 if (keyCode == _gvars.playerUser.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
                 {
-                    if (current_popup is SettingsWindow)
-                    {
-                        removePopup();
-                    }
-                    else
-                    {
-                        addPopup(Main.POPUP_OPTIONS);
-                    }
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
                 }
 
                 // Help Menu
                 else if (keyCode == Keyboard.F1)
                 {
-                    if (current_popup is PopupHelp)
-                    {
-                        removePopup();
-                    }
-                    else
-                    {
-                        addPopup(Main.POPUP_HELP);
-                    }
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_HELP));
                 }
 
                 // Replay History
                 else if (keyCode == Keyboard.F2)
                 {
-                    if (current_popup is ReplayHistoryWindow)
-                    {
-                        removePopup();
-                    }
-                    else
-                    {
-                        addPopup(Main.POPUP_REPLAY_HISTORY);
-                    }
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
                 }
             }
         }

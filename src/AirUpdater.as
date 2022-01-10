@@ -49,10 +49,8 @@ package
         private var totalFiles:int = 0;
         private var failFiles:int = 0;
 
-        public function AirUpdater(myParent:MenuPanel)
+        public function AirUpdater()
         {
-            super(myParent);
-
             updateList = [];
         }
 

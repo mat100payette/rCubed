@@ -58,7 +58,7 @@ package game
 
         private var graphCache:Object = {"0": {}, "1": {}};
 
-        private var _mp:MultiplayerState = MultiplayerState.getInstance();
+        private var _mp:MultiplayerState = MultiplayerState.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
@@ -98,9 +98,8 @@ package game
         private var navHighscores:BoxButton;
         private var navMenu:BoxButton;
 
-        public function GameResults(myParent:MenuPanel)
+        public function GameResults()
         {
-            super(myParent);
         }
 
         override public function init():Boolean
@@ -117,7 +116,7 @@ package game
             // More songs to play, jump to gameplay or loading.
             if (_gvars.songQueue.length > 0)
             {
-                switchTo(GameMenu.GAME_LOADING);
+                dispatchEvent(new ChangePanelEvent(GameMenu.GAME_LOADING));
                 return false;
             }
             else
@@ -253,7 +252,6 @@ package game
             displayGameResult(songResults.length > 1 ? -1 : 0);
 
             _mp.gameplayResults(this, songResults);
-            _gvars.gameMain.displayPopupQueue();
         }
 
         override public function stageRemove():void
@@ -677,7 +675,7 @@ package game
             var target:DisplayObject = e.target;
 
             // Don't do anything with popups open.
-            if (_gvars.gameMain.current_popup != null)
+            if (false)
                 return;
 
             // Handle Key events and click in the same function
@@ -743,12 +741,12 @@ package game
                 if (skipload)
                 {
                     _gvars.songRestarts++;
-                    switchTo(GameMenu.GAME_PLAY);
+                    dispatchEvent(new ChangePanelEvent(GameMenu.GAME_PLAY));
                 }
                 else
                 {
                     _gvars.songQueue = _gvars.totalSongQueue.concat();
-                    switchTo(GameMenu.GAME_LOADING);
+                    dispatchEvent(new ChangePanelEvent(GameMenu.GAME_LOADING));
                 }
             }
 
@@ -784,33 +782,36 @@ package game
                     _gvars.songQueue.push(selectedSong);
                     _gvars.options = new GameOptions(_gvars.activeUser);
                     _gvars.options.fill();
-                    switchTo(Main.GAME_PLAY_PANEL);
+
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
                 }
             }
 
             else if (target == navOptions)
             {
-                addPopup(Main.POPUP_OPTIONS);
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
             }
 
             else if (target == navHighscores)
             {
                 if (resultIndex >= 0)
                 {
-                    addPopup(new PopupHighscores(this, songResults[resultIndex].songInfo));
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_HIGHSCORES));
+                        //addPopup(new PopupHighscores(songResults[resultIndex].songInfo));
                 }
             }
 
             else if (target == navMenu)
             {
-                switchTo(Main.GAME_MENU_PANEL);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
             }
 
             else if (target == navRating)
             {
                 if (resultIndex >= 0)
                 {
-                    _gvars.gameMain.addPopup(new PopupSongNotes(this, songResults[resultIndex].songInfo));
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SONG_NOTES));
+                        //_gvars.gameMain.addPopup(new PopupSongNotes(songResults[resultIndex].songInfo));
                 }
             }
 
@@ -1010,7 +1011,7 @@ package game
                 // Server Message Popup
                 if (data.gServerMessageFull != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupMessage(this, data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : ""));
+                    _gvars.gameMain.addPopupQueue(new PopupMessage(data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : ""));
                 }
 
                 // Token Unlock
@@ -1018,13 +1019,13 @@ package game
                 {
                     for each (var token_item:Object in data.token_unlocks)
                     {
-                        _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(this, token_item.type, token_item.ID, token_item.text));
+                        _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(token_item.type, token_item.ID, token_item.text));
                         _gvars.unlockTokenById(token_item.type, token_item.ID);
                     }
                 }
                 else if (data.tUnlock != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(this, data.tType, data.tID, data.tText, data.tName, data.tMessage));
+                    _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(data.tType, data.tID, data.tText, data.tName, data.tMessage));
                     _gvars.unlockTokenById(data.tType, data.tID);
                 }
 
@@ -1095,10 +1096,6 @@ package game
                 _gvars.activeUser.credits += gameResult.credits;
 
                 Playlist.instanceCanon.updateSongAccess();
-
-                // Display Popup Queue
-                if (resultsDisplay != null)
-                    _gvars.gameMain.displayPopupQueue();
             }
             else
             {
@@ -1253,19 +1250,13 @@ package game
                 // Server Message Popup
                 if (data.gServerMessageFull != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupMessage(this, data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : ""));
+                    _gvars.gameMain.addPopupQueue(new PopupMessage(data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : ""));
                 }
 
                 // Token Unlock
                 if (data.tUnlock != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(this, data.tType, data.tID, data.tText, data.tName, data.tMessage));
-                }
-
-                // Display Popup Queue
-                if (resultsDisplay != null)
-                {
-                    _gvars.gameMain.displayPopupQueue();
+                    _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(data.tType, data.tID, data.tText, data.tName, data.tMessage));
                 }
             }
         }

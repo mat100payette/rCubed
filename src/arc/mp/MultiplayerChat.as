@@ -27,44 +27,44 @@ package arc.mp
 
     public class MultiplayerChat extends Component
     {
-        public var controlChat:TextArea;
-        public var controlInput:InputText;
+        private var _controlChat:TextArea;
+        private var _controlInput:InputText;
 
-        private var chatText:String = "";
-        private var canRedraw:Boolean = true;
-        private var chatScroll:Boolean = false;
-        private var chatScrollV:int;
-        private var chatFrameDelay:int;
+        private var _canRedraw:Boolean = true;
+        private var _chatText:String = "";
+        private var _chatScroll:Boolean = false;
+        private var _chatScrollV:int;
+        private var _chatFrameDelay:int;
 
         public var room:Room;
-        public var connection:Multiplayer;
+        private var _connection:Multiplayer;
 
-        public function MultiplayerChat(parent:DisplayObjectContainer, roomValue:Room)
+        public function MultiplayerChat(parent:DisplayObjectContainer, room:Room)
         {
             super(parent);
-            this.room = roomValue;
+            this.room = room;
 
-            connection = MultiplayerState.getInstance().connection;
+            _connection = MultiplayerState.instance.connection;
 
             setSize(400, 300);
 
-            controlChat = new TextArea();
-            controlChat.editable = false;
-            controlChat.html = true;
-            addChild(controlChat);
+            _controlChat = new TextArea();
+            _controlChat.editable = false;
+            _controlChat.html = true;
+            addChild(_controlChat);
 
-            controlInput = new InputText();
-            controlInput.addEventListener(KeyboardEvent.KEY_DOWN, onInputTextKeyDown);
-            addChild(controlInput);
+            _controlInput = new InputText();
+            _controlInput.addEventListener(KeyboardEvent.KEY_DOWN, onInputTextKeyDown);
+            addChild(_controlInput);
 
-            connection.addEventListener(Multiplayer.EVENT_SERVER_MESSAGE, onServerMessageEvent);
-            connection.addEventListener(Multiplayer.EVENT_XT_RESPONSE, onExtensionResponseEvent);
-            connection.addEventListener(Multiplayer.EVENT_MESSAGE, onMessageEvent);
-            connection.addEventListener(Multiplayer.EVENT_ROOM_USER, onRoomUserEvent);
-            connection.addEventListener(Multiplayer.EVENT_CONNECTION, onConnectionEvent);
-            connection.addEventListener(Multiplayer.EVENT_LOGIN, onLoginEvent);
-            connection.addEventListener(Multiplayer.EVENT_ROOM_JOINED, onRoomJoinedEvent);
-            connection.addEventListener(Multiplayer.EVENT_GAME_RESULTS, onGameResultsEvent);
+            _connection.addEventListener(Multiplayer.EVENT_SERVER_MESSAGE, onServerMessageEvent);
+            _connection.addEventListener(Multiplayer.EVENT_XT_RESPONSE, onExtensionResponseEvent);
+            _connection.addEventListener(Multiplayer.EVENT_MESSAGE, onMessageEvent);
+            _connection.addEventListener(Multiplayer.EVENT_ROOM_USER, onRoomUserEvent);
+            _connection.addEventListener(Multiplayer.EVENT_CONNECTION, onConnectionEvent);
+            _connection.addEventListener(Multiplayer.EVENT_LOGIN, onLoginEvent);
+            _connection.addEventListener(Multiplayer.EVENT_ROOM_JOINED, onRoomJoinedEvent);
+            _connection.addEventListener(Multiplayer.EVENT_GAME_RESULTS, onGameResultsEvent);
 
             GlobalVariables.instance.gameMain.addEventListener(Main.EVENT_PANEL_SWITCHED, checkRedraw);
 
@@ -77,8 +77,8 @@ package arc.mp
         {
             if (event.keyCode == Keyboard.ENTER)
             {
-                connection.sendMessage(room, controlInput.text);
-                controlInput.text = "";
+                _connection.sendMessage(room, _controlInput.text);
+                _controlInput.text = "";
             }
             event.stopPropagation();
         }
@@ -116,7 +116,7 @@ package arc.mp
 
         private function onConnectionEvent(event:ConnectionEvent):void
         {
-            if (!connection.connected && !event.isSolo)
+            if (!_connection.connected && !event.isSolo)
                 textAreaAddLine(textFormatDisconnect());
         }
 
@@ -139,60 +139,65 @@ package arc.mp
 
         private function checkRedraw(event:Event):void
         {
-            canRedraw = (GlobalVariables.instance.gameMain.activePanelName == Main.GAME_MENU_PANEL);
+            _canRedraw = (GlobalVariables.instance.gameMain.activePanelName == PanelMediator.PANEL_GAME_MENU);
             redraw()
         }
 
         public function resize():void
         {
-            controlInput.move(0, height - controlInput.height);
-            controlInput.setSize(width, controlInput.height);
+            _controlInput.move(0, height - _controlInput.height);
+            _controlInput.setSize(width, _controlInput.height);
 
-            controlChat.move(0, 0);
-            controlChat.setSize(width, controlInput.y);
+            _controlChat.move(0, 0);
+            _controlChat.setSize(width, _controlInput.y);
         }
 
         public function focus():void
         {
             if (stage)
             {
-                stage.focus = controlInput.textField;
-                controlInput.textField.setSelection(0, 0);
+                stage.focus = _controlInput.textField;
+                _controlInput.textField.setSelection(0, 0);
             }
         }
 
         public function broadcastServerMsg(event:ContextMenuEvent):void
         {
-            if (controlInput.text.length > 0)
+            if (_controlInput.text.length > 0)
                 return;
 
-            connection.sendServerMessage(controlInput.text);
-            controlInput.text = "";
+            _connection.sendServerMessage(_controlInput.text);
+            _controlInput.text = "";
         }
 
         public function broadcastRoomMsg(event:ContextMenuEvent):void
         {
-            if (controlInput.text.length > 0)
+            if (_controlInput.text.length > 0)
                 return;
 
-            connection.sendServerMessage(controlInput.text, room);
-            controlInput.text = "";
+            _connection.sendServerMessage(_controlInput.text, room);
+            _controlInput.text = "";
         }
 
         public function broadcastHtmlMsg(event:ContextMenuEvent):void
         {
-            if (controlInput.text.length > 0)
+            if (_controlInput.text.length > 0)
                 return;
 
-            connection.sendHTMLMessage(controlInput.text, room);
-            controlInput.text = "";
+            _connection.sendHTMLMessage(_controlInput.text, room);
+            _controlInput.text = "";
+        }
+
+        public function get inputHeight():int
+        {
+            return _controlInput.height;
         }
 
         public function buildContextMenu():void
         {
-            if (!connection.currentUser.isModerator)
+            if (!_connection.currentUser.isModerator)
             {
-                controlInput.contextMenu = controlInput.textField.contextMenu = null;
+                _controlInput.contextMenu = _controlInput.textField.contextMenu = null;
                 return;
             }
 
@@ -206,7 +211,7 @@ package arc.mp
             broadcastRoomItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, broadcastRoomMsg);
             contextMenu.customItems.push(broadcastRoomItem);
 
-            if (connection.currentUser.isAdmin)
+            if (_connection.currentUser.isAdmin)
             {
                 var broadcastHtmlItem:ContextMenuItem = new ContextMenuItem("Send HTML");
                 broadcastHtmlItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, broadcastHtmlMsg);
@@ -214,7 +219,7 @@ package arc.mp
             }
 
             contextMenu.clipboardMenu = true;
-            controlInput.contextMenu = controlInput.textField.contextMenu = contextMenu;
+            _controlInput.contextMenu = _controlInput.textField.contextMenu = contextMenu;
         }
 
         public function textAreaAddLine(message:String):void
@@ -222,11 +227,11 @@ package arc.mp
             if (message == null)
                 return;
 
-            chatScrollV = controlChat.textField.scrollV;
-            chatScroll ||= (chatScrollV == controlChat.textField.maxScrollV);
-            chatFrameDelay = 0;
+            _chatScrollV = _controlChat.textField.scrollV;
+            _chatScroll ||= (_chatScrollV == _controlChat.textField.maxScrollV);
+            _chatFrameDelay = 0;
 
-            chatText += (chatText.length == 0 ? "" : "\n");
+            _chatText += (_chatText.length == 0 ? "" : "\n");
             if (GlobalVariables.instance.activeUser.settings.displayMPTimestamp)
             {
                 var date:Date = new Date();
@@ -234,39 +239,39 @@ package arc.mp
                 var minutesStr:String = (date.minutes < 10 ? "0" : "") + date.minutes;
                 var ampmStr:String = (date.hours < 12 ? " AM" : " PM");
 
-                chatText += HtmlUtil.bold("[" + hoursStr + ":" + minutesStr + ampmStr + "] ");
+                _chatText += HtmlUtil.bold("[" + hoursStr + ":" + minutesStr + ampmStr + "] ");
             }
-            chatText += message;
+            _chatText += message;
             redraw();
         }
 
         public function redraw(force:Boolean = false):void
         {
             if (force)
-                canRedraw = true;
-            if (!canRedraw)
+                _canRedraw = true;
+            if (!_canRedraw)
                 return;
 
-            chatFrameDelay = 0;
-            controlChat.text = HtmlUtil.font(chatText, Style.fontName);
-            controlChat.draw();
-            controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
-            controlChat.addEventListener(Event.ENTER_FRAME, onRedrawFrame);
+            _chatFrameDelay = 0;
+            _controlChat.text = HtmlUtil.font(_chatText, Style.fontName);
+            _controlChat.draw();
+            _controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
+            _controlChat.addEventListener(Event.ENTER_FRAME, onRedrawFrame);
         }
 
         private function onRedrawFrame(event:Event):void
         {
-            chatFrameDelay++;
-            if (chatFrameDelay <= 2)
+            _chatFrameDelay++;
+            if (_chatFrameDelay <= 2)
                 return;
 
-            if (chatScroll)
+            if (_chatScroll)
             {
-                chatScrollV = controlChat.textField.maxScrollV;
-                chatScroll = false;
+                _chatScrollV = _controlChat.textField.maxScrollV;
+                _chatScroll = false;
             }
-            controlChat.textField.scrollV = chatScrollV;
-            controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
+            _controlChat.textField.scrollV = _chatScrollV;
+            _controlChat.removeEventListener(Event.ENTER_FRAME, onRedrawFrame);
         }
 
         public static function nameUser(user:User, format:Boolean = true):String

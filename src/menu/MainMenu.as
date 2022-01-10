@@ -76,9 +76,9 @@ package menu
         public var options:Object;
 
         ///- Constructor
-        public function MainMenu(myParent:MenuPanel)
+        public function MainMenu()
         {
-            super(myParent);
+            super();
 
             ArcGlobals.instance.resetConfig();
         }
@@ -121,7 +121,7 @@ package menu
                 }
             }
 
-            MultiplayerState.getInstance().gameplayCleanup();
+            MultiplayerState.instance.gameplayCleanup();
 
             //- Add Main Panel to Stage
             var targetMenu:String = "";
@@ -138,7 +138,7 @@ package menu
 
                     // Auto - Connect MP
                     if (playerStartup == 0 || playerStartup == 1)
-                        var pan:MultiplayerPanel = MultiplayerState.getInstance().getPanel(this);
+                        var pan:MultiplayerPanel = MultiplayerState.instance.getPanel();
 
                     if (playerStartup == 0)
                         targetMenu = MENU_MULTIPLAYER;
@@ -360,10 +360,10 @@ package menu
             }
         }
 
-        override public function switchTo(_panel:String, useNew:Boolean = false):Boolean
+        public function switchTo(panelName:String, useNew:Boolean = false):Boolean
         {
             //- Check Parent Function first.
-            if (super.switchTo(_panel, useNew))
+            if (true)
                 return true;
 
             //- Do current panel.
@@ -371,19 +371,20 @@ package menu
             var initValid:Boolean = false;
             var doStageAddAnyway:Boolean = false;
 
-            if (_panel == MENU_OPTIONS)
+            if (panelName == MENU_OPTIONS)
             {
-                addPopup(Main.POPUP_OPTIONS);
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
                 return true;
             }
-            else if (_panel == MENU_FILTERS)
+            else if (panelName == MENU_FILTERS)
             {
-                addPopup(new PopupFilterManager(this));
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
+                //addPopup(new PopupFilterManager());
                 return true;
             }
-            else if (_panel == MENU_REPLAYS)
+            else if (panelName == MENU_REPLAYS)
             {
-                addPopup(new ReplayHistoryWindow(this));
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
                 return true;
             }
 
@@ -393,11 +394,11 @@ package menu
                 this.removeChild(panel);
             }
 
-            switch (_panel)
+            switch (panelName)
             {
                 case MENU_SONGSELECTION:
                     if (_MenuSingleplayer == null || useNew)
-                        _MenuSingleplayer = new MenuSongSelection(this);
+                        _MenuSingleplayer = new MenuSongSelection();
                     panel = _MenuSingleplayer;
                     options.activePanel = 0;
                     isFound = true;
@@ -405,7 +406,8 @@ package menu
 
                 case MENU_MULTIPLAYER:
                     if (_MenuMultiplayer == null || useNew)
-                        _MenuMultiplayer = MultiplayerState.getInstance().getPanel(this); //_MenuMultiplayer = new MenuMultiplayer(this);
+                        _MenuMultiplayer = MultiplayerState.instance.getPanel();
+
                     panel = _MenuMultiplayer;
                     options.activePanel = 1;
                     isFound = true;
@@ -413,7 +415,7 @@ package menu
 
                 case MENU_TOKENS:
                     if (_MenuTokens == null || useNew)
-                        _MenuTokens = new MenuTokens(this);
+                        _MenuTokens = new MenuTokens();
                     panel = _MenuTokens;
                     options.activePanel = 2;
                     isFound = true;
@@ -504,7 +506,8 @@ package menu
                 var resp:Object = JSON.parse(e.target.data);
                 if (_gvars.gameMain.activePanel is MainMenu)
                 {
-                    _gvars.gameMain.addPopup(new PopupSkillRankUpdate(_gvars.gameMain, resp), true);
+                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SKILL_RANK_UPDATE));
+                    //_gvars.gameMain.addPopup(new PopupSkillRankUpdate(resp), true);
                     rankUpdateThrobber.stop();
                     rankUpdateThrobber.visible = false;
                 }
