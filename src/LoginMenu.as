@@ -317,7 +317,7 @@ package
                 _gvars.userSession = _data.session;
                 _gvars.gameMain.loadComplete = false;
                 Playlist.clearCanon();
-                dispatchEvent(new ChangePanelEvent("none"));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN));
             }
             else
             {

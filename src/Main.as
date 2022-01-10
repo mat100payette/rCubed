@@ -51,8 +51,6 @@ package
         public static const GAME_WIDTH:int = 780;
         public static const GAME_HEIGHT:int = 480;
 
-        public static const EVENT_PANEL_SWITCHED:String = "MainEventSwitched";
-
         public static var WINDOW_WIDTH_EXTRA:Number = 0;
         public static var WINDOW_HEIGHT_EXTRA:Number = 0;
 
@@ -458,14 +456,14 @@ package
         }
 
         ///- Panels
-        private function changePanel(e:ChangePanelEvent):Boolean
+        private function changePanel(e:ChangePanelEvent):void
         {
             var panelName:String = e.panelName;
 
             var isFound:Boolean = false;
             var nextPanel:MenuPanel;
 
-            if (panelName == "none")
+            if (panelName == PanelMediator.PANEL_MAIN)
             {
                 // Make background force displayed.
                 bg.updateDisplay();
@@ -484,7 +482,7 @@ package
                 //- Load Game Data
                 loadGameData();
 
-                return true;
+                return;
             }
 
             //- Add Requested Panel
@@ -492,67 +490,51 @@ package
             {
                 case PanelMediator.PANEL_GAME_UPDATE:
                     nextPanel = new AirUpdater();
-                    isFound = true;
                     break;
 
                 case PanelMediator.PANEL_GAME_LOGIN:
                     nextPanel = new LoginMenu();
-                    isFound = true;
                     break;
 
                 case PanelMediator.PANEL_GAME_MENU:
                     nextPanel = new MainMenu();
-                    isFound = true;
 
                     if (contains(_epilepsyWarning))
                         removeChild(_epilepsyWarning);
-
                     break;
 
                 case PanelMediator.PANEL_GAME_PLAY:
                     nextPanel = new GameMenu();
-                    isFound = true;
                     break;
             }
 
-            // Show Background
+            // Show Background if not gameplay
             if (panelName != PanelMediator.PANEL_GAME_PLAY)
             {
                 bg.visible = true;
                 versionText.visible = true;
             }
 
-            if (isFound)
+            //- Remove last panel if exist
+            if (activePanel != null)
             {
-                //- Remove last panel if exist
-                if (activePanel != null)
-                {
-                    TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: removeLastPanel, onCompleteParams: [activePanel]});
-                    activePanel.mouseEnabled = false;
-                    activePanel.mouseChildren = false;
-                }
-
-                activePanel = nextPanel;
-                activePanel.alpha = 0;
-
-                addChildAt(activePanel, 1);
-                if (!activePanel.hasInit)
-                {
-                    activePanel.init();
-                    activePanel.hasInit = true;
-                }
-
-                activePanel.stageAdd();
-                TweenLite.to(activePanel, 0.5, {alpha: 1});
+                TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: removeLastPanel, onCompleteParams: [activePanel]});
+                activePanel.mouseEnabled = false;
+                activePanel.mouseChildren = false;
             }
 
-            if (isFound)
+            activePanel = nextPanel;
+            activePanel.alpha = 0;
+
+            addChildAt(activePanel, 1);
+            if (!activePanel.hasInit)
             {
-                activePanelName = panelName;
-                dispatchEvent(new Event(EVENT_PANEL_SWITCHED));
+                activePanel.init();
+                activePanel.hasInit = true;
             }
 
-            return isFound;
+            activePanel.stageAdd();
+            TweenLite.to(activePanel, 0.5, {alpha: 1});
         }
 
         private function removeLastPanel(removePanel:MenuPanel):void
@@ -569,8 +551,9 @@ package
         }
 
         ///- Popups
-        public function addPopup(popupName:String, overlay:Boolean = false):void
+        public function addPopup(e:AddPopupEvent, overlay:Boolean = false):void
         {
+            var popupName:String = e.popupName;
             var popup:MenuPanel;
 
             switch (popupName)
@@ -599,12 +582,6 @@ package
         public function addPopupQueue(_panel:*, newLayer:Boolean = false):void
         {
             _popupQueue.push({"panel": _panel, "layer": newLayer});
-        }
-
-        public function removePopudp():void
-        {
-            stage.focus = stage;
-            SystemUtil.gc();
         }
 
         private function removeChildClass(clazz:Class):void

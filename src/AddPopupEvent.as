@@ -11,7 +11,7 @@ package
         public function AddPopupEvent(popupName:String):void
         {
             _popupName = popupName;
-            super(EVENT_TYPE);
+            super(EVENT_TYPE, true);
         }
 
         public function get popupName():String

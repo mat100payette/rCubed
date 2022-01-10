@@ -360,12 +360,8 @@ package menu
             }
         }
 
-        public function switchTo(panelName:String, useNew:Boolean = false):Boolean
+        public function switchTo(panelName:String, useNew:Boolean = false):void
         {
-            //- Check Parent Function first.
-            if (true)
-                return true;
-
             //- Do current panel.
             var isFound:Boolean = false;
             var initValid:Boolean = false;
@@ -374,24 +370,24 @@ package menu
             if (panelName == MENU_OPTIONS)
             {
                 dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
-                return true;
+                return;
             }
             else if (panelName == MENU_FILTERS)
             {
                 dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
                 //addPopup(new PopupFilterManager());
-                return true;
+                return;
             }
             else if (panelName == MENU_REPLAYS)
             {
                 dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
-                return true;
+                return;
             }
 
             if (panel != null)
             {
                 panel.stageRemove();
-                this.removeChild(panel);
+                removeChild(panel);
             }
 
             switch (panelName)
@@ -401,7 +397,6 @@ package menu
                         _MenuSingleplayer = new MenuSongSelection();
                     panel = _MenuSingleplayer;
                     options.activePanel = 0;
-                    isFound = true;
                     break;
 
                 case MENU_MULTIPLAYER:
@@ -410,7 +405,6 @@ package menu
 
                     panel = _MenuMultiplayer;
                     options.activePanel = 1;
-                    isFound = true;
                     break;
 
                 case MENU_TOKENS:
@@ -418,10 +412,10 @@ package menu
                         _MenuTokens = new MenuTokens();
                     panel = _MenuTokens;
                     options.activePanel = 2;
-                    isFound = true;
                     break;
             }
-            this.addChild(panel);
+
+            addChild(panel);
 
             if (panel.hasInit)
                 doStageAddAnyway = true;
@@ -437,7 +431,6 @@ package menu
 
             buildMenuItems();
             SystemUtil.gc();
-            return isFound;
         }
 
         private function menuItemClick(e:MouseEvent = null):void

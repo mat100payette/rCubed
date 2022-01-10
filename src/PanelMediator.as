@@ -6,6 +6,7 @@ package
 
     public class PanelMediator extends EventDispatcher
     {
+        public static const PANEL_MAIN:String = "MainPanel";
         public static const PANEL_GAME_UPDATE:String = "GameAirUpdatePanel";
         public static const PANEL_GAME_LOGIN:String = "GameLoginPanel";
         public static const PANEL_GAME_MENU:String = "GameMenuPanel";

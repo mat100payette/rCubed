@@ -66,8 +66,6 @@ package arc.mp
             _connection.addEventListener(Multiplayer.EVENT_ROOM_JOINED, onRoomJoinedEvent);
             _connection.addEventListener(Multiplayer.EVENT_GAME_RESULTS, onGameResultsEvent);
 
-            GlobalVariables.instance.gameMain.addEventListener(Main.EVENT_PANEL_SWITCHED, checkRedraw);
-
             buildContextMenu();
 
             resize();

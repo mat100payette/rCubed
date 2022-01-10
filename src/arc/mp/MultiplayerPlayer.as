@@ -52,8 +52,6 @@ package arc.mp
             connection.addEventListener(Multiplayer.EVENT_ROOM_USER, onRoomUser);
             connection.addEventListener(Multiplayer.EVENT_ROOM_USER_STATUS, onRoomUserStatus);
 
-            GlobalVariables.instance.gameMain.addEventListener(Main.EVENT_PANEL_SWITCHED, checkRedraw);
-
             redraw();
         }
 

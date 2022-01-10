@@ -136,7 +136,7 @@ package popups
                     Flags.VALUES = {};
                     Playlist.clearCanon();
                     _gvars.gameMain.loadComplete = false;
-                    dispatchEvent(new ChangePanelEvent("none"));
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN));
                 }
             }
             else if (e.target.action == "switch_profile")
