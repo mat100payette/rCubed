@@ -45,6 +45,10 @@ package
     import popups.PopupHelp;
     import popups.replays.ReplayHistoryWindow;
     import popups.settings.SettingsWindow;
+    import game.GameLoading;
+    import game.GameplayDisplay;
+    import game.GameReplay;
+    import game.GameResults;
 
     public class Main extends MenuPanel
     {
@@ -505,6 +509,28 @@ package
 
                 case PanelMediator.PANEL_GAME_PLAY:
                     nextPanel = new GameMenu();
+                    break;
+
+                case PanelMediator.GAME_LOADING:
+                    nextPanel = new GameLoading();
+                    _gvars.gameMain.bg.updateDisplay();
+                    _gvars.gameMain.versionText.visible = true;
+                    break;
+
+                case PanelMediator.GAME_PLAY:
+                    _gvars.gameMain.bg.updateDisplay(true);
+                    _gvars.gameMain.versionText.visible = false;
+                    nextPanel = new GameplayDisplay(_gvars.options);
+                    break;
+
+                case PanelMediator.GAME_REPLAY:
+                    _gvars.gameMain.bg.updateDisplay(true);
+                    _gvars.gameMain.versionText.visible = false;
+                    nextPanel = new GameReplay();
+                    break;
+
+                case PanelMediator.GAME_RESULTS:
+                    nextPanel = new GameResults();
                     break;
             }
 

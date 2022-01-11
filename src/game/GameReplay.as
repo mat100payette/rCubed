@@ -24,7 +24,7 @@ package game
             _gvars.options.fill();
             _gvars.options.fillFromReplay();
 
-            dispatchEvent(new ChangePanelEvent(GameMenu.GAME_LOADING));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
 
             return false;
         }

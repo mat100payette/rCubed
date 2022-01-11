@@ -5,16 +5,14 @@ package game
     import classes.SongInfo;
     import classes.chart.Song;
     import classes.ui.BoxButton;
-    import classes.ui.ProgressBar;
+    import classes.ui.PreloaderStatusBar;
     import com.flashfla.utils.NumberUtil;
     import com.greensock.TweenLite;
     import flash.display.Sprite;
     import flash.events.Event;
-    import flash.text.AntiAliasType;
     import flash.text.TextField;
     import flash.text.TextFormat;
     import menu.MenuPanel;
-    import flash.text.TextFieldAutoSize;
 
     public class GameLoading extends MenuPanel
     {
@@ -24,14 +22,13 @@ package game
         private var _lang:Language = Language.instance;
         private var _playlist:Playlist = Playlist.instance;
 
-        private var preloader:ProgressBar;
-        private var namedisplay:TextField;
-        private var blackOverlay:Sprite;
-        private var loadTimer:int = 0;
-        private var cancelLoadButton:BoxButton;
+        private var _preloader:PreloaderStatusBar;
+        private var _blackOverlay:Sprite;
+        private var _loadTimer:int = 0;
+        private var _cancelLoadButton:BoxButton;
 
-        private var song:Song;
-        private var songName:String = "";
+        private var _song:Song;
+        private var _songNameHtml:String = "";
 
         public function GameLoading()
         {
@@ -46,19 +43,19 @@ package game
                 var songInfo:SongInfo = _gvars.songQueue[0];
                 _gvars.songQueue.shift();
 
-                song = _gvars.getSongFile(songInfo, _gvars.options.loadPreview);
-                _gvars.options.song = song;
+                _song = _gvars.getSongFile(songInfo, _gvars.options.loadPreview);
+                _gvars.options.song = _song;
             }
             else if (_gvars.options.song)
-                song = _gvars.options.song;
+                _song = _gvars.options.song;
             else
             { // No songs in queue? Something went wrong...
                 dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
                 return false;
             }
-            if (song && song.isLoaded)
+            if (_song && _song.isLoaded)
             {
-                dispatchEvent(new ChangePanelEvent(GameMenu.GAME_PLAY));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
                 return false;
             }
             return true;
@@ -66,103 +63,96 @@ package game
 
         override public function stageAdd():void
         {
-            songName = _lang.wrapFont(song.songInfo.name ? song.songInfo.name : "Invalid Song / Replay");
+            _songNameHtml = _lang.wrapFont(_song.songInfo.name ? _song.songInfo.name : "Invalid Song / Replay");
 
             //- Preloader Display
-            preloader = new ProgressBar(10, Main.GAME_HEIGHT - 30, Main.GAME_WIDTH - 20, 20);
+            _preloader = new PreloaderStatusBar(10, Main.GAME_HEIGHT - 30, Main.GAME_WIDTH - 20);
+            _preloader.text.defaultTextFormat = _textFormat;
+            _preloader.text.htmlText = _songNameHtml;
 
-            //- Song Name Display
-            namedisplay = new TextField();
-            namedisplay.x = 10;
-            namedisplay.y = Main.GAME_HEIGHT - 58;
-            namedisplay.selectable = false;
-            namedisplay.embedFonts = true;
-            namedisplay.antiAliasType = AntiAliasType.ADVANCED;
-            namedisplay.autoSize = TextFieldAutoSize.LEFT;
-            namedisplay.defaultTextFormat = _textFormat;
-            namedisplay.htmlText = songName;
-            this.addChild(namedisplay);
+            addChild(_preloader);
 
             //- Frame Listener
-            this.addEventListener(Event.ENTER_FRAME, updatePreloader);
+            addEventListener(Event.ENTER_FRAME, updatePreloader);
         }
 
         override public function stageRemove():void
         {
-            this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
+            removeEventListener(Event.ENTER_FRAME, updatePreloader);
 
-            if (cancelLoadButton)
-                cancelLoadButton.dispose();
+            if (_cancelLoadButton)
+                _cancelLoadButton.dispose();
 
-            if (preloader)
-                preloader.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
+            if (_preloader)
+                _preloader.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
         }
 
         ///- PreloaderHandlers
         private function updatePreloader(e:Event):void
         {
-            loadTimer++;
+            _loadTimer++;
 
             // TODO: use localized strings here
-            namedisplay.htmlText = "";
-            if (song.songInfo.name)
+            _preloader.text.htmlText = "";
+            if (_song.songInfo.name)
             {
-                namedisplay.htmlText += song.songInfo.name + " - " + song.progress + "%  --- ";
+                _preloader.text.htmlText += _song.songInfo.name + " - " + _song.progress + "%  --- ";
 
-                if (song.bytesTotal > 0)
-                    namedisplay.htmlText += "(" + NumberUtil.bytesToString(song.bytesLoaded) + " / " + NumberUtil.bytesToString(song.bytesTotal) + ")";
+                if (_song.bytesTotal > 0)
+                    _preloader.text.htmlText += "(" + NumberUtil.bytesToString(_song.bytesLoaded) + " / " + NumberUtil.bytesToString(_song.bytesTotal) + ")";
                 else
-                    namedisplay.htmlText += "Connecting..."
+                    _preloader.text.htmlText += "Connecting..."
 
-                if (song.loadFail)
-                    namedisplay.htmlText += " --- <font color=\"#FFC4C4\">[Loading Failed]</font>";
+                if (_song.loadFail)
+                    _preloader.text.htmlText += " --- <font color=\"#FFC4C4\">[Loading Failed]</font>";
             }
             else
-                namedisplay.htmlText += songName;
+                _preloader.text.htmlText += _songNameHtml;
 
-            preloader.update(song.progress / 100);
+            _preloader.bar.update(_song.progress / 100);
 
-            if ((loadTimer >= 60 || song.loadFail) && !cancelLoadButton)
+            if ((_loadTimer >= 60 || _song.loadFail) && !_cancelLoadButton)
             {
-                cancelLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, preloader.y - 35, 75, 25, "Cancel", 12, e_cancelClick);
+                _cancelLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, _preloader.y - 35, 75, 25, "Cancel", 12, e_cancelClick);
             }
 
-            if (song.loadFail)
+            if (_song.loadFail)
             {
                 // Loading Failed :/
-                _gvars.removeSongFile(song);
-                if (cancelLoadButton)
-                    cancelLoadButton.text = "Return";
+                _gvars.removeSongFile(_song);
+                if (_cancelLoadButton)
+                    _cancelLoadButton.text = "Return";
                 removeEventListener(Event.ENTER_FRAME, updatePreloader);
             }
 
-            if (preloader.isComplete && song.isLoaded)
+            if (_preloader.bar.isComplete && _song.isLoaded)
             {
-                this.removeEventListener(Event.ENTER_FRAME, updatePreloader);
-                preloader.addEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
-                preloader.remove();
+                removeEventListener(Event.ENTER_FRAME, updatePreloader);
+                _preloader.bar.addEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
+                _preloader.bar.remove();
 
-                blackOverlay = new Sprite();
-                blackOverlay.alpha = 0;
-                blackOverlay.graphics.beginFill(0x000000);
-                blackOverlay.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
-                this.addChild(blackOverlay);
-                TweenLite.to(blackOverlay, 0.5, {alpha: 1});
+                _blackOverlay = new Sprite();
+                _blackOverlay.alpha = 0;
+                _blackOverlay.graphics.beginFill(0x000000);
+                _blackOverlay.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
+                addChild(_blackOverlay);
+
+                TweenLite.to(_blackOverlay, 0.5, {alpha: 1});
             }
         }
 
         private function e_cancelClick(e:Event):void
         {
-            _gvars.removeSongFile(song);
+            _gvars.removeSongFile(_song);
 
             removeEventListener(Event.ENTER_FRAME, updatePreloader);
             dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
-        private function preloaderRemoved(e:Event = null):void
+        private function preloaderRemoved(e:Event):void
         {
-            preloader.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
-            dispatchEvent(new ChangePanelEvent(GameMenu.GAME_PLAY));
+            _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
+            dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
         }
     }
 }

@@ -12,6 +12,11 @@ package
         public static const PANEL_GAME_MENU:String = "GameMenuPanel";
         public static const PANEL_GAME_PLAY:String = "GamePlayPanel";
 
+        public static const GAME_LOADING:String = "GameLoading";
+        public static const GAME_PLAY:String = "GamePlay";
+        public static const GAME_REPLAY:String = "GameReplay";
+        public static const GAME_RESULTS:String = "GameResults";
+
         public static const POPUP_HELP:String = "PopupHelp";
         public static const POPUP_OPTIONS:String = "PopupOptions";
         public static const POPUP_HIGHSCORES:String = "PopupHighscores";

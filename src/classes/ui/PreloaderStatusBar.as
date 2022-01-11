@@ -10,7 +10,7 @@ package classes.ui
         public var text:TextField;
         public var bar:ProgressBar;
 
-        public function PreloaderStatusBar(x:int, y:int, width:int, labelSpacing:int)
+        public function PreloaderStatusBar(x:int, y:int, width:int, labelSpacing:int = 88)
         {
             text = new TextField();
             text.x = x;

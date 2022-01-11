@@ -7,11 +7,6 @@ package game
 
     public class GameMenu extends MenuPanel
     {
-        public static const GAME_LOADING:String = "GameLoading";
-        public static const GAME_PLAY:String = "GamePlay";
-        public static const GAME_REPLAY:String = "GameReplay";
-        public static const GAME_RESULTS:String = "GameResults";
-
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _playlist:Playlist = Playlist.instance;
@@ -26,13 +21,13 @@ package game
         {
             if (_gvars.options.isEditor)
             {
-                switchTo(GAME_PLAY);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
             }
             else
             {
                 // Clone Song queue
                 _gvars.totalSongQueue = _gvars.songQueue.concat();
-                switchTo(GAME_LOADING);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
             }
             return false;
         }
@@ -48,69 +43,6 @@ package game
                 panel = null;
             }
             super.stageRemove();
-        }
-
-        public function switchTo(_panel:String, useNew:Boolean = false):Boolean
-        {
-            //- Check Parent Function first.
-            if (true)
-            {
-                _gvars.gameMain.bg.updateDisplay();
-                _gvars.gameMain.versionText.visible = true;
-                return true;
-            }
-
-            //- Do Current Panel
-            var isFound:Boolean = false;
-            var initValid:Boolean = false;
-
-            if (panel != null)
-            {
-                panel.stageRemove();
-                this.removeChild(panel);
-                panel.dispose();
-            }
-
-            switch (_panel)
-            {
-                case GAME_LOADING:
-                    panel = new GameLoading();
-                    _gvars.gameMain.bg.updateDisplay();
-                    _gvars.gameMain.versionText.visible = true;
-                    isFound = true;
-                    break;
-
-                case GAME_PLAY:
-                    _gvars.gameMain.bg.updateDisplay(true);
-                    _gvars.gameMain.versionText.visible = false;
-                    panel = new GameplayDisplay(_gvars.options);
-                    isFound = true;
-                    break;
-
-                case GAME_REPLAY:
-                    _gvars.gameMain.bg.updateDisplay(true);
-                    _gvars.gameMain.versionText.visible = false;
-                    panel = new GameReplay();
-                    isFound = true;
-                    break;
-
-                case GAME_RESULTS:
-                    panel = new GameResults();
-                    isFound = true;
-                    break;
-            }
-            this.addChild(panel);
-            if (!panel.hasInit)
-            {
-                initValid = panel.init();
-                panel.hasInit = true;
-            }
-
-            if (initValid)
-                panel.stageAdd();
-
-            SystemUtil.gc();
-            return isFound;
         }
     }
 }

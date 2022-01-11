@@ -1357,7 +1357,7 @@ package game
                 newGameResults.last_note = noteCount < song.totalNotes ? noteCount : 0;
                 newGameResults.accuracy = accuracy.value;
                 newGameResults.accuracy_deviation = accuracy.deviation;
-                newGameResults.options = this.options;
+                newGameResults.options = options;
                 newGameResults.restart_stats = _gvars.songStats.data;
                 newGameResults.replayData = gameReplay.concat();
                 newGameResults.replay_hit = gameReplayHit.concat();
@@ -1508,7 +1508,7 @@ package game
             if (options.isEditor || mpSpectate)
                 dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
             else
-                dispatchEvent(new ChangePanelEvent(GameMenu.GAME_RESULTS));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_RESULTS));
         }
 
         private function restartGame():void

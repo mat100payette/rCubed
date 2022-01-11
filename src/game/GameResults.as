@@ -116,7 +116,7 @@ package game
             // More songs to play, jump to gameplay or loading.
             if (_gvars.songQueue.length > 0)
             {
-                dispatchEvent(new ChangePanelEvent(GameMenu.GAME_LOADING));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
                 return false;
             }
             else
@@ -741,12 +741,12 @@ package game
                 if (skipload)
                 {
                     _gvars.songRestarts++;
-                    dispatchEvent(new ChangePanelEvent(GameMenu.GAME_PLAY));
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
                 }
                 else
                 {
                     _gvars.songQueue = _gvars.totalSongQueue.concat();
-                    dispatchEvent(new ChangePanelEvent(GameMenu.GAME_LOADING));
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
                 }
             }
 
