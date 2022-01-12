@@ -32,6 +32,8 @@ package menu
     import popups.PopupSkillRankUpdate;
     import popups.replays.ReplayHistoryWindow;
     import flash.text.TextFormatAlign;
+    import popups.events.AddPopupSkillRankUpdateEvent;
+    import popups.events.AddPopupEvent;
 
     public class MainMenu extends MenuPanel
     {
@@ -499,8 +501,8 @@ package menu
                 var resp:Object = JSON.parse(e.target.data);
                 if (_gvars.gameMain.activePanel is MainMenu)
                 {
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SKILL_RANK_UPDATE));
-                    //_gvars.gameMain.addPopup(new PopupSkillRankUpdate(resp), true);
+                    dispatchEvent(new AddPopupSkillRankUpdateEvent(resp));
+
                     rankUpdateThrobber.stop();
                     rankUpdateThrobber.visible = false;
                 }

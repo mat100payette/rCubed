@@ -16,13 +16,13 @@ package
     import classes.NoteskinsList;
     import classes.Playlist;
     import classes.Site;
+    import classes.SongInfo;
     import classes.User;
     import classes.ui.BoxButton;
     import classes.ui.EpilepsyWarning;
     import classes.ui.PreloaderStatusBar;
     import classes.ui.VersionText;
     import com.flashdynamix.utils.SWFProfiler;
-    import com.flashfla.utils.ObjectUtil;
     import com.flashfla.utils.SystemUtil;
     import com.greensock.TweenLite;
     import com.greensock.TweenMax;
@@ -49,6 +49,17 @@ package
     import game.GameplayDisplay;
     import game.GameReplay;
     import game.GameResults;
+    import popups.PopupHighscores;
+    import popups.PopupSongNotes;
+    import popups.PopupQueueManager;
+    import popups.PopupContextMenu;
+    import popups.PopupFilterManager;
+    import popups.PopupSkillRankUpdate;
+    import popups.events.AddPopupSkillRankUpdateEvent;
+    import popups.events.AddPopupHighscoresEvent;
+    import popups.events.AddPopupSongNotesEvent;
+    import popups.events.RemovePopupEvent;
+    import popups.events.AddPopupEvent;
 
     public class Main extends MenuPanel
     {
@@ -91,7 +102,7 @@ package
         {
             super();
 
-            _panelMediator = new PanelMediator(changePanel, addPopup, this);
+            _panelMediator = new PanelMediator(this, changePanel, addPopup, removePopup);
 
             //- Set GlobalVariables Stage
             _gvars.gameMain = this;
@@ -545,6 +556,7 @@ package
             if (activePanel != null)
             {
                 TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: removeLastPanel, onCompleteParams: [activePanel]});
+                activePanel.stageRemove();
                 activePanel.mouseEnabled = false;
                 activePanel.mouseChildren = false;
             }
@@ -577,7 +589,7 @@ package
         }
 
         ///- Popups
-        public function addPopup(e:AddPopupEvent, overlay:Boolean = false):void
+        private function addPopup(e:AddPopupEvent):void
         {
             var popupName:String = e.popupName;
             var popup:MenuPanel;
@@ -593,9 +605,30 @@ package
                 case PanelMediator.POPUP_REPLAY_HISTORY:
                     popup = new ReplayHistoryWindow();
                     break;
+                case PanelMediator.POPUP_HIGHSCORES:
+                    var scoresSongInfo:SongInfo = (e as AddPopupHighscoresEvent).songInfo;
+                    popup = new PopupHighscores(scoresSongInfo);
+                    break;
+                case PanelMediator.POPUP_SONG_NOTES:
+                    var notesSongInfo:SongInfo = (e as AddPopupSongNotesEvent).songInfo;
+                    popup = new PopupSongNotes(notesSongInfo);
+                    break;
+                case PanelMediator.POPUP_QUEUE_MANAGER:
+                    popup = new PopupQueueManager();
+                    break;
+                case PanelMediator.POPUP_CONTEXT_MENU:
+                    popup = new PopupContextMenu();
+                    break;
+                case PanelMediator.POPUP_FILTER_MANAGER:
+                    popup = new PopupFilterManager();
+                    break;
+                case PanelMediator.POPUP_SKILL_RANK_UPDATE:
+                    var skillRankData:Object = (e as AddPopupSkillRankUpdateEvent).skillRankData;
+                    popup = new PopupSkillRankUpdate(skillRankData);
+                    break;
             }
 
-            addChildAt(popup, 2);
+            addChildAt(popup, 1 + _panelMediator.topPopupLayer);
             if (!popup.hasInit)
             {
                 popup.init();
@@ -605,9 +638,25 @@ package
             popup.stageAdd();
         }
 
+        private function removePopup(e:RemovePopupEvent):void
+        {
+            // Index 1 is the current panel
+            trace('');
+            for (var i:int = 0; i < numChildren; i++)
+                trace(i.toString() + " --- " + getChildAt(i).toString());
+
+            trace('Removing ' + _panelMediator.topPopupLayer.toString());
+            removeChildAt(_panelMediator.topPopupLayer);
+        }
+
         public function addPopupQueue(_panel:*, newLayer:Boolean = false):void
         {
             _popupQueue.push({"panel": _panel, "layer": newLayer});
+        }
+
+        public function redrawBackground():void
+        {
+            bg.redraw();
         }
 
         private function removeChildClass(clazz:Class):void
@@ -627,7 +676,6 @@ package
         {
             if (!disablePopups)
                 dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_CONTEXT_MENU));
-            //addPopup(new PopupContextMenu());
         }
 
         ///- Key Handling
@@ -638,21 +686,15 @@ package
             {
                 // Options
                 if (keyCode == _gvars.playerUser.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
-                {
                     dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
-                }
 
                 // Help Menu
                 else if (keyCode == Keyboard.F1)
-                {
                     dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_HELP));
-                }
 
                 // Replay History
                 else if (keyCode == Keyboard.F2)
-                {
                     dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
-                }
             }
         }
     }

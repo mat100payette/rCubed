@@ -23,6 +23,7 @@ package popups.settings
     import flash.system.Capabilities;
     import flash.text.TextFormatAlign;
     import menu.MainMenu;
+    import popups.events.AddPopupEvent;
 
     public class SettingsTabMisc extends SettingsTabBase
     {

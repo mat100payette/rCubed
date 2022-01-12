@@ -80,82 +80,84 @@ package game
         public static const LAYOUT_ACCURACY_BAR:String = "accuracybar";
         public static const LAYOUT_PA:String = "pa";
 
-        public static const LAYOUT_MP_JUDGE:String = "mpjudge";
-        public static const LAYOUT_MP_COMBO:String = "mpcombo";
-        public static const LAYOUT_MP_PA:String = "mppa";
-        public static const LAYOUT_MP_HEADER:String = "mpheader";
+        private static const LAYOUT_MP_JUDGE:String = "mpjudge";
+        private static const LAYOUT_MP_COMBO:String = "mpcombo";
+        private static const LAYOUT_MP_PA:String = "mppa";
+        private static const LAYOUT_MP_HEADER:String = "mpheader";
 
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _noteskins:NoteskinsList = NoteskinsList.instance;
         private var _lang:Language = Language.instance;
+
         private var _loader:URLLoader;
+
         private var _keys:Array;
-        private var song:Song;
-        private var song_background:MovieClip;
-        private var legacyMode:Boolean;
-        private var levelScript:LevelScriptRuntime;
+        private var _song:Song;
+        private var _songBackground:MovieClip;
+        private var _legacyMode:Boolean;
+        private var _levelScript:LevelScriptRuntime;
 
-        private var reverseMod:Boolean;
-        private var sideScroll:Boolean;
-        private var defaultLayout:Object;
+        private var _reverseMod:Boolean;
+        private var _sideScroll:Boolean;
+        private var _defaultLayout:Object;
 
-        private var displayBlackBG:Sprite;
-        private var gameplayUI:*;
-        private var progressDisplay:ProgressBar;
-        private var progressDisplayText:TextStatic;
-        private var noteBox:NoteBox;
-        private var score:Score;
-        private var comboTotal:Combo;
-        private var comboStatic:TextStatic;
-        private var comboTotalStatic:TextStatic;
-        private var accBar:AccuracyBar;
-        private var screenCut:ScreenCut;
-        private var flashLight:FlashlightOverlay;
-        private var exitEditor:BoxButton;
-        private var resetEditor:BoxButton;
+        private var _displayBlackBG:Sprite;
+        private var _gameplayUI:*;
+        private var _progressDisplay:ProgressBar;
+        private var _progressDisplayText:TextStatic;
+        private var _noteBox:NoteBox;
+        private var _score:Score;
+        private var _comboTotal:Combo;
+        private var _comboStatic:TextStatic;
+        private var _comboTotalStatic:TextStatic;
+        private var _accBar:AccuracyBar;
+        private var _screenCut:ScreenCut;
+        private var _flashLight:FlashlightOverlay;
+        private var _exitEditor:BoxButton;
+        private var _resetEditor:BoxButton;
 
-        private var player1PAWindow:PAWindow;
-        private var player1Combo:Combo;
-        private var player1Life:LifeBar;
-        private var player1Judge:Judge;
-        private var player1JudgeOffset:int;
+        private var _player1PAWindow:PAWindow;
+        private var _player1Combo:Combo;
+        private var _player1Life:LifeBar;
+        private var _player1Judge:Judge;
+        private var _player1JudgeOffset:int;
 
-        private var mpHeader:Array;
-        private var mpCombo:Array;
-        private var mpJudge:Array;
-        private var mpPA:Array;
+        private var _mpHeader:Array;
+        private var _mpCombo:Array;
+        private var _mpJudge:Array;
+        private var _mpPA:Array;
 
-        private var msStartTime:Number = 0;
-        private var absoluteStart:int = 0;
-        private var absolutePosition:int = 0;
-        private var songPausePosition:int = 0;
-        private var songDelay:int = 0;
-        private var songDelayStarted:Boolean = false;
-        private var songOffset:RollingAverage;
-        private var frameRate:RollingAverage;
-        private var gamePosition:int = 0;
-        private var gameProgress:int = 0;
-        private var globalOffset:int = 0;
-        private var globalOffsetRounded:int = 0;
-        private var accuracy:Average;
-        private var judgeOffset:int = 0;
-        private var autoJudgeOffset:Boolean = false;
-        private var judgeSettings:Vector.<JudgeNode>;
+        private var _msStartTime:Number = 0;
+        private var _absoluteStart:int = 0;
+        private var _absolutePosition:int = 0;
+        private var _songPausePosition:int = 0;
+        private var _songDelay:int = 0;
+        private var _songDelayStarted:Boolean = false;
+        private var _songOffset:RollingAverage;
+        private var _frameRate:RollingAverage;
+        private var _gamePosition:int = 0;
+        private var _gameProgress:int = 0;
+        private var _globalOffset:int = 0;
+        private var _globalOffsetRounded:int = 0;
+        private var _accuracy:Average;
+        private var _judgeOffset:int = 0;
+        private var _autoJudgeOffset:Boolean = false;
+        private var _judgeSettings:Vector.<JudgeNode>;
 
-        private var quitDoubleTap:int = -1;
+        private var _quitDoubleTap:int = -1;
 
-        private var options:GameOptions;
-        private var mpSpectate:Boolean;
+        private var _options:GameOptions;
+        private var _mpSpectate:Boolean;
 
-        private var gameLastNoteFrame:Number;
-        private var gameFirstNoteFrame:Number;
-        private var gameSongFrames:int;
+        private var _gameLastNoteFrame:Number;
+        private var _gameFirstNoteFrame:Number;
+        private var _gameSongFrames:int;
 
-        private var gameLife:int;
-        private var gameScore:int;
-        private var gameRawGoods:Number;
-        private var gameReplay:Array;
+        private var _gameLife:int;
+        private var _gameScore:int;
+        private var _gameRawGoods:Number;
+        private var _gameReplay:Array;
 
         /** Contains a list of scores or other flags used in replay_hit.
          * The value is either:
@@ -167,50 +169,50 @@ package game
          * [-5]   Missed Note After End Game
          * [-10]  End of Replay Hit Tag
          */
-        private var gameReplayHit:Array;
+        private var _gameReplayHit:Array;
 
-        private var binReplayNotes:Vector.<ReplayBinFrame>;
-        private var binReplayBoos:Vector.<ReplayBinFrame>;
+        private var _binReplayNotes:Vector.<ReplayBinFrame>;
+        private var _binReplayBoos:Vector.<ReplayBinFrame>;
 
-        private var replayPressCount:Number = 0;
+        private var _replayPressCount:Number = 0;
 
-        private var hitAmazing:int;
-        private var hitPerfect:int;
-        private var hitGood:int;
-        private var hitAverage:int;
-        private var hitMiss:int;
-        private var hitBoo:int;
-        private var hitCombo:int;
-        private var hitMaxCombo:int;
+        private var _hitAmazing:int;
+        private var _hitPerfect:int;
+        private var _hitGood:int;
+        private var _hitAverage:int;
+        private var _hitMiss:int;
+        private var _hitBoo:int;
+        private var _hitCombo:int;
+        private var _hitMaxCombo:int;
 
-        private var noteBoxOffset:Object = {"x": 0, "y": 0};
-        private var noteBoxPositionDefault:Object;
+        private var _noteBoxOffset:Object = {"x": 0, "y": 0};
+        private var _noteBoxPositionDefault:Object;
 
-        private var keyHints:Array;
+        private var _keyHints:Array;
 
-        private var GAME_STATE:uint = GAME_PLAY;
+        private var _GAME_STATE:uint = GAME_PLAY;
 
-        private var SOCKET_SONG_MESSAGE:Object = {};
-        private var SOCKET_SCORE_MESSAGE:Object = {};
+        private var _socketSongMessage:Object = {};
+        private var _socketScoreMessage:Object = {};
 
         // Anti-GPU Rampdown Hack
-        private var GPU_PIXEL_BMD:BitmapData;
-        private var GPU_PIXEL_BITMAP:Bitmap;
+        private var _gpuPixelBitmapData:BitmapData;
+        private var _gpuPixelBitmap:Bitmap;
 
         public function GameplayDisplay(gameOptions:GameOptions)
         {
-            options = gameOptions;
+            _options = gameOptions;
         }
 
         override public function init():Boolean
         {
-            song = options.song;
-            if (!options.isEditor && song.chart.Notes.length == 0)
+            _song = _options.song;
+            if (!_options.isEditor && _song.chart.Notes.length == 0)
             {
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
-                var screen:int = options.settings.startUpScreen;
-                if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
+                var screen:int = _options.settings.startUpScreen;
+                if (!_options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
                 {
                     MultiplayerState.instance.connection.connect();
                 }
@@ -219,30 +221,30 @@ package game
             }
 
             // --- Per Song Options
-            var perSongOptions:SQLSongUserInfo = SQLQueries.getSongUserInfo(song.songInfo);
-            if (perSongOptions != null && !options.isEditor && !options.replay)
+            var perSongOptions:SQLSongUserInfo = SQLQueries.getSongUserInfo(_song.songInfo);
+            if (perSongOptions != null && !_options.isEditor && !_options.replay)
             {
-                options.fill(); // Reset
+                _options.fill(); // Reset
 
                 // Custom Offsets
                 if (perSongOptions.set_custom_offsets)
                 {
-                    options.settings.judgeOffset = perSongOptions.offset_judge;
-                    options.settings.globalOffset = perSongOptions.offset_music;
+                    _options.settings.judgeOffset = perSongOptions.offset_judge;
+                    _options.settings.globalOffset = perSongOptions.offset_music;
                 }
 
                 // Invert Mirror Mod
                 if (perSongOptions.set_mirror_invert)
                 {
-                    if (options.modEnabled("mirror"))
+                    if (_options.modEnabled("mirror"))
                     {
-                        options.settings.activeMods.removeAt(options.settings.activeMods.indexOf("mirror"));
-                        delete options.modCache["mirror"];
+                        _options.settings.activeMods.removeAt(_options.settings.activeMods.indexOf("mirror"));
+                        delete _options.modCache["mirror"];
                     }
                     else
                     {
-                        options.settings.activeMods.push("mirror");
-                        options.modCache["mirror"] = true;
+                        _options.settings.activeMods.push("mirror");
+                        _options.modCache["mirror"] = true;
                     }
                 }
             }
@@ -267,46 +269,46 @@ package game
             initCore();
 
             // Prebuild Websocket Message, this is updated instead of creating a new object every message.
-            SOCKET_SONG_MESSAGE = {"player": {
-                        "settings": options.settings.stringify(),
-                        "name": options.user.name,
-                        "userid": options.user.siteId,
-                        "avatar": Constant.USER_AVATAR_URL + "?uid=" + options.user.siteId,
-                        "skill_rating": options.user.skillRating,
-                        "skill_level": options.user.skillLevel,
-                        "game_rank": options.user.gameRank,
-                        "game_played": options.user.gamesPlayed,
-                        "game_grand_total": options.user.grandTotal
+            _socketSongMessage = {"player": {
+                        "settings": _options.settings.stringify(),
+                        "name": _options.user.name,
+                        "userid": _options.user.siteId,
+                        "avatar": Constant.USER_AVATAR_URL + "?uid=" + _options.user.siteId,
+                        "skill_rating": _options.user.skillRating,
+                        "skill_level": _options.user.skillLevel,
+                        "game_rank": _options.user.gameRank,
+                        "game_played": _options.user.gamesPlayed,
+                        "game_grand_total": _options.user.grandTotal
                     },
-                    "engine": (song.songInfo.engine == null ? null : {"id": song.songInfo.engine.id,
-                            "name": song.songInfo.engine.name,
-                            "config": song.songInfo.engine.config_url,
-                            "domain": song.songInfo.engine.domain})
+                    "engine": (_song.songInfo.engine == null ? null : {"id": _song.songInfo.engine.id,
+                            "name": _song.songInfo.engine.name,
+                            "config": _song.songInfo.engine.config_url,
+                            "domain": _song.songInfo.engine.domain})
                     ,
                     "song": {
-                        "name": song.songInfo.name,
-                        "level": song.songInfo.level,
-                        "difficulty": song.songInfo.difficulty,
-                        "style": song.songInfo.style,
-                        "author": song.songInfo.author,
-                        "author_url": song.songInfo.stepauthor_url,
-                        "stepauthor": song.songInfo.stepauthor,
-                        "credits": song.songInfo.credits,
-                        "genre": song.songInfo.genre,
-                        "nps_min": song.songInfo.min_nps,
-                        "nps_max": song.songInfo.max_nps,
+                        "name": _song.songInfo.name,
+                        "level": _song.songInfo.level,
+                        "difficulty": _song.songInfo.difficulty,
+                        "style": _song.songInfo.style,
+                        "author": _song.songInfo.author,
+                        "author_url": _song.songInfo.stepauthor_url,
+                        "stepauthor": _song.songInfo.stepauthor,
+                        "credits": _song.songInfo.credits,
+                        "genre": _song.songInfo.genre,
+                        "nps_min": _song.songInfo.min_nps,
+                        "nps_max": _song.songInfo.max_nps,
                         // TODO: Check these fields
                         //"release_date": song.songInfo.releasedate,
                         //"song_rating": song.songInfo.song_rating,
                         // Trust the chart, not the playlist.
-                        "time": song.chartTimeFormatted,
-                        "time_seconds": song.chartTime,
-                        "note_count": song.totalNotes,
-                        "nps_avg": (song.totalNotes / song.chartTime)
+                        "time": _song.chartTimeFormatted,
+                        "time_seconds": _song.chartTime,
+                        "note_count": _song.totalNotes,
+                        "nps_avg": (_song.totalNotes / _song.chartTime)
                     },
-                    "best_score": options.user.getLevelRank(song.songInfo)};
+                    "best_score": _options.user.getLevelRank(_song.songInfo)};
 
-            SOCKET_SCORE_MESSAGE = {"amazing": 0,
+            _socketScoreMessage = {"amazing": 0,
                     "perfect": 0,
                     "good": 0,
                     "average": 0,
@@ -319,13 +321,13 @@ package game
                     "last_hit": null};
 
             // Set Defaults for Editor Mode
-            if (options.isEditor)
+            if (_options.isEditor)
             {
-                SOCKET_SONG_MESSAGE["song"]["name"] = "Editor Mode";
-                SOCKET_SONG_MESSAGE["song"]["author"] = "rCubed Engine";
-                SOCKET_SONG_MESSAGE["song"]["difficulty"] = 0;
-                SOCKET_SONG_MESSAGE["song"]["time"] = "10:00";
-                SOCKET_SONG_MESSAGE["song"]["time_seconds"] = 600;
+                _socketSongMessage["song"]["name"] = "Editor Mode";
+                _socketSongMessage["song"]["author"] = "rCubed Engine";
+                _socketSongMessage["song"]["difficulty"] = 0;
+                _socketSongMessage["song"]["time"] = "10:00";
+                _socketSongMessage["song"]["time_seconds"] = 600;
             }
 
             // Init Game
@@ -339,20 +341,20 @@ package game
             }
 
             // Setup MP Things
-            if (options.mpRoom)
+            if (_options.mpRoom)
             {
                 MultiplayerState.instance.gameplayPlaying(this);
-                if (!options.isEditor)
+                if (!_options.isEditor)
                 {
-                    options.singleplayer = false; // Back to multiplayer lobby
-                    options.mpRoom.connection.addEventListener(Multiplayer.EVENT_GAME_UPDATE, onMultiplayerUpdate);
-                    if (mpSpectate)
-                        options.mpRoom.connection.addEventListener(Multiplayer.EVENT_GAME_RESULTS, onMultiplayerResults);
+                    _options.singleplayer = false; // Back to multiplayer lobby
+                    _options.mpRoom.connection.addEventListener(Multiplayer.EVENT_GAME_UPDATE, onMultiplayerUpdate);
+                    if (_mpSpectate)
+                        _options.mpRoom.connection.addEventListener(Multiplayer.EVENT_GAME_RESULTS, onMultiplayerResults);
                 }
             }
             else
             {
-                options.singleplayer = true; // Back to song selection
+                _options.singleplayer = true; // Back to song selection
             }
             stage.focus = this.stage;
 
@@ -360,23 +362,23 @@ package game
 
             _gvars.gameMain.disablePopups = true;
 
-            if (!options.isEditor && !options.replay && !mpSpectate)
+            if (!_options.isEditor && !_options.replay && !_mpSpectate)
                 Mouse.hide();
 
-            if (song.songInfo && song.songInfo.name)
-                stage.nativeWindow.title = Constant.AIR_WINDOW_TITLE + " - " + song.songInfo.name;
+            if (_song.songInfo && _song.songInfo.name)
+                stage.nativeWindow.title = Constant.AIR_WINDOW_TITLE + " - " + _song.songInfo.name;
 
             // Add onEnterFrame Listeners
-            if (options.isEditor)
+            if (_options.isEditor)
             {
-                options.isAutoplay = true;
-                stage.frameRate = options.settings.frameRate;
+                _options.isAutoplay = true;
+                stage.frameRate = _options.settings.frameRate;
                 stage.addEventListener(Event.ENTER_FRAME, editorOnEnterFrame, false, int.MAX_VALUE - 10, true);
                 stage.addEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown, false, int.MAX_VALUE - 10, true);
             }
             else
             {
-                stage.frameRate = song.frameRate;
+                stage.frameRate = _song.frameRate;
                 stage.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, int.MAX_VALUE - 10, true);
                 stage.addEventListener(KeyboardEvent.KEY_DOWN, keyboardKeyDown, true, int.MAX_VALUE - 10, true);
                 stage.addEventListener(KeyboardEvent.KEY_UP, keyboardKeyUp, true, int.MAX_VALUE - 10, true);
@@ -386,9 +388,9 @@ package game
         override public function stageRemove():void
         {
             stage.frameRate = 60;
-            if (options.isEditor)
+            if (_options.isEditor)
             {
-                options.settings.screencutPosition = options.settings.screencutPosition;
+                _options.settings.screencutPosition = _options.settings.screencutPosition;
                 stage.removeEventListener(Event.ENTER_FRAME, editorOnEnterFrame);
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown);
             }
@@ -398,17 +400,17 @@ package game
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyboardKeyDown, true);
                 stage.removeEventListener(KeyboardEvent.KEY_UP, keyboardKeyUp, true);
 
-                if (options.mpRoom)
+                if (_options.mpRoom)
                 {
-                    options.mpRoom.connection.removeEventListener(Multiplayer.EVENT_GAME_UPDATE, onMultiplayerUpdate);
-                    options.mpRoom.connection.removeEventListener(Multiplayer.EVENT_GAME_RESULTS, onMultiplayerResults);
+                    _options.mpRoom.connection.removeEventListener(Multiplayer.EVENT_GAME_UPDATE, onMultiplayerUpdate);
+                    _options.mpRoom.connection.removeEventListener(Multiplayer.EVENT_GAME_RESULTS, onMultiplayerResults);
                 }
             }
 
             _gvars.gameMain.disablePopups = false;
 
             // Disable Editor mode when leaving editor.
-            options.isEditor = false;
+            _options.isEditor = false;
 
             Mouse.show();
         }
@@ -425,32 +427,32 @@ package game
         private function initCore():void
         {
             // Bound Isolation Note Mod
-            if (options.isolationOffset >= song.chart.Notes.length)
-                options.isolationOffset = song.chart.Notes.length - 1;
+            if (_options.isolationOffset >= _song.chart.Notes.length)
+                _options.isolationOffset = _song.chart.Notes.length - 1;
 
             // Song
-            song.updateMusicDelay();
-            legacyMode = (song.type == NoteChart.FFR || song.type == NoteChart.FFR_RAW || song.type == NoteChart.FFR_LEGACY);
-            if (song.music && (legacyMode || !options.modEnabled("nobackground")))
+            _song.updateMusicDelay();
+            _legacyMode = (_song.type == NoteChart.FFR || _song.type == NoteChart.FFR_RAW || _song.type == NoteChart.FFR_LEGACY);
+            if (_song.music && (_legacyMode || !_options.modEnabled("nobackground")))
             {
-                song_background = song.music as MovieClip;
-                gameSongFrames = song_background.totalFrames;
-                song_background.x = 115;
-                song_background.y = 42.5;
-                this.addChild(song_background);
-                if (options.modEnabled("nobackground"))
-                    setChildIndex(song_background, 0);
+                _songBackground = _song.music as MovieClip;
+                _gameSongFrames = _songBackground.totalFrames;
+                _songBackground.x = 115;
+                _songBackground.y = 42.5;
+                this.addChild(_songBackground);
+                if (_options.modEnabled("nobackground"))
+                    setChildIndex(_songBackground, 0);
             }
-            song.start();
-            songDelay = song.mp3Frame / options.settings.songRate * 1000 / 30 - globalOffset;
+            _song.start();
+            _songDelay = _song.mp3Frame / _options.settings.songRate * 1000 / 30 - _globalOffset;
         }
 
         private function initBackground():void
         {
             // Anti-GPU Rampdown Hack
-            GPU_PIXEL_BMD = new BitmapData(1, 1, false, 0x010101);
-            GPU_PIXEL_BITMAP = new Bitmap(GPU_PIXEL_BMD);
-            this.addChild(GPU_PIXEL_BITMAP);
+            _gpuPixelBitmapData = new BitmapData(1, 1, false, 0x010101);
+            _gpuPixelBitmap = new Bitmap(_gpuPixelBitmapData);
+            this.addChild(_gpuPixelBitmap);
 
             stage.color = GameBackgroundColor.BG_STAGE;
 
@@ -465,11 +467,11 @@ package game
 
         private function initUI():void
         {
-            noteBox = new NoteBox(song, options);
-            noteBox.position();
-            this.addChild(noteBox);
+            _noteBox = new NoteBox(_song, _options);
+            _noteBox.position();
+            this.addChild(_noteBox);
 
-            if (!options.isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
+            if (!_options.isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
             {
                 var isInSoloMode:Boolean = true;
                 MultiplayerState.instance.connection.disconnect(isInSoloMode);
@@ -502,150 +504,151 @@ package game
 
             buildScreenCut();
 
-            gameplayUI = (sideScroll ? new viewLR() : new viewUD());
-            this.addChild(gameplayUI);
+            _gameplayUI = (_sideScroll ? new viewLR() : new viewUD());
+            this.addChild(_gameplayUI);
 
-            if (!options.settings.displayGameTopBar)
-                gameplayUI.top_bar.visible = false;
+            if (!_options.settings.displayGameTopBar)
+                _gameplayUI.top_bar.visible = false;
 
-            if (!options.settings.displayGameBottomBar)
-                gameplayUI.bottom_bar.visible = false;
+            if (!_options.settings.displayGameBottomBar)
+                _gameplayUI.bottom_bar.visible = false;
 
-            if (!options.settings.displayGameTopBar && !options.settings.displayGameBottomBar)
-                gameplayUI.visible = false;
+            if (!_options.settings.displayGameTopBar && !_options.settings.displayGameBottomBar)
+                _gameplayUI.visible = false;
 
-            if (options.settings.displayPACount)
+            if (_options.settings.displayPACount)
             {
-                player1PAWindow = new PAWindow(options);
-                if (sideScroll)
-                    player1PAWindow.alternateLayout();
-                this.addChild(player1PAWindow);
+                _player1PAWindow = new PAWindow(_options);
+                if (_sideScroll)
+                    _player1PAWindow.alternateLayout();
+                this.addChild(_player1PAWindow);
             }
 
-            if (options.settings.displayScore)
+            if (_options.settings.displayScore)
             {
-                score = new Score(options);
-                this.addChild(score);
+                _score = new Score(_options);
+                this.addChild(_score);
             }
 
-            if (options.settings.displayCombo)
+            if (_options.settings.displayCombo)
             {
-                player1Combo = new Combo(options);
-                if (!sideScroll)
-                    player1Combo.alignment = TextFieldAutoSize.RIGHT;
-                this.addChild(player1Combo);
+                _player1Combo = new Combo(_options);
+                if (!_sideScroll)
+                    _player1Combo.alignment = TextFieldAutoSize.RIGHT;
+                this.addChild(_player1Combo);
 
-                comboStatic = new TextStatic(_lang.string("game_combo"));
-                this.addChild(comboStatic);
+                _comboStatic = new TextStatic(_lang.string("game_combo"));
+                this.addChild(_comboStatic);
             }
 
-            if (options.settings.displayTotal)
+            if (_options.settings.displayTotal)
             {
-                comboTotal = new Combo(options);
-                if (sideScroll)
-                    comboTotal.alignment = TextFieldAutoSize.RIGHT;
-                this.addChild(comboTotal);
+                _comboTotal = new Combo(_options);
+                if (_sideScroll)
+                    _comboTotal.alignment = TextFieldAutoSize.RIGHT;
+                this.addChild(_comboTotal);
 
-                comboTotalStatic = new TextStatic(_lang.string("game_combo_total"));
-                this.addChild(comboTotalStatic);
+                _comboTotalStatic = new TextStatic(_lang.string("game_combo_total"));
+                this.addChild(_comboTotalStatic);
             }
 
-            if (options.settings.displayAccuracyBar)
+            if (_options.settings.displayAccuracyBar)
             {
-                accBar = new AccuracyBar(options);
-                this.addChild(accBar);
+                _accBar = new AccuracyBar(_options);
+                this.addChild(_accBar);
             }
 
-            if (options.settings.displaySongProgress || options.replay)
+            if (_options.settings.displaySongProgress || _options.replay)
             {
-                progressDisplay = new ProgressBar(161, 9, 458, 20, 4, 0x545454, 0.1);
+                _progressDisplay = new ProgressBar(161, 9, 458, 20, 4, 0x545454, 0.1);
+                addChild(_progressDisplay);
 
-                if (options.replay)
-                    progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
+                if (_options.replay)
+                    _progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
             }
-            if (options.settings.displaySongProgressText)
+            if (_options.settings.displaySongProgressText)
             {
-                progressDisplayText = new TextStatic("0:00");
-                this.addChild(progressDisplayText);
+                _progressDisplayText = new TextStatic("0:00");
+                this.addChild(_progressDisplayText);
             }
 
-            if (!mpSpectate)
+            if (!_mpSpectate)
             {
                 buildJudge();
                 buildHealth();
             }
 
-            if (options.mpRoom)
+            if (_options.mpRoom)
                 buildMultiplayer();
 
-            if (options.isEditor)
+            if (_options.isEditor)
             {
-                gameplayUI.mouseChildren = false;
-                gameplayUI.mouseEnabled = false;
+                _gameplayUI.mouseChildren = false;
+                _gameplayUI.mouseEnabled = false;
 
                 function closeEditor(e:MouseEvent):void
                 {
-                    GAME_STATE = GAME_END;
-                    if (!options.replay)
+                    _GAME_STATE = GAME_END;
+                    if (!_options.replay)
                     {
-                        options.user.saveSettingsLocally();
-                        options.user.saveSettingsOnline(_gvars.userSession);
+                        _options.user.saveSettingsLocally();
+                        _options.user.saveSettingsOnline(_gvars.userSession);
                     }
                 }
 
                 function resetLayout(e:MouseEvent):void
                 {
-                    for (var key:String in options.layout)
-                        delete options.layout[key];
+                    for (var key:String in _options.layout)
+                        delete _options.layout[key];
                     _avars.interfaceSave();
                     interfaceSetup();
                 }
 
-                exitEditor = new BoxButton(this, (Main.GAME_WIDTH - 75) / 2, (Main.GAME_HEIGHT - 30) / 2, 75, 30, _lang.string("menu_close"), 12, closeEditor);
-                resetEditor = new BoxButton(this, exitEditor.x, exitEditor.y + 35, 75, 30, _lang.string("menu_reset"), 12, resetLayout);
+                _exitEditor = new BoxButton(this, (Main.GAME_WIDTH - 75) / 2, (Main.GAME_HEIGHT - 30) / 2, 75, 30, _lang.string("menu_close"), 12, closeEditor);
+                _resetEditor = new BoxButton(this, _exitEditor.x, _exitEditor.y + 35, 75, 30, _lang.string("menu_reset"), 12, resetLayout);
             }
         }
 
         private function initPlayerVars():void
         {
             // Force no Judge on SongPreviews
-            if (options.replay && options.replay.isPreview)
+            if (_options.replay && _options.replay.isPreview)
             {
-                options.settings.judgeOffset = 0;
-                options.settings.globalOffset = 0;
-                options.isAutoplay = true;
+                _options.settings.judgeOffset = 0;
+                _options.settings.globalOffset = 0;
+                _options.isAutoplay = true;
             }
 
-            reverseMod = options.modEnabled("reverse");
-            sideScroll = (options.settings.scrollDirection == "left" || options.settings.scrollDirection == "right");
-            player1JudgeOffset = Math.round(options.settings.judgeOffset);
-            globalOffsetRounded = Math.round(options.settings.globalOffset);
-            globalOffset = (options.settings.globalOffset - globalOffsetRounded) * 1000 / 30;
+            _reverseMod = _options.modEnabled("reverse");
+            _sideScroll = (_options.settings.scrollDirection == "left" || _options.settings.scrollDirection == "right");
+            _player1JudgeOffset = Math.round(_options.settings.judgeOffset);
+            _globalOffsetRounded = Math.round(_options.settings.globalOffset);
+            _globalOffset = (_options.settings.globalOffset - _globalOffsetRounded) * 1000 / 30;
 
-            if (options.judgeWindow)
-                judgeSettings = buildJudgeNodes(options.judgeWindow);
+            if (_options.judgeWindow)
+                _judgeSettings = buildJudgeNodes(_options.judgeWindow);
             else
-                judgeSettings = buildJudgeNodes(Constant.JUDGE_WINDOW);
-            judgeOffset = options.settings.judgeOffset * 1000 / 30;
-            autoJudgeOffset = options.settings.autoJudgeOffset;
+                _judgeSettings = buildJudgeNodes(Constant.JUDGE_WINDOW);
+            _judgeOffset = _options.settings.judgeOffset * 1000 / 30;
+            _autoJudgeOffset = _options.settings.autoJudgeOffset;
 
-            mpSpectate = (options.mpRoom && !options.mpRoom.connection.currentUser.isPlayer);
-            if (mpSpectate)
+            _mpSpectate = (_options.mpRoom && !_options.mpRoom.connection.currentUser.isPlayer);
+            if (_mpSpectate)
             {
-                options.settings.displayCombo = false;
-                options.settings.displayTotal = false;
-                options.settings.displayPACount = false;
+                _options.settings.displayCombo = false;
+                _options.settings.displayTotal = false;
+                _options.settings.displayPACount = false;
             }
-            else if (options.mpRoom)
-                options.settings.displayTotal = false;
+            else if (_options.mpRoom)
+                _options.settings.displayTotal = false;
         }
 
         private function initVars(postStart:Boolean = true):void
         {
             // Post Start Time
-            if (postStart && !options.user.isGuest && !options.replay && !options.isEditor && song.songInfo.engine == null && !mpSpectate)
+            if (postStart && !_options.user.isGuest && !_options.replay && !_options.isEditor && _song.songInfo.engine == null && !_mpSpectate)
             {
-                Logger.debug(this, "Posting Start of level " + song.id);
+                Logger.debug(this, "Posting Start of level " + _song.id);
                 _loader = new URLLoader();
                 addLoaderListeners();
 
@@ -653,7 +656,7 @@ package game
                 var requestVars:URLVariables = new URLVariables();
                 Constant.addDefaultRequestVariables(requestVars);
                 requestVars.session = _gvars.userSession;
-                requestVars.id = song.id;
+                requestVars.id = _song.id;
                 requestVars.restarts = _gvars.songRestarts;
                 req.data = requestVars;
                 req.method = URLRequestMethod.POST;
@@ -663,76 +666,76 @@ package game
 
             // Game Vars
             _keys = [];
-            gameLife = 50;
-            gameScore = 0;
-            gameRawGoods = 0;
-            gameReplay = [];
-            gameReplayHit = [];
+            _gameLife = 50;
+            _gameScore = 0;
+            _gameRawGoods = 0;
+            _gameReplay = [];
+            _gameReplayHit = [];
 
-            binReplayNotes = new Vector.<ReplayBinFrame>(song.totalNotes, true);
-            binReplayBoos = new <ReplayBinFrame>[];
+            _binReplayNotes = new Vector.<ReplayBinFrame>(_song.totalNotes, true);
+            _binReplayBoos = new <ReplayBinFrame>[];
 
             // Prefill Replay
-            for (var i:int = song.totalNotes - 1; i >= 0; i--)
-                binReplayNotes[i] = new ReplayBinFrame(NaN, song.getNote(i).direction, i);
+            for (var i:int = _song.totalNotes - 1; i >= 0; i--)
+                _binReplayNotes[i] = new ReplayBinFrame(NaN, _song.getNote(i).direction, i);
 
-            replayPressCount = 0;
+            _replayPressCount = 0;
 
-            hitAmazing = 0;
-            hitPerfect = 0;
-            hitGood = 0;
-            hitAverage = 0;
-            hitMiss = 0;
-            hitBoo = 0;
-            hitCombo = 0;
-            hitMaxCombo = 0;
+            _hitAmazing = 0;
+            _hitPerfect = 0;
+            _hitGood = 0;
+            _hitAverage = 0;
+            _hitMiss = 0;
+            _hitBoo = 0;
+            _hitCombo = 0;
+            _hitMaxCombo = 0;
 
             updateHealth(0);
-            if (song != null && song.totalNotes > 0)
+            if (_song != null && _song.totalNotes > 0)
             {
-                gameLastNoteFrame = song.getNote(song.totalNotes - 1).frame;
-                gameFirstNoteFrame = song.getNote(0).frame;
+                _gameLastNoteFrame = _song.getNote(_song.totalNotes - 1).frame;
+                _gameFirstNoteFrame = _song.getNote(0).frame;
             }
-            if (comboTotal)
-                comboTotal.update(song.totalNotes);
+            if (_comboTotal)
+                _comboTotal.update(_song.totalNotes);
 
-            msStartTime = getTimer();
-            absoluteStart = getTimer();
-            gamePosition = 0;
-            gameProgress = 0;
-            absolutePosition = 0;
-            if (song != null)
+            _msStartTime = getTimer();
+            _absoluteStart = getTimer();
+            _gamePosition = 0;
+            _gameProgress = 0;
+            _absolutePosition = 0;
+            if (_song != null)
             {
-                songOffset = new RollingAverage(song.frameRate * 4, _avars.configMusicOffset);
-                frameRate = new RollingAverage(song.frameRate * 4, song.frameRate);
+                _songOffset = new RollingAverage(_song.frameRate * 4, _avars.configMusicOffset);
+                _frameRate = new RollingAverage(_song.frameRate * 4, _song.frameRate);
             }
-            accuracy = new Average();
+            _accuracy = new Average();
 
-            songDelayStarted = false;
+            _songDelayStarted = false;
 
             updateFieldVars();
 
-            if (progressDisplayText)
-                progressDisplayText.update(TimeUtil.convertToHMSS(Math.ceil(gameLastNoteFrame / 30)));
+            if (_progressDisplayText)
+                _progressDisplayText.update(TimeUtil.convertToHMSS(Math.ceil(_gameLastNoteFrame / 30)));
 
             if (postStart)
             {
                 // Websocket
                 if (_gvars.air_useWebsockets)
                 {
-                    SOCKET_SCORE_MESSAGE["amazing"] = hitAmazing;
-                    SOCKET_SCORE_MESSAGE["perfect"] = hitPerfect;
-                    SOCKET_SCORE_MESSAGE["good"] = hitGood;
-                    SOCKET_SCORE_MESSAGE["average"] = hitAverage;
-                    SOCKET_SCORE_MESSAGE["boo"] = hitBoo;
-                    SOCKET_SCORE_MESSAGE["miss"] = hitMiss;
-                    SOCKET_SCORE_MESSAGE["combo"] = hitCombo;
-                    SOCKET_SCORE_MESSAGE["maxcombo"] = hitMaxCombo;
-                    SOCKET_SCORE_MESSAGE["score"] = gameScore;
-                    SOCKET_SCORE_MESSAGE["last_hit"] = null;
-                    SOCKET_SCORE_MESSAGE["restarts"] = _gvars.songRestarts;
-                    _gvars.websocketSend("NOTE_JUDGE", SOCKET_SCORE_MESSAGE);
-                    _gvars.websocketSend("SONG_START", SOCKET_SONG_MESSAGE);
+                    _socketScoreMessage["amazing"] = _hitAmazing;
+                    _socketScoreMessage["perfect"] = _hitPerfect;
+                    _socketScoreMessage["good"] = _hitGood;
+                    _socketScoreMessage["average"] = _hitAverage;
+                    _socketScoreMessage["boo"] = _hitBoo;
+                    _socketScoreMessage["miss"] = _hitMiss;
+                    _socketScoreMessage["combo"] = _hitCombo;
+                    _socketScoreMessage["maxcombo"] = _hitMaxCombo;
+                    _socketScoreMessage["score"] = _gameScore;
+                    _socketScoreMessage["last_hit"] = null;
+                    _socketScoreMessage["restarts"] = _gvars.songRestarts;
+                    _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
+                    _gvars.websocketSend("SONG_START", _socketSongMessage);
                 }
             }
         }
@@ -789,92 +792,92 @@ package game
 
         private function logicTick():void
         {
-            gameProgress++;
+            _gameProgress++;
 
             // Anti-GPU Rampdown Hack:
             // By doing a sparse but steady amount of screen updates using a single pixel in the
             // top left, the GPU is kept active on laptops. This fixes the issue when a skip can
             // appear to happen when the GPU re-awakes to begin drawing updates after a break in
             // a song.
-            if (gameProgress % 15 == 0)
+            if (_gameProgress % 15 == 0)
             {
-                if ((gameProgress & 1) == 0)
-                    GPU_PIXEL_BMD.setPixel(0, 0, 0x010101);
+                if ((_gameProgress & 1) == 0)
+                    _gpuPixelBitmapData.setPixel(0, 0, 0x010101);
                 else
-                    GPU_PIXEL_BMD.setPixel(0, 0, 0x020202);
+                    _gpuPixelBitmapData.setPixel(0, 0, 0x020202);
             }
 
-            if (levelScript != null)
-                levelScript.doProgressTick(gameProgress);
+            if (_levelScript != null)
+                _levelScript.doProgressTick(_gameProgress);
 
-            if (quitDoubleTap > 0)
+            if (_quitDoubleTap > 0)
             {
-                quitDoubleTap--;
+                _quitDoubleTap--;
             }
 
-            if (gameProgress >= gameLastNoteFrame + 20 || quitDoubleTap == 0)
+            if (_gameProgress >= _gameLastNoteFrame + 20 || _quitDoubleTap == 0)
             {
-                GAME_STATE = GAME_END;
+                _GAME_STATE = GAME_END;
                 return;
             }
 
             // Timer Text
-            if (gameProgress % 30 == 0 && progressDisplayText != null)
+            if (_gameProgress % 30 == 0 && _progressDisplayText != null)
             {
-                progressDisplayText.update(TimeUtil.convertToHMSS(Math.ceil(Math.max(0, (gameLastNoteFrame - gameProgress)) / 30)));
+                _progressDisplayText.update(TimeUtil.convertToHMSS(Math.ceil(Math.max(0, (_gameLastNoteFrame - _gameProgress)) / 30)));
             }
 
-            var nextNote:Note = noteBox.nextNote;
-            while (nextNote && nextNote.frame <= gameProgress + player1JudgeOffset + 5)
+            var nextNote:Note = _noteBox.nextNote;
+            while (nextNote && nextNote.frame <= _gameProgress + _player1JudgeOffset + 5)
             {
-                noteBox.spawnArrow(nextNote, (gameProgress + player1JudgeOffset + 5) / 30 * 1000);
-                nextNote = noteBox.nextNote;
+                _noteBox.spawnArrow(nextNote, (_gameProgress + _player1JudgeOffset + 5) / 30 * 1000);
+                nextNote = _noteBox.nextNote;
             }
 
-            var notes:Array = noteBox.notes;
+            var notes:Array = _noteBox.notes;
             for (var n:int = 0; n < notes.length; n++)
             {
                 var curNote:GameNote = notes[n];
 
                 // Game Bot
-                if (options.isAutoplay && (gameProgress - curNote.PROGRESS + player1JudgeOffset) == 0)
+                if (_options.isAutoplay && (_gameProgress - curNote.PROGRESS + _player1JudgeOffset) == 0)
                 {
-                    judgeScore(curNote.DIR, gameProgress);
+                    judgeScore(curNote.DIR, _gameProgress);
                     n--;
                 }
 
                 // Remove Old note
-                if (gameProgress - curNote.PROGRESS + player1JudgeOffset >= 6)
+                if (_gameProgress - curNote.PROGRESS + _player1JudgeOffset >= 6)
                 {
-                    commitJudge(curNote.DIR, gameProgress, -10);
-                    noteBox.removeNote(curNote.ID);
+                    commitJudge(curNote.DIR, _gameProgress, -10);
+                    _noteBox.removeNote(curNote.ID);
                     n--;
                 }
             }
 
             // Replays
-            if (options.replay && !options.replay.isPreview)
+            if (_options.replay && !_options.replay.isPreview)
             {
-                var newPress:ReplayNote = options.replay.getPress(replayPressCount);
-                if (options.replay.needsBeatboxGeneration)
+                var newPress:ReplayNote = _options.replay.getPress(_replayPressCount);
+                if (_options.replay.needsBeatboxGeneration)
                 {
-                    var oldPosition:int = gamePosition;
-                    gamePosition = (gameProgress + 0.5) * 1000 / 30;
-                    var cutOffReplayNote:uint = options.replay.generationReplayNotes.length;
-                    var readAheadTime:Number = (1 / frameRate.value) * 1000;
+                    var oldPosition:int = _gamePosition;
+                    _gamePosition = (_gameProgress + 0.5) * 1000 / 30;
+                    var cutOffReplayNote:uint = _options.replay.generationReplayNotes.length;
+                    var readAheadTime:Number = (1 / _frameRate.value) * 1000;
                     // Note Hits
                     for (var rn:int = 0; rn < notes.length; rn++)
                     {
                         var repCurNote:GameNote = notes[rn];
 
                         // Missed Note
-                        if (repCurNote.ID >= cutOffReplayNote || (options.replay.generationReplayNotes[repCurNote.ID] == null || isNaN(options.replay.generationReplayNotes[repCurNote.ID].time)))
+                        if (repCurNote.ID >= cutOffReplayNote || (_options.replay.generationReplayNotes[repCurNote.ID] == null || isNaN(_options.replay.generationReplayNotes[repCurNote.ID].time)))
                         {
                             continue;
                         }
 
-                        var diffValue:int = options.replay.generationReplayNotes[repCurNote.ID].time + repCurNote.POSITION;
-                        if ((gamePosition + readAheadTime >= diffValue) || gamePosition >= diffValue)
+                        var diffValue:int = _options.replay.generationReplayNotes[repCurNote.ID].time + repCurNote.POSITION;
+                        if ((_gamePosition + readAheadTime >= diffValue) || _gamePosition >= diffValue)
                         {
                             judgeScorePosition(repCurNote.DIR, diffValue);
                             rn--;
@@ -882,26 +885,26 @@ package game
                     }
 
                     // Boo Handling
-                    while (newPress != null && gamePosition >= newPress.time)
+                    while (newPress != null && _gamePosition >= newPress.time)
                     {
                         if (newPress.frame == -2)
                         {
-                            commitJudge(newPress.direction, gameProgress, -5);
-                            binReplayBoos[binReplayBoos.length] = new ReplayBinFrame(newPress.time, newPress.direction, binReplayBoos.length);
+                            commitJudge(newPress.direction, _gameProgress, -5);
+                            _binReplayBoos[_binReplayBoos.length] = new ReplayBinFrame(newPress.time, newPress.direction, _binReplayBoos.length);
                         }
-                        replayPressCount++;
-                        newPress = options.replay.getPress(replayPressCount);
+                        _replayPressCount++;
+                        newPress = _options.replay.getPress(_replayPressCount);
                     }
-                    gamePosition = oldPosition;
+                    _gamePosition = oldPosition;
                 }
                 else
                 {
-                    while (newPress != null && newPress.frame == gameProgress)
+                    while (newPress != null && newPress.frame == _gameProgress)
                     {
                         judgeScore(newPress.direction, newPress.frame);
 
-                        replayPressCount++;
-                        newPress = options.replay.getPress(replayPressCount);
+                        _replayPressCount++;
+                        newPress = _options.replay.getPress(_replayPressCount);
                     }
                 }
             }
@@ -918,7 +921,7 @@ package game
         {
             var lowIndex:int = 0;
             var highIndex:int = 0;
-            for each (var user:User in options.mpRoom.players)
+            for each (var user:User in _options.mpRoom.players)
             {
                 var gameplay:Gameplay = user.gameplay;
                 var index:int = gameplay.amazing + gameplay.perfect + gameplay.good + gameplay.average + gameplay.miss;
@@ -928,11 +931,11 @@ package game
                     highIndex = index;
             }
 
-            if (!song.getNote(lowIndex) || !song.getNote(highIndex))
+            if (!_song.getNote(lowIndex) || !_song.getNote(highIndex))
                 return;
 
-            var lowProgress:int = song.getNote(lowIndex).frame;
-            var highProgress:int = song.getNote(highIndex).frame;
+            var lowProgress:int = _song.getNote(lowIndex).frame;
+            var highProgress:int = _song.getNote(highIndex).frame;
 
             var currentTime:int = getTimer();
             if (lowIndex > mpLowProgress)
@@ -951,130 +954,130 @@ package game
             lowIndex = mpLowProgressTime ? (mpLowProgress + (currentTime - mpLowProgressTime) * 30 / 1000) : 0;
             highIndex = mpHighProgressTime ? (mpHighProgress + (currentTime - mpHighProgressTime) * 30 / 1000) : 0;
 
-            if (gameProgress < lowIndex - 30)
+            if (_gameProgress < lowIndex - 30)
             {
                 if (highIndex - lowIndex < 60)
                     lowIndex = lowIndex + (highIndex - lowIndex) / 2;
                 else
                     lowIndex += 15;
-                absoluteStart = currentTime;
-                songOffset.reset(lowIndex * 1000 / 30);
-                song.start(lowIndex * 1000 / 30);
-                noteBox.resetNoteCount(mpLowIndex);
-                while (gameProgress < lowIndex)
+                _absoluteStart = currentTime;
+                _songOffset.reset(lowIndex * 1000 / 30);
+                _song.start(lowIndex * 1000 / 30);
+                _noteBox.resetNoteCount(mpLowIndex);
+                while (_gameProgress < lowIndex)
                     logicTick();
             }
-            else if (gameProgress > highIndex + 30 || (!lowIndex && !highIndex))
+            else if (_gameProgress > highIndex + 30 || (!lowIndex && !highIndex))
             {
                 if (highIndex - lowIndex < 60)
                     highIndex = lowIndex + (highIndex - lowIndex) / 2;
                 else if (highIndex > 15)
                     highIndex -= 15;
-                absoluteStart = currentTime;
-                songOffset.reset(highIndex * 1000 / 30);
-                song.start(highIndex * 1000 / 30);
-                noteBox.resetNoteCount(mpHighIndex);
+                _absoluteStart = currentTime;
+                _songOffset.reset(highIndex * 1000 / 30);
+                _song.start(highIndex * 1000 / 30);
+                _noteBox.resetNoteCount(mpHighIndex);
             }
         }
 
         private function onEnterFrame(e:Event):void
         {
             // XXX: HACK HACK HACK
-            if (legacyMode)
+            if (_legacyMode)
             {
-                var songFrame:int = song_background.currentFrame;
-                if (songFrame == gameSongFrames - 1)
-                    song.stop();
+                var songFrame:int = _songBackground.currentFrame;
+                if (songFrame == _gameSongFrames - 1)
+                    _song.stop();
             }
 
             // UI Updates
-            if (options.settings.displayMPJudge && options.mpRoom)
+            if (_options.settings.displayMPJudge && _options.mpRoom)
             {
-                for each (var mpJudgeComponent:Judge in mpJudge)
+                for each (var mpJudgeComponent:Judge in _mpJudge)
                 {
                     mpJudgeComponent.updateJudge(e);
                 }
             }
-            else if (options.settings.displayJudge && player1Judge != null)
+            else if (_options.settings.displayJudge && _player1Judge != null)
             {
-                player1Judge.updateJudge(e);
+                _player1Judge.updateJudge(e);
             }
 
 
             // Gameplay Logic
-            switch (GAME_STATE)
+            switch (_GAME_STATE)
             {
                 case GAME_PLAY:
-                    if (legacyMode)
+                    if (_legacyMode)
                     {
                         logicTick();
-                        gamePosition = (gameProgress + 0.5) * 1000 / 30;
+                        _gamePosition = (_gameProgress + 0.5) * 1000 / 30;
 
-                        if (mpSpectate)
+                        if (_mpSpectate)
                             spectateSync();
                     }
                     else
                     {
-                        var lastAbsolutePosition:int = absolutePosition;
-                        absolutePosition = getTimer() - absoluteStart;
+                        var lastAbsolutePosition:int = _absolutePosition;
+                        _absolutePosition = getTimer() - _absoluteStart;
 
-                        if (!songDelayStarted)
+                        if (!_songDelayStarted)
                         {
-                            if (absolutePosition < songDelay)
+                            if (_absolutePosition < _songDelay)
                             {
-                                song.stop();
+                                _song.stop();
                             }
                             else
                             {
-                                songDelayStarted = true;
-                                song.start();
+                                _songDelayStarted = true;
+                                _song.start();
                             }
                         }
 
-                        var songPosition:int = song.getPosition() + songDelay;
-                        if (song.musicIsPlaying && songPosition > 100)
-                            songOffset.addValue(songPosition - absolutePosition);
+                        var songPosition:int = _song.getPosition() + _songDelay;
+                        if (_song.musicIsPlaying && songPosition > 100)
+                            _songOffset.addValue(songPosition - _absolutePosition);
 
-                        frameRate.addValue(1000 / (absolutePosition - lastAbsolutePosition));
+                        _frameRate.addValue(1000 / (_absolutePosition - lastAbsolutePosition));
 
-                        gamePosition = Math.round(absolutePosition + songOffset.value);
-                        if (gamePosition < 0)
-                            gamePosition = 0;
+                        _gamePosition = Math.round(_absolutePosition + _songOffset.value);
+                        if (_gamePosition < 0)
+                            _gamePosition = 0;
 
-                        var targetProgress:int = Math.round(gamePosition * 30 / 1000 - 0.5);
-                        var threshold:int = Math.round(1 / (frameRate.value / 60));
+                        var targetProgress:int = Math.round(_gamePosition * 30 / 1000 - 0.5);
+                        var threshold:int = Math.round(1 / (_frameRate.value / 60));
                         if (threshold < 1)
                             threshold = 1;
-                        if (options.replay)
+                        if (_options.replay)
                             threshold = 0x7fffffff;
 
                         //Logger.debug("GP", "lAP: " + lastAbsolutePosition + " | aP: " + absolutePosition + " | sDS: " + songDelayStarted + " | sD: " + songDelay + " | sOv: " + songOffset.value + " | sGP: " + song.getPosition() + " | sP: " + songPosition + " | gP: " + gamePosition + " | tP: " + targetProgress + " | t: " + threshold);
 
-                        while (gameProgress < targetProgress && threshold-- > 0)
+                        while (_gameProgress < targetProgress && threshold-- > 0)
                             logicTick();
 
-                        if (mpSpectate)
+                        if (_mpSpectate)
                             spectateSync();
 
-                        if (reverseMod)
-                            stopClips(song_background, 2 + song.musicDelay - globalOffsetRounded + gameProgress * options.settings.songRate);
+                        if (_reverseMod)
+                            stopClips(_songBackground, 2 + _song.musicDelay - _globalOffsetRounded + _gameProgress * _options.settings.songRate);
                         else
-                            stopClips(song_background, 2 + song.musicDelay - globalOffsetRounded + gameProgress * options.settings.songRate);
+                            stopClips(_songBackground, 2 + _song.musicDelay - _globalOffsetRounded + _gameProgress * _options.settings.songRate);
                     }
 
-                    if (options.modEnabled("tap_pulse"))
+                    if (_options.modEnabled("tap_pulse"))
                     {
-                        noteBoxOffset.x = Math.max(Math.min(Math.abs(noteBoxOffset.x) < 0.5 ? 0 : (noteBoxOffset.x * 0.992), noteBox.positionOffsetMax.max_x), noteBox.positionOffsetMax.min_x);
-                        noteBoxOffset.y = Math.max(Math.min(Math.abs(noteBoxOffset.y) < 0.5 ? 0 : (noteBoxOffset.y * 0.992), noteBox.positionOffsetMax.max_y), noteBox.positionOffsetMax.min_y);
+                        _noteBoxOffset.x = Math.max(Math.min(Math.abs(_noteBoxOffset.x) < 0.5 ? 0 : (_noteBoxOffset.x * 0.992), _noteBox.positionOffsetMax.max_x), _noteBox.positionOffsetMax.min_x);
+                        _noteBoxOffset.y = Math.max(Math.min(Math.abs(_noteBoxOffset.y) < 0.5 ? 0 : (_noteBoxOffset.y * 0.992), _noteBox.positionOffsetMax.max_y), _noteBox.positionOffsetMax.min_y);
 
-                        noteBox.x = noteBoxPositionDefault.x + noteBoxOffset.x;
-                        noteBox.y = noteBoxPositionDefault.y + noteBoxOffset.y;
+                        _noteBox.x = _noteBoxPositionDefault.x + _noteBoxOffset.x;
+                        _noteBox.y = _noteBoxPositionDefault.y + _noteBoxOffset.y;
                     }
 
-                    noteBox.update(gamePosition);
+                    _noteBox.update(_gamePosition);
 
-                    if (progressDisplay)
-                        progressDisplay.update(gameProgress / gameLastNoteFrame, false);
+                    if (_progressDisplay)
+                        _progressDisplay.update(_gameProgress / _gameLastNoteFrame, false);
                     break;
                 case GAME_END:
                     endGame();
@@ -1111,47 +1114,47 @@ package game
             _keys[keyCode] = true;
 
             // Handle judgement of key presses.
-            if (gameLife > 0)
+            if (_gameLife > 0)
             {
-                if (!options.replay)
+                if (!_options.replay)
                 {
                     var dir:String = null;
                     switch (keyCode)
                     {
-                        case options.settings.keyLeft:
+                        case _options.settings.keyLeft:
                             //case Keyboard.NUMPAD_4:
                             dir = "L";
                             break;
 
-                        case options.settings.keyRight:
+                        case _options.settings.keyRight:
                             //case Keyboard.NUMPAD_6:
                             dir = "R";
                             break;
 
-                        case options.settings.keyUp:
+                        case _options.settings.keyUp:
                             //case Keyboard.NUMPAD_8:
                             dir = "U";
                             break;
 
-                        case options.settings.keyDown:
+                        case _options.settings.keyDown:
                             //case Keyboard.NUMPAD_2:
                             dir = "D";
                             break;
                     }
                     if (dir)
                     {
-                        if (legacyMode)
-                            judgeScore(dir, gameProgress);
+                        if (_legacyMode)
+                            judgeScore(dir, _gameProgress);
                         else
-                            judgeScorePosition(dir, Math.round(getTimer() - absoluteStart + songOffset.value));
+                            judgeScorePosition(dir, Math.round(getTimer() - _absoluteStart + _songOffset.value));
                     }
                 }
             }
 
             // Game Restart
-            if (keyCode == _gvars.playerUser.settings.keyRestart && !options.mpRoom)
+            if (keyCode == _gvars.playerUser.settings.keyRestart && !_options.mpRoom)
             {
-                GAME_STATE = GAME_RESTART;
+                _GAME_STATE = GAME_RESTART;
             }
 
             // Quit
@@ -1159,24 +1162,24 @@ package game
             {
                 if (_gvars.songQueue.length > 0)
                 {
-                    if (quitDoubleTap > 0)
+                    if (_quitDoubleTap > 0)
                     {
                         _gvars.songQueue = [];
-                        GAME_STATE = GAME_END;
+                        _GAME_STATE = GAME_END;
                     }
                     else
                     {
-                        quitDoubleTap = options.settings.frameRate / 4;
+                        _quitDoubleTap = _options.settings.frameRate / 4;
                     }
                 }
                 else
                 {
-                    GAME_STATE = GAME_END;
+                    _GAME_STATE = GAME_END;
                 }
             }
 
             // Pause
-            else if (keyCode == 19 && (CONFIG::debug || _gvars.playerUser.isAdmin || _gvars.playerUser.isDeveloper || options.replay))
+            else if (keyCode == 19 && (CONFIG::debug || _gvars.playerUser.isAdmin || _gvars.playerUser.isDeveloper || _options.replay))
             {
                 togglePause();
             }
@@ -1184,8 +1187,8 @@ package game
             // Auto-Play
             else if (keyCode == Keyboard.F8 && (CONFIG::debug || _gvars.playerUser.isDeveloper || _gvars.playerUser.isAdmin))
             {
-                options.isAutoplay = !options.isAutoplay;
-                Alert.add("Bot Play: " + options.isAutoplay, 60);
+                _options.isAutoplay = !_options.isAutoplay;
+                Alert.add("Bot Play: " + _options.isAutoplay, 60);
             }
 
             e.stopImmediatePropagation();
@@ -1193,35 +1196,35 @@ package game
 
         private function progressMouseClick(e:MouseEvent):void
         {
-            var seek:int = (e.localX / e.target.width) * gameLastNoteFrame;
-            if (seek < gameProgress)
+            var seek:int = (e.localX / e.target.width) * _gameLastNoteFrame;
+            if (seek < _gameProgress)
                 restartGame();
-            absoluteStart = getTimer();
-            songOffset.reset(seek * 1000 / 30);
-            song.start(seek * 1000 / 30);
-            while (gameProgress < seek)
+            _absoluteStart = getTimer();
+            _songOffset.reset(seek * 1000 / 30);
+            _song.start(seek * 1000 / 30);
+            while (_gameProgress < seek)
                 logicTick();
-            songDelayStarted = true;
+            _songDelayStarted = true;
         }
 
         private function editorOnEnterFrame(e:Event):void
         {
             // State 0 = Gameplay
-            if (GAME_STATE == GAME_PLAY)
+            if (_GAME_STATE == GAME_PLAY)
             {
-                gamePosition = getTimer() - absoluteStart;
-                var targetProgress:int = Math.round(gamePosition * 30 / 1000);
+                _gamePosition = getTimer() - _absoluteStart;
+                var targetProgress:int = Math.round(_gamePosition * 30 / 1000);
 
                 // Update Notes
-                while (gameProgress < targetProgress)
+                while (_gameProgress < targetProgress)
                 {
                     logicTick();
                 }
 
-                noteBox.update(gamePosition);
+                _noteBox.update(_gamePosition);
             }
             // State 1 = End Game
-            else if (GAME_STATE == GAME_END)
+            else if (_GAME_STATE == GAME_END)
             {
                 endGame();
                 return;
@@ -1230,7 +1233,7 @@ package game
 
         private function editorKeyboardKeyDown(e:KeyboardEvent):void
         {
-            if (noteBox == null)
+            if (_noteBox == null)
                 return;
 
             var keyCode:int = e.keyCode;
@@ -1238,7 +1241,7 @@ package game
 
             if (keyCode == _gvars.playerUser.settings.keyQuit)
             {
-                GAME_STATE = GAME_END;
+                _GAME_STATE = GAME_END;
             }
 
             switch (keyCode)
@@ -1266,7 +1269,7 @@ package game
 
             if (dir != "")
             {
-                noteBox.spawnArrow(new Note(dir, (gameProgress + 31) / 30, "red", gameProgress + 31), (gameProgress + player1JudgeOffset + 5) / 30 * 1000);
+                _noteBox.spawnArrow(new Note(dir, (_gameProgress + 31) / 30, "red", _gameProgress + 31), (_gameProgress + _player1JudgeOffset + 5) / 30 * 1000);
             }
         }
 
@@ -1281,103 +1284,103 @@ package game
 
         public function togglePause():void
         {
-            if (GAME_STATE == GAME_PLAY)
+            if (_GAME_STATE == GAME_PLAY)
             {
-                GAME_STATE = GAME_PAUSE;
-                songPausePosition = getTimer();
-                song.pause();
+                _GAME_STATE = GAME_PAUSE;
+                _songPausePosition = getTimer();
+                _song.pause();
 
                 if (_gvars.air_useWebsockets)
                 {
-                    _gvars.websocketSend("SONG_PAUSE", SOCKET_SONG_MESSAGE);
+                    _gvars.websocketSend("SONG_PAUSE", _socketSongMessage);
                 }
             }
-            else if (GAME_STATE == GAME_PAUSE)
+            else if (_GAME_STATE == GAME_PAUSE)
             {
-                GAME_STATE = GAME_PLAY;
-                absoluteStart += (getTimer() - songPausePosition);
-                song.resume();
+                _GAME_STATE = GAME_PLAY;
+                _absoluteStart += (getTimer() - _songPausePosition);
+                _song.resume();
 
                 if (_gvars.air_useWebsockets)
                 {
-                    _gvars.websocketSend("SONG_RESUME", SOCKET_SONG_MESSAGE);
+                    _gvars.websocketSend("SONG_RESUME", _socketSongMessage);
                 }
             }
         }
 
         private function endGame():void
         {
-            if (levelScript)
-                levelScript.destroy();
+            if (_levelScript)
+                _levelScript.destroy();
 
             // Stop Music Play
-            if (song)
-                song.stop();
+            if (_song)
+                _song.stop();
 
             // Play through to the end of a replay
-            if (options.replay)
+            if (_options.replay)
             {
-                GAME_STATE = GAME_PLAY;
-                while (gameLife > 0 && GAME_STATE == GAME_PLAY)
+                _GAME_STATE = GAME_PLAY;
+                while (_gameLife > 0 && _GAME_STATE == GAME_PLAY)
                     logicTick();
-                GAME_STATE = GAME_END;
+                _GAME_STATE = GAME_END;
             }
 
             // Fill missing notes from replay.
-            if (gameReplayHit.length > 0)
+            if (_gameReplayHit.length > 0)
             { // fix crash when spectating game ends
-                while (gameReplayHit.length < song.totalNotes)
+                while (_gameReplayHit.length < _song.totalNotes)
                 {
-                    gameReplayHit.push(-5);
+                    _gameReplayHit.push(-5);
                 }
             }
-            gameReplayHit.push(-10);
-            gameReplay.sort(ReplayNote.sortFunction)
+            _gameReplayHit.push(-10);
+            _gameReplay.sort(ReplayNote.sortFunction)
 
-            var noteCount:int = hitAmazing + hitPerfect + hitGood + hitAverage + hitMiss;
+            var noteCount:int = _hitAmazing + _hitPerfect + _hitGood + _hitAverage + _hitMiss;
 
             // Save results for display
-            if (!mpSpectate && !options.isEditor)
+            if (!_mpSpectate && !_options.isEditor)
             {
                 var newGameResults:GameScoreResult = new GameScoreResult();
                 newGameResults.game_index = _gvars.gameIndex++;
-                newGameResults.level = song.id;
-                newGameResults.song = song;
-                newGameResults.songInfo = song.songInfo;
-                newGameResults.note_count = song.totalNotes;
-                newGameResults.amazing = hitAmazing;
-                newGameResults.perfect = hitPerfect;
-                newGameResults.good = hitGood;
-                newGameResults.average = hitAverage;
-                newGameResults.boo = hitBoo;
-                newGameResults.miss = hitMiss;
-                newGameResults.combo = hitCombo;
-                newGameResults.max_combo = hitMaxCombo;
-                newGameResults.score = gameScore;
-                newGameResults.last_note = noteCount < song.totalNotes ? noteCount : 0;
-                newGameResults.accuracy = accuracy.value;
-                newGameResults.accuracy_deviation = accuracy.deviation;
-                newGameResults.options = options;
+                newGameResults.level = _song.id;
+                newGameResults.song = _song;
+                newGameResults.songInfo = _song.songInfo;
+                newGameResults.note_count = _song.totalNotes;
+                newGameResults.amazing = _hitAmazing;
+                newGameResults.perfect = _hitPerfect;
+                newGameResults.good = _hitGood;
+                newGameResults.average = _hitAverage;
+                newGameResults.boo = _hitBoo;
+                newGameResults.miss = _hitMiss;
+                newGameResults.combo = _hitCombo;
+                newGameResults.max_combo = _hitMaxCombo;
+                newGameResults.score = _gameScore;
+                newGameResults.last_note = noteCount < _song.totalNotes ? noteCount : 0;
+                newGameResults.accuracy = _accuracy.value;
+                newGameResults.accuracy_deviation = _accuracy.deviation;
+                newGameResults.options = _options;
                 newGameResults.restart_stats = _gvars.songStats.data;
-                newGameResults.replayData = gameReplay.concat();
-                newGameResults.replay_hit = gameReplayHit.concat();
-                newGameResults.replay_bin_notes = binReplayNotes;
-                newGameResults.replay_bin_boos = binReplayBoos;
-                newGameResults.user = options.replay ? options.replay.user : options.user;
-                newGameResults.restarts = options.replay ? 0 : _gvars.songRestarts;
+                newGameResults.replayData = _gameReplay.concat();
+                newGameResults.replay_hit = _gameReplayHit.concat();
+                newGameResults.replay_bin_notes = _binReplayNotes;
+                newGameResults.replay_bin_boos = _binReplayBoos;
+                newGameResults.user = _options.replay ? _options.replay.user : _options.user;
+                newGameResults.restarts = _options.replay ? 0 : _gvars.songRestarts;
                 newGameResults.start_time = _gvars.songStartTime;
                 newGameResults.start_hash = _gvars.songStartHash;
-                newGameResults.end_time = options.replay ? TimeUtil.getFormattedDate(new Date(options.replay.timestamp * 1000)) : TimeUtil.getCurrentDate();
-                newGameResults.song_progress = (gameProgress / gameLastNoteFrame);
-                newGameResults.playtime_secs = ((getTimer() - msStartTime) / 1000);
+                newGameResults.end_time = _options.replay ? TimeUtil.getFormattedDate(new Date(_options.replay.timestamp * 1000)) : TimeUtil.getCurrentDate();
+                newGameResults.song_progress = (_gameProgress / _gameLastNoteFrame);
+                newGameResults.playtime_secs = ((getTimer() - _msStartTime) / 1000);
 
                 // Set Note Counts for Preview Songs
-                if (options.replay && options.replay.isPreview)
+                if (_options.replay && _options.replay.isPreview)
                 {
                     newGameResults.is_preview = true;
-                    newGameResults.score = song.totalNotes * 50;
-                    newGameResults.amazing = song.totalNotes;
-                    newGameResults.max_combo = song.totalNotes;
+                    newGameResults.score = _song.totalNotes * 50;
+                    newGameResults.amazing = _song.totalNotes;
+                    newGameResults.max_combo = _song.totalNotes;
                 }
 
                 newGameResults.update(_gvars);
@@ -1387,9 +1390,9 @@ package game
             _gvars.sessionStats.addFromStats(_gvars.songStats);
             _gvars.songStats.reset();
 
-            if (!legacyMode && !options.replay && !options.isEditor && !mpSpectate)
+            if (!_legacyMode && !_options.replay && !_options.isEditor && !_mpSpectate)
             {
-                _avars.configMusicOffset = (_avars.configMusicOffset * 0.85) + songOffset.value * 0.15;
+                _avars.configMusicOffset = (_avars.configMusicOffset * 0.85) + _songOffset.value * 0.15;
 
                 // Cap between 5 seconds for sanity.
                 if (Math.abs(_avars.configMusicOffset) >= 5000)
@@ -1403,109 +1406,109 @@ package game
             // Websocket
             if (_gvars.air_useWebsockets)
             {
-                SOCKET_SCORE_MESSAGE["amazing"] = hitAmazing;
-                SOCKET_SCORE_MESSAGE["perfect"] = hitPerfect;
-                SOCKET_SCORE_MESSAGE["good"] = hitGood;
-                SOCKET_SCORE_MESSAGE["average"] = hitAverage;
-                SOCKET_SCORE_MESSAGE["boo"] = hitBoo;
-                SOCKET_SCORE_MESSAGE["miss"] = hitMiss;
-                SOCKET_SCORE_MESSAGE["combo"] = hitCombo;
-                SOCKET_SCORE_MESSAGE["maxcombo"] = hitMaxCombo;
-                SOCKET_SCORE_MESSAGE["score"] = gameScore;
-                SOCKET_SCORE_MESSAGE["last_hit"] = null;
-                _gvars.websocketSend("NOTE_JUDGE", SOCKET_SCORE_MESSAGE);
-                _gvars.websocketSend("SONG_END", SOCKET_SONG_MESSAGE);
+                _socketScoreMessage["amazing"] = _hitAmazing;
+                _socketScoreMessage["perfect"] = _hitPerfect;
+                _socketScoreMessage["good"] = _hitGood;
+                _socketScoreMessage["average"] = _hitAverage;
+                _socketScoreMessage["boo"] = _hitBoo;
+                _socketScoreMessage["miss"] = _hitMiss;
+                _socketScoreMessage["combo"] = _hitCombo;
+                _socketScoreMessage["maxcombo"] = _hitMaxCombo;
+                _socketScoreMessage["score"] = _gameScore;
+                _socketScoreMessage["last_hit"] = null;
+                _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
+                _gvars.websocketSend("SONG_END", _socketSongMessage);
             }
 
             // Cleanup
             initVars(false);
 
-            if (song != null)
-                song.stop();
+            if (_song != null)
+                _song.stop();
 
-            song = null;
+            _song = null;
 
-            if (song_background)
+            if (_songBackground)
             {
-                this.removeChild(song_background);
-                song_background = null;
+                this.removeChild(_songBackground);
+                _songBackground = null;
             }
 
             // Remove Notes
-            if (noteBox != null)
+            if (_noteBox != null)
             {
-                noteBox.reset();
+                _noteBox.reset();
             }
 
             // Remove UI
-            if (GPU_PIXEL_BITMAP)
+            if (_gpuPixelBitmap)
             {
-                this.removeChild(GPU_PIXEL_BITMAP);
-                GPU_PIXEL_BITMAP = null;
-                GPU_PIXEL_BMD = null;
+                this.removeChild(_gpuPixelBitmap);
+                _gpuPixelBitmap = null;
+                _gpuPixelBitmapData = null;
             }
-            if (displayBlackBG)
+            if (_displayBlackBG)
             {
-                this.removeChild(displayBlackBG);
-                displayBlackBG = null;
+                this.removeChild(_displayBlackBG);
+                _displayBlackBG = null;
             }
-            if (progressDisplay)
+            if (_progressDisplay)
             {
-                this.removeChild(progressDisplay);
-                progressDisplay = null;
+                this.removeChild(_progressDisplay);
+                _progressDisplay = null;
             }
-            if (player1Life)
+            if (_player1Life)
             {
-                this.removeChild(player1Life);
-                player1Life = null;
+                this.removeChild(_player1Life);
+                _player1Life = null;
             }
-            if (player1Judge)
+            if (_player1Judge)
             {
-                this.removeChild(player1Judge);
-                player1Judge = null;
+                this.removeChild(_player1Judge);
+                _player1Judge = null;
             }
-            if (gameplayUI)
+            if (_gameplayUI)
             {
-                this.removeChild(gameplayUI);
-                gameplayUI = null;
+                this.removeChild(_gameplayUI);
+                _gameplayUI = null;
             }
-            if (noteBox)
+            if (_noteBox)
             {
-                this.removeChild(noteBox);
-                noteBox = null;
+                this.removeChild(_noteBox);
+                _noteBox = null;
             }
-            if (displayBlackBG)
+            if (_displayBlackBG)
             {
-                this.removeChild(displayBlackBG);
-                displayBlackBG = null;
+                this.removeChild(_displayBlackBG);
+                _displayBlackBG = null;
             }
-            if (flashLight)
+            if (_flashLight)
             {
-                this.removeChild(flashLight);
-                flashLight = null;
+                this.removeChild(_flashLight);
+                _flashLight = null;
             }
-            if (screenCut)
+            if (_screenCut)
             {
-                this.removeChild(screenCut);
-                screenCut = null;
+                this.removeChild(_screenCut);
+                _screenCut = null;
             }
-            if (exitEditor)
+            if (_exitEditor)
             {
-                exitEditor.dispose();
-                this.removeChild(exitEditor);
-                exitEditor = null;
+                _exitEditor.dispose();
+                this.removeChild(_exitEditor);
+                _exitEditor = null;
             }
 
-            GAME_STATE = GAME_DISPOSE;
+            _GAME_STATE = GAME_DISPOSE;
 
-            var screen:int = options.settings.startUpScreen;
-            if (!options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
+            var screen:int = _options.settings.startUpScreen;
+            if (!_options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
             {
                 MultiplayerState.instance.connection.connect();
             }
 
             // Go to results
-            if (options.isEditor || mpSpectate)
+            if (_options.isEditor || _mpSpectate)
                 dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
             else
                 dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_RESULTS));
@@ -1514,45 +1517,45 @@ package game
         private function restartGame():void
         {
             // Remove Notes
-            noteBox.reset();
+            _noteBox.reset();
 
-            if (player1PAWindow)
-                player1PAWindow.reset();
+            if (_player1PAWindow)
+                _player1PAWindow.reset();
 
-            if (accBar)
-                accBar.onResetSignal();
+            if (_accBar)
+                _accBar.onResetSignal();
 
-            noteBoxOffset = {"x": 0, "y": 0};
+            _noteBoxOffset = {"x": 0, "y": 0};
 
             // Track
-            var tempGT:Number = ((hitAmazing + hitPerfect) * 500) + (hitGood * 250) + (hitAverage * 50) + (hitCombo * 1000) - (hitMiss * 300) - (hitBoo * 15) + gameScore;
-            _gvars.songStats.amazing += hitAmazing;
-            _gvars.songStats.perfect += hitPerfect;
-            _gvars.songStats.good += hitGood;
-            _gvars.songStats.average += hitAverage;
-            _gvars.songStats.miss += hitMiss;
-            _gvars.songStats.boo += hitBoo;
-            _gvars.songStats.raw_score += gameScore;
-            _gvars.songStats.amazing += hitAmazing;
+            var tempGT:Number = ((_hitAmazing + _hitPerfect) * 500) + (_hitGood * 250) + (_hitAverage * 50) + (_hitCombo * 1000) - (_hitMiss * 300) - (_hitBoo * 15) + _gameScore;
+            _gvars.songStats.amazing += _hitAmazing;
+            _gvars.songStats.perfect += _hitPerfect;
+            _gvars.songStats.good += _hitGood;
+            _gvars.songStats.average += _hitAverage;
+            _gvars.songStats.miss += _hitMiss;
+            _gvars.songStats.boo += _hitBoo;
+            _gvars.songStats.raw_score += _gameScore;
+            _gvars.songStats.amazing += _hitAmazing;
             _gvars.songStats.grandtotal += tempGT;
             _gvars.songStats.credits += Math.round(tempGT / _gvars.SCORE_PER_CREDIT);
             _gvars.songStats.restarts++;
 
             // Restart
-            song.reset();
-            GAME_STATE = GAME_PLAY;
+            _song.reset();
+            _GAME_STATE = GAME_PLAY;
             initPlayerVars();
             initVars();
-            if (player1Judge)
-                player1Judge.hideJudge();
+            if (_player1Judge)
+                _player1Judge.hideJudge();
             _gvars.songRestarts++;
 
             // Websocket
             if (_gvars.air_useWebsockets)
             {
-                SOCKET_SCORE_MESSAGE["restarts"] = _gvars.songRestarts;
-                _gvars.websocketSend("NOTE_JUDGE", SOCKET_SCORE_MESSAGE);
-                _gvars.websocketSend("SONG_RESTART", SOCKET_SONG_MESSAGE);
+                _socketScoreMessage["restarts"] = _gvars.songRestarts;
+                _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
+                _gvars.websocketSend("SONG_RESTART", _socketSongMessage);
             }
         }
 
@@ -1566,110 +1569,110 @@ package game
            \*#########################################################################################*/
         private function buildFlashlight():void
         {
-            if (options.modEnabled("flashlight"))
+            if (_options.modEnabled("flashlight"))
             {
-                if (flashLight == null)
-                    flashLight = new FlashlightOverlay();
+                if (_flashLight == null)
+                    _flashLight = new FlashlightOverlay();
 
-                if (!contains(flashLight))
-                    addChild(flashLight);
+                if (!contains(_flashLight))
+                    addChild(_flashLight);
             }
-            else if (flashLight != null && this.contains(flashLight))
+            else if (_flashLight != null && this.contains(_flashLight))
             {
-                removeChild(flashLight);
+                removeChild(_flashLight);
             }
         }
 
         private function buildScreenCut():void
         {
-            if (!options.settings.displayScreencut)
+            if (!_options.settings.displayScreencut)
                 return;
 
-            if (screenCut)
+            if (_screenCut)
             {
-                if (this.contains(screenCut))
-                    this.removeChild(screenCut);
-                screenCut = null;
+                if (this.contains(_screenCut))
+                    this.removeChild(_screenCut);
+                _screenCut = null;
             }
-            screenCut = new ScreenCut(options);
-            this.addChild(screenCut);
+            _screenCut = new ScreenCut(_options);
+            this.addChild(_screenCut);
         }
 
         private function buildJudge():void
         {
-            if (!options.settings.displayJudge)
+            if (!_options.settings.displayJudge)
                 return;
 
-            player1Judge = new Judge(options);
-            addChild(player1Judge);
-            if (options.isEditor)
-                player1Judge.showJudge(100, true);
+            _player1Judge = new Judge(_options);
+            addChild(_player1Judge);
+            if (_options.isEditor)
+                _player1Judge.showJudge(100, true);
         }
 
         private function buildHealth():void
         {
-            if (!options.settings.displayHealth)
+            if (!_options.settings.displayHealth)
                 return;
 
-            player1Life = new LifeBar();
-            player1Life.x = Main.GAME_WIDTH - 37;
-            player1Life.y = 71.5;
-            addChild(player1Life);
+            _player1Life = new LifeBar();
+            _player1Life.x = Main.GAME_WIDTH - 37;
+            _player1Life.y = 71.5;
+            addChild(_player1Life);
         }
 
         private function buildMultiplayer():void
         {
-            mpJudge = [];
-            mpPA = [];
-            mpCombo = [];
-            mpHeader = [];
+            _mpJudge = [];
+            _mpPA = [];
+            _mpCombo = [];
+            _mpHeader = [];
 
-            if (!options.settings.displayMPUI && !mpSpectate)
+            if (!_options.settings.displayMPUI && !_mpSpectate)
                 return;
 
-            for each (var user:User in options.mpRoom.players)
+            for each (var user:User in _options.mpRoom.players)
             {
-                if (user.id == options.mpRoom.connection.currentUser.id)
+                if (user.id == _options.mpRoom.connection.currentUser.id)
                 {
-                    if (player1PAWindow)
-                        mpPA[user.playerIdx] = player1PAWindow;
-                    if (player1Combo)
-                        mpCombo[user.playerIdx] = player1Combo;
-                    if (player1Judge)
-                        mpJudge[user.playerIdx] = player1Judge;
+                    if (_player1PAWindow)
+                        _mpPA[user.playerIdx] = _player1PAWindow;
+                    if (_player1Combo)
+                        _mpCombo[user.playerIdx] = _player1Combo;
+                    if (_player1Judge)
+                        _mpJudge[user.playerIdx] = _player1Judge;
                     continue;
                 }
 
-                if (options.settings.displayMPPA)
+                if (_options.settings.displayMPPA)
                 {
-                    var pa:PAWindow = new PAWindow(options);
+                    var pa:PAWindow = new PAWindow(_options);
                     addChild(pa);
-                    mpPA[user.playerIdx] = pa;
+                    _mpPA[user.playerIdx] = pa;
                 }
 
-                if (mpSpectate)
+                if (_mpSpectate)
                 {
                     var header:MPHeader = new MPHeader(user);
-                    if (options.settings.displayMPPA)
-                        mpPA[user.playerIdx].addChild(header);
+                    if (_options.settings.displayMPPA)
+                        _mpPA[user.playerIdx].addChild(header);
                     else
                         addChild(header);
-                    mpHeader[user.playerIdx] = header;
+                    _mpHeader[user.playerIdx] = header;
                 }
 
-                if (options.settings.displayMPCombo)
+                if (_options.settings.displayMPCombo)
                 {
-                    var combo:Combo = new Combo(options);
+                    var combo:Combo = new Combo(_options);
                     addChild(combo);
-                    mpCombo[user.playerIdx] = combo;
+                    _mpCombo[user.playerIdx] = combo;
                 }
 
-                if (options.settings.displayMPJudge)
+                if (_options.settings.displayMPJudge)
                 {
-                    var judge:Judge = new Judge(options);
+                    var judge:Judge = new Judge(_options);
                     addChild(judge);
-                    mpJudge[user.playerIdx] = judge;
-                    if (options.isEditor)
+                    _mpJudge[user.playerIdx] = judge;
+                    if (_options.isEditor)
                         judge.showJudge(100, true);
                 }
             }
@@ -1680,128 +1683,128 @@ package game
             if (defaults)
             {
                 var ret:Object = {};
-                var def:Object = defaultLayout[key];
+                var def:Object = _defaultLayout[key];
                 for (var i:String in def)
                     ret[i] = def[i];
-                var layout:Object = options.layout[key];
+                var layout:Object = _options.layout[key];
                 for (i in layout)
                     ret[i] = layout[i];
                 return ret;
             }
-            else if (!options.layout[key])
-                options.layout[key] = {};
-            return options.layout[key];
+            else if (!_options.layout[key])
+                _options.layout[key] = {};
+            return _options.layout[key];
         }
 
         private function interfaceSetup():void
         {
-            defaultLayout = {};
-            defaultLayout[LAYOUT_PROGRESS_BAR] = {x: 161, y: 9};
-            defaultLayout[LAYOUT_PROGRESS_TEXT] = {x: 768, y: 5, properties: {alignment: "right"}};
-            defaultLayout[LAYOUT_JUDGE] = {x: 392, y: 228};
-            defaultLayout[LAYOUT_ACCURACY_BAR] = {x: (Main.GAME_WIDTH / 2), y: 328};
-            defaultLayout[LAYOUT_HEALTH] = {x: Main.GAME_WIDTH - 37, y: 71.5};
-            defaultLayout[LAYOUT_RECEPTORS] = {x: 230, y: 0};
-            if (sideScroll)
+            _defaultLayout = {};
+            _defaultLayout[LAYOUT_PROGRESS_BAR] = {x: 161, y: 9};
+            _defaultLayout[LAYOUT_PROGRESS_TEXT] = {x: 768, y: 5, properties: {alignment: "right"}};
+            _defaultLayout[LAYOUT_JUDGE] = {x: 392, y: 228};
+            _defaultLayout[LAYOUT_ACCURACY_BAR] = {x: (Main.GAME_WIDTH / 2), y: 328};
+            _defaultLayout[LAYOUT_HEALTH] = {x: Main.GAME_WIDTH - 37, y: 71.5};
+            _defaultLayout[LAYOUT_RECEPTORS] = {x: 230, y: 0};
+            if (_sideScroll)
             {
-                defaultLayout[LAYOUT_PA] = {x: 16, y: 418};
-                defaultLayout[LAYOUT_SCORE] = {x: 392, y: 24};
-                defaultLayout[LAYOUT_COMBO] = {x: 508, y: 388};
-                defaultLayout[LAYOUT_COMBO_TOTAL] = {x: 770, y: 420, properties: {alignment: "right"}};
-                defaultLayout[LAYOUT_COMBO_STATIC] = {x: 512, y: 438};
-                defaultLayout[LAYOUT_COMBO_TOTAL_STATIC] = {x: 734, y: 414};
+                _defaultLayout[LAYOUT_PA] = {x: 16, y: 418};
+                _defaultLayout[LAYOUT_SCORE] = {x: 392, y: 24};
+                _defaultLayout[LAYOUT_COMBO] = {x: 508, y: 388};
+                _defaultLayout[LAYOUT_COMBO_TOTAL] = {x: 770, y: 420, properties: {alignment: "right"}};
+                _defaultLayout[LAYOUT_COMBO_STATIC] = {x: 512, y: 438};
+                _defaultLayout[LAYOUT_COMBO_TOTAL_STATIC] = {x: 734, y: 414};
             }
             else
             {
-                defaultLayout[LAYOUT_PA] = {x: 6, y: 96};
-                defaultLayout[LAYOUT_SCORE] = {x: 392, y: 440};
-                defaultLayout[LAYOUT_COMBO] = {x: 222, y: 402, properties: {alignment: "right"}};
-                defaultLayout[LAYOUT_COMBO_TOTAL] = {x: 544, y: 402};
-                defaultLayout[LAYOUT_COMBO_STATIC] = {x: 228, y: 436};
-                defaultLayout[LAYOUT_COMBO_TOTAL_STATIC] = {x: 502, y: 436};
+                _defaultLayout[LAYOUT_PA] = {x: 6, y: 96};
+                _defaultLayout[LAYOUT_SCORE] = {x: 392, y: 440};
+                _defaultLayout[LAYOUT_COMBO] = {x: 222, y: 402, properties: {alignment: "right"}};
+                _defaultLayout[LAYOUT_COMBO_TOTAL] = {x: 544, y: 402};
+                _defaultLayout[LAYOUT_COMBO_STATIC] = {x: 228, y: 436};
+                _defaultLayout[LAYOUT_COMBO_TOTAL_STATIC] = {x: 502, y: 436};
             }
 
             // Multiplayer
-            defaultLayout[LAYOUT_MP_COMBO + "1"] = defaultLayout[LAYOUT_COMBO];
-            defaultLayout[LAYOUT_MP_JUDGE + "1"] = {x: 208, y: 102};
-            defaultLayout[LAYOUT_MP_PA + "1"] = {x: 6, y: 96};
-            if (options.settings.displayMPPA)
-                defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 0, y: -35};
+            _defaultLayout[LAYOUT_MP_COMBO + "1"] = _defaultLayout[LAYOUT_COMBO];
+            _defaultLayout[LAYOUT_MP_JUDGE + "1"] = {x: 208, y: 102};
+            _defaultLayout[LAYOUT_MP_PA + "1"] = {x: 6, y: 96};
+            if (_options.settings.displayMPPA)
+                _defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 0, y: -35};
             else
-                defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 6, y: 190};
+                _defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 6, y: 190};
 
-            defaultLayout[LAYOUT_MP_COMBO + "2"] = defaultLayout[LAYOUT_COMBO_TOTAL];
-            defaultLayout[LAYOUT_MP_JUDGE + "2"] = {x: 568, y: 102};
-            defaultLayout[LAYOUT_MP_PA + "2"] = {x: 645, y: 96, properties: {alignment: "right"}};
-            if (options.settings.displayMPPA)
-                defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 25, y: -35, properties: {alignment: MPHeader.ALIGN_RIGHT}};
+            _defaultLayout[LAYOUT_MP_COMBO + "2"] = _defaultLayout[LAYOUT_COMBO_TOTAL];
+            _defaultLayout[LAYOUT_MP_JUDGE + "2"] = {x: 568, y: 102};
+            _defaultLayout[LAYOUT_MP_PA + "2"] = {x: 645, y: 96, properties: {alignment: "right"}};
+            if (_options.settings.displayMPPA)
+                _defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 25, y: -35, properties: {alignment: MPHeader.ALIGN_RIGHT}};
             else
-                defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 690, y: 190, properties: {alignment: MPHeader.ALIGN_RIGHT}};
+                _defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 690, y: 190, properties: {alignment: MPHeader.ALIGN_RIGHT}};
 
-            if (mpSpectate)
+            if (_mpSpectate)
             {
-                defaultLayout[LAYOUT_MP_PA + "1"]["y"] += 84;
-                defaultLayout[LAYOUT_MP_PA + "2"]["y"] += 84;
+                _defaultLayout[LAYOUT_MP_PA + "1"]["y"] += 84;
+                _defaultLayout[LAYOUT_MP_PA + "2"]["y"] += 84;
             }
 
-            noteBoxPositionDefault = interfaceLayout(LAYOUT_RECEPTORS);
+            _noteBoxPositionDefault = interfaceLayout(LAYOUT_RECEPTORS);
 
             // Position
-            interfacePosition(progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR));
-            interfacePosition(progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT));
-            interfacePosition(noteBox, interfaceLayout(LAYOUT_RECEPTORS));
-            interfacePosition(accBar, interfaceLayout(LAYOUT_ACCURACY_BAR));
-            interfacePosition(player1Life, interfaceLayout(LAYOUT_HEALTH));
-            interfacePosition(score, interfaceLayout(LAYOUT_SCORE));
-            interfacePosition(comboTotal, interfaceLayout(LAYOUT_COMBO_TOTAL));
-            interfacePosition(comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC));
-            interfacePosition(comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC));
+            interfacePosition(_progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR));
+            interfacePosition(_progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT));
+            interfacePosition(_noteBox, interfaceLayout(LAYOUT_RECEPTORS));
+            interfacePosition(_accBar, interfaceLayout(LAYOUT_ACCURACY_BAR));
+            interfacePosition(_player1Life, interfaceLayout(LAYOUT_HEALTH));
+            interfacePosition(_score, interfaceLayout(LAYOUT_SCORE));
+            interfacePosition(_comboTotal, interfaceLayout(LAYOUT_COMBO_TOTAL));
+            interfacePosition(_comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC));
+            interfacePosition(_comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC));
 
-            if (!options.mpRoom)
+            if (!_options.mpRoom)
             {
-                interfacePosition(player1PAWindow, interfaceLayout(LAYOUT_PA));
-                interfacePosition(player1Combo, interfaceLayout(LAYOUT_COMBO));
-                interfacePosition(player1Judge, interfaceLayout(LAYOUT_JUDGE));
+                interfacePosition(_player1PAWindow, interfaceLayout(LAYOUT_PA));
+                interfacePosition(_player1Combo, interfaceLayout(LAYOUT_COMBO));
+                interfacePosition(_player1Judge, interfaceLayout(LAYOUT_JUDGE));
             }
 
             // Editor Mode
-            if (options.isEditor)
+            if (_options.isEditor)
             {
-                interfaceEditor(progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR, false));
-                interfaceEditor(progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT, false));
-                interfaceEditor(noteBox, interfaceLayout(LAYOUT_RECEPTORS, false));
-                interfaceEditor(accBar, interfaceLayout(LAYOUT_ACCURACY_BAR, false));
-                interfaceEditor(player1Life, interfaceLayout(LAYOUT_HEALTH, false));
-                interfaceEditor(score, interfaceLayout(LAYOUT_SCORE, false));
-                interfaceEditor(comboTotal, interfaceLayout(LAYOUT_COMBO_TOTAL, false));
-                interfaceEditor(comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC, false));
-                interfaceEditor(comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC, false));
+                interfaceEditor(_progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR, false));
+                interfaceEditor(_progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT, false));
+                interfaceEditor(_noteBox, interfaceLayout(LAYOUT_RECEPTORS, false));
+                interfaceEditor(_accBar, interfaceLayout(LAYOUT_ACCURACY_BAR, false));
+                interfaceEditor(_player1Life, interfaceLayout(LAYOUT_HEALTH, false));
+                interfaceEditor(_score, interfaceLayout(LAYOUT_SCORE, false));
+                interfaceEditor(_comboTotal, interfaceLayout(LAYOUT_COMBO_TOTAL, false));
+                interfaceEditor(_comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC, false));
+                interfaceEditor(_comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC, false));
 
-                if (!options.mpRoom)
+                if (!_options.mpRoom)
                 {
-                    interfaceEditor(player1PAWindow, interfaceLayout(LAYOUT_PA, false));
-                    interfaceEditor(player1Combo, interfaceLayout(LAYOUT_COMBO, false));
-                    interfaceEditor(player1Judge, interfaceLayout(LAYOUT_JUDGE, false));
+                    interfaceEditor(_player1PAWindow, interfaceLayout(LAYOUT_PA, false));
+                    interfaceEditor(_player1Combo, interfaceLayout(LAYOUT_COMBO, false));
+                    interfaceEditor(_player1Judge, interfaceLayout(LAYOUT_JUDGE, false));
                 }
             }
 
             // Multiplayer
-            if (options.mpRoom)
+            if (_options.mpRoom)
             {
-                for each (var user:User in options.mpRoom.players)
+                for each (var user:User in _options.mpRoom.players)
                 {
-                    interfacePosition(mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx));
-                    interfacePosition(mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx));
-                    interfacePosition(mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx));
-                    interfacePosition(mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx));
+                    interfacePosition(_mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx));
+                    interfacePosition(_mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx));
+                    interfacePosition(_mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx));
+                    interfacePosition(_mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx));
 
                     // Multiplayer - Editor
-                    if (options.isEditor)
+                    if (_options.isEditor)
                     {
-                        interfaceEditor(mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx, false));
-                        interfaceEditor(mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx, false));
-                        interfaceEditor(mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx, false));
-                        interfaceEditor(mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx, false));
+                        interfaceEditor(_mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx, false));
+                        interfaceEditor(_mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx, false));
+                        interfaceEditor(_mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx, false));
+                        interfaceEditor(_mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx, false));
                     }
                 }
             }
@@ -1875,12 +1878,12 @@ package game
         {
             if (position < 0)
                 position = 0;
-            var positionJudged:int = position + judgeOffset;
+            var positionJudged:int = position + _judgeOffset;
 
             var score:int = 0;
             var frame:int = 0;
             var booConflict:Boolean = false;
-            for each (var note:GameNote in noteBox.notes)
+            for each (var note:GameNote in _noteBox.notes)
             {
                 if (note.DIR != dir)
                     continue;
@@ -1888,7 +1891,7 @@ package game
                 var acc:Number = note.POSITION - position;
                 var diff:Number = positionJudged - note.POSITION;
                 var lastJudge:JudgeNode = null;
-                for each (var j:JudgeNode in judgeSettings)
+                for each (var j:JudgeNode in _judgeSettings)
                 {
                     if (diff > j.time)
                         lastJudge = j;
@@ -1898,59 +1901,59 @@ package game
                     frame = lastJudge.frame;
                 if (!_avars.configJudge && !score)
                 {
-                    var pdiff:int = gameProgress - note.PROGRESS + player1JudgeOffset;
+                    var pdiff:int = _gameProgress - note.PROGRESS + _player1JudgeOffset;
                     if (pdiff >= -3 && pdiff <= 3)
                         booConflict = true;
                 }
                 if (score > 0)
                     break;
-                else if (diff <= judgeSettings[0].time)
+                else if (diff <= _judgeSettings[0].time)
                     break;
             }
             if (score)
             {
-                commitJudge(dir, frame + note.PROGRESS - player1JudgeOffset, score);
-                noteBox.removeNote(note.ID);
-                accuracy.addValue(acc);
-                binReplayNotes[note.ID].time = diff;
+                commitJudge(dir, frame + note.PROGRESS - _player1JudgeOffset, score);
+                _noteBox.removeNote(note.ID);
+                _accuracy.addValue(acc);
+                _binReplayNotes[note.ID].time = diff;
 
-                if (accBar != null)
-                    accBar.onScoreSignal(score, diff);
+                if (_accBar != null)
+                    _accBar.onScoreSignal(score, diff);
             }
             else
             {
-                var booFrame:int = gameProgress;
+                var booFrame:int = _gameProgress;
                 if (booConflict)
                 {
                     var noteIndex:int = 0;
-                    note = noteBox.notes[noteIndex++] || noteBox.spawnNextNote();
+                    note = _noteBox.notes[noteIndex++] || _noteBox.spawnNextNote();
                     while (note)
                     {
-                        if (booFrame + player1JudgeOffset < note.PROGRESS - 3)
+                        if (booFrame + _player1JudgeOffset < note.PROGRESS - 3)
                             break;
                         if (note.DIR == dir)
-                            booFrame = note.PROGRESS + 4 - player1JudgeOffset;
+                            booFrame = note.PROGRESS + 4 - _player1JudgeOffset;
 
-                        note = noteBox.notes[noteIndex++] || noteBox.spawnNextNote();
+                        note = _noteBox.notes[noteIndex++] || _noteBox.spawnNextNote();
                     }
                 }
 
-                if (booFrame >= gameFirstNoteFrame)
-                    binReplayBoos[binReplayBoos.length] = new ReplayBinFrame(position, dir, binReplayBoos.length);
+                if (booFrame >= _gameFirstNoteFrame)
+                    _binReplayBoos[_binReplayBoos.length] = new ReplayBinFrame(position, dir, _binReplayBoos.length);
 
                 commitJudge(dir, booFrame, -5);
             }
 
-            if (options.modEnabled("tap_pulse"))
+            if (_options.modEnabled("tap_pulse"))
             {
                 if (dir == "L")
-                    noteBoxOffset.x -= Math.abs(options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x -= Math.abs(_options.settings.receptorGap * 0.20);
                 if (dir == "R")
-                    noteBoxOffset.x += Math.abs(options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x += Math.abs(_options.settings.receptorGap * 0.20);
                 if (dir == "U")
-                    noteBoxOffset.y -= Math.abs(options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y -= Math.abs(_options.settings.receptorGap * 0.15);
                 if (dir == "D")
-                    noteBoxOffset.y += Math.abs(options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y += Math.abs(_options.settings.receptorGap * 0.15);
             }
 
             return Boolean(score);
@@ -1959,12 +1962,12 @@ package game
         private function judgeScore(dir:String, frame:int):Boolean
         {
             var score:int = 0;
-            for each (var note:GameNote in noteBox.notes)
+            for each (var note:GameNote in _noteBox.notes)
             {
                 if (note.DIR != dir)
                     continue;
 
-                var diff:int = frame + player1JudgeOffset - note.PROGRESS;
+                var diff:int = frame + _player1JudgeOffset - note.PROGRESS;
                 switch (diff)
                 {
                     case -3:
@@ -1997,26 +2000,26 @@ package game
                     break;
             }
 
-            if (options.modEnabled("tap_pulse"))
+            if (_options.modEnabled("tap_pulse"))
             {
                 if (dir == "L")
-                    noteBoxOffset.x -= Math.abs(options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x -= Math.abs(_options.settings.receptorGap * 0.20);
                 if (dir == "R")
-                    noteBoxOffset.x += Math.abs(options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x += Math.abs(_options.settings.receptorGap * 0.20);
                 if (dir == "U")
-                    noteBoxOffset.y -= Math.abs(options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y -= Math.abs(_options.settings.receptorGap * 0.15);
                 if (dir == "D")
-                    noteBoxOffset.y += Math.abs(options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y += Math.abs(_options.settings.receptorGap * 0.15);
             }
 
             if (score)
             {
                 commitJudge(dir, frame, score);
-                noteBox.removeNote(note.ID);
-                accuracy.addValue((note.PROGRESS - frame) * 1000 / 30);
+                _noteBox.removeNote(note.ID);
+                _accuracy.addValue((note.PROGRESS - frame) * 1000 / 30);
 
-                if (accBar != null)
-                    accBar.onScoreSignal(score, diff * 33.3333 - 1);
+                if (_accBar != null)
+                    _accBar.onScoreSignal(score, diff * 33.3333 - 1);
             }
             else
                 commitJudge(dir, frame, -5);
@@ -2028,137 +2031,137 @@ package game
         {
             var health:int = 0;
             var jscore:int = score;
-            noteBox.receptorFeedback(dir, score);
+            _noteBox.receptorFeedback(dir, score);
             switch (score)
             {
                 case 100:
-                    hitAmazing++;
-                    hitCombo++;
-                    gameScore += 50;
+                    _hitAmazing++;
+                    _hitCombo++;
+                    _gameScore += 50;
                     health = 1;
-                    if (options.settings.displayAmazing)
+                    if (_options.settings.displayAmazing)
                     {
-                        checkAutofail(options.settings.autofail[0], hitAmazing);
+                        checkAutofail(_options.settings.autofail[0], _hitAmazing);
                     }
                     else
                     {
                         jscore = 50;
-                        checkAutofail(options.settings.autofail[0] + options.settings.autofail[1], hitAmazing + hitPerfect);
+                        checkAutofail(_options.settings.autofail[0] + _options.settings.autofail[1], _hitAmazing + _hitPerfect);
                     }
-                    checkAutofail(options.settings.autofail[6], gameRawGoods);
+                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
                     break;
                 case 50:
-                    hitPerfect++;
-                    hitCombo++;
-                    gameScore += 50;
+                    _hitPerfect++;
+                    _hitCombo++;
+                    _gameScore += 50;
                     health = 1;
-                    checkAutofail(options.settings.autofail[1], hitPerfect);
-                    checkAutofail(options.settings.autofail[6], gameRawGoods);
+                    checkAutofail(_options.settings.autofail[1], _hitPerfect);
+                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
                     break;
                 case 25:
-                    hitGood++;
-                    hitCombo++;
-                    gameScore += 25;
-                    gameRawGoods += 1;
+                    _hitGood++;
+                    _hitCombo++;
+                    _gameScore += 25;
+                    _gameRawGoods += 1;
                     health = 1;
-                    checkAutofail(options.settings.autofail[2], hitGood);
-                    checkAutofail(options.settings.autofail[6], gameRawGoods);
+                    checkAutofail(_options.settings.autofail[2], _hitGood);
+                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
                     break;
                 case 5:
-                    hitAverage++;
-                    hitCombo++;
-                    gameScore += 5;
-                    gameRawGoods += 1.8;
+                    _hitAverage++;
+                    _hitCombo++;
+                    _gameScore += 5;
+                    _gameRawGoods += 1.8;
                     health = 1;
-                    checkAutofail(options.settings.autofail[3], hitAverage);
-                    checkAutofail(options.settings.autofail[6], gameRawGoods);
+                    checkAutofail(_options.settings.autofail[3], _hitAverage);
+                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
                     break;
                 case -5:
-                    if (frame < gameFirstNoteFrame)
+                    if (frame < _gameFirstNoteFrame)
                         return;
-                    hitBoo++;
-                    gameScore -= 5;
-                    gameRawGoods += 0.2;
+                    _hitBoo++;
+                    _gameScore -= 5;
+                    _gameRawGoods += 0.2;
                     health = -1;
-                    checkAutofail(options.settings.autofail[5], hitBoo);
-                    checkAutofail(options.settings.autofail[6], gameRawGoods);
+                    checkAutofail(_options.settings.autofail[5], _hitBoo);
+                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
                     break;
                 case -10:
-                    hitMiss++;
-                    hitCombo = 0;
-                    gameScore -= 10;
-                    gameRawGoods += 2.4;
+                    _hitMiss++;
+                    _hitCombo = 0;
+                    _gameScore -= 10;
+                    _gameRawGoods += 2.4;
                     health = -1;
-                    checkAutofail(options.settings.autofail[4], hitMiss);
-                    checkAutofail(options.settings.autofail[6], gameRawGoods);
+                    checkAutofail(_options.settings.autofail[4], _hitMiss);
+                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
                     break;
             }
 
-            if (options.isAutoplay)
+            if (_options.isAutoplay)
             {
-                gameScore = 0;
-                hitAmazing = 0;
-                hitPerfect = 0;
-                hitGood = 0;
-                hitAverage = 0;
+                _gameScore = 0;
+                _hitAmazing = 0;
+                _hitPerfect = 0;
+                _hitGood = 0;
+                _hitAverage = 0;
             }
 
-            if (player1Judge && !options.isEditor)
-                player1Judge.showJudge(jscore);
+            if (_player1Judge && !_options.isEditor)
+                _player1Judge.showJudge(jscore);
 
             updateHealth(health > 0 ? _gvars.HEALTH_JUDGE_ADD : _gvars.HEALTH_JUDGE_REMOVE);
 
-            if (hitCombo > hitMaxCombo)
-                hitMaxCombo = hitCombo;
+            if (_hitCombo > _hitMaxCombo)
+                _hitMaxCombo = _hitCombo;
 
             if (score == -10)
-                gameReplayHit.push(0);
+                _gameReplayHit.push(0);
             else if (score == -5)
                 score = 0;
 
             if (score > 0)
-                gameReplayHit.push(score);
+                _gameReplayHit.push(score);
 
             if (score >= 0)
-                gameReplay.push(new ReplayNote(dir, frame, (getTimer() - msStartTime), score));
+                _gameReplay.push(new ReplayNote(dir, frame, (getTimer() - _msStartTime), score));
 
             updateFieldVars();
 
-            if (options.mpRoom)
+            if (_options.mpRoom)
             {
-                dispatchEvent(new GameUpdateEvent({gameScore: gameScore,
-                        gameLife: gameLife,
-                        hitMaxCombo: hitMaxCombo,
-                        hitCombo: hitCombo,
-                        hitAmazing: hitAmazing,
-                        hitPerfect: hitPerfect,
-                        hitGood: hitGood,
-                        hitAverage: hitAverage,
-                        hitMiss: hitMiss,
-                        hitBoo: hitBoo}));
+                dispatchEvent(new GameUpdateEvent({_gameScore: _gameScore,
+                        _gameLife: _gameLife,
+                        _hitMaxCombo: _hitMaxCombo,
+                        _hitCombo: _hitCombo,
+                        _hitAmazing: _hitAmazing,
+                        _hitPerfect: _hitPerfect,
+                        _hitGood: _hitGood,
+                        _hitAverage: _hitAverage,
+                        _hitMiss: _hitMiss,
+                        _hitBoo: _hitBoo}));
             }
 
             // Websocket
             if (_gvars.air_useWebsockets)
             {
-                SOCKET_SCORE_MESSAGE["amazing"] = hitAmazing;
-                SOCKET_SCORE_MESSAGE["perfect"] = hitPerfect;
-                SOCKET_SCORE_MESSAGE["good"] = hitGood;
-                SOCKET_SCORE_MESSAGE["average"] = hitAverage;
-                SOCKET_SCORE_MESSAGE["boo"] = hitBoo;
-                SOCKET_SCORE_MESSAGE["miss"] = hitMiss;
-                SOCKET_SCORE_MESSAGE["combo"] = hitCombo;
-                SOCKET_SCORE_MESSAGE["maxcombo"] = hitMaxCombo;
-                SOCKET_SCORE_MESSAGE["score"] = gameScore;
-                SOCKET_SCORE_MESSAGE["last_hit"] = score;
-                _gvars.websocketSend("NOTE_JUDGE", SOCKET_SCORE_MESSAGE);
+                _socketScoreMessage["amazing"] = _hitAmazing;
+                _socketScoreMessage["perfect"] = _hitPerfect;
+                _socketScoreMessage["good"] = _hitGood;
+                _socketScoreMessage["average"] = _hitAverage;
+                _socketScoreMessage["boo"] = _hitBoo;
+                _socketScoreMessage["miss"] = _hitMiss;
+                _socketScoreMessage["combo"] = _hitCombo;
+                _socketScoreMessage["maxcombo"] = _hitMaxCombo;
+                _socketScoreMessage["score"] = _gameScore;
+                _socketScoreMessage["last_hit"] = score;
+                _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
             }
         }
 
         private function checkAutofail(autofail:Number, hit:Number):void
         {
             if (autofail > 0 && hit >= autofail)
-                GAME_STATE = GAME_END;
+                _GAME_STATE = GAME_END;
         }
 
         /*#########################################################################################*\
@@ -2172,31 +2175,31 @@ package game
 
         private function updateHealth(val:int):void
         {
-            gameLife += val;
-            if (gameLife <= 0)
+            _gameLife += val;
+            if (_gameLife <= 0)
             {
-                GAME_STATE = GAME_END;
+                _GAME_STATE = GAME_END;
             }
-            else if (gameLife > 100)
+            else if (_gameLife > 100)
             {
-                gameLife = 100;
+                _gameLife = 100;
             }
-            if (player1Life)
-                player1Life.health = gameLife;
+            if (_player1Life)
+                _player1Life.health = _gameLife;
         }
 
         private function updateFieldVars():void
         {
             //gameplayUI.sDisplay_score.text = gameScore.toString();
 
-            if (player1PAWindow)
-                player1PAWindow.update(hitAmazing, hitPerfect, hitGood, hitAverage, hitMiss, hitBoo);
+            if (_player1PAWindow)
+                _player1PAWindow.update(_hitAmazing, _hitPerfect, _hitGood, _hitAverage, _hitMiss, _hitBoo);
 
-            if (score)
-                score.update(gameScore);
+            if (_score)
+                _score.update(_gameScore);
 
-            if (player1Combo)
-                player1Combo.update(hitCombo, hitAmazing, hitPerfect, hitGood, hitAverage, hitMiss, hitBoo, gameRawGoods);
+            if (_player1Combo)
+                _player1Combo.update(_hitCombo, _hitAmazing, _hitPerfect, _hitGood, _hitAverage, _hitMiss, _hitBoo, _gameRawGoods);
         }
 
         private var previousDiffs:Array = new Array();
@@ -2231,20 +2234,20 @@ package game
             var user:User = event.user;
             var gameplay:Gameplay = user.gameplay;
 
-            if (!gameplay || !options.mpRoom.isPlayer(user) || user.id == options.mpRoom.connection.currentUser.id)
+            if (!gameplay || !_options.mpRoom.isPlayer(user) || user.id == _options.mpRoom.connection.currentUser.id)
                 return;
 
             var diff:Object = multiplayerDiff(user.id, gameplay);
 
-            var combo:Combo = mpCombo[user.playerIdx];
+            var combo:Combo = _mpCombo[user.playerIdx];
             if (combo)
                 combo.update(gameplay.combo, gameplay.amazing, gameplay.perfect, gameplay.good, gameplay.average, gameplay.miss, gameplay.boo);
 
-            var pa:PAWindow = mpPA[user.playerIdx];
+            var pa:PAWindow = _mpPA[user.playerIdx];
             if (pa)
                 pa.update(gameplay.amazing, gameplay.perfect, gameplay.good, gameplay.average, gameplay.miss, gameplay.boo);
 
-            var judge:Judge = mpJudge[user.playerIdx];
+            var judge:Judge = _mpJudge[user.playerIdx];
             if (judge)
             {
                 var value:int = 0;
@@ -2274,8 +2277,8 @@ package game
 
         public function onMultiplayerResults(event:GameResultsEvent):void
         {
-            if (event.room == options.mpRoom)
-                GAME_STATE = GAME_END;
+            if (event.room == _options.mpRoom)
+                _GAME_STATE = GAME_END;
         }
 
         private function addLoaderListeners():void

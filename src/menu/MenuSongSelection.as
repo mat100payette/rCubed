@@ -51,6 +51,8 @@ package menu
     import popups.PopupQueueManager;
     import popups.PopupSongNotes;
     import flash.text.TextFormatAlign;
+    import popups.events.AddPopupEvent;
+    import popups.events.AddPopupSongNotesEvent;
 
     public class MenuSongSelection extends MenuPanel
     {
@@ -983,8 +985,7 @@ package menu
             var songInfo:SongInfo = _playlist.getSongInfo(songItem.level);
 
             if (songInfo != null)
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SONG_NOTES));
-            //_gvars.gameMain.addPopup(new PopupSongNotes(songInfo));
+                dispatchEvent(new AddPopupSongNotesEvent(songInfo));
         }
 
         /**
@@ -1926,7 +1927,7 @@ package menu
                 else if (clickAction == "filterManager")
                 {
                     dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
-                    //addPopup(new PopupFilterManager());
+                        //addPopup(new PopupFilterManager());
                 }
                 else if (clickAction == "doFilterRandom")
                 {

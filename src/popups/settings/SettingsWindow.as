@@ -27,6 +27,7 @@ package popups.settings
     import menu.MainMenu;
     import menu.MenuPanel;
     import menu.MenuSongSelection;
+    import popups.events.RemovePopupEvent;
 
 
     public class SettingsWindow extends MenuPanel
@@ -95,7 +96,7 @@ package popups.settings
 
         override public function stageAdd():void
         {
-            stage.focus = this.stage;
+            stage.focus = stage;
 
             _bmp = SpriteUtil.getBitmapSprite(stage);
             addChild(_bmp);
@@ -153,13 +154,6 @@ package popups.settings
             _btnClose = new BoxButton(_box, 685, 15, 80, 29, _lang.string(Lang.MENU_CLOSE), 12, onCloseClicked);
 
             changeTab(_lastIndex);
-        }
-
-        override public function stageRemove():void
-        {
-            _currentTab.closeTab();
-            _scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
-            pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
         }
 
         public function buildTabs():void
@@ -369,7 +363,7 @@ package popups.settings
                 GameBackgroundColor.BG_STATIC = _user.settings.gameColors[2];
                 GameBackgroundColor.BG_POPUP = _user.settings.gameColors[3];
                 GameBackgroundColor.BG_STAGE = _user.settings.gameColors[4];
-                (_gvars.gameMain.getChildAt(0) as GameBackgroundColor).redraw();
+                _gvars.gameMain.redrawBackground();
 
                 if (_gvars.gameMain.activePanel is MainMenu && ((_gvars.gameMain.activePanel as MainMenu).panel is MenuSongSelection))
                 {
@@ -381,6 +375,13 @@ package popups.settings
 
             SoundMixer.soundTransform = new SoundTransform(_user.settings.gameVolume);
             LocalOptions.setVariable("menu_music_volume", _gvars.menuMusicSoundVolume);
+
+            _currentTab.closeTab();
+            _scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
+            pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
+
+            stageRemove();
+            dispatchEvent(new RemovePopupEvent());
         }
 
         private function mouseWheelMoved(e:MouseEvent):void

@@ -1,4 +1,4 @@
-package
+package popups.events
 {
     import flash.events.Event;
 

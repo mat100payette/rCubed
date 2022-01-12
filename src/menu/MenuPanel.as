@@ -1,6 +1,7 @@
 package menu
 {
     import flash.display.Sprite;
+    import flash.display.DisplayObject;
 
     public class MenuPanel extends Sprite
     {
@@ -28,6 +29,16 @@ package menu
 
         public function stageRemove():void
         {
+            for (var i:int = numChildren - 1; i >= 0; i--)
+            {
+                var child:DisplayObject = getChildAt(i);
+
+                // TODO: Make this a thing
+                //if (child is IDisposable)
+                //    child.dispose();
+
+                removeChildAt(i);
+            }
         }
 
         public function draw():void

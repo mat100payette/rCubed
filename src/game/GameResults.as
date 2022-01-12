@@ -48,6 +48,9 @@ package game
     import popups.PopupTokenUnlock;
     import popups.replays.ReplayHistoryTabLocal;
     import classes.UserSettings;
+    import popups.events.AddPopupHighscoresEvent;
+    import popups.events.AddPopupSongNotesEvent;
+    import popups.events.AddPopupEvent;
 
     public class GameResults extends MenuPanel
     {
@@ -788,31 +791,21 @@ package game
             }
 
             else if (target == navOptions)
-            {
                 dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
-            }
 
             else if (target == navHighscores)
             {
                 if (resultIndex >= 0)
-                {
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_HIGHSCORES));
-                        //addPopup(new PopupHighscores(songResults[resultIndex].songInfo));
-                }
+                    dispatchEvent(new AddPopupHighscoresEvent(songResults[resultIndex].songInfo));
             }
 
             else if (target == navMenu)
-            {
                 dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
-            }
 
             else if (target == navRating)
             {
                 if (resultIndex >= 0)
-                {
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SONG_NOTES));
-                        //_gvars.gameMain.addPopup(new PopupSongNotes(songResults[resultIndex].songInfo));
-                }
+                    dispatchEvent(new AddPopupSongNotesEvent(songResults[resultIndex].songInfo));
             }
 
             else if (target == graphToggle)
