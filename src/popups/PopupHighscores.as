@@ -17,7 +17,7 @@ package popups
     import flash.events.MouseEvent;
     import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
-    import popups.events.RemovePopupEvent;
+    import events.navigation.popups.RemovePopupEvent;
 
     public class PopupHighscores extends DisplayLayer
     {

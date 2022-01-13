@@ -1,4 +1,4 @@
-package events
+package events.navigation
 {
     import flash.events.Event;
 
@@ -6,7 +6,7 @@ package events
     {
         private var _panelName:String;
 
-        static public var EVENT_TYPE:String = "change_panel_event";
+        static public var EVENT_TYPE:String = "ChangePanelEvent";
 
         public function ChangePanelEvent(panelName:String):void
         {

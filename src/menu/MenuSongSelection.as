@@ -47,13 +47,10 @@ package menu
     import flash.ui.Keyboard;
     import game.GameOptions;
     import menu.MenuSongSelectionOptions;
-    import popups.PopupFilterManager;
-    import popups.PopupQueueManager;
-    import popups.PopupSongNotes;
     import flash.text.TextFormatAlign;
-    import popups.events.AddPopupEvent;
-    import popups.events.AddPopupSongNotesEvent;
-    import events.ChangePanelEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.navigation.popups.AddPopupSongNotesEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class MenuSongSelection extends DisplayLayer
     {

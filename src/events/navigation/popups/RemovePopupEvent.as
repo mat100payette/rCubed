@@ -1,11 +1,11 @@
-package popups.events
+package events.navigation.popups
 {
 
     import flash.events.Event;
 
     public class RemovePopupEvent extends Event
     {
-        static public var EVENT_TYPE:String = "remove_popup_event";
+        static public var EVENT_TYPE:String = "RemovePopupEvent";
 
         public function RemovePopupEvent():void
         {

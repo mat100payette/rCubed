@@ -1,4 +1,4 @@
-package popups.events
+package events.navigation.popups
 {
     import flash.events.Event;
 
@@ -7,7 +7,7 @@ package popups.events
         private var _popupName:String;
         private var _overlay:Boolean;
 
-        static public var EVENT_TYPE:String = "add_popup_event";
+        static public var EVENT_TYPE:String = "AddPopupEvent";
 
         public function AddPopupEvent(popupName:String, overlay:Boolean = true):void
         {

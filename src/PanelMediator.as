@@ -4,13 +4,12 @@ package
     import flash.concurrent.Mutex;
     import flash.events.EventDispatcher;
     import flash.events.IEventDispatcher;
-    import popups.events.RemovePopupEvent;
-    import popups.events.AddPopupEvent;
-    import events.ChangePanelEvent;
+    import events.navigation.popups.RemovePopupEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class PanelMediator extends EventDispatcher
     {
-        public static const PANEL_MAIN:String = "MainPanel";
         public static const PANEL_INITIAL_LOADING:String = "GameInitialLoading";
         public static const PANEL_GAME_UPDATE:String = "GameAirUpdatePanel";
         public static const PANEL_GAME_LOGIN:String = "GameLoginPanel";

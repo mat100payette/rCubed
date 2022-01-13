@@ -1,4 +1,4 @@
-package popups.events
+package events.navigation.popups
 {
 
     public class AddPopupSkillRankUpdateEvent extends AddPopupEvent

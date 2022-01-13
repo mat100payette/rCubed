@@ -20,7 +20,7 @@ package popups.replays
     import game.GameOptions;
     import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class ReplayHistoryWindow extends DisplayLayer
     {

@@ -58,7 +58,7 @@ package game
     import menu.MenuSongSelection;
     import sql.SQLSongUserInfo;
     import flash.text.TextFieldAutoSize;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class GameplayDisplay extends DisplayLayer
     {

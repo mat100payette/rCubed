@@ -28,10 +28,10 @@ package menu
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.text.TextFormatAlign;
-    import popups.events.AddPopupSkillRankUpdateEvent;
-    import popups.events.AddPopupEvent;
+    import events.navigation.popups.AddPopupSkillRankUpdateEvent;
+    import events.navigation.popups.AddPopupEvent;
     import classes.ui.BoxButton;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class MainMenu extends DisplayLayer
     {

@@ -15,9 +15,8 @@ package
     import com.greensock.TweenMax;
     import com.greensock.easing.SineInOut;
     import classes.Alert;
-    import events.ChangePanelEvent;
-    import events.GameDataLoadedEvent;
-    import events.LanguageChangedEvent;
+    import events.navigation.ChangePanelEvent;
+    import events.state.LanguageChangedEvent;
 
     public class InitialLoading extends DisplayLayer
     {

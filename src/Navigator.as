@@ -2,22 +2,22 @@ package
 {
 
     import flash.display.Sprite;
-    import popups.events.AddPopupEvent;
+    import events.navigation.popups.AddPopupEvent;
     import menu.DisplayLayer;
     import popups.settings.SettingsWindow;
     import popups.PopupHelp;
     import popups.replays.ReplayHistoryWindow;
     import classes.SongInfo;
     import popups.PopupHighscores;
-    import popups.events.AddPopupHighscoresEvent;
-    import popups.events.AddPopupSongNotesEvent;
+    import events.navigation.popups.AddPopupHighscoresEvent;
+    import events.navigation.popups.AddPopupSongNotesEvent;
     import popups.PopupSongNotes;
     import popups.PopupQueueManager;
     import popups.PopupContextMenu;
     import popups.PopupFilterManager;
-    import popups.events.AddPopupSkillRankUpdateEvent;
+    import events.navigation.popups.AddPopupSkillRankUpdateEvent;
     import popups.PopupSkillRankUpdate;
-    import popups.events.RemovePopupEvent;
+    import events.navigation.popups.RemovePopupEvent;
     import menu.MainMenu;
     import game.GameplayDisplay;
     import game.GameLoading;
@@ -26,8 +26,9 @@ package
     import com.greensock.TweenLite;
     import assets.GameBackgroundColor;
     import classes.ui.VersionText;
-    import events.ChangePanelEvent;
-    import events.InitialLoadingEvent;
+    import events.navigation.ChangePanelEvent;
+    import events.navigation.InitialLoadingEvent;
+    import flash.events.IEventDispatcher;
 
     public class Navigator extends Sprite
     {
@@ -39,14 +40,13 @@ package
 
         public var activePanel:DisplayLayer;
 
-        public function Navigator(bg:GameBackgroundColor, versionText:VersionText)
+        public function Navigator(target:IEventDispatcher, bg:GameBackgroundColor, versionText:VersionText)
         {
             _bg = bg;
             _versionText = versionText;
-            _panelMediator = new PanelMediator(this, changePanel, addPopup, removePopup);
+            _panelMediator = new PanelMediator(target, changePanel, addPopup, removePopup);
         }
 
-        ///- Panels
         public function changePanel(e:ChangePanelEvent):void
         {
             var panelName:String = e.panelName;
@@ -112,32 +112,7 @@ package
             _bg.updateDisplay(!showBgAndVersion);
             _versionText.visible = showBgAndVersion;
 
-            //- Remove last panel if exist
-            if (activePanel != null)
-            {
-                activePanel.alpha = 0;
-                TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: transitionPanel, onCompleteParams: [activePanel]});
-                activePanel.mouseEnabled = false;
-                activePanel.mouseChildren = false;
-
-                activePanel = nextPanel;
-                activePanel.alpha = 0;
-
-                addChildAt(activePanel, 0);
-
-                activePanel.stageAdd();
-                TweenLite.to(activePanel, 0.5, {alpha: 1});
-            }
-            else
-            {
-                activePanel = nextPanel;
-                activePanel.alpha = 0;
-
-                addChildAt(activePanel, 0);
-
-                activePanel.stageAdd();
-                TweenLite.to(activePanel, 0.5, {alpha: 1});
-            }
+            transitionPanel(nextPanel);
         }
 
         public function addPopup(e:AddPopupEvent):void
@@ -189,7 +164,37 @@ package
             removeChildAt(_panelMediator.topPopupLayer - 1);
         }
 
-        private function transitionPanel(currentPanel:DisplayLayer):void
+        private function transitionPanel(nextPanel:DisplayLayer):void
+        {
+            //- Remove last panel if exist
+            if (activePanel != null)
+            {
+                activePanel.alpha = 0;
+                TweenLite.to(activePanel, 0.5, {alpha: 0, onComplete: disposePanel, onCompleteParams: [activePanel]});
+                activePanel.mouseEnabled = false;
+                activePanel.mouseChildren = false;
+
+                activePanel = nextPanel;
+                activePanel.alpha = 0;
+
+                addChildAt(activePanel, 0);
+
+                activePanel.stageAdd();
+                TweenLite.to(activePanel, 0.5, {alpha: 1});
+            }
+            else
+            {
+                activePanel = nextPanel;
+                activePanel.alpha = 0;
+
+                addChildAt(activePanel, 0);
+
+                activePanel.stageAdd();
+                TweenLite.to(activePanel, 0.5, {alpha: 1});
+            }
+        }
+
+        private function disposePanel(currentPanel:DisplayLayer):void
         {
             if (currentPanel)
             {

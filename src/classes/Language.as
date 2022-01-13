@@ -12,7 +12,7 @@ package classes
     import flash.events.SecurityErrorEvent;
     import flash.net.URLLoader;
     import flash.net.URLRequest;
-    import events.LanguageChangedEvent;
+    import events.state.LanguageChangedEvent;
 
     public class Language extends EventDispatcher
     {

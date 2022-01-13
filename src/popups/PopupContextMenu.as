@@ -1,9 +1,7 @@
 package popups
 {
-    import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import classes.Language;
-    import classes.Playlist;
     import classes.ui.Box;
     import classes.ui.BoxButton;
     import com.flashdynamix.utils.SWFProfiler;
@@ -12,11 +10,10 @@ package popups
     import flash.events.MouseEvent;
     import flash.profiler.showRedrawRegions;
     import menu.DisplayLayer;
-    import classes.User;
-    import popups.events.RemovePopupEvent;
+    import events.navigation.popups.RemovePopupEvent;
     import flash.events.Event;
-    import game.GameLoading;
-    import game.GameplayDisplay;
+    import events.state.ReloadEngineEvent;
+    import events.state.LogoutEvent;
 
     public class PopupContextMenu extends DisplayLayer
     {
@@ -131,31 +128,11 @@ package popups
             }
             else if (e.target.action == "reload_engine")
             {
-                // TODO: Event to reset load status on InitialLoading
-
-                /*if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.navigator.activePanel is GameLoading || _gvars.gameMain.navigator.activePanel is GameplayDisplay))
-                   {
-                   MultiplayerState.destroyInstance();
-                   Flags.VALUES = {};
-                   Playlist.clearCanon();
-                   _gvars.gameMain.loadComplete = false;
-                   dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN));
-                   }*/
+                dispatchEvent(new ReloadEngineEvent());
             }
             else if (e.target.action == "switch_profile")
             {
-                // TODO: Event to reset load status on InitialLoading
-
-                /*if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.navigator.activePanel is GameLoading || _gvars.gameMain.navigator.activePanel is GameplayDisplay))
-                   {
-                   MultiplayerState.destroyInstance();
-                   Flags.VALUES = {};
-                   _gvars.userSession = "0";
-                   _gvars.playerUser = new User(true);
-                   _gvars.playerUser.loadFull(_gvars.userSession);
-                   _gvars.activeUser = _gvars.playerUser;
-                   dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
-                   }*/
+                dispatchEvent(new LogoutEvent());
             }
         }
     }

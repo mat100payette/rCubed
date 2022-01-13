@@ -4,7 +4,7 @@ package game
     import classes.Playlist;
     import flash.text.TextFormat;
     import menu.DisplayLayer;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class GameReplay extends DisplayLayer
     {

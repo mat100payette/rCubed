@@ -27,8 +27,8 @@ package
     import flash.net.navigateToURL;
     import flash.ui.Keyboard;
     import menu.DisplayLayer;
-    import events.ChangePanelEvent;
-    import events.InitialLoadingEvent;
+    import events.navigation.ChangePanelEvent;
+    import events.navigation.InitialLoadingEvent;
 
     public class LoginMenu extends DisplayLayer
     {
@@ -40,28 +40,28 @@ package
         private const STORED_PASSWORD:int = 1;
         private const STORED_SESSION:int = 2;
 
-        private var savedInfos:Object;
+        private var _savedInfos:Object;
 
-        private var box:Box;
-        private var panel_login:Sprite;
-        private var panel_session:Sprite;
+        private var _box:Box;
+        private var _panelLogin:Sprite;
+        private var _panelSession:Sprite;
 
-        private var input_user:BoxText;
-        private var input_pass:BoxText;
-        private var saveDetails:BoxCheck;
+        private var _inputUser:BoxText;
+        private var _inputPass:BoxText;
+        private var _saveDetails:BoxCheck;
 
-        private var isLoading:Boolean = false;
+        private var _isLoading:Boolean = false;
 
         public function LoginMenu()
         {
-            savedInfos = loadLoginDetails();
+            _savedInfos = loadLoginDetails();
         }
 
         override public function dispose():void
         {
             if (stage)
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, loginKeyDown);
-            saveDetails.dispose();
+            _saveDetails.dispose();
             super.dispose();
         }
 
@@ -70,14 +70,14 @@ package
             stage.addEventListener(KeyboardEvent.KEY_DOWN, loginKeyDown);
 
             //- BG
-            box = new Box(this, (Main.GAME_WIDTH - 300) / 2, (Main.GAME_HEIGHT - 140) / 2, false);
-            box.setSize(300, 140);
+            _box = new Box(this, (Main.GAME_WIDTH - 300) / 2, (Main.GAME_HEIGHT - 140) / 2, false);
+            _box.setSize(300, 140);
 
             // Register Button
-            var register_online_btn:BoxButton = new BoxButton(this, box.x, box.y + box.height + 10, 300, 30, _lang.string("register_online"), 12, registerOnline);
+            var register_online_btn:BoxButton = new BoxButton(this, _box.x, _box.y + _box.height + 10, 300, 30, _lang.string("register_online"), 12, registerOnline);
 
             /// 
-            panel_session = new Sprite();
+            _panelSession = new Sprite();
 
             var draw_pane:Sprite = new Sprite();
             draw_pane.graphics.lineStyle(1, 0xffffff, 0);
@@ -90,16 +90,16 @@ package
             draw_pane.graphics.moveTo(100, 50);
             draw_pane.graphics.lineTo(265, 50);
             draw_pane.graphics.moveTo(1, 98);
-            draw_pane.graphics.lineTo(box.width, 98);
-            panel_session.addChild(draw_pane);
+            draw_pane.graphics.lineTo(_box.width, 98);
+            _panelSession.addChild(draw_pane);
 
-            if (savedInfos.avatar != null)
+            if (_savedInfos.avatar != null)
             {
                 try
                 {
                     var avatarLoader:Loader = new Loader();
                     avatarLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, displayAvatarComplete);
-                    avatarLoader.loadBytes(savedInfos.avatar, AirContext.getLoaderContext());
+                    avatarLoader.loadBytes(_savedInfos.avatar, AirContext.getLoaderContext());
 
                     function displayAvatarComplete(e:Event):void
                     {
@@ -111,7 +111,7 @@ package
                             SpriteUtil.scaleTo(userAvatar, 77, 77);
                             userAvatar.x = 11 + ((77 - userAvatar.width) / 2);
                             userAvatar.y = 11 + ((77 - userAvatar.height) / 2);
-                            panel_session.addChildAt(userAvatar, 1);
+                            _panelSession.addChildAt(userAvatar, 1);
                         }
                     }
                 }
@@ -122,72 +122,67 @@ package
             }
 
             // Username
-            var session_label_user:Text = new Text(panel_session, 100, 30, _lang.string("login_continue_as"));
-            var session_txt_username:Text = new Text(panel_session, 100, 50, savedInfos.username ? savedInfos.username : "----", 16, "#F3FAFF");
+            var session_label_user:Text = new Text(_panelSession, 100, 30, _lang.string("login_continue_as"));
+            var session_txt_username:Text = new Text(_panelSession, 100, 50, _savedInfos.username ? _savedInfos.username : "----", 16, "#F3FAFF");
 
             //- Buttons
-            var session_continueAsbtn:SimpleBoxButton = new SimpleBoxButton(box.width, 98);
+            var session_continueAsbtn:SimpleBoxButton = new SimpleBoxButton(_box.width, 98);
             session_continueAsbtn.addEventListener(MouseEvent.CLICK, attemptLoginSession);
-            panel_session.addChild(session_continueAsbtn);
+            _panelSession.addChild(session_continueAsbtn);
 
-            var session_guestbtn:BoxButton = new BoxButton(panel_session, 6, box.height - 36, 120, 30, _lang.string("login_guest"), 12, playAsGuest);
-            var session_changeusertbtn:BoxButton = new BoxButton(panel_session, box.width - 126, box.height - 36, 120, 30, _lang.string("login_change_user"), 12, changeUserEvent);
+            var session_guestbtn:BoxButton = new BoxButton(_panelSession, 6, _box.height - 36, 120, 30, _lang.string("login_guest"), 12, playAsGuest);
+            var session_changeusertbtn:BoxButton = new BoxButton(_panelSession, _box.width - 126, _box.height - 36, 120, 30, _lang.string("login_change_user"), 12, changeUserEvent);
 
             /// Login Screen
-            panel_login = new Sprite();
+            _panelLogin = new Sprite();
 
             //- Text
             // Username
-            var txt_user:Text = new Text(panel_login, 5, 5, _lang.string("login_name"));
-            input_user = new BoxText(panel_login, 5, 25, 290, 20);
+            var txt_user:Text = new Text(_panelLogin, 5, 5, _lang.string("login_name"));
+            _inputUser = new BoxText(_panelLogin, 5, 25, 290, 20);
 
             // Password
-            var txt_pass:Text = new Text(panel_login, 5, 55, _lang.string("login_pass"));
-            input_pass = new BoxText(panel_login, 5, 75, 290, 20);
-            input_pass.displayAsPassword = true;
+            var txt_pass:Text = new Text(_panelLogin, 5, 55, _lang.string("login_pass"));
+            _inputPass = new BoxText(_panelLogin, 5, 75, 290, 20);
+            _inputPass.displayAsPassword = true;
 
             // Save Details
-            saveDetails = new BoxCheck(panel_login, 92, 113, toggleDetailsSave);
-            var txt_save:Text = new Text(panel_login, 110, 111, _lang.string("login_remember"));
+            _saveDetails = new BoxCheck(_panelLogin, 92, 113);
+            var txt_save:Text = new Text(_panelLogin, 110, 111, _lang.string("login_remember"));
 
             //- Buttons
-            var login_guestbtn:BoxButton = new BoxButton(panel_login, 6, box.height - 36, 75, 30, _lang.string("login_guest"), 12, playAsGuest);
-            var loginbtn:BoxButton = new BoxButton(panel_login, box.width - 81, box.height - 36, 75, 30, _lang.string("login_text"), 12, attemptLogin);
+            var login_guestbtn:BoxButton = new BoxButton(_panelLogin, 6, _box.height - 36, 75, 30, _lang.string("login_guest"), 12, playAsGuest);
+            var loginbtn:BoxButton = new BoxButton(_panelLogin, _box.width - 81, _box.height - 36, 75, 30, _lang.string("login_text"), 12, attemptLogin);
 
             // Set Values
-            if (savedInfos.state == STORED_SESSION)
+            if (_savedInfos.state == STORED_SESSION)
             {
 
             }
-            else if (savedInfos.state == STORED_PASSWORD)
+            else if (_savedInfos.state == STORED_PASSWORD)
             {
-                input_user.text = savedInfos.username;
-                input_pass.text = savedInfos.password;
-                saveDetails.checked = true;
+                _inputUser.text = _savedInfos.username;
+                _inputPass.text = _savedInfos.password;
+                _saveDetails.checked = true;
             }
 
             // Set Focus when at textboxes
-            if (savedInfos.state == STORED_SESSION)
+            if (_savedInfos.state == STORED_SESSION)
             {
-                box.addChild(panel_session);
+                _box.addChild(_panelSession);
             }
-            else if (savedInfos.state == STORED_NONE || savedInfos.state == STORED_PASSWORD)
+            else if (_savedInfos.state == STORED_NONE || _savedInfos.state == STORED_PASSWORD)
             {
-                box.addChild(panel_login);
-                stage.focus = input_user.field;
-                input_user.field.setSelection(input_user.text.length, input_user.text.length);
+                _box.addChild(_panelLogin);
+                stage.focus = _inputUser.field;
+                _inputUser.field.setSelection(_inputUser.text.length, _inputUser.text.length);
             }
         }
 
 
         private function get rememberPassword():Boolean
         {
-            return saveDetails.checked;
-        }
-
-        public function toggleDetailsSave(e:Event):void
-        {
-            saveDetails.checked = !saveDetails.checked;
+            return _saveDetails.checked;
         }
 
         public function playAsGuest(e:Event = null):void
@@ -204,21 +199,21 @@ package
         {
             saveLoginDetails(false);
 
-            if (box.contains(panel_session))
-                box.removeChild(panel_session);
+            if (_box.contains(_panelSession))
+                _box.removeChild(_panelSession);
 
-            box.addChild(panel_login);
+            _box.addChild(_panelLogin);
 
-            if (savedInfos.username != null)
-                input_user.text = savedInfos.username;
+            if (_savedInfos.username != null)
+                _inputUser.text = _savedInfos.username;
 
-            stage.focus = input_user.field;
-            input_user.field.setSelection(input_user.text.length, input_user.text.length);
+            stage.focus = _inputUser.field;
+            _inputUser.field.setSelection(_inputUser.text.length, _inputUser.text.length);
         }
 
         public function attemptLoginSession(e:Event = null):void
         {
-            if (isLoading)
+            if (_isLoading)
                 return;
 
             _loader = new URLLoader();
@@ -227,20 +222,20 @@ package
             var req:URLRequest = new URLRequest(Constant.USER_LOGIN_URL);
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.username = savedInfos.username;
-            requestVars.token = savedInfos.token;
+            requestVars.username = _savedInfos.username;
+            requestVars.token = _savedInfos.token;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
 
             Logger.info(this, "Attempting session login for: " + requestVars.username.substr(0, 4) + "..." + requestVars.token.substr(-4));
 
-            isLoading = true;
+            _isLoading = true;
         }
 
         public function attemptLogin(e:Event = null):void
         {
-            if (isLoading)
+            if (_isLoading)
                 return;
 
             _loader = new URLLoader();
@@ -249,9 +244,9 @@ package
             var req:URLRequest = new URLRequest(Constant.USER_LOGIN_URL);
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.username = input_user.text;
-            requestVars.password = input_pass.text;
-            requestVars.rememberPassword = (this.rememberPassword ? "true" : "false");
+            requestVars.username = _inputUser.text;
+            requestVars.password = _inputPass.text;
+            requestVars.rememberPassword = (rememberPassword ? "true" : "false");
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
@@ -266,14 +261,14 @@ package
             if (event.keyCode == Keyboard.ENTER)
             {
                 // Session Screen
-                if (panel_session.stage != null)
+                if (_panelSession.stage != null)
                 {
                     attemptLoginSession(event);
                 }
                 // Login Screen
                 else
                 {
-                    if (input_user.text.length > 0)
+                    if (_inputUser.text.length > 0)
                         attemptLogin(event);
                     else
                         playAsGuest(event);
@@ -307,7 +302,7 @@ package
             if (_data.result == 4)
             {
                 Logger.error(this, "Invalid User/Session");
-                isLoading = false;
+                _isLoading = false;
                 Alert.add(_lang.string("login_invalid_session"));
                 changeUserEvent(e);
             }
@@ -328,7 +323,7 @@ package
             }
         }
 
-        private function loginLoadError(e:ErrorEvent = null):void
+        private function loginLoadError(e:ErrorEvent):void
         {
             Logger.error(this, "Login Load Error: " + Logger.event_error(e));
             Alert.add(_lang.string("login_connection_error"));
@@ -354,31 +349,31 @@ package
         {
             if (val)
             {
-                isLoading = true;
-                input_user.selectable = false;
-                input_pass.selectable = false;
-                input_user.textColor = 0xD6D6D6;
-                input_pass.textColor = 0xD6D6D6;
-                input_pass.color = 0xD6D6D6;
-                input_pass.borderColor = 0xFFFFFF;
+                _isLoading = true;
+                _inputUser.selectable = false;
+                _inputPass.selectable = false;
+                _inputUser.textColor = 0xD6D6D6;
+                _inputPass.textColor = 0xD6D6D6;
+                _inputPass.color = 0xD6D6D6;
+                _inputPass.borderColor = 0xFFFFFF;
             }
             else
             {
-                isLoading = false;
-                input_user.selectable = true;
-                input_pass.selectable = true;
-                input_user.textColor = 0xFFFFFF;
-                input_pass.textColor = 0xFFFFFF;
-                input_pass.color = 0xFFFFFF;
-                input_pass.borderColor = 0xFFFFFF;
+                _isLoading = false;
+                _inputUser.selectable = true;
+                _inputPass.selectable = true;
+                _inputUser.textColor = 0xFFFFFF;
+                _inputPass.textColor = 0xFFFFFF;
+                _inputPass.color = 0xFFFFFF;
+                _inputPass.borderColor = 0xFFFFFF;
             }
 
             if (isError)
             {
-                input_pass.text = "";
-                input_pass.textColor = 0xFFDBDB;
-                input_pass.color = 0xFF0000;
-                input_pass.borderColor = 0xFF0000;
+                _inputPass.text = "";
+                _inputPass.textColor = 0xFFDBDB;
+                _inputPass.color = 0xFF0000;
+                _inputPass.borderColor = 0xFF0000;
             }
         }
 
@@ -386,7 +381,7 @@ package
         {
             if (saveLogin && session != "")
             {
-                LocalStore.setVariable("uUsername", Crypt.Encode(input_user.text));
+                LocalStore.setVariable("uUsername", Crypt.Encode(_inputUser.text));
                 LocalStore.setVariable("uSessionToken", Crypt.Encode(session));
             }
             else

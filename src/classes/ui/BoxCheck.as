@@ -31,11 +31,8 @@ package classes.ui
             y = ypos;
 
             //- Set click event listener
-            if (onClick != null)
-            {
-                _onClick = onClick;
-                addEventListener(MouseEvent.CLICK, this.onClick);
-            }
+            _onClick = onClick;
+            addEventListener(MouseEvent.CLICK, onChecked);
 
             draw();
         }
@@ -43,10 +40,10 @@ package classes.ui
         public function dispose():void
         {
             if (_onClick != null)
-                removeEventListener(MouseEvent.CLICK, onClick);
+                removeEventListener(MouseEvent.CLICK, onChecked);
         }
 
-        private function onClick(event:Event):void
+        private function onChecked(event:Event):void
         {
             checked = !_active;
             if (_onClick != null)

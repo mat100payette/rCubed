@@ -27,8 +27,8 @@ package popups.settings
     import menu.MainMenu;
     import menu.DisplayLayer;
     import menu.MenuSongSelection;
-    import popups.events.RemovePopupEvent;
-    import events.ChangePanelEvent;
+    import events.navigation.popups.RemovePopupEvent;
+    import events.navigation.ChangePanelEvent;
 
 
     public class SettingsWindow extends DisplayLayer

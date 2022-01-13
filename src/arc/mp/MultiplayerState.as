@@ -37,7 +37,7 @@ package arc.mp
     import game.GameScoreResult;
     import menu.DisplayLayer;
     import flash.events.EventDispatcher;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class MultiplayerState extends EventDispatcher
     {

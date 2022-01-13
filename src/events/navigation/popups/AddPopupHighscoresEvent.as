@@ -1,16 +1,16 @@
-package popups.events
+package events.navigation.popups
 {
 
     import classes.SongInfo;
 
-    public class AddPopupSongNotesEvent extends AddPopupEvent
+    public class AddPopupHighscoresEvent extends AddPopupEvent
     {
         private var _songInfo:SongInfo;
 
-        public function AddPopupSongNotesEvent(songInfo:SongInfo):void
+        public function AddPopupHighscoresEvent(songInfo:SongInfo):void
         {
             _songInfo = songInfo;
-            super(PanelMediator.POPUP_SONG_NOTES);
+            super(PanelMediator.POPUP_HIGHSCORES);
         }
 
         public function get songInfo():SongInfo

@@ -12,7 +12,7 @@ package game
     import flash.events.Event;
     import flash.text.TextFormat;
     import menu.DisplayLayer;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class GameLoading extends DisplayLayer
     {

@@ -14,7 +14,7 @@ package classes
     import flash.net.URLVariables;
     import menu.MainMenu;
     import menu.MenuSongSelection;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class Playlist extends EventDispatcher
     {

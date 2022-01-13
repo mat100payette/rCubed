@@ -17,7 +17,7 @@ package menu
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.net.URLRequest;
-    import events.ChangePanelEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class MenuTokens extends DisplayLayer
     {

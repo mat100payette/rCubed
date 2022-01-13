@@ -30,13 +30,13 @@ package
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
-    import menu.DisplayLayer;
-    import popups.events.AddPopupEvent;
-    import events.InitialLoadingEvent;
-    import events.GameDataLoadedEvent;
-    import events.LanguageChangedEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.navigation.InitialLoadingEvent;
+    import events.state.GameDataLoadedEvent;
+    import events.state.LanguageChangedEvent;
+    import flash.display.Sprite;
 
-    public class Main extends DisplayLayer
+    public class Main extends Sprite
     {
         public static const GAME_WIDTH:int = 780;
         public static const GAME_HEIGHT:int = 480;
@@ -51,6 +51,8 @@ package
         private var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
         public var navigator:Navigator;
+        private var _stateManager:StateManager;
+
         private var _popupQueue:Array = [];
 
         public var ignoreWindowChanges:Boolean = false;
@@ -66,8 +68,7 @@ package
 
             _gvars.gameMain = this;
 
-            addEventListener(GameDataLoadedEvent.EVENT_NAME, buildContextMenu);
-            addEventListener(LanguageChangedEvent.EVENT_NAME, onLanguageChanged);
+            setListeners();
 
             // Sometimes AIR doesn't load the stage right away.
             if (stage)
@@ -78,6 +79,12 @@ package
                     removeEventListener(Event.ADDED_TO_STAGE, _init);
                     gameInit();
                 });
+        }
+
+        private function setListeners():void
+        {
+            addEventListener(GameDataLoadedEvent.EVENT_TYPE, buildContextMenu);
+            addEventListener(LanguageChangedEvent.EVENT_TYPE, onLanguageChanged);
         }
 
         private function gameInit():void
@@ -134,7 +141,8 @@ package
             addChild(bg);
 
             versionText = new VersionText(stage.width - 5, 2);
-            navigator = new Navigator(bg, versionText);
+            navigator = new Navigator(this, bg, versionText);
+            _stateManager = new StateManager(this, navigator);
             addChild(navigator);
 
             //- Add Debug Tracking
@@ -228,7 +236,7 @@ package
         private function toggleContextPopup(e:Event):void
         {
             if (!disablePopups)
-                navigator.activePanel.dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_CONTEXT_MENU));
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_CONTEXT_MENU));
         }
 
         ///- Key Handling

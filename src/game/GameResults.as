@@ -48,10 +48,10 @@ package game
     import popups.PopupTokenUnlock;
     import popups.replays.ReplayHistoryTabLocal;
     import classes.UserSettings;
-    import popups.events.AddPopupHighscoresEvent;
-    import popups.events.AddPopupSongNotesEvent;
-    import popups.events.AddPopupEvent;
-    import events.ChangePanelEvent;
+    import events.navigation.popups.AddPopupHighscoresEvent;
+    import events.navigation.popups.AddPopupSongNotesEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.navigation.ChangePanelEvent;
 
     public class GameResults extends DisplayLayer
     {
