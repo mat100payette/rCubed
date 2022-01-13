@@ -13,7 +13,7 @@ package menu
     import flash.events.Event;
     import flash.events.MouseEvent;
 
-    public class MenuFriends extends MenuPanel
+    public class MenuFriends extends DisplayLayer
     {
         ///- Private Locals
         private var _friends:Friends = Friends.instance;
@@ -29,7 +29,7 @@ package menu
         public var options:Object;
         public var isLoading:Boolean = false;
 
-        public function MenuFriends(myParent:MenuPanel)
+        public function MenuFriends(myParent:DisplayLayer)
         {
             super(myParent);
         }

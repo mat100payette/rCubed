@@ -12,10 +12,10 @@ package popups
     import flash.text.StyleSheet;
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
 
-    public class PopupHelp extends MenuPanel
+    public class PopupHelp extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
 
@@ -77,7 +77,7 @@ package popups
             closeOptions = new BoxButton(box, box.width - 94.5, box.height - 42, 79.5, 27, _lang.string("menu_close"), 12, clickHandler);
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             closeOptions.dispose();
 

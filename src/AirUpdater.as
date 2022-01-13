@@ -22,10 +22,10 @@ package
     import flash.text.StyleSheet;
     import flash.text.TextField;
     import flash.utils.ByteArray;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
 
-    public class AirUpdater extends MenuPanel
+    public class AirUpdater extends DisplayLayer
     {
         private var _site:Site = Site.instance;
         private var _lang:Language = Language.instance;
@@ -51,6 +51,7 @@ package
 
         public function AirUpdater()
         {
+            super();
             updateList = [];
         }
 

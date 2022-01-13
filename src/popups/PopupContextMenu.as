@@ -11,13 +11,14 @@ package popups
     import flash.display.Bitmap;
     import flash.events.MouseEvent;
     import flash.profiler.showRedrawRegions;
-    import game.GameMenu;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import classes.User;
     import popups.events.RemovePopupEvent;
     import flash.events.Event;
+    import game.GameLoading;
+    import game.GameplayDisplay;
 
-    public class PopupContextMenu extends MenuPanel
+    public class PopupContextMenu extends DisplayLayer
     {
         CONFIG::debug
         {
@@ -99,7 +100,7 @@ package popups
 
         private function onCloseClicked(e:Event):void
         {
-            stageRemove();
+            dispose();
             dispatchEvent(new RemovePopupEvent());
         }
 
@@ -130,27 +131,31 @@ package popups
             }
             else if (e.target.action == "reload_engine")
             {
-                if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.activePanel is GameMenu))
-                {
-                    MultiplayerState.destroyInstance();
-                    Flags.VALUES = {};
-                    Playlist.clearCanon();
-                    _gvars.gameMain.loadComplete = false;
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN));
-                }
+                // TODO: Event to reset load status on InitialLoading
+
+                /*if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.navigator.activePanel is GameLoading || _gvars.gameMain.navigator.activePanel is GameplayDisplay))
+                   {
+                   MultiplayerState.destroyInstance();
+                   Flags.VALUES = {};
+                   Playlist.clearCanon();
+                   _gvars.gameMain.loadComplete = false;
+                   dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN));
+                   }*/
             }
             else if (e.target.action == "switch_profile")
             {
-                if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.activePanel is GameMenu))
-                {
-                    MultiplayerState.destroyInstance();
-                    Flags.VALUES = {};
-                    _gvars.userSession = "0";
-                    _gvars.playerUser = new User(true);
-                    _gvars.playerUser.loadFull(_gvars.userSession);
-                    _gvars.activeUser = _gvars.playerUser;
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
-                }
+                // TODO: Event to reset load status on InitialLoading
+
+                /*if (_gvars.gameMain.loadComplete && !(_gvars.gameMain.navigator.activePanel is GameLoading || _gvars.gameMain.navigator.activePanel is GameplayDisplay))
+                   {
+                   MultiplayerState.destroyInstance();
+                   Flags.VALUES = {};
+                   _gvars.userSession = "0";
+                   _gvars.playerUser = new User(true);
+                   _gvars.playerUser.loadFull(_gvars.userSession);
+                   _gvars.activeUser = _gvars.playerUser;
+                   dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
+                   }*/
             }
         }
     }

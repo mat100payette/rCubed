@@ -53,8 +53,9 @@ package menu
     import flash.text.TextFormatAlign;
     import popups.events.AddPopupEvent;
     import popups.events.AddPopupSongNotesEvent;
+    import events.ChangePanelEvent;
 
-    public class MenuSongSelection extends MenuPanel
+    public class MenuSongSelection extends DisplayLayer
     {
         public static const ITEM_PER_PAGE:int = 500;
 
@@ -118,9 +119,10 @@ package menu
         public function MenuSongSelection()
         {
             super();
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             Flags.VALUES[Flags.ENABLE_GLOBAL_POPUPS] = true;
 
@@ -141,20 +143,18 @@ package menu
             Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD] = true;
 
             if (Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD_SKIP])
-                return true;
+                return;
 
             //- Add Background
             background = new SongSelectionBackground();
             background.x = 145;
             background.y = 52;
             background.visible = LocalOptions.getVariable("menu_show_song_selection_background", true);
-            this.addChild(background);
+            addChild(background);
 
             GENRE_MODE = LocalStore.getVariable("genre_mode", GENRE_DIFFICULTIES);
 
             draw();
-
-            return true;
         }
 
         override public function dispose():void
@@ -194,10 +194,15 @@ package menu
                 searchBox.dispose();
                 searchBox = null;
             }
+
+            //- Remove Listeners
+            if (stage)
+                stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyHandler);
+
             super.dispose();
         }
 
-        override public function draw():void
+        public function draw():void
         {
             // Menu Music Context Menu
             var songItemContextMenuItem:ContextMenuItem;
@@ -341,13 +346,6 @@ package menu
                 stage.addEventListener(KeyboardEvent.KEY_DOWN, keyHandler, false, 0, true);
         }
 
-        override public function stageRemove():void
-        {
-            //- Remove Listeners
-            if (stage)
-                stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyHandler);
-        }
-
         /**
          * Called when an Alt Engine fails to load as the default displayed engine.
          * Reloads the song selection panel.
@@ -358,7 +356,7 @@ package menu
             _playlist.removeEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
             _playlist.engineChangeHandler(e);
 
-            dispatchEvent(new ChangePanelEvent(MainMenu.MENU_SONGSELECTION));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
         }
 
         //******************************************************************************************//
@@ -1038,7 +1036,7 @@ package menu
 
                 // Switch to game
                 Alert.add(_lang.string("song_selection_load_play_chart_preview"));
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
             }
         }
 
@@ -1532,7 +1530,7 @@ package menu
 
             _mp.gameplayPicking(_playlist.getSongInfo(level));
             _mp.gameplayLoading();
-            dispatchEvent(new ChangePanelEvent(MainMenu.MENU_MULTIPLAYER));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MULTIPLAYER));
         }
 
         /**
@@ -1576,7 +1574,7 @@ package menu
 
             _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
         /**
@@ -1895,8 +1893,7 @@ package menu
                     var songInfo:SongInfo = _playlist.getSongInfo(e.target.level);
 
                     if (songInfo != null)
-                        dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_SKILL_RANK_UPDATE));
-                        //_gvars.gameMain.addPopup(new PopupSongNotes(songInfo));
+                        dispatchEvent(new AddPopupSongNotesEvent(songInfo));
                 }
                 else if (clickAction == "clearQueue")
                 {

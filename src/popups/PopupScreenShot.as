@@ -15,11 +15,11 @@ package popups
     import flash.text.AntiAliasType;
     import flash.text.TextField;
     import flash.text.TextFormat;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import classes.Language;
     import flash.text.TextFormatAlign;
 
-    public class PopupScreenShot extends MenuPanel
+    public class PopupScreenShot extends DisplayLayer
     {
         private var box:Box;
         private var directCopyBox:BoxButton;
@@ -28,7 +28,7 @@ package popups
         private var results:Object;
         private var textFormat:TextFormat = new TextFormat(Language.UNI_FONT_NAME, 14, 0xFFFFFF, true);
 
-        public function PopupScreenShot(myParent:MenuPanel, results:Object)
+        public function PopupScreenShot(myParent:DisplayLayer, results:Object)
         {
             super(myParent);
             this.results = results;

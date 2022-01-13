@@ -33,9 +33,9 @@ package arc.mp
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.utils.Timer;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
 
-    public class MultiplayerPanel extends MenuPanel
+    public class MultiplayerPanel extends DisplayLayer
     {
         public var _lang:Language = Language.instance;
 

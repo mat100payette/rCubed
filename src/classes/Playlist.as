@@ -14,6 +14,7 @@ package classes
     import flash.net.URLVariables;
     import menu.MainMenu;
     import menu.MenuSongSelection;
+    import events.ChangePanelEvent;
 
     public class Playlist extends EventDispatcher
     {
@@ -353,20 +354,20 @@ package classes
                     Alert.add(_lang.string("error_loading_playlist"));
                     break;
                 case GlobalVariables.LOAD_COMPLETE:
-                    if (_gvars.gameMain.activePanel is MainMenu)
+                    if (_gvars.gameMain.navigator.activePanel is MainMenu)
                     {
-                        var mainmenu:MainMenu = _gvars.gameMain.activePanel as MainMenu;
-                        if (mainmenu != null && mainmenu._MenuSingleplayer != null)
+                        var mainmenu:MainMenu = _gvars.gameMain.navigator.activePanel as MainMenu;
+                        if (mainmenu != null && mainmenu._layerSongSelection != null)
                         {
                             var reload:Boolean = false;
-                            if (mainmenu.panel == mainmenu._MenuSingleplayer)
+                            if (mainmenu.currentPanel == mainmenu._layerSongSelection)
                                 reload = true;
-                            mainmenu._MenuSingleplayer = null;
+                            mainmenu._layerSongSelection = null;
                             if (reload)
                             {
                                 MenuSongSelection.options.pageNumber = 0;
                                 MenuSongSelection.options.scroll_position = 0;
-                                mainmenu.switchTo(MainMenu.MENU_SONGSELECTION);
+                                mainmenu.dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
                             }
                             _gvars.removeSongFiles();
                         }

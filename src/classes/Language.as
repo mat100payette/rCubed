@@ -12,6 +12,7 @@ package classes
     import flash.events.SecurityErrorEvent;
     import flash.net.URLLoader;
     import flash.net.URLRequest;
+    import events.LanguageChangedEvent;
 
     public class Language extends EventDispatcher
     {
@@ -163,13 +164,13 @@ package classes
                 AirContext.writeTextFile(AirContext.getAppFile("logs/language.txt"), siteDataString);
 
                 _loadError = true;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
                 return;
             }
 
             // Has Response
-            data = new Object();
-            indexed = new Array();
+            data = {};
+            indexed = [];
 
             for (var a:uint = 0; a < xmlChildren.length(); ++a)
             {
@@ -177,7 +178,7 @@ package classes
                 var lang:String = xmlChildren[a].attribute("id").toString();
                 if (data[lang] == null)
                 {
-                    data[lang] = new Object();
+                    data[lang] = {};
                 }
 
                 // Add Attributes to Object
@@ -206,7 +207,8 @@ package classes
         {
             if (isLoaded())
             {
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+                dispatchEvent(new LanguageChangedEvent());
+                dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE, true));
             }
         }
 
@@ -214,7 +216,7 @@ package classes
         {
             Logger.error(this, "Load Failure: " + Logger.event_error(err));
             removeLoaderListeners();
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
         }
 
         private function addLoaderListeners():void

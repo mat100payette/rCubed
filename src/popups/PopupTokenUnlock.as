@@ -15,9 +15,9 @@ package popups
     import flash.text.AntiAliasType;
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
 
-    public class PopupTokenUnlock extends MenuPanel
+    public class PopupTokenUnlock extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
@@ -181,7 +181,7 @@ package popups
             TweenLite.to(bh, 1, {alpha: 1, scaleX: 1, scaleY: 1, ease: Back.easeOut});
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             closeOptions.dispose();
 

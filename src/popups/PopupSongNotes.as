@@ -24,14 +24,14 @@ package popups
     import flash.text.AntiAliasType;
     import flash.text.TextField;
     import menu.MainMenu;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import menu.MenuSongSelection;
     import sql.SQLSongUserInfo;
     import flash.text.TextFormatAlign;
     import fl.controls.TextInput;
     import flash.text.TextFieldType;
 
-    public class PopupSongNotes extends MenuPanel
+    public class PopupSongNotes extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
@@ -206,7 +206,7 @@ package popups
             notesLength.text = "(" + notesField.length + " / 250)";
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             notesField.removeEventListener(Event.CHANGE, e_notesFieldChange);
             setMirrorInvert.dispose();
@@ -274,12 +274,12 @@ package popups
                 saveDetails();
 
                 // Update the Note Hover Directly
-                if (_gvars.gameMain.activePanel != null && _gvars.gameMain.activePanel is MainMenu)
+                if (_gvars.gameMain.navigator.activePanel != null && _gvars.gameMain.navigator.activePanel is MainMenu)
                 {
-                    var mmmenu:MainMenu = (_gvars.gameMain.activePanel as MainMenu);
-                    if (mmmenu.panel != null && (mmmenu.panel is MenuSongSelection))
+                    var mmmenu:MainMenu = (_gvars.gameMain.navigator.activePanel as MainMenu);
+                    if (mmmenu.currentPanel != null && (mmmenu.currentPanel is MenuSongSelection))
                     {
-                        var msmenu:MenuSongSelection = (mmmenu.panel as MenuSongSelection);
+                        var msmenu:MenuSongSelection = (mmmenu.currentPanel as MenuSongSelection);
                         msmenu.updateSongItemNote(songInfo.level);
                     }
                 }

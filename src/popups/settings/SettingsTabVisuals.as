@@ -310,21 +310,18 @@ package popups.settings
         {
             _settings.displayGenreFlag = !_settings.displayGenreFlag;
             _parent.checkValidMods();
-            _gvars.gameMain.activePanel.draw();
         }
 
         private function onDisplaySongFlagChanged(e:Event):void
         {
             _settings.displaySongFlag = !_settings.displaySongFlag;
             _parent.checkValidMods();
-            _gvars.gameMain.activePanel.draw();
         }
 
         private function onDisplaySongNoteChanged(e:Event):void
         {
             _settings.displaySongNote = !_settings.displaySongNote;
             _parent.checkValidMods();
-            _gvars.gameMain.activePanel.draw();
         }
     }
 }

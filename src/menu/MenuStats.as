@@ -11,7 +11,7 @@ package menu
     import flash.events.MouseEvent;
     import classes.SongInfo;
 
-    public class MenuStats extends MenuPanel
+    public class MenuStats extends DisplayLayer
     {
         ///- Private Locals
         private var _gvars:GlobalVariables = GlobalVariables.instance;
@@ -26,7 +26,7 @@ package menu
         public var options:Object;
         public var isLoading:Boolean = false;
 
-        public function MenuStats(myParent:MenuPanel)
+        public function MenuStats(myParent:DisplayLayer)
         {
             super(myParent);
         }

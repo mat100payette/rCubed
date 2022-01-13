@@ -24,6 +24,7 @@ package arc.mp
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
+    import menu.MainMenu;
 
     public class MultiplayerChat extends Component
     {
@@ -137,7 +138,7 @@ package arc.mp
 
         private function checkRedraw(event:Event):void
         {
-            _canRedraw = (GlobalVariables.instance.gameMain.activePanelName == PanelMediator.PANEL_GAME_MENU);
+            _canRedraw = (GlobalVariables.instance.gameMain.navigator.activePanel is MainMenu);
             redraw()
         }
 

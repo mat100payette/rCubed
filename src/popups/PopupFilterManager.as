@@ -21,11 +21,11 @@ package popups
     import flash.filters.BlurFilter;
     import flash.geom.Point;
     import menu.MainMenu;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import menu.MenuSongSelection;
     import flash.text.TextFormatAlign;
 
-    public class PopupFilterManager extends MenuPanel
+    public class PopupFilterManager extends DisplayLayer
     {
         public static const TAB_FILTER:int = 0;
         public static const TAB_LIST:int = 1;
@@ -60,16 +60,17 @@ package popups
         public function PopupFilterManager()
         {
             super();
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             bmd = new BitmapData(Main.GAME_WIDTH, Main.GAME_HEIGHT, false, 0x000000);
             bmd.draw(stage);
             bmd.applyFilter(bmd, bmd.rect, new Point(), new BlurFilter(16, 16, 3));
             bmp = new Bitmap(bmd);
 
-            this.addChild(bmp);
+            addChild(bmp);
 
             var bgbox:Box = new Box(this, 20, 20, false, false);
             bgbox.setSize(Main.GAME_WIDTH - 40, Main.GAME_HEIGHT - 40);
@@ -134,11 +135,9 @@ package popups
             }
 
             draw();
-
-            return true;
         }
 
-        override public function draw():void
+        public function draw():void
         {
             scrollbar.reset();
             scrollpane.clear();
@@ -284,14 +283,14 @@ package popups
                 _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
             }
 
-            if (_gvars.gameMain.activePanel != null && _gvars.gameMain.activePanel is MainMenu)
+            if (_gvars.gameMain.navigator.activePanel != null && _gvars.gameMain.navigator.activePanel is MainMenu)
             {
-                var mmmenu:MainMenu = (_gvars.gameMain.activePanel as MainMenu);
+                var mmmenu:MainMenu = (_gvars.gameMain.navigator.activePanel as MainMenu);
                 mmmenu.buildMenuItems();
 
-                if (mmmenu.panel != null && (mmmenu.panel is MenuSongSelection))
+                if (mmmenu.currentPanel != null && (mmmenu.currentPanel is MenuSongSelection))
                 {
-                    var msmenu:MenuSongSelection = (mmmenu.panel as MenuSongSelection);
+                    var msmenu:MenuSongSelection = (mmmenu.currentPanel as MenuSongSelection);
                     msmenu.buildPlayList();
                     msmenu.buildInfoBox();
                 }

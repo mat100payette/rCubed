@@ -1,19 +1,25 @@
 package
 {
 
+    import flash.concurrent.Mutex;
     import flash.events.EventDispatcher;
     import flash.events.IEventDispatcher;
     import popups.events.RemovePopupEvent;
     import popups.events.AddPopupEvent;
-    import flash.concurrent.Mutex;
+    import events.ChangePanelEvent;
 
     public class PanelMediator extends EventDispatcher
     {
         public static const PANEL_MAIN:String = "MainPanel";
+        public static const PANEL_INITIAL_LOADING:String = "GameInitialLoading";
         public static const PANEL_GAME_UPDATE:String = "GameAirUpdatePanel";
         public static const PANEL_GAME_LOGIN:String = "GameLoginPanel";
-        public static const PANEL_GAME_MENU:String = "GameMenuPanel";
-        public static const PANEL_GAME_PLAY:String = "GamePlayPanel";
+        public static const PANEL_MAIN_MENU:String = "GameMenuPanel";
+        public static const PANEL_GAME_MENU:String = "GamePlayPanel";
+
+        public static const PANEL_SONGSELECTION:String = "MenuSongSelection";
+        public static const PANEL_MULTIPLAYER:String = "MenuMultiplayer";
+        public static const PANEL_TOKENS:String = "MenuTokens";
 
         public static const GAME_LOADING:String = "GameLoading";
         public static const GAME_PLAY:String = "GamePlay";
@@ -21,6 +27,7 @@ package
         public static const GAME_RESULTS:String = "GameResults";
 
         public static const REMOVE_POPUP:String = "RemovePopup";
+
         public static const POPUP_HELP:String = "PopupHelp";
         public static const POPUP_OPTIONS:String = "PopupOptions";
         public static const POPUP_HIGHSCORES:String = "PopupHighscores";
@@ -33,30 +40,30 @@ package
 
         private var _target:IEventDispatcher;
 
-        private var _panelCallback:Function;
+        private var _newLayerCallback:Function;
         private var _addPopupCallback:Function;
         private var _removePopupCallback:Function;
 
-        private var _topPopupLayer:uint = 1;
+        private var _topLayerIndex:uint = 1;
         private var _layerMutex:Mutex = new Mutex();
 
-        public function PanelMediator(target:IEventDispatcher = null, switchPanelCallback:Function = null, addPopupCallback:Function = null, removePopupCallback:Function = null)
+        public function PanelMediator(target:IEventDispatcher = null, newLayerCallback:Function = null, addPopupCallback:Function = null, removePopupCallback:Function = null)
         {
             super(target);
 
-            _panelCallback = switchPanelCallback;
+            _newLayerCallback = newLayerCallback;
             _addPopupCallback = addPopupCallback;
             _removePopupCallback = removePopupCallback;
             _target = target;
 
-            _target.addEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.addEventListener(ChangePanelEvent.EVENT_TYPE, onNewLayerEvent);
             _target.addEventListener(AddPopupEvent.EVENT_TYPE, onAddPopupEvent);
             _target.addEventListener(RemovePopupEvent.EVENT_TYPE, onRemovePopupEvent);
         }
 
-        private function onChangePanelEvent(e:ChangePanelEvent):void
+        private function onNewLayerEvent(e:ChangePanelEvent):void
         {
-            _panelCallback(e);
+            _newLayerCallback(e);
         }
 
         private function onAddPopupEvent(e:AddPopupEvent):void
@@ -67,7 +74,7 @@ package
             try
             {
                 _addPopupCallback(e);
-                _topPopupLayer++;
+                _topLayerIndex++;
             }
             finally
             {
@@ -82,11 +89,11 @@ package
 
             try
             {
-                if (_topPopupLayer == 1)
+                if (_topLayerIndex == 1)
                     return;
 
                 _removePopupCallback(e);
-                _topPopupLayer--;
+                _topLayerIndex--;
             }
             finally
             {
@@ -96,12 +103,12 @@ package
 
         public function get topPopupLayer():uint
         {
-            return _topPopupLayer;
+            return _topLayerIndex;
         }
 
         public function dispose():void
         {
-            _target.removeEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.removeEventListener(ChangePanelEvent.EVENT_TYPE, onNewLayerEvent);
             _target.removeEventListener(AddPopupEvent.EVENT_TYPE, onAddPopupEvent);
             _target.removeEventListener(RemovePopupEvent.EVENT_TYPE, onRemovePopupEvent);
         }

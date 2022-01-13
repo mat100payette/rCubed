@@ -8,8 +8,9 @@ package popups.settings
     import flash.geom.Point;
     import flash.display.DisplayObject;
     import flash.text.TextFormatAlign;
+    import flash.events.EventDispatcher;
 
-    public class SettingsTabBase
+    public class SettingsTabBase extends EventDispatcher
     {
         protected static const DEFAULT_OPTIONS:GameOptions = new GameOptions(null);
 

@@ -17,8 +17,9 @@ package menu
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.net.URLRequest;
+    import events.ChangePanelEvent;
 
-    public class MenuTokens extends MenuPanel
+    public class MenuTokens extends DisplayLayer
     {
         ///- Private Locals
         private var _gvars:GlobalVariables = GlobalVariables.instance;
@@ -44,12 +45,13 @@ package menu
         public function MenuTokens()
         {
             super();
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             //- Setup Settings
-            options = new Object();
+            options = {};
             options.active_type = "ski";
             options.filter_complete = false;
 
@@ -86,8 +88,6 @@ package menu
 
             //- Add Content
             buildTokens();
-
-            return true;
         }
 
         private function hideCompleteClick(e:Event):void
@@ -123,6 +123,7 @@ package menu
         {
             if (pane)
             {
+                pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
                 pane.dispose();
                 this.removeChild(pane);
                 pane = null;
@@ -130,6 +131,12 @@ package menu
 
             normalTokenButton.dispose();
             skillTokenButton.dispose();
+
+            //- Remove Listeners
+            if (stage)
+            {
+                scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
+            }
 
             super.dispose();
         }
@@ -141,16 +148,6 @@ package menu
             {
                 scrollbar.addEventListener(Event.CHANGE, scrollBarMoved, false, 0, false);
                 pane.addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false, 0, false);
-            }
-        }
-
-        override public function stageRemove():void
-        {
-            //- Remove Listeners
-            if (stage)
-            {
-                scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
-                pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
             }
         }
 
@@ -207,9 +204,9 @@ package menu
             _gvars.songQueue = token_songs;
             MenuSongSelection.options.queuePlaylist = _gvars.songQueue;
 
-            dispatchEvent(new ChangePanelEvent(MainMenu.MENU_SONGSELECTION));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
             MenuSongSelection.options.infoTab = MenuSongSelection.TAB_QUEUE;
-            var panel:MenuSongSelection = ((_gvars.gameMain.activePanel as MainMenu).panel as MenuSongSelection);
+            var panel:MenuSongSelection = ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel as MenuSongSelection);
             panel.swapToQueue();
         }
 

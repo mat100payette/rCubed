@@ -25,12 +25,13 @@ package popups.settings
     import flash.text.TextFormatAlign;
     import game.GameOptions;
     import menu.MainMenu;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import menu.MenuSongSelection;
     import popups.events.RemovePopupEvent;
+    import events.ChangePanelEvent;
 
 
-    public class SettingsWindow extends MenuPanel
+    public class SettingsWindow extends DisplayLayer
     {
         public var pane:ScrollPane;
 
@@ -341,7 +342,7 @@ package popups.settings
             _gvars.options.song = new Song(tempSongInfo);
 
             _gvars.options.fill();
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
         private function onManageSettingsClicked(e:Event):void
@@ -365,9 +366,9 @@ package popups.settings
                 GameBackgroundColor.BG_STAGE = _user.settings.gameColors[4];
                 _gvars.gameMain.redrawBackground();
 
-                if (_gvars.gameMain.activePanel is MainMenu && ((_gvars.gameMain.activePanel as MainMenu).panel is MenuSongSelection))
+                if (_gvars.gameMain.navigator.activePanel is MainMenu && ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel is MenuSongSelection))
                 {
-                    const panel:MenuSongSelection = ((_gvars.gameMain.activePanel as MainMenu).panel as MenuSongSelection);
+                    const panel:MenuSongSelection = ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel as MenuSongSelection);
                     panel.buildGenreList();
                     panel.drawPages();
                 }
@@ -380,7 +381,7 @@ package popups.settings
             _scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
             pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
 
-            stageRemove();
+            dispose();
             dispatchEvent(new RemovePopupEvent());
         }
 

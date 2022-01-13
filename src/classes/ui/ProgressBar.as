@@ -91,7 +91,7 @@ package classes.ui
                 if (percent >= 1)
                 {
                     dispatchEvent(new Event(LOADER_COMPLETE));
-                    this.isComplete = true;
+                    isComplete = true;
                 }
             }
         }

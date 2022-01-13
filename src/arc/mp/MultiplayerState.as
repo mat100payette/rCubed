@@ -35,11 +35,11 @@ package arc.mp
     import flash.utils.Timer;
     import game.GameOptions;
     import game.GameScoreResult;
-    import menu.MainMenu;
-    import menu.MenuPanel;
-    import menu.MenuSongSelection;
+    import menu.DisplayLayer;
+    import flash.events.EventDispatcher;
+    import events.ChangePanelEvent;
 
-    public class MultiplayerState extends Object
+    public class MultiplayerState extends EventDispatcher
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
@@ -279,9 +279,10 @@ package arc.mp
             var playlistEngineId:Object = Playlist.instance.engine ? Playlist.instance.engine.id : null;
             if (playlistEngineId == (songInfo.engine ? songInfo.engine.id : null))
             {
-                var mmenu:MainMenu = _gvars.gameMain.activePanel as MainMenu;
-                mmenu.switchTo(MainMenu.MENU_SONGSELECTION);
-                (mmenu._MenuSingleplayer as MenuSongSelection).multiplayerSelect(songInfo.name, songInfo);
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+
+                    // TODO: Redo this
+                    //(mmenu._layerSongSelection as MenuSongSelection).multiplayerSelect(songInfo.name, songInfo);
             }
             else
             {
@@ -427,7 +428,7 @@ package arc.mp
             _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
             _gvars.options.loadPreview = true;
 
-            _gvars.gameMain.dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
         public function gameplayStart(room:Room):void
@@ -441,7 +442,7 @@ package arc.mp
             _gvars.options.judgeWindow = null;
             _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
 
-            _gvars.gameMain.dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
         }
 
         public function gameplayPlaying(play:Object):Boolean
@@ -474,7 +475,7 @@ package arc.mp
             propagateCurrentUserScore();
         }
 
-        public function gameplayResults(gameResults:MenuPanel, songResults:Vector.<GameScoreResult>):void
+        public function gameplayResults(gameResults:DisplayLayer, songResults:Vector.<GameScoreResult>):void
         {
             var room:Room = _gvars.options.mpRoom;
 

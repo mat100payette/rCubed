@@ -18,10 +18,11 @@ package popups.replays
     import flash.events.Event;
     import flash.events.MouseEvent;
     import game.GameOptions;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
+    import events.ChangePanelEvent;
 
-    public class ReplayHistoryWindow extends MenuPanel
+    public class ReplayHistoryWindow extends DisplayLayer
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
@@ -137,7 +138,7 @@ package popups.replays
             changeTab(LAST_INDEX);
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             CURRENT_TAB.closeTab();
             scrollbar.removeEventListener(Event.CHANGE, e_scrollBarMoved, false);
@@ -251,7 +252,7 @@ package popups.replays
 
                     //_gvars.gameMain.removePopup();
 
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
                 }
 
                 if (target == entry.btn_copy)

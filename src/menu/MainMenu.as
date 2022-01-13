@@ -21,40 +21,29 @@ package menu
     import classes.ui.Throbber;
     import com.flashfla.net.WebRequest;
     import com.flashfla.utils.NumberUtil;
-    import com.flashfla.utils.SystemUtil;
     import com.flashfla.utils.sprintf;
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
-    import popups.PopupFilterManager;
-    import popups.PopupSkillRankUpdate;
-    import popups.replays.ReplayHistoryWindow;
     import flash.text.TextFormatAlign;
     import popups.events.AddPopupSkillRankUpdateEvent;
     import popups.events.AddPopupEvent;
+    import classes.ui.BoxButton;
+    import events.ChangePanelEvent;
 
-    public class MainMenu extends MenuPanel
+    public class MainMenu extends DisplayLayer
     {
-        public static const MENU_SONGSELECTION:String = "MenuSongSelection";
-        public static const MENU_MULTIPLAYER:String = "MenuMultiplayer";
-        public static const MENU_TOKENS:String = "MenuTokens";
-        public static const MENU_FILTERS:String = "MenuFilter";
-        public static const MENU_REPLAYS:String = "MenuReplays";
-        public static const MENU_OPTIONS:String = "MenuOptions";
-
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
-        public var _MenuSingleplayer:MenuPanel;
-        private var _MenuMultiplayer:MenuPanel;
-        private var _MenuFriends:MenuPanel;
-        private var _MenuStats:MenuPanel;
-        private var _MenuTokens:MenuPanel;
+        public var _layerSongSelection:DisplayLayer;
+        private var _layerMultiplayer:DisplayLayer;
+        private var _layerTokens:DisplayLayer;
 
         private var hover_message:MouseTooltip;
-        private var user_text:Text;
+        private var userText:Text;
         private var menuItemBox:Sprite;
         private var logo:Logo;
 
@@ -67,15 +56,7 @@ package menu
         private var statUpdaterBtn:SimpleBoxButton;
         private var rankUpdateThrobber:Throbber;
 
-        public var menuItems:Array = [["menu_play", MENU_SONGSELECTION, false, "iconPlay"],
-            ["menu_multiplayer", MENU_MULTIPLAYER, false, "iconUsers"],
-            ["menu_tokens", MENU_TOKENS, false, "iconMedal"],
-            ["menu_filters", MENU_FILTERS, true, "iconFilter"],
-            ["menu_replays", MENU_REPLAYS, true, "iconVideo"],
-            ["menu_options", MENU_OPTIONS, false, "iconGear"]];
-
-        public var panel:MenuPanel;
-        public var options:Object;
+        public var currentPanel:DisplayLayer;
 
         ///- Constructor
         public function MainMenu()
@@ -83,26 +64,23 @@ package menu
             super();
 
             ArcGlobals.instance.resetConfig();
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
-            //- Setup Options
-            options = {};
-            options.activePanel = -1;
-
             //- Add Logo
             logo = new Logo();
             logo.x = 18 + logo.width * 0.5;
             logo.y = 8 + logo.height * 0.5;
             logo.visible = LocalOptions.getVariable("menu_show_logo", true);
-            this.addChild(logo);
+            addChild(logo);
 
             //- Add Menu Background
             var menu_bg:MainMenuBackground = new MainMenuBackground();
             menu_bg.x = 145;
             menu_bg.visible = LocalOptions.getVariable("menu_show_menu_background", true);
-            this.addChild(menu_bg);
+            addChild(menu_bg);
 
             //- Add Menu to Stage
             buildMenuItems();
@@ -126,104 +104,83 @@ package menu
             MultiplayerState.instance.gameplayCleanup();
 
             //- Add Main Panel to Stage
-            var targetMenu:String = "";
+
             // Guests
             if (GlobalVariables.instance.activeUser.isGuest || (_gvars.options && _gvars.options.singleplayer))
-            {
-                targetMenu = MENU_SONGSELECTION;
-            }
+                setActiveLayer(PanelMediator.PANEL_SONGSELECTION);
             else
             {
                 if (!Flags.VALUES[Flags.STARTUP_SCREEN])
                 {
                     var playerStartup:int = _gvars.activeUser.settings.startUpScreen;
-
-                    // Auto - Connect MP
-                    if (playerStartup == 0 || playerStartup == 1)
-                        var pan:MultiplayerPanel = MultiplayerState.instance.getPanel();
+                    Flags.VALUES[Flags.STARTUP_SCREEN] = true;
 
                     if (playerStartup == 0)
-                        targetMenu = MENU_MULTIPLAYER;
+                        setActiveLayer(PanelMediator.PANEL_MULTIPLAYER);
                     else
-                        targetMenu = MENU_SONGSELECTION;
-
-                    Flags.VALUES[Flags.STARTUP_SCREEN] = true;
+                        setActiveLayer(PanelMediator.PANEL_SONGSELECTION);
                 }
                 else
-                {
-                    targetMenu = MENU_MULTIPLAYER;
-                }
+                    setActiveLayer(PanelMediator.PANEL_MULTIPLAYER);
             }
-            switchTo(targetMenu);
-            return false;
         }
 
-        override public function dispose():void
+        public function setActiveLayer(panelName:String):void
         {
-            if (_MenuSingleplayer)
-            {
-                _MenuSingleplayer.stageRemove();
-                _MenuSingleplayer.dispose();
-                if (this.contains(_MenuSingleplayer))
-                    this.removeChild(_MenuSingleplayer);
-                _MenuSingleplayer = null;
-            }
-            if (_MenuMultiplayer)
-            {
-                _MenuMultiplayer.stageRemove();
-                _MenuMultiplayer.dispose();
-                if (this.contains(_MenuMultiplayer))
-                    this.removeChild(_MenuMultiplayer);
-                _MenuMultiplayer = null;
-            }
-            if (_MenuFriends)
-            {
-                _MenuFriends.stageRemove();
-                _MenuFriends.dispose();
-                if (this.contains(_MenuFriends))
-                    this.removeChild(_MenuFriends);
-                _MenuFriends = null;
-            }
-            if (_MenuStats)
-            {
-                _MenuStats.stageRemove();
-                _MenuStats.dispose();
-                if (this.contains(_MenuStats))
-                    this.removeChild(_MenuStats);
-                _MenuStats = null;
-            }
-            super.stageRemove();
-        }
+            var newPanel:DisplayLayer;
 
-        override public function draw():void
-        {
-            buildMenuItems();
-            panel.draw();
+            switch (panelName)
+            {
+                case PanelMediator.PANEL_SONGSELECTION:
+                    if (_layerSongSelection == null)
+                        _layerSongSelection = new MenuSongSelection();
+                    newPanel = _layerSongSelection;
+                    break;
+
+                case PanelMediator.PANEL_MULTIPLAYER:
+                    newPanel = MultiplayerState.instance.getPanel();
+                    break;
+
+                case PanelMediator.PANEL_TOKENS:
+                    if (_layerTokens == null)
+                        _layerTokens = new MenuTokens();
+                    newPanel = _layerTokens;
+                    break;
+            }
+
+            if (currentPanel != null && currentPanel != newPanel)
+                removeChild(currentPanel);
+
+            if (newPanel != null)
+            {
+                currentPanel = newPanel;
+                addChild(currentPanel);
+            }
         }
 
         public function buildMenuItems():void
         {
             if (menuItemBox != null)
             {
-                this.removeChild(menuItemBox);
+                removeChild(menuItemBox);
                 menuItemBox = null;
 
-                this.removeChild(user_text);
-                user_text = null;
+                removeChild(userText);
+                userText = null;
             }
 
             //- User Info Display
             _gvars.activeUser.updateAverageRank(_gvars.TOTAL_PUBLIC_SONGS);
-            user_text = new Text(this, 153, 452, sprintf(_lang.string("main_menu_userbar"), {"player_name": _gvars.activeUser.name,
+            userText = new Text(this, 153, 452, sprintf(_lang.string("main_menu_userbar"), {"player_name": _gvars.activeUser.name,
                     "games_played": NumberUtil.numberFormat(_gvars.activeUser.gamesPlayed),
                     "grand_total": NumberUtil.numberFormat(_gvars.activeUser.grandTotal),
                     "rank": NumberUtil.numberFormat(_gvars.activeUser.gameRank),
                     "skill_level": _gvars.activeUser.skillLevel,
                     "skill_rating": NumberUtil.numberFormat(_gvars.activeUser.skillRating, 2),
                     "avg_rank": NumberUtil.numberFormat(_gvars.activeUser.averageRank, 3, true)}));
-            user_text.width = 594;
-            user_text.height = 28;
-            user_text.align = TextFormatAlign.CENTER;
+            userText.width = 594;
+            userText.height = 28;
+            userText.align = TextFormatAlign.CENTER;
 
             if (!_gvars.activeUser.isGuest)
             {
@@ -241,46 +198,90 @@ package menu
 
             //- Add Menu Buttons
             var i:int;
-            var btnLarge:int = menuItems.length;
+            var btnXOffset:int = 0;
 
-            for (i = 0; i < menuItems.length; i++)
+            const BTN_HEIGHT:int = 28;
+            const ICON_BTN_WIDTH:int = 28;
+            const BTN_SPACING:int = 6;
+
+            // Change these two accordingly
+            const ICON_BTN_COUNT:int = 2;
+            const VARIABLE_BTN_COUNT:int = 4;
+
+            const TOTAL_BTN_COUNT:int = ICON_BTN_COUNT + VARIABLE_BTN_COUNT;
+            const VARIABLE_BTN_WIDTH:int = Math.floor((604 - ((TOTAL_BTN_COUNT - VARIABLE_BTN_COUNT) * ICON_BTN_WIDTH) - (BTN_SPACING * (TOTAL_BTN_COUNT - 1))) / VARIABLE_BTN_COUNT);
+
+            function addMenuVariableButton(active:Boolean, localStringName:String, clickCallback:Function):BoxButton
             {
-                if (menuItems[i][2])
-                    btnLarge--;
+                var button:BoxButton = new BoxButton(null, menuItemBox.x + btnXOffset, menuItemBox.y, VARIABLE_BTN_WIDTH, BTN_HEIGHT, _lang.string(localStringName), 12, clickCallback);
+                button.active = active;
+
+                addChild(button);
+                button.draw();
+
+                btnXOffset += button.width + BTN_SPACING;
+
+                return button;
             }
 
-            var btnWidth:int = ((604 - ((menuItems.length - btnLarge) * 28) - (6 * (menuItems.length - 1))) / btnLarge);
-            var btnPosition:int = 0;
-
-            for (i = 0; i < menuItems.length; i++)
+            function addMenuIconButton(active:Boolean, localStringName:String, iconName:String, clickCallback:Function):BoxIcon
             {
-                if (menuItems[i][2])
-                {
-                    var menuItemSmall:BoxIcon = new BoxIcon(menuItemBox, btnPosition, 0, 28, 28, IconUtil.getIcon(menuItems[i][3]), menuItemClick);
-                    menuItemSmall.panel = menuItems[i][1];
-                    menuItemSmall.setIconColor("#DDDDDD");
-                    menuItemSmall.setHoverText(_lang.string(menuItems[i][0]), "bottom");
-                    menuItemSmall.active = (i == options.activePanel);
-                    btnPosition += (28 + 6);
+                var button:BoxIcon = new BoxIcon(null, menuItemBox.x + btnXOffset, menuItemBox.y, ICON_BTN_WIDTH, BTN_HEIGHT, IconUtil.getIcon(iconName), clickCallback);
+                button.setIconColor("#DDDDDD");
+                button.setHoverText(_lang.string(localStringName), "bottom");
+                button.active = active;
 
-                    // Filter - Set to Green if enabled.
-                    if (menuItems[i][1] == MENU_FILTERS && _gvars.activeFilter != null)
-                    {
-                        menuItemSmall.setIconColor("#61ED42");
-                        menuItemSmall.color = 0x61ED42;
-                        menuItemSmall.borderColor = 0x61ED42;
-                    }
-                }
-                else
-                {
-                    var menuItem:MenuButton = new MenuButton(menuItemBox, btnPosition, btnWidth, _lang.string(menuItems[i][0]), i == options.activePanel, menuItemClick);
-                    menuItem.panel = menuItems[i][1];
-                    btnPosition += (btnWidth + 6);
-                }
+                addChild(button);
+                button.draw();
 
+                btnXOffset += ICON_BTN_WIDTH + BTN_SPACING;
+
+                return button;
             }
 
-            this.addChild(menuItemBox);
+            addMenuVariableButton(true, "menu_play", onSongSelectionButtonClick);
+            addMenuVariableButton(false, "menu_multiplayer", onMultiplayerButtonClick);
+            addMenuVariableButton(false, "menu_tokens", onTokensButtonClick);
+            var btnFilters:BoxIcon = addMenuIconButton(false, "menu_filters", "iconFilter", onFiltersButtonClick);
+            addMenuIconButton(false, "menu_replays", "iconVideo", onReplaysButtonClick);
+            addMenuVariableButton(false, "menu_options", onOptionsButtonClick);
+
+            if (_gvars.activeFilter != null)
+            {
+                btnFilters.setIconColor("#61ED42");
+                btnFilters.color = 0x61ED42;
+                btnFilters.borderColor = 0x61ED42;
+            }
+        }
+
+        private function onSongSelectionButtonClick(e:Event):void
+        {
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+        }
+
+        private function onMultiplayerButtonClick(e:Event):void
+        {
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MULTIPLAYER));
+        }
+
+        private function onTokensButtonClick(e:Event):void
+        {
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_TOKENS));
+        }
+
+        private function onOptionsButtonClick(e:Event):void
+        {
+            dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
+        }
+
+        private function onFiltersButtonClick(e:Event):void
+        {
+            dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
+        }
+
+        private function onReplaysButtonClick(e:Event):void
+        {
+            dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
         }
 
         public function drawMenuMusicControls():void
@@ -362,84 +363,6 @@ package menu
             }
         }
 
-        public function switchTo(panelName:String, useNew:Boolean = false):void
-        {
-            //- Do current panel.
-            var isFound:Boolean = false;
-            var initValid:Boolean = false;
-            var doStageAddAnyway:Boolean = false;
-
-            if (panelName == MENU_OPTIONS)
-            {
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
-                return;
-            }
-            else if (panelName == MENU_FILTERS)
-            {
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
-                //addPopup(new PopupFilterManager());
-                return;
-            }
-            else if (panelName == MENU_REPLAYS)
-            {
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
-                return;
-            }
-
-            if (panel != null)
-            {
-                panel.stageRemove();
-                removeChild(panel);
-            }
-
-            switch (panelName)
-            {
-                case MENU_SONGSELECTION:
-                    if (_MenuSingleplayer == null || useNew)
-                        _MenuSingleplayer = new MenuSongSelection();
-                    panel = _MenuSingleplayer;
-                    options.activePanel = 0;
-                    break;
-
-                case MENU_MULTIPLAYER:
-                    if (_MenuMultiplayer == null || useNew)
-                        _MenuMultiplayer = MultiplayerState.instance.getPanel();
-
-                    panel = _MenuMultiplayer;
-                    options.activePanel = 1;
-                    break;
-
-                case MENU_TOKENS:
-                    if (_MenuTokens == null || useNew)
-                        _MenuTokens = new MenuTokens();
-                    panel = _MenuTokens;
-                    options.activePanel = 2;
-                    break;
-            }
-
-            addChild(panel);
-
-            if (panel.hasInit)
-                doStageAddAnyway = true;
-
-            if (!panel.hasInit)
-            {
-                initValid = panel.init();
-                panel.hasInit = true;
-            }
-
-            if (initValid || doStageAddAnyway)
-                panel.stageAdd();
-
-            buildMenuItems();
-            SystemUtil.gc();
-        }
-
-        private function menuItemClick(e:MouseEvent = null):void
-        {
-            switchTo(e.target.panel);
-        }
-
         private function e_statUpdaterMouseOver(e:Event):void
         {
             statUpdaterBtn.addEventListener(MouseEvent.MOUSE_OUT, e_statUpdaterMouseOut);
@@ -499,7 +422,7 @@ package menu
             function c_rankComplete(e:* = null):void
             {
                 var resp:Object = JSON.parse(e.target.data);
-                if (_gvars.gameMain.activePanel is MainMenu)
+                if (_gvars.gameMain.navigator.activePanel is MainMenu)
                 {
                     dispatchEvent(new AddPopupSkillRankUpdateEvent(resp));
 
@@ -511,7 +434,7 @@ package menu
             function c_rankFail(e:*):void
             {
                 Alert.add(_lang.string("skill_rank_update_fail"), 90, Alert.RED);
-                if (_gvars.gameMain.activePanel is MainMenu)
+                if (_gvars.gameMain.navigator.activePanel is MainMenu)
                 {
                     rankUpdateThrobber.stop();
                     rankUpdateThrobber.visible = false;

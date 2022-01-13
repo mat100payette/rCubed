@@ -10,11 +10,11 @@ package game
     import com.greensock.TweenLite;
     import flash.display.Sprite;
     import flash.events.Event;
-    import flash.text.TextField;
     import flash.text.TextFormat;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
+    import events.ChangePanelEvent;
 
-    public class GameLoading extends MenuPanel
+    public class GameLoading extends DisplayLayer
     {
         private var _textFormat:TextFormat = new TextFormat(Language.UNI_FONT_NAME, 16, 0xFFFFFF, true);
 
@@ -32,9 +32,10 @@ package game
 
         public function GameLoading()
         {
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             _gvars.songRestarts = 0;
             //- Set Active Song
@@ -50,15 +51,10 @@ package game
                 _song = _gvars.options.song;
             else
             { // No songs in queue? Something went wrong...
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
-                return false;
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
             }
             if (_song && _song.isLoaded)
-            {
                 dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
-                return false;
-            }
-            return true;
         }
 
         override public function stageAdd():void
@@ -66,9 +62,9 @@ package game
             _songNameHtml = _lang.wrapFont(_song.songInfo.name ? _song.songInfo.name : "Invalid Song / Replay");
 
             //- Preloader Display
-            _preloader = new PreloaderStatusBar(10, Main.GAME_HEIGHT - 30, Main.GAME_WIDTH - 20);
+            _preloader = new PreloaderStatusBar(10, Main.GAME_HEIGHT - 30, Main.GAME_WIDTH - 20, 6);
             _preloader.text.defaultTextFormat = _textFormat;
-            _preloader.text.htmlText = _songNameHtml;
+            _preloader.htmlText = _songNameHtml;
 
             addChild(_preloader);
 
@@ -76,7 +72,7 @@ package game
             addEventListener(Event.ENTER_FRAME, updatePreloader);
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             removeEventListener(Event.ENTER_FRAME, updatePreloader);
 
@@ -93,22 +89,23 @@ package game
             _loadTimer++;
 
             // TODO: use localized strings here
-            _preloader.text.htmlText = "";
+            var preloaderHtmlText:String = "";
             if (_song.songInfo.name)
             {
-                _preloader.text.htmlText += _song.songInfo.name + " - " + _song.progress + "%  --- ";
+                preloaderHtmlText += _song.songInfo.name + " - " + _song.progress + "%  --- ";
 
                 if (_song.bytesTotal > 0)
-                    _preloader.text.htmlText += "(" + NumberUtil.bytesToString(_song.bytesLoaded) + " / " + NumberUtil.bytesToString(_song.bytesTotal) + ")";
+                    preloaderHtmlText += "(" + NumberUtil.bytesToString(_song.bytesLoaded) + " / " + NumberUtil.bytesToString(_song.bytesTotal) + ")";
                 else
-                    _preloader.text.htmlText += "Connecting..."
+                    preloaderHtmlText += "Connecting..."
 
                 if (_song.loadFail)
-                    _preloader.text.htmlText += " --- <font color=\"#FFC4C4\">[Loading Failed]</font>";
+                    preloaderHtmlText += " --- <font color=\"#FFC4C4\">[Loading Failed]</font>";
             }
             else
-                _preloader.text.htmlText += _songNameHtml;
+                preloaderHtmlText += _songNameHtml;
 
+            _preloader.htmlText = preloaderHtmlText
             _preloader.bar.update(_song.progress / 100);
 
             if ((_loadTimer >= 60 || _song.loadFail) && !_cancelLoadButton)
@@ -146,7 +143,7 @@ package game
             _gvars.removeSongFile(_song);
 
             removeEventListener(Event.ENTER_FRAME, updatePreloader);
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
         }
 
         private function preloaderRemoved(e:Event):void

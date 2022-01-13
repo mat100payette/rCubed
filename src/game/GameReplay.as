@@ -3,9 +3,10 @@ package game
     import classes.Language;
     import classes.Playlist;
     import flash.text.TextFormat;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
+    import events.ChangePanelEvent;
 
-    public class GameReplay extends MenuPanel
+    public class GameReplay extends DisplayLayer
     {
         private var _textFormat:TextFormat = new TextFormat(Language.UNI_FONT_NAME, 16, 0xFFFFFF, true);
 
@@ -15,9 +16,10 @@ package game
 
         public function GameReplay()
         {
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             var replay:Object = _gvars.options.replay;
             _gvars.activeUser = replay.user;
@@ -25,8 +27,6 @@ package game
             _gvars.options.fillFromReplay();
 
             dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
-
-            return false;
         }
     }
 }

@@ -24,6 +24,7 @@ package popups.settings
     import flash.text.TextFormatAlign;
     import menu.MainMenu;
     import popups.events.AddPopupEvent;
+    import events.LanguageChangedEvent;
 
     public class SettingsTabMisc extends SettingsTabBase
     {
@@ -487,17 +488,16 @@ package popups.settings
             {
                 _settings.language = e.target.selectedItem.data as String;
 
-                _gvars.gameMain.activePanel.draw();
-                _gvars.gameMain.buildContextMenu();
+                dispatchEvent(new LanguageChangedEvent());
 
-                if (_gvars.gameMain.activePanel is MainMenu)
+                if (_gvars.gameMain.navigator.activePanel is MainMenu)
                 {
-                    const mmpanel:MainMenu = (_gvars.gameMain.activePanel as MainMenu);
+                    const mmpanel:MainMenu = (_gvars.gameMain.navigator.activePanel as MainMenu);
                     mmpanel.updateMenuMusicControls();
                 }
 
                 // refresh popup
-                _gvars.gameMain.dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
+                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
             }
         }
 

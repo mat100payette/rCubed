@@ -8,10 +8,10 @@ package popups
     import com.flashfla.utils.SpriteUtil;
     import flash.display.Bitmap;
     import flash.events.MouseEvent;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
 
-    public class PopupMessage extends MenuPanel
+    public class PopupMessage extends DisplayLayer
     {
         //- Background
         private var box:Box;
@@ -62,7 +62,7 @@ package popups
             closeOptions = new BoxButton(box, box.width - 94.5, box.height - 42, 79.5, 27, _lang.string("menu_close"), 12, clickHandler);
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             closeOptions.dispose();
             box.dispose();

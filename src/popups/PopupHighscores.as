@@ -15,10 +15,11 @@ package popups
     import flash.display.Bitmap;
     import flash.display.Sprite;
     import flash.events.MouseEvent;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
+    import popups.events.RemovePopupEvent;
 
-    public class PopupHighscores extends MenuPanel
+    public class PopupHighscores extends DisplayLayer
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
@@ -90,7 +91,7 @@ package popups
             nextBtn = new BoxButton(box, 100, box.height - 42, 79.5, 27, _lang.string("popup_highscores_next"), 12, clickHandler);
 
             //- Close
-            closeBtn = new BoxButton(box, box.width - 94.5, box.height - 42, 79.5, 27, _lang.string("menu_close"), 12, clickHandler);
+            closeBtn = new BoxButton(box, box.width - 94.5, box.height - 42, 79.5, 27, _lang.string(Lang.MENU_CLOSE), 12, clickHandler);
 
             //- Refresh
             refreshBtn = new BoxButton(box, box.width - 184.5, box.height - 42, 79.5, 27, _lang.string("popup_highscores_refresh"), 12, clickHandler);
@@ -231,7 +232,7 @@ package popups
             myAVText.text = infoRanks.results;
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             prevBtn.dispose();
             nextBtn.dispose();
@@ -271,6 +272,7 @@ package popups
             //- Close
             if (e.target == closeBtn)
             {
+                dispatchEvent(new RemovePopupEvent());
                 return;
             }
         }

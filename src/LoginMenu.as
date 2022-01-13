@@ -26,9 +26,11 @@ package
     import flash.net.URLVariables;
     import flash.net.navigateToURL;
     import flash.ui.Keyboard;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
+    import events.ChangePanelEvent;
+    import events.InitialLoadingEvent;
 
-    public class LoginMenu extends MenuPanel
+    public class LoginMenu extends DisplayLayer
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
@@ -60,7 +62,7 @@ package
             if (stage)
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, loginKeyDown);
             saveDetails.dispose();
-            super.stageRemove();
+            super.dispose();
         }
 
         override public function stageAdd():void
@@ -190,7 +192,7 @@ package
 
         public function playAsGuest(e:Event = null):void
         {
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
         }
 
         public function registerOnline(e:Event = null):void
@@ -315,9 +317,10 @@ package
                 if (_data.result == 1 || _data.result == 2)
                     saveLoginDetails(this.rememberPassword, _data.session);
                 _gvars.userSession = _data.session;
-                _gvars.gameMain.loadComplete = false;
+                // TODO: Event to reset load status on InitialLoading
+                //_gvars.gameMain.loadComplete = false;
                 Playlist.clearCanon();
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN));
+                dispatchEvent(new InitialLoadingEvent(true));
             }
             else
             {

@@ -16,10 +16,10 @@ package popups
     import flash.events.MouseEvent;
     import flash.filters.BlurFilter;
     import flash.geom.Point;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import classes.SongInfo;
 
-    public class PopupQueueManager extends MenuPanel
+    public class PopupQueueManager extends DisplayLayer
     {
         private const TAB_MAIN:int = 0;
         private const TAB_PREGEN:int = 1;
@@ -105,7 +105,7 @@ package popups
             scrollbar.scrollTo(dist);
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             menuMain.dispose();
             menuPregen.dispose();
@@ -390,12 +390,12 @@ internal class QueueBox extends Sprite
 
         _gvars.songQueue = newSongQueue;
         MenuSongSelection.options.queuePlaylist = newSongQueue;
-        if (_gvars.gameMain.activePanel != null && _gvars.gameMain.activePanel is MainMenu)
+        if (_gvars.gameMain.navigator.activePanel != null && _gvars.gameMain.navigator.activePanel is MainMenu)
         {
-            var mmmenu:MainMenu = (_gvars.gameMain.activePanel as MainMenu);
-            if (mmmenu.panel != null && (mmmenu.panel is MenuSongSelection))
+            var mmmenu:MainMenu = (_gvars.gameMain.navigator.activePanel as MainMenu);
+            if (mmmenu.currentPanel != null && (mmmenu.currentPanel is MenuSongSelection))
             {
-                var msmenu:MenuSongSelection = (mmmenu.panel as MenuSongSelection);
+                var msmenu:MenuSongSelection = (mmmenu.currentPanel as MenuSongSelection);
                 msmenu.buildPlayList();
                 msmenu.buildInfoBox();
             }

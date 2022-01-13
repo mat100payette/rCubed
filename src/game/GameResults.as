@@ -41,7 +41,7 @@ package game
     import game.graph.GraphAccuracy;
     import game.graph.GraphBase;
     import game.graph.GraphCombo;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import popups.PopupHighscores;
     import popups.PopupMessage;
     import popups.PopupSongNotes;
@@ -51,8 +51,9 @@ package game
     import popups.events.AddPopupHighscoresEvent;
     import popups.events.AddPopupSongNotesEvent;
     import popups.events.AddPopupEvent;
+    import events.ChangePanelEvent;
 
-    public class GameResults extends MenuPanel
+    public class GameResults extends DisplayLayer
     {
         public static const GRAPH_WIDTH:int = 718;
         public static const GRAPH_HEIGHT:int = 117;
@@ -103,9 +104,10 @@ package game
 
         public function GameResults()
         {
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             songResults = _gvars.songResults.concat();
 
@@ -118,15 +120,9 @@ package game
 
             // More songs to play, jump to gameplay or loading.
             if (_gvars.songQueue.length > 0)
-            {
                 dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
-                return false;
-            }
             else
-            {
                 _gvars.songResults.length = 0;
-            }
-            return true;
         }
 
         //******************************************************************************************//
@@ -257,7 +253,7 @@ package game
             _mp.gameplayResults(this, songResults);
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             // Remove keyboard navigation
             stage.removeEventListener(KeyboardEvent.KEY_DOWN, eventHandler);
@@ -265,7 +261,7 @@ package game
             // Remove Mouse Move for graphs
             stage.removeEventListener(MouseEvent.MOUSE_MOVE, e_graphHover);
 
-            super.stageRemove();
+            super.dispose();
         }
 
         //******************************************************************************************//
@@ -786,7 +782,7 @@ package game
                     _gvars.options = new GameOptions(_gvars.activeUser);
                     _gvars.options.fill();
 
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_PLAY));
+                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
                 }
             }
 
@@ -800,7 +796,7 @@ package game
             }
 
             else if (target == navMenu)
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
 
             else if (target == navRating)
             {

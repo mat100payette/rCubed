@@ -54,12 +54,13 @@ package game
     import game.controls.Score;
     import game.controls.ScreenCut;
     import game.controls.TextStatic;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import menu.MenuSongSelection;
     import sql.SQLSongUserInfo;
     import flash.text.TextFieldAutoSize;
+    import events.ChangePanelEvent;
 
-    public class GameplayDisplay extends MenuPanel
+    public class GameplayDisplay extends DisplayLayer
     {
         public static const GAME_DISPOSE:int = -1;
         public static const GAME_PLAY:int = 0;
@@ -202,9 +203,10 @@ package game
         public function GameplayDisplay(gameOptions:GameOptions)
         {
             _options = gameOptions;
+            init();
         }
 
-        override public function init():Boolean
+        public function init():void
         {
             _song = _options.song;
             if (!_options.isEditor && _song.chart.Notes.length == 0)
@@ -216,8 +218,8 @@ package game
                 {
                     MultiplayerState.instance.connection.connect();
                 }
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
-                return false;
+
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
             }
 
             // --- Per Song Options
@@ -248,9 +250,6 @@ package game
                     }
                 }
             }
-            // --- End Per Song Settings
-
-            return true;
         }
 
         override public function stageAdd():void
@@ -385,7 +384,7 @@ package game
             }
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             stage.frameRate = 60;
             if (_options.isEditor)
@@ -1509,7 +1508,7 @@ package game
 
             // Go to results
             if (_options.isEditor || _mpSpectate)
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
             else
                 dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_RESULTS));
         }

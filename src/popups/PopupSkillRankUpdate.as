@@ -15,10 +15,10 @@ package popups
     import flash.events.Event;
     import flash.text.AntiAliasType;
     import flash.text.TextField;
-    import menu.MenuPanel;
+    import menu.DisplayLayer;
     import flash.text.TextFieldAutoSize;
 
-    public class PopupSkillRankUpdate extends MenuPanel
+    public class PopupSkillRankUpdate extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
 
@@ -54,7 +54,7 @@ package popups
             TweenLite.to(box, 0.5, {"y": Main.GAME_HEIGHT - (box.height - 40), "ease": BackOut.ease});
         }
 
-        override public function stageRemove():void
+        override public function dispose():void
         {
             closeBox.dispose();
 
