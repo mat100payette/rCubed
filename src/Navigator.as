@@ -29,48 +29,62 @@ package
     import events.navigation.ChangePanelEvent;
     import events.navigation.InitialLoadingEvent;
     import flash.events.IEventDispatcher;
+    import flash.concurrent.Mutex;
+    import flash.events.Event;
 
-    public class Navigator extends Sprite
+    public class Navigator extends Sprite implements IDisposable
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
 
         private var _bg:GameBackgroundColor;
         private var _versionText:VersionText;
-        private var _panelMediator:PanelMediator;
+
+        private var _target:IEventDispatcher;
+
+        private var _newLayerCallback:Function;
+        private var _addPopupCallback:Function;
+        private var _removePopupCallback:Function;
+
+        private var _topLayerIndex:uint = 1;
+        private var _popupMutex:Mutex = new Mutex();
 
         public var activePanel:DisplayLayer;
 
         public function Navigator(target:IEventDispatcher, bg:GameBackgroundColor, versionText:VersionText)
         {
+            _target = target;
             _bg = bg;
             _versionText = versionText;
-            _panelMediator = new PanelMediator(target, changePanel, addPopup, removePopup);
+
+            _target.addEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.addEventListener(AddPopupEvent.EVENT_TYPE, onAddPopupEvent);
+            _target.addEventListener(RemovePopupEvent.EVENT_TYPE, onRemovePopupEvent);
         }
 
-        public function changePanel(e:ChangePanelEvent):void
+        public function onChangePanelEvent(e:ChangePanelEvent):void
         {
             var panelName:String = e.panelName;
             var nextPanel:DisplayLayer;
 
             switch (panelName)
             {
-                case PanelMediator.PANEL_INITIAL_LOADING:
+                case Routes.PANEL_INITIAL_LOADING:
                     var userLoggedIn:Boolean = (e as InitialLoadingEvent).userLoggedIn;
                     nextPanel = new InitialLoading(userLoggedIn);
                     break;
 
-                case PanelMediator.PANEL_GAME_UPDATE:
+                case Routes.PANEL_GAME_UPDATE:
                     nextPanel = new AirUpdater();
                     break;
 
-                case PanelMediator.PANEL_GAME_LOGIN:
+                case Routes.PANEL_GAME_LOGIN:
                     nextPanel = new LoginMenu();
                     break;
 
-                case PanelMediator.PANEL_TOKENS:
-                case PanelMediator.PANEL_MULTIPLAYER:
-                case PanelMediator.PANEL_SONGSELECTION:
-                case PanelMediator.PANEL_MAIN_MENU:
+                case Routes.PANEL_TOKENS:
+                case Routes.PANEL_MULTIPLAYER:
+                case Routes.PANEL_SONGSELECTION:
+                case Routes.PANEL_MAIN_MENU:
                     if (activePanel is MainMenu)
                     {
                         (activePanel as MainMenu).setActiveLayer(panelName);
@@ -80,7 +94,9 @@ package
                         nextPanel = new MainMenu();
                     break;
 
-                case PanelMediator.PANEL_GAME_MENU:
+                case Routes.PANEL_GAME_MENU:
+                    onRemoveAllPopupsEvent();
+
                     if (_gvars.options.isEditor)
                         nextPanel = new GameplayDisplay(_gvars.options);
                     else
@@ -90,24 +106,24 @@ package
                     }
                     break;
 
-                case PanelMediator.GAME_LOADING:
+                case Routes.GAME_LOADING:
                     nextPanel = new GameLoading();
                     break;
 
-                case PanelMediator.GAME_PLAY:
+                case Routes.GAME_PLAY:
                     nextPanel = new GameplayDisplay(_gvars.options);
                     break;
 
-                case PanelMediator.GAME_REPLAY:
+                case Routes.GAME_REPLAY:
                     nextPanel = new GameReplay();
                     break;
 
-                case PanelMediator.GAME_RESULTS:
+                case Routes.GAME_RESULTS:
                     nextPanel = new GameResults();
                     break;
             }
 
-            // Show Background if not gameplay
+            // Show Background only if not gameplay or results
             var showBgAndVersion:Boolean = !(nextPanel is GameplayDisplay || nextPanel is GameResults);
             _bg.updateDisplay(!showBgAndVersion);
             _versionText.visible = showBgAndVersion;
@@ -115,53 +131,113 @@ package
             transitionPanel(nextPanel);
         }
 
-        public function addPopup(e:AddPopupEvent):void
+        private function onAddPopupEvent(e:AddPopupEvent = null):void
         {
-            var popupName:String = e.popupName;
-            var isOverlay:Boolean = e.isOverlay;
-            var popup:DisplayLayer;
-
-            switch (popupName)
+            if (!_popupMutex.tryLock())
             {
-                case PanelMediator.POPUP_OPTIONS:
-                    popup = new SettingsWindow(_gvars.activeUser);
-                    break;
-                case PanelMediator.POPUP_HELP:
-                    popup = new PopupHelp();
-                    break;
-                case PanelMediator.POPUP_REPLAY_HISTORY:
-                    popup = new ReplayHistoryWindow();
-                    break;
-                case PanelMediator.POPUP_HIGHSCORES:
-                    var scoresSongInfo:SongInfo = (e as AddPopupHighscoresEvent).songInfo;
-                    popup = new PopupHighscores(scoresSongInfo);
-                    break;
-                case PanelMediator.POPUP_SONG_NOTES:
-                    var notesSongInfo:SongInfo = (e as AddPopupSongNotesEvent).songInfo;
-                    popup = new PopupSongNotes(notesSongInfo);
-                    break;
-                case PanelMediator.POPUP_QUEUE_MANAGER:
-                    popup = new PopupQueueManager();
-                    break;
-                case PanelMediator.POPUP_CONTEXT_MENU:
-                    popup = new PopupContextMenu();
-                    break;
-                case PanelMediator.POPUP_FILTER_MANAGER:
-                    popup = new PopupFilterManager();
-                    break;
-                case PanelMediator.POPUP_SKILL_RANK_UPDATE:
-                    var skillRankData:Object = (e as AddPopupSkillRankUpdateEvent).skillRankData;
-                    popup = new PopupSkillRankUpdate(skillRankData);
-                    break;
+                if (e != null)
+                    e.preventDefault();
+
+                return;
             }
 
-            addChildAt(popup, _panelMediator.topPopupLayer);
-            popup.stageAdd();
+            try
+            {
+                var popupName:String = e.popupName;
+                var isOverlay:Boolean = e.isOverlay;
+                var popup:DisplayLayer;
+
+                switch (popupName)
+                {
+                    case Routes.POPUP_OPTIONS:
+                        popup = new SettingsWindow(_gvars.activeUser);
+                        break;
+                    case Routes.POPUP_HELP:
+                        popup = new PopupHelp();
+                        break;
+                    case Routes.POPUP_REPLAY_HISTORY:
+                        popup = new ReplayHistoryWindow();
+                        break;
+                    case Routes.POPUP_HIGHSCORES:
+                        var scoresSongInfo:SongInfo = (e as AddPopupHighscoresEvent).songInfo;
+                        popup = new PopupHighscores(scoresSongInfo);
+                        break;
+                    case Routes.POPUP_SONG_NOTES:
+                        var notesSongInfo:SongInfo = (e as AddPopupSongNotesEvent).songInfo;
+                        popup = new PopupSongNotes(notesSongInfo);
+                        break;
+                    case Routes.POPUP_QUEUE_MANAGER:
+                        popup = new PopupQueueManager();
+                        break;
+                    case Routes.POPUP_CONTEXT_MENU:
+                        popup = new PopupContextMenu();
+                        break;
+                    case Routes.POPUP_FILTER_MANAGER:
+                        popup = new PopupFilterManager();
+                        break;
+                    case Routes.POPUP_SKILL_RANK_UPDATE:
+                        var skillRankData:Object = (e as AddPopupSkillRankUpdateEvent).skillRankData;
+                        popup = new PopupSkillRankUpdate(skillRankData);
+                        break;
+                }
+
+                addChildAt(popup, _topLayerIndex);
+                popup.stageAdd();
+
+                _topLayerIndex++;
+            }
+            finally
+            {
+                _popupMutex.unlock();
+            }
         }
 
-        public function removePopup(e:RemovePopupEvent):void
+        public function onRemovePopupEvent(e:RemovePopupEvent = null):void
         {
-            removeChildAt(_panelMediator.topPopupLayer - 1);
+            if (!_popupMutex.tryLock())
+            {
+                if (e != null)
+                    e.preventDefault();
+
+                return;
+            }
+
+            try
+            {
+                if (_topLayerIndex == 1)
+                    return;
+
+                removeChildAt(_topLayerIndex - 1);
+                _topLayerIndex--;
+            }
+            finally
+            {
+                _popupMutex.unlock();
+            }
+        }
+
+        private function onRemoveAllPopupsEvent(e:Event = null):void
+        {
+            if (!_popupMutex.tryLock())
+            {
+                if (e != null)
+                    e.preventDefault();
+
+                return;
+            }
+
+            try
+            {
+                while (_topLayerIndex > 1)
+                {
+                    removeChildAt(_topLayerIndex - 1);
+                    _topLayerIndex--;
+                }
+            }
+            finally
+            {
+                _popupMutex.unlock();
+            }
         }
 
         private function transitionPanel(nextPanel:DisplayLayer):void
@@ -204,6 +280,13 @@ package
 
                 currentPanel = null;
             }
+        }
+
+        public function dispose():void
+        {
+            _target.removeEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.removeEventListener(AddPopupEvent.EVENT_TYPE, onAddPopupEvent);
+            _target.removeEventListener(RemovePopupEvent.EVENT_TYPE, onRemovePopupEvent);
         }
     }
 }

@@ -18,12 +18,11 @@ package popups
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
-    import flash.filters.BlurFilter;
-    import flash.geom.Point;
     import menu.MainMenu;
     import menu.DisplayLayer;
     import menu.MenuSongSelection;
     import flash.text.TextFormatAlign;
+    import com.flashfla.utils.SpriteUtil;
 
     public class PopupFilterManager extends DisplayLayer
     {
@@ -60,16 +59,11 @@ package popups
         public function PopupFilterManager()
         {
             super();
-            init();
         }
 
-        public function init():void
+        override public function stageAdd():void
         {
-            bmd = new BitmapData(Main.GAME_WIDTH, Main.GAME_HEIGHT, false, 0x000000);
-            bmd.draw(stage);
-            bmd.applyFilter(bmd, bmd.rect, new Point(), new BlurFilter(16, 16, 3));
-            bmp = new Bitmap(bmd);
-
+            bmp = SpriteUtil.getBitmapSprite(stage);
             addChild(bmp);
 
             var bgbox:Box = new Box(this, 20, 20, false, false);
@@ -87,27 +81,27 @@ package popups
             tabLabel.width = box.width - 10;
 
             //- Closed
-            closeButton = new BoxButton(box, box.width - 105, 5, 100, 31, _lang.string("popup_close"), 12, e_closeButton);
+            closeButton = new BoxButton(box, box.width - 105, 5, 100, 31, _lang.string("popup_close"), 12, onCloseClicked);
 
             //- Saved 
-            filterListButton = new BoxButton(box, closeButton.x - 105, 5, 100, 31, _lang.string("popup_filter_saved_filters"), 12, e_toggleTabButton);
+            filterListButton = new BoxButton(box, closeButton.x - 105, 5, 100, 31, _lang.string("popup_filter_saved_filters"), 12, onToggleTabClicked);
 
             //- Clear
-            clearFilterButton = new BoxButton(box, filterListButton.x - 105, 5, 100, 31, _lang.string("popup_filter_clear_filter"), 12, e_clearFilterButton);
+            clearFilterButton = new BoxButton(box, filterListButton.x - 105, 5, 100, 31, _lang.string("popup_filter_clear_filter"), 12, onClearFilterClicked);
 
             //- Add
-            addSavedFilterButton = new BoxButton(box, filterListButton.x - 105, 5, 100, 31, _lang.string("popup_filter_add_filter"), 12, e_addSavedFilterButton);
+            addSavedFilterButton = new BoxButton(box, filterListButton.x - 105, 5, 100, 31, _lang.string("popup_filter_add_filter"), 12, onAddSavedFilterClicked);
 
             //- Import Filter
-            importFilterButton = new BoxButton(box, addSavedFilterButton.x - 105, 5, 100, 31, _lang.string("popup_filter_filter_single_import"), 12, e_importFilterButton);
+            importFilterButton = new BoxButton(box, addSavedFilterButton.x - 105, 5, 100, 31, _lang.string("popup_filter_filter_single_import"), 12, onImportFilterClicked);
 
             // Filter Name Input
             filterNameInput = new BoxText(box, 5, 5, clearFilterButton.x - 11, 30);
-            filterNameInput.addEventListener(Event.CHANGE, e_filterNameUpdate);
+            filterNameInput.addEventListener(Event.CHANGE, onFilterNameUpdate);
 
             //- content
             scrollpane = new ScrollPane(box, 5, 41, box.width - 35, box.height - 46, mouseWheelHandler);
-            scrollbar = new ScrollBar(box, 10 + scrollpane.width, 41, 20, scrollpane.height, null, null, e_scrollBarMoved);
+            scrollbar = new ScrollBar(box, 10 + scrollpane.width, 41, 20, scrollpane.height, null, null, onScrollBarMoved);
 
             // new type selector
             typeSelector = new Sprite();
@@ -130,7 +124,7 @@ package popups
             var typeOptions:Array = EngineLevelFilter.createOptions(EngineLevelFilter.FILTERS, "type");
             for (var i:int = 0; i < typeOptions.length; i++)
             {
-                typeButton = new BoxButton(typeSelector, (Main.GAME_WIDTH / 2 - 200) + 10 + (195 * (i % 2)), 30 + (Math.floor(i / 2) * 35), 185, 25, typeOptions[i]["label"], 12, e_addFilterSelection);
+                typeButton = new BoxButton(typeSelector, (Main.GAME_WIDTH / 2 - 200) + 10 + (195 * (i % 2)), 30 + (Math.floor(i / 2) * 35), 185, 25, typeOptions[i]["label"], 12, onAddFilterTypeClicked);
                 typeButton.tag = typeOptions[i]["data"];
             }
 
@@ -210,7 +204,7 @@ package popups
                         var type_text:Text = new Text(scrollpane.content, xPos, yPos + 2, _lang.string("filter_type_" + filter.type));
 
                         // Remove Filter Button
-                        var removeFilter:BoxButton = new BoxButton(scrollpane.content, xPos + INDENT_GAP + 327, yPos, 23, 23, "X", 12, e_removeFilter);
+                        var removeFilter:BoxButton = new BoxButton(scrollpane.content, xPos + INDENT_GAP + 327, yPos, 23, 23, "X", 12, onRemoveFilterClicked);
                         removeFilter.tag = filter;
 
                         yPos -= 8;
@@ -232,7 +226,7 @@ package popups
                     pG.moveTo(xPos + INDENT_GAP - 4, yPos + 57);
                     pG.lineTo(xPos + 10, yPos + 57);
 
-                    var addFilter:BoxButton = new BoxButton(scrollpane.content, xPos + INDENT_GAP, yPos += 44, 23, 23, "+", 12, e_addFilter);
+                    var addFilter:BoxButton = new BoxButton(scrollpane.content, xPos + INDENT_GAP, yPos += 44, 23, 23, "+", 12, onAddFilterClicked);
                     addFilter.tag = filter;
                     pG.drawRect(addFilter.x, addFilter.y, 23, 23);
 
@@ -265,17 +259,17 @@ package popups
             }
         }
 
-        private function e_scrollBarMoved(e:Event):void
+        private function onScrollBarMoved(e:Event):void
         {
             scrollpane.scrollTo(scrollbar.scroll);
         }
 
-        private function e_filterNameUpdate(e:Event):void
+        private function onFilterNameUpdate(e:Event):void
         {
             _gvars.activeFilter.name = filterNameInput.text;
         }
 
-        private function e_closeButton(e:Event):void
+        private function onCloseClicked(e:Event):void
         {
             if (_gvars.activeUser == _gvars.playerUser)
             {
@@ -285,6 +279,8 @@ package popups
 
             if (_gvars.gameMain.navigator.activePanel != null && _gvars.gameMain.navigator.activePanel is MainMenu)
             {
+                // TODO: Change all this to a stateEvent
+                // like FiltersSavedEvent
                 var mmmenu:MainMenu = (_gvars.gameMain.navigator.activePanel as MainMenu);
                 mmmenu.buildMenuItems();
 
@@ -297,19 +293,19 @@ package popups
             }
         }
 
-        private function e_toggleTabButton(e:Event):void
+        private function onToggleTabClicked(e:Event):void
         {
             DRAW_TAB = (DRAW_TAB == TAB_FILTER ? TAB_LIST : TAB_FILTER);
             draw();
         }
 
-        private function e_clearFilterButton(e:Event):void
+        private function onClearFilterClicked(e:Event):void
         {
             _gvars.activeFilter = null;
             draw();
         }
 
-        private function e_addSavedFilterButton(e:Event):void
+        private function onAddSavedFilterClicked(e:Event):void
         {
             _gvars.activeUser.settings.filters.push(new EngineLevelFilter(true));
 
@@ -319,12 +315,12 @@ package popups
             draw();
         }
 
-        private function e_importFilterButton(e:Event):void
+        private function onImportFilterClicked(e:Event):void
         {
-            new Prompt(box.parent, 320, _lang.string("popup_filter_filter_single_import"), 100, "IMPORT", e_importFilter);
+            new Prompt(box.parent, 320, _lang.string("popup_filter_filter_single_import"), 100, "IMPORT", importFilter);
         }
 
-        private function e_importFilter(filterJSON:String):void
+        private function importFilter(filterJSON:String):void
         {
             try
             {
@@ -341,13 +337,13 @@ package popups
             }
         }
 
-        private function e_addFilter(e:Event):void
+        private function onAddFilterClicked(e:Event):void
         {
             SELECTED_FILTER = (e.target as BoxButton).tag;
             addChild(typeSelector);
         }
 
-        private function e_addFilterSelection(e:Event):void
+        private function onAddFilterTypeClicked(e:Event):void
         {
             removeChild(typeSelector);
             var newFilter:EngineLevelFilter = new EngineLevelFilter();
@@ -358,7 +354,7 @@ package popups
             draw();
         }
 
-        private function e_removeFilter(e:Event):void
+        private function onRemoveFilterClicked(e:Event):void
         {
             var filter:EngineLevelFilter = (e.target as BoxButton).tag;
             if (ArrayUtil.remove(filter, filter.parent_filter.filters))

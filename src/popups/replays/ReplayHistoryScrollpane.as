@@ -145,12 +145,12 @@ package popups.replays
         /**
          * Moves the ReplayHistoryEntry to the y value. Also marks the song button
          * as in use for the removal sweep.
-         * @param _y
+         * @param y
          * @param btn
          */
-        public function moveEntryButton(_y:int, btn:ReplayHistoryEntry):void
+        public function moveEntryButton(y:int, btn:ReplayHistoryEntry):void
         {
-            btn.y = _y;
+            btn.y = y;
             btn.garbageSweep = 1;
         }
 

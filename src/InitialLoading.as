@@ -120,13 +120,13 @@ package
                 _gvars.loadUserSongData();
 
                 if (_gvars.activeUser.isGuest)
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
+                    dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_LOGIN));
                 else
                 {
                     if (contains(_epilepsyWarning))
                         removeChild(_epilepsyWarning);
 
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
+                    dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
                 }
             }
         }

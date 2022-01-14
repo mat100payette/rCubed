@@ -8,7 +8,7 @@ package events.navigation
         public function InitialLoadingEvent(userLoggedIn:Boolean):void
         {
             _userLoggedIn = userLoggedIn;
-            super(PanelMediator.PANEL_INITIAL_LOADING);
+            super(Routes.PANEL_INITIAL_LOADING);
         }
 
         public function get userLoggedIn():Boolean

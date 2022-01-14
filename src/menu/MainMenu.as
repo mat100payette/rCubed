@@ -107,7 +107,7 @@ package menu
 
             // Guests
             if (GlobalVariables.instance.activeUser.isGuest || (_gvars.options && _gvars.options.singleplayer))
-                setActiveLayer(PanelMediator.PANEL_SONGSELECTION);
+                setActiveLayer(Routes.PANEL_SONGSELECTION);
             else
             {
                 if (!Flags.VALUES[Flags.STARTUP_SCREEN])
@@ -116,12 +116,12 @@ package menu
                     Flags.VALUES[Flags.STARTUP_SCREEN] = true;
 
                     if (playerStartup == 0)
-                        setActiveLayer(PanelMediator.PANEL_MULTIPLAYER);
+                        setActiveLayer(Routes.PANEL_MULTIPLAYER);
                     else
-                        setActiveLayer(PanelMediator.PANEL_SONGSELECTION);
+                        setActiveLayer(Routes.PANEL_SONGSELECTION);
                 }
                 else
-                    setActiveLayer(PanelMediator.PANEL_MULTIPLAYER);
+                    setActiveLayer(Routes.PANEL_MULTIPLAYER);
             }
         }
 
@@ -131,17 +131,17 @@ package menu
 
             switch (panelName)
             {
-                case PanelMediator.PANEL_SONGSELECTION:
+                case Routes.PANEL_SONGSELECTION:
                     if (_layerSongSelection == null)
                         _layerSongSelection = new MenuSongSelection();
                     newPanel = _layerSongSelection;
                     break;
 
-                case PanelMediator.PANEL_MULTIPLAYER:
+                case Routes.PANEL_MULTIPLAYER:
                     newPanel = MultiplayerState.instance.getPanel();
                     break;
 
-                case PanelMediator.PANEL_TOKENS:
+                case Routes.PANEL_TOKENS:
                     if (_layerTokens == null)
                         _layerTokens = new MenuTokens();
                     newPanel = _layerTokens;
@@ -256,32 +256,32 @@ package menu
 
         private function onSongSelectionButtonClick(e:Event):void
         {
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
         }
 
         private function onMultiplayerButtonClick(e:Event):void
         {
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MULTIPLAYER));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_MULTIPLAYER));
         }
 
         private function onTokensButtonClick(e:Event):void
         {
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_TOKENS));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_TOKENS));
         }
 
         private function onOptionsButtonClick(e:Event):void
         {
-            dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
+            dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
         }
 
         private function onFiltersButtonClick(e:Event):void
         {
-            dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
+            dispatchEvent(new AddPopupEvent(Routes.POPUP_FILTER_MANAGER));
         }
 
         private function onReplaysButtonClick(e:Event):void
         {
-            dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
+            dispatchEvent(new AddPopupEvent(Routes.POPUP_REPLAY_HISTORY));
         }
 
         public function drawMenuMusicControls():void

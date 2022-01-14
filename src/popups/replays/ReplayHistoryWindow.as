@@ -21,6 +21,7 @@ package popups.replays
     import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
     import events.navigation.ChangePanelEvent;
+    import events.navigation.popups.RemovePopupEvent;
 
     public class ReplayHistoryWindow extends DisplayLayer
     {
@@ -108,10 +109,10 @@ package popups.replays
 
             // scroll pane
             pane = new ReplayHistoryScrollpane(this, 180, 61, 584, Main.GAME_HEIGHT - 61);
-            pane.addEventListener(MouseEvent.MOUSE_WHEEL, e_mouseWheelMoved, false, 0, false);
-            pane.addEventListener(MouseEvent.CLICK, e_replayEntryClick);
+            pane.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheelMoved, false, 0, false);
+            pane.addEventListener(MouseEvent.CLICK, onReplayEntryClicked);
             scrollbar = new ScrollBar(this, Main.GAME_WIDTH - 16, 61, 16, Main.GAME_HEIGHT - 61, null, new Sprite());
-            scrollbar.addEventListener(Event.CHANGE, e_scrollBarMoved, false, 0, false);
+            scrollbar.addEventListener(Event.CHANGE, onScrollBarMoved, false, 0, false);
 
             // ui
             buildTabs();
@@ -124,7 +125,7 @@ package popups.replays
             search_field_placeholder.alpha = 0.6;
 
             search_field = new BoxText(box, 400, 15, 220, 29);
-            search_field.addEventListener(Event.CHANGE, e_searchChange, false, 0, true);
+            search_field.addEventListener(Event.CHANGE, onSearchChanged, false, 0, true);
 
             var searchSprite:Sprite = new iconSearch();
             searchSprite.x = 644;
@@ -133,7 +134,7 @@ package popups.replays
             searchSprite.alpha = 0.8;
             box.addChild(searchSprite);
 
-            btn_close = new BoxButton(box, 685, 15, 80, 29, _lang.string("menu_close"), 12, e_clickHandler);
+            btn_close = new BoxButton(box, 685, 15, 80, 29, _lang.string("menu_close"), 12, onCloseClicked);
 
             changeTab(LAST_INDEX);
         }
@@ -141,8 +142,8 @@ package popups.replays
         override public function dispose():void
         {
             CURRENT_TAB.closeTab();
-            scrollbar.removeEventListener(Event.CHANGE, e_scrollBarMoved, false);
-            pane.removeEventListener(MouseEvent.MOUSE_WHEEL, e_mouseWheelMoved, false);
+            scrollbar.removeEventListener(Event.CHANGE, onScrollBarMoved, false);
+            pane.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheelMoved, false);
         }
 
         public function buildTabs():void
@@ -153,7 +154,7 @@ package popups.replays
             {
                 tabBox = new TabButton(box, -1, 60 + 33 * idx, idx, _lang.string("replay_tab_" + TABS[idx].name));
                 tabBox.tabIndex = idx;
-                tabBox.addEventListener(MouseEvent.CLICK, e_tabHandler);
+                tabBox.addEventListener(MouseEvent.CLICK, onTabClicked);
 
                 TAB_BUTTONS.push(tabBox);
             }
@@ -181,20 +182,17 @@ package popups.replays
                 tabButton.setActive(tabButton.index == idx);
         }
 
-        private function e_tabHandler(e:MouseEvent):void
+        private function onTabClicked(e:MouseEvent):void
         {
             changeTab((e.currentTarget as TabButton).index);
         }
 
-        private function e_clickHandler(e:MouseEvent):void
+        private function onCloseClicked(e:MouseEvent):void
         {
-            if (e.target == btn_close)
-            {
-                return;
-            }
+            dispatchEvent(new RemovePopupEvent());
         }
 
-        private function e_mouseWheelMoved(e:MouseEvent):void
+        private function onMouseWheelMoved(e:MouseEvent):void
         {
             if (!scrollbar.visible)
                 return;
@@ -204,7 +202,7 @@ package popups.replays
             scrollbar.scrollTo(dist, false);
         }
 
-        private function e_scrollBarMoved(e:Event):void
+        private function onScrollBarMoved(e:Event):void
         {
             pane.scrollTo(e.target.scroll);
         }
@@ -217,7 +215,7 @@ package popups.replays
             scrollbar.visible = pane.doScroll;
         }
 
-        public function e_replayEntryClick(e:MouseEvent):void
+        public function onReplayEntryClicked(e:MouseEvent):void
         {
             var te:* = e.target;
             if (te is SimpleBoxButton)
@@ -229,7 +227,7 @@ package popups.replays
                 if (replay == null)
                     return;
 
-                if (target == entry.btn_play)
+                if (target == entry.btnPlay)
                 {
                     if (replay.song == null)
                     {
@@ -252,10 +250,10 @@ package popups.replays
 
                     //_gvars.gameMain.removePopup();
 
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+                    dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
                 }
 
-                if (target == entry.btn_copy)
+                if (target == entry.btnCopy)
                 {
                     var replayString:String = replay.getEncode();
                     var success:Boolean = SystemUtil.setClipboard(replayString);
@@ -271,7 +269,7 @@ package popups.replays
             }
         }
 
-        private function e_searchChange(e:Event):void
+        private function onSearchChanged(e:Event):void
         {
             _search_text = search_field.text;
             search_field_placeholder.visible = (_search_text.length <= 0);

@@ -31,80 +31,80 @@ package popups.replays
         public var replay:Replay;
         public var info:SongInfo;
 
-        private var title:Text;
-        private var rate:Text;
-        private var engine:Text;
+        private var _title:Text;
+        private var _rate:Text;
+        private var _engine:Text;
 
-        private var field_plane:Sprite;
-        private var fields:Vector.<Text>;
+        private var _fieldPlane:Sprite;
+        private var _fields:Vector.<Text>;
 
-        public var btn_play:SimpleBoxButton;
-        public var btn_copy:SimpleBoxButton;
+        public var btnPlay:SimpleBoxButton;
+        public var btnCopy:SimpleBoxButton;
 
         public var index:int = 0;
         public var garbageSweep:Boolean = false;
 
         public function ReplayHistoryEntry():void
         {
-            this.graphics.lineStyle(1, 0xFFFFFF, 0.35);
-            this.graphics.beginFill(0xFFFFFF, 0.1);
-            this.graphics.drawRect(0, 0, 578, ENTRY_HEIGHT);
-            this.graphics.endFill();
+            graphics.lineStyle(1, 0xFFFFFF, 0.35);
+            graphics.beginFill(0xFFFFFF, 0.1);
+            graphics.drawRect(0, 0, 578, ENTRY_HEIGHT);
+            graphics.endFill();
 
-            this.graphics.moveTo(548, 1);
-            this.graphics.lineTo(548, ENTRY_HEIGHT);
+            graphics.moveTo(548, 1);
+            graphics.lineTo(548, ENTRY_HEIGHT);
 
-            this.graphics.lineStyle(0, 0xFFFFFF, 0);
+            graphics.lineStyle(0, 0xFFFFFF, 0);
 
             var copyIcon:iconCopy = new iconCopy();
             copyIcon.scaleX = copyIcon.scaleY = (17 / copyIcon.width);
             copyIcon.x = 564;
             copyIcon.y = (ENTRY_HEIGHT / 2) + 1;
-            this.addChild(copyIcon);
+            addChild(copyIcon);
 
             // Score Fields BG
-            field_plane = new Sprite();
-            field_plane.x = 1;
-            field_plane.y = ENTRY_HEIGHT - 20;
-            this.addChild(field_plane);
+            _fieldPlane = new Sprite();
+            _fieldPlane.x = 1;
+            _fieldPlane.y = ENTRY_HEIGHT - 20;
+            addChild(_fieldPlane);
 
             var field_txt:Text;
-            fields = new Vector.<Text>(SCORE_BG.length, true);
+            _fields = new Vector.<Text>(SCORE_BG.length, true);
 
-            var X_OFF:Number = 0;
+            var xOff:Number = 0;
             for (var index:int = 0; index < SCORE_BG.length; index++)
             {
-                var score_field:Array = SCORE_BG[index];
+                var scoreField:Array = SCORE_BG[index];
 
-                field_plane.graphics.beginGradientFill(GradientType.LINEAR, [score_field[0], score_field[0], score_field[0]], [0.15, 0.22, 0.32], [0x00, 0x77, 0xFF], SCORE_BG_MATRIX);
-                field_plane.graphics.drawRect(X_OFF, 0, score_field[1], 20);
-                field_plane.graphics.endFill();
+                _fieldPlane.graphics.beginGradientFill(GradientType.LINEAR, [scoreField[0], scoreField[0], scoreField[0]], [0.15, 0.22, 0.32], [0x00, 0x77, 0xFF], SCORE_BG_MATRIX);
+                _fieldPlane.graphics.drawRect(xOff, 0, scoreField[1], 20);
+                _fieldPlane.graphics.endFill();
 
-                field_txt = new Text(field_plane, X_OFF + 2, 0, "");
-                field_txt.setAreaParams(score_field[1] - 4, 20, TextFormatAlign.CENTER);
-                fields[index] = field_txt;
-                X_OFF += score_field[1];
+                field_txt = new Text(_fieldPlane, xOff + 2, 0, "");
+                field_txt.setAreaParams(scoreField[1] - 4, 20, TextFormatAlign.CENTER);
+                _fields[index] = field_txt;
+                xOff += scoreField[1];
             }
 
             // Text
-            title = new Text(this, 6, 6, "???", 14);
-            title.setAreaParams(536, 20);
+            _title = new Text(this, 6, 6, "???", 14);
+            _title.setAreaParams(536, 20);
 
-            rate = new Text(this, X_OFF + 5, 6, "", 14);
-            rate.setAreaParams(181, 20, TextFormatAlign.RIGHT);
-            rate.alpha = 0.4;
+            _rate = new Text(this, xOff + 5, 6, "", 14);
+            _rate.setAreaParams(181, 20, TextFormatAlign.RIGHT);
+            _rate.alpha = 0.4;
 
-            engine = new Text(this, X_OFF + 5, ENTRY_HEIGHT - 20, "");
-            engine.setAreaParams(181, 20, TextFormatAlign.RIGHT);
-            engine.alpha = 0.4;
+            _engine = new Text(this, xOff + 5, ENTRY_HEIGHT - 20, "");
+            _engine.setAreaParams(181, 20, TextFormatAlign.RIGHT);
+            _engine.alpha = 0.4;
 
             // Buttons
-            btn_play = new SimpleBoxButton(548, ENTRY_HEIGHT);
-            this.addChild(btn_play);
+            btnPlay = new SimpleBoxButton(548, ENTRY_HEIGHT);
+            addChild(btnPlay);
 
-            btn_copy = new SimpleBoxButton(30, ENTRY_HEIGHT);
-            btn_copy.x = 548;
-            this.addChild(btn_copy);
+            btnCopy = new SimpleBoxButton(30, ENTRY_HEIGHT);
+            btnCopy.x = 548;
+            addChild(btnCopy);
         }
 
         public function setData(item:Replay):void
@@ -112,40 +112,40 @@ package popups.replays
             replay = item;
             info = item.song;
 
-            title.text = info.name;
+            _title.text = info.name;
 
             if (info.engine != null)
             {
                 if (info.engine.name == null)
-                    engine.text = info.engine.id.toString().toUpperCase();
+                    _engine.text = info.engine.id.toString().toUpperCase();
                 else
-                    engine.text = info.engine.name.toString();
+                    _engine.text = info.engine.name.toString();
 
-                engine.visible = true;
+                _engine.visible = true;
             }
             else
-                engine.visible = false;
+                _engine.visible = false;
 
             if (item.user.settings.songRate != 1)
             {
-                rate.text = "x" + item.user.settings.songRate;
-                rate.visible = true;
+                _rate.text = "x" + item.user.settings.songRate;
+                _rate.visible = true;
             }
             else
-                rate.visible = false;
+                _rate.visible = false;
 
-            fields[0].text = item.score.toString();
-            fields[1].text = item.perfect.toString();
-            fields[2].text = item.good.toString();
-            fields[3].text = item.average.toString();
-            fields[4].text = item.miss.toString();
-            fields[5].text = item.boo.toString();
-            fields[6].text = item.maxcombo.toString();
+            _fields[0].text = item.score.toString();
+            _fields[1].text = item.perfect.toString();
+            _fields[2].text = item.good.toString();
+            _fields[3].text = item.average.toString();
+            _fields[4].text = item.miss.toString();
+            _fields[5].text = item.boo.toString();
+            _fields[6].text = item.maxcombo.toString();
 
-            fields[2].alpha = item.good > 0 ? 1 : 0.3;
-            fields[3].alpha = item.average > 0 ? 1 : 0.3;
-            fields[4].alpha = item.miss > 0 ? 1 : 0.3;
-            fields[5].alpha = item.boo > 0 ? 1 : 0.3;
+            _fields[2].alpha = item.good > 0 ? 1 : 0.3;
+            _fields[3].alpha = item.average > 0 ? 1 : 0.3;
+            _fields[4].alpha = item.miss > 0 ? 1 : 0.3;
+            _fields[5].alpha = item.boo > 0 ? 1 : 0.3;
         }
 
         public function clear():void

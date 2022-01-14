@@ -10,7 +10,7 @@ package events.navigation.popups
         public function AddPopupHighscoresEvent(songInfo:SongInfo):void
         {
             _songInfo = songInfo;
-            super(PanelMediator.POPUP_HIGHSCORES);
+            super(Routes.POPUP_HIGHSCORES);
         }
 
         public function get songInfo():SongInfo

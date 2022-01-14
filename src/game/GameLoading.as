@@ -51,10 +51,10 @@ package game
                 _song = _gvars.options.song;
             else
             { // No songs in queue? Something went wrong...
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+                dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
             }
             if (_song && _song.isLoaded)
-                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
+                dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
         }
 
         override public function stageAdd():void
@@ -143,13 +143,13 @@ package game
             _gvars.removeSongFile(_song);
 
             removeEventListener(Event.ENTER_FRAME, updatePreloader);
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
         }
 
         private function preloaderRemoved(e:Event):void
         {
             _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
-            dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
+            dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
         }
     }
 }

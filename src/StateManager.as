@@ -73,7 +73,7 @@ package
             _gvars.activeUser = _gvars.playerUser;
 
             _target.dispatchEvent(new RemovePopupEvent());
-            _target.dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_LOGIN));
+            _target.dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_LOGIN));
         }
     }
 }

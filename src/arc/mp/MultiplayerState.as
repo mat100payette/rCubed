@@ -279,7 +279,7 @@ package arc.mp
             var playlistEngineId:Object = Playlist.instance.engine ? Playlist.instance.engine.id : null;
             if (playlistEngineId == (songInfo.engine ? songInfo.engine.id : null))
             {
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+                dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
 
                     // TODO: Redo this
                     //(mmenu._layerSongSelection as MenuSongSelection).multiplayerSelect(songInfo.name, songInfo);
@@ -428,7 +428,7 @@ package arc.mp
             _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
             _gvars.options.loadPreview = true;
 
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 
         public function gameplayStart(room:Room):void
@@ -442,7 +442,7 @@ package arc.mp
             _gvars.options.judgeWindow = null;
             _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
 
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 
         public function gameplayPlaying(play:Object):Boolean

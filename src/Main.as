@@ -158,7 +158,7 @@ package
                 Alert.add("Development Build - " + CONFIG::timeStamp + " - NOT FOR RELEASE", 120, Alert.RED);
             }
 
-            navigator.changePanel(new InitialLoadingEvent(false));
+            navigator.onChangePanelEvent(new InitialLoadingEvent(false));
         }
 
         private function onLanguageChanged(e:LanguageChangedEvent):void
@@ -236,7 +236,7 @@ package
         private function toggleContextPopup(e:Event):void
         {
             if (!disablePopups)
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_CONTEXT_MENU));
+                dispatchEvent(new AddPopupEvent(Routes.POPUP_CONTEXT_MENU));
         }
 
         ///- Key Handling
@@ -247,15 +247,15 @@ package
             {
                 // Options
                 if (keyCode == _gvars.playerUser.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
+                    dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
 
                 // Help Menu
                 else if (keyCode == Keyboard.F1)
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_HELP));
+                    dispatchEvent(new AddPopupEvent(Routes.POPUP_HELP));
 
                 // Replay History
                 else if (keyCode == Keyboard.F2)
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_REPLAY_HISTORY));
+                    dispatchEvent(new AddPopupEvent(Routes.POPUP_REPLAY_HISTORY));
             }
         }
     }

@@ -10,7 +10,7 @@ package events.navigation.popups
         public function AddPopupSongNotesEvent(songInfo:SongInfo):void
         {
             _songInfo = songInfo;
-            super(PanelMediator.POPUP_SONG_NOTES);
+            super(Routes.POPUP_SONG_NOTES);
         }
 
         public function get songInfo():SongInfo

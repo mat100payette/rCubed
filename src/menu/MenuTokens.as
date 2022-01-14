@@ -204,7 +204,7 @@ package menu
             _gvars.songQueue = token_songs;
             MenuSongSelection.options.queuePlaylist = _gvars.songQueue;
 
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
             MenuSongSelection.options.infoTab = MenuSongSelection.TAB_QUEUE;
             var panel:MenuSongSelection = ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel as MenuSongSelection);
             panel.swapToQueue();

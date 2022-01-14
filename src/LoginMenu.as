@@ -187,7 +187,7 @@ package
 
         public function playAsGuest(e:Event = null):void
         {
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
         }
 
         public function registerOnline(e:Event = null):void

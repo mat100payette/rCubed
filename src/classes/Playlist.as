@@ -367,7 +367,7 @@ package classes
                             {
                                 MenuSongSelection.options.pageNumber = 0;
                                 MenuSongSelection.options.scroll_position = 0;
-                                mainmenu.dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+                                mainmenu.dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
                             }
                             _gvars.removeSongFiles();
                         }

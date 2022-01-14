@@ -497,7 +497,7 @@ package popups.settings
                 }
 
                 // refresh popup
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
+                dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
             }
         }
 

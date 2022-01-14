@@ -342,7 +342,7 @@ package popups.settings
             _gvars.options.song = new Song(tempSongInfo);
 
             _gvars.options.fill();
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 
         private function onManageSettingsClicked(e:Event):void

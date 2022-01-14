@@ -353,7 +353,7 @@ package menu
             _playlist.removeEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
             _playlist.engineChangeHandler(e);
 
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_SONGSELECTION));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
         }
 
         //******************************************************************************************//
@@ -1033,7 +1033,7 @@ package menu
 
                 // Switch to game
                 Alert.add(_lang.string("song_selection_load_play_chart_preview"));
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+                dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
             }
         }
 
@@ -1527,7 +1527,7 @@ package menu
 
             _mp.gameplayPicking(_playlist.getSongInfo(level));
             _mp.gameplayLoading();
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MULTIPLAYER));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_MULTIPLAYER));
         }
 
         /**
@@ -1571,7 +1571,7 @@ package menu
 
             _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();
-            dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 
         /**
@@ -1915,12 +1915,12 @@ package menu
                 }
                 else if (clickAction == "queueManager")
                 {
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_QUEUE_MANAGER));
+                    dispatchEvent(new AddPopupEvent(Routes.POPUP_QUEUE_MANAGER));
                         //addPopup(new PopupQueueManager());
                 }
                 else if (clickAction == "filterManager")
                 {
-                    dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_FILTER_MANAGER));
+                    dispatchEvent(new AddPopupEvent(Routes.POPUP_FILTER_MANAGER));
                         //addPopup(new PopupFilterManager());
                 }
                 else if (clickAction == "doFilterRandom")

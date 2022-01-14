@@ -120,7 +120,7 @@ package game
 
             // More songs to play, jump to gameplay or loading.
             if (_gvars.songQueue.length > 0)
-                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
+                dispatchEvent(new ChangePanelEvent(Routes.GAME_LOADING));
             else
                 _gvars.songResults.length = 0;
         }
@@ -740,12 +740,12 @@ package game
                 if (skipload)
                 {
                     _gvars.songRestarts++;
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_PLAY));
+                    dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
                 }
                 else
                 {
                     _gvars.songQueue = _gvars.totalSongQueue.concat();
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_LOADING));
+                    dispatchEvent(new ChangePanelEvent(Routes.GAME_LOADING));
                 }
             }
 
@@ -782,12 +782,12 @@ package game
                     _gvars.options = new GameOptions(_gvars.activeUser);
                     _gvars.options.fill();
 
-                    dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_GAME_MENU));
+                    dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
                 }
             }
 
             else if (target == navOptions)
-                dispatchEvent(new AddPopupEvent(PanelMediator.POPUP_OPTIONS));
+                dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
 
             else if (target == navHighscores)
             {
@@ -796,7 +796,7 @@ package game
             }
 
             else if (target == navMenu)
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
+                dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
 
             else if (target == navRating)
             {

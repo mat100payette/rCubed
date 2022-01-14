@@ -18,26 +18,27 @@ package popups.replays
     {
         private static var INITIAL_LOAD:Boolean = false;
         private static var REPLAYS:Vector.<Replay>;
+
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var _http:WebRequest;
-        private var btn_refresh:BoxButton;
+        private var _btnRefresh:BoxButton;
 
-        private var uiLock:Sprite;
-        private var uiLockBG:Bitmap;
-        private var loadingCancelButton:BoxButton;
+        private var _uiLock:Sprite;
+        private var _uiLockBG:Bitmap;
+        private var _loadingCancelButton:BoxButton;
 
         public function ReplayHistoryTabOnline(replayWindow:ReplayHistoryWindow):void
         {
             super(replayWindow);
 
             // UI Lock
-            uiLock = new Sprite();
-            var lockUIText:Text = new Text(uiLock, 0, 200, _lang.string("replay_loading_online"), 24);
+            _uiLock = new Sprite();
+            var lockUIText:Text = new Text(_uiLock, 0, 200, _lang.string("replay_loading_online"), 24);
             lockUIText.setAreaParams(780, 30, TextFormatAlign.CENTER);
 
-            loadingCancelButton = new BoxButton(uiLock, 390 - 40, 440, 80, 30, _lang.string("menu_cancel"), 12, clickHandler);
+            _loadingCancelButton = new BoxButton(_uiLock, 390 - 40, 440, 80, 30, _lang.string("menu_cancel"), 12, clickHandler);
         }
 
         override public function get name():String
@@ -48,11 +49,11 @@ package popups.replays
         override public function openTab():void
         {
             // Add UI Elements
-            if (!btn_refresh)
+            if (!_btnRefresh)
             {
-                btn_refresh = new BoxButton(null, 5, Main.GAME_HEIGHT - 35, 162, 29, _lang.string("menu_refresh"), 12, loadOnlineReplays);
+                _btnRefresh = new BoxButton(null, 5, Main.GAME_HEIGHT - 35, 162, 29, _lang.string("menu_refresh"), 12, loadOnlineReplays);
             }
-            parent.addChild(btn_refresh);
+            parent.addChild(_btnRefresh);
 
             // Initial Load
             if (!INITIAL_LOAD)
@@ -64,12 +65,12 @@ package popups.replays
 
         override public function closeTab():void
         {
-            parent.removeChild(btn_refresh);
+            parent.removeChild(_btnRefresh);
         }
 
         override public function setValues():void
         {
-            var render_list:Array = [];
+            var renderList:Array = [];
             for each (var r:Replay in REPLAYS)
             {
                 if (r.song == null)
@@ -78,9 +79,9 @@ package popups.replays
                 if (parent.searchText.length >= 1 && r.song.name.toLowerCase().indexOf(parent.searchText) == -1)
                     continue;
 
-                render_list[render_list.length] = r;
+                renderList[renderList.length] = r;
             }
-            parent.pane.setRenderList(render_list);
+            parent.pane.setRenderList(renderList);
             parent.updateScrollPane();
         }
 
@@ -91,19 +92,19 @@ package popups.replays
 
             REPLAYS = new <Replay>[];
 
-            _http = new WebRequest(Constant.SITE_REPLAYS_URL, e_webLoad, e_webError);
+            _http = new WebRequest(Constant.SITE_REPLAYS_URL, onReplaysFetched, onReplaysFetchError);
             _http.load({"session": _gvars.userSession});
         }
 
         private function clickHandler(e:MouseEvent):void
         {
-            if (e.target == loadingCancelButton)
+            if (e.target == _loadingCancelButton)
             {
                 webLoadComplete(true);
             }
         }
 
-        private function e_webLoad(e:Event):void
+        private function onReplaysFetched(e:Event):void
         {
             var data:String = e.target.data;
 
@@ -127,7 +128,7 @@ package popups.replays
             webLoadComplete();
         }
 
-        private function e_webError(e:Event):void
+        private function onReplaysFetchError(e:Event):void
         {
             Alert.add(_lang.string("replay_error_retrieving_online"), 120, Alert.RED);
             webLoadComplete();
@@ -147,17 +148,17 @@ package popups.replays
         {
             if (val)
             {
-                uiLockBG = SpriteUtil.getBitmapSprite(_gvars.gameMain.stage, 0.3);
-                uiLock.addChildAt(uiLockBG, 0);
-                parent.addChild(uiLock);
+                _uiLockBG = SpriteUtil.getBitmapSprite(_gvars.gameMain.stage, 0.3);
+                _uiLock.addChildAt(_uiLockBG, 0);
+                parent.addChild(_uiLock);
             }
             else
             {
-                if (parent.contains(uiLock))
+                if (parent.contains(_uiLock))
                 {
-                    uiLock.removeChildAt(0);
-                    uiLockBG = null;
-                    parent.removeChild(uiLock);
+                    _uiLock.removeChildAt(0);
+                    _uiLockBG = null;
+                    parent.removeChild(_uiLock);
                 }
             }
         }

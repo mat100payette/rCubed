@@ -8,7 +8,7 @@ package events.navigation.popups
         public function AddPopupSkillRankUpdateEvent(skillRankData:Object):void
         {
             _skillRankData = skillRankData;
-            super(PanelMediator.POPUP_SKILL_RANK_UPDATE);
+            super(Routes.POPUP_SKILL_RANK_UPDATE);
         }
 
         public function get skillRankData():Object

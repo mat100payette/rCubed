@@ -219,7 +219,7 @@ package game
                     MultiplayerState.instance.connection.connect();
                 }
 
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
+                dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
             }
 
             // --- Per Song Options
@@ -1508,9 +1508,9 @@ package game
 
             // Go to results
             if (_options.isEditor || _mpSpectate)
-                dispatchEvent(new ChangePanelEvent(PanelMediator.PANEL_MAIN_MENU));
+                dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
             else
-                dispatchEvent(new ChangePanelEvent(PanelMediator.GAME_RESULTS));
+                dispatchEvent(new ChangePanelEvent(Routes.GAME_RESULTS));
         }
 
         private function restartGame():void
