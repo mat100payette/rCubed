@@ -20,8 +20,8 @@ package classes.chart
         public var id:Number = 0;
         public var gap:Number = 0;
         public var BPMs:Array = [];
-        public var Stops:Array = [];
-        public var Notes:Array = [];
+        public var stops:Array = [];
+        public var notes:Array = [];
         public var chartData:Object;
         public var framerate:int = 60;
         protected var frameOffset:int = 0;
@@ -117,9 +117,9 @@ package classes.chart
 
         protected function notesToFrame():void
         {
-            for (var n:String in this.Notes)
+            for (var n:String in this.notes)
             {
-                this.Notes[n].setFrame(noteToTime(this.Notes[n]));
+                this.notes[n].setFrame(noteToTime(this.notes[n]));
             }
         }
 
@@ -143,9 +143,9 @@ package classes.chart
 
             totalOff += 240 * (n.time - (BPMs[i].getStart())) / (BPMs[i].getBPM());
 
-            for (var j:int = 0; j < Stops.length; j++)
+            for (var j:int = 0; j < stops.length; j++)
             {
-                var f:Stop = Stops[j];
+                var f:Stop = stops[j];
                 if (f.time < n.time)
                 {
                     totalOff += f.length;
@@ -180,11 +180,11 @@ package classes.chart
          */
         public function toString(type:String = null):String
         {
-            if (Notes.length == 0)
+            if (notes.length == 0)
                 return "No Notes...";
 
             var returnVal:String = "";
-            var note:Note = Notes[0];
+            var note:Note = notes[0];
 
             // Auto Pad to 60 frame mark
             var frameBuffer:int = note.frame;
@@ -200,9 +200,9 @@ package classes.chart
             {
                 returnVal = "_root.beatBox = [";
             }
-            for (var i:int = 0; i < Notes.length; i++)
+            for (var i:int = 0; i < notes.length; i++)
             {
-                note = Notes[i];
+                note = notes[i];
                 if (type == FFR_BEATBOX)
                 {
                     // [40, "L", "red"],

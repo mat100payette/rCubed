@@ -20,7 +20,7 @@ package classes.chart.parse
             {
                 var note:Array = this.chartData[i].split(",").map(clean);
                 if (note.length >= 2 && isValidDirection(note[1]))
-                    this.Notes.push(new Note(note[1], Number(note[0]) / 30, note[2], Number(note[0])));
+                    this.notes.push(new Note(note[1], Number(note[0]) / 30, note[2], Number(note[0])));
             }
         }
 

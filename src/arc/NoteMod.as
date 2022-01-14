@@ -3,90 +3,94 @@ package arc
     import classes.chart.Note;
     import classes.chart.Song;
     import game.GameOptions;
+    import classes.UserSettings;
 
     public class NoteMod extends Object
     {
-        private var song:Song;
-        private var notes:Array;
-        private var shuffle:Array;
-        private var lastChord:Object;
-
         private const DIRECTIONS:Array = ["L", "D", "U", "R"];
         private const HALF_COLOR:Object = {"red": "red", "blue": "red", "purple": "purple", "yellow": "blue", "pink": "purple", "orange": "yellow", "cyan": "pink", "green": "orange", "white": "white"}
 
-        public var options:GameOptions;
+        private var _song:Song;
+        private var _notes:Array;
+        private var _shuffle:Array;
+        private var _lastChord:Object;
 
-        public var modDark:Boolean;
-        public var modHidden:Boolean;
-        public var modMirror:Boolean;
-        public var modRandom:Boolean;
-        public var modScramble:Boolean;
-        public var modShuffle:Boolean;
-        public var modReverse:Boolean;
-        public var modColumnColor:Boolean;
-        public var modHalfTime:Boolean;
-        public var modNoBackground:Boolean;
-        public var modIsolation:Boolean;
-        public var modOffset:Boolean;
-        public var modRate:Boolean;
-        public var modFPS:Boolean;
-        public var modJudgeWindow:Boolean;
+        private var _options:GameOptions;
+        private var _settings:UserSettings;
 
-        private var reverseLastFrame:int;
-        private var reverseLastPos:Number;
+        private var _modDark:Boolean;
+        private var _modHidden:Boolean;
+        private var _modMirror:Boolean;
+        private var _modRandom:Boolean;
+        private var _modScramble:Boolean;
+        private var _modShuffle:Boolean;
+        private var _modReverse:Boolean;
+        private var _modColumnColor:Boolean;
+        private var _modHalfTime:Boolean;
+        private var _modNoBackground:Boolean;
+        private var _modIsolation:Boolean;
+        private var _modOffset:Boolean;
+        private var _modRate:Boolean;
+        private var _modFPS:Boolean;
+        private var _modJudgeWindow:Boolean;
+
+        private var _reverseLastFrame:int;
+        private var _reverseLastPos:Number;
 
         public function NoteMod(song:Song, options:GameOptions)
         {
-            this.song = song;
-            this.options = options;
+            _song = song;
+            _options = options;
+            _settings = new UserSettings();
+            _settings.update(options.settings);
 
             updateMods();
         }
 
         public function updateMods():void
         {
-            modDark = options.modEnabled("dark");
-            modHidden = options.modEnabled("hidden");
-            modMirror = options.modEnabled("mirror");
-            modRandom = options.modEnabled("random");
-            modScramble = options.modEnabled("scramble");
-            modShuffle = options.modEnabled("shuffle");
-            modReverse = options.modEnabled("reverse");
-            modColumnColor = options.modEnabled("columncolor");
-            modHalfTime = options.modEnabled("halftime");
-            modNoBackground = options.modEnabled("nobackground");
-            modIsolation = options.isolation;
-            modOffset = options.settings.globalOffset != 0;
-            modRate = options.settings.songRate != 1;
-            modFPS = options.settings.frameRate > 30;
-            modJudgeWindow = Boolean(options.judgeWindow);
+            _modDark = _options.modEnabled("dark");
+            _modHidden = _options.modEnabled("hidden");
+            _modMirror = _options.modEnabled("mirror");
+            _modRandom = _options.modEnabled("random");
+            _modScramble = _options.modEnabled("scramble");
+            _modShuffle = _options.modEnabled("shuffle");
+            _modReverse = _options.modEnabled("reverse");
+            _modColumnColor = _options.modEnabled("columncolor");
+            _modHalfTime = _options.modEnabled("halftime");
+            _modNoBackground = _options.modEnabled("nobackground");
+            _modIsolation = _options.isolation;
+            _modOffset = _options.settings.globalOffset != 0;
+            _modRate = _options.settings.songRate != 1;
+            _modFPS = _options.settings.frameRate > 30;
+            _modJudgeWindow = Boolean(_options.judgeWindow);
 
-            reverseLastFrame = -1;
-            reverseLastPos = -1;
+            _reverseLastFrame = -1;
+            _reverseLastPos = -1;
         }
 
         public function start(options:GameOptions):void
         {
-            this.options = options;
+            //this.options = options;
 
-            updateMods();
+            //updateMods();
 
-            if (modShuffle)
+            if (_modShuffle)
             {
-                shuffle = new Array();
+                _shuffle = new Array();
                 for (var i:int = 0; i < 4; i++)
                 {
                     var map:int;
-                    while (shuffle.indexOf((map = int(Math.random() * 4))) >= 0)
+                    while (_shuffle.indexOf((map = int(Math.random() * 4))) >= 0)
                     {
                     }
-                    shuffle.push(map);
+                    _shuffle.push(map);
                 }
             }
 
-            notes = song.chart.Notes;
+            _notes = _song.chart.notes;
 
-            lastChord = {frame: 0, values: [], previousValues: [], notes: []};
+            _lastChord = {frame: 0, values: [], previousValues: [], _notes: []};
         }
 
         private function valueOfDirection(direction:String):int
@@ -107,25 +111,25 @@ package arc
 
         public function required():Boolean
         {
-            return modIsolation || modRandom || modScramble || modShuffle || modColumnColor || modHalfTime || modMirror || modOffset || modRate;
+            return _modIsolation || _modRandom || _modScramble || _modShuffle || _modColumnColor || _modHalfTime || _modMirror || _modOffset || _modRate;
         }
 
         public function transformNote(index:int):Note
         {
-            if (modIsolation)
-                index += options.isolationOffset;
+            if (_modIsolation)
+                index += _options.isolationOffset;
 
-            if (modReverse)
+            if (_modReverse)
             {
-                index = notes.length - 1 - index;
-                if (reverseLastFrame < 0)
+                index = _notes.length - 1 - index;
+                if (_reverseLastFrame < 0)
                 {
-                    reverseLastFrame = notes[notes.length - 1].frame - song.musicDelay * 2;
-                    reverseLastPos = notes[notes.length - 1].time - ((song.musicDelay * 2) / 30);
+                    _reverseLastFrame = _notes[_notes.length - 1].frame - _song.musicDelay * 2;
+                    _reverseLastPos = _notes[_notes.length - 1].time - ((_song.musicDelay * 2) / 30);
                 }
             }
 
-            var note:Note = notes[index];
+            var note:Note = _notes[index];
             if (note == null)
                 return null;
 
@@ -134,64 +138,64 @@ package arc
             var frame:Number = note.frame;
             var dir:int = valueOfDirection(note.direction);
 
-            frame -= song.musicDelay;
-            pos -= (song.musicDelay / 30);
+            frame -= _song.musicDelay;
+            pos -= (_song.musicDelay / 30);
 
-            if (modReverse)
+            if (_modReverse)
             {
-                frame = reverseLastFrame - frame + song.mp3Frame + 60;
-                pos = reverseLastPos - pos + (song.mp3Frame + 60) / 30;
+                frame = _reverseLastFrame - frame + _song.mp3Frame + 60;
+                pos = _reverseLastPos - pos + (_song.mp3Frame + 60) / 30;
             }
 
-            if (modRate)
+            if (_modRate)
             {
-                pos /= options.settings.songRate;
-                frame /= options.settings.songRate;
+                pos /= _settings.songRate;
+                frame /= _settings.songRate;
             }
 
-            if (modOffset)
+            if (_modOffset)
             {
-                var goffset:int = Math.round(options.settings.globalOffset);
+                var goffset:int = Math.round(_settings.globalOffset);
                 frame += goffset;
                 pos += goffset / 30;
             }
 
-            if (modMirror)
+            if (_modMirror)
                 dir = -dir + 3;
 
-            if (modShuffle)
-                dir = shuffle[dir];
+            if (_modShuffle)
+                dir = _shuffle[dir];
 
-            if (modRandom || modScramble)
+            if (_modRandom || _modScramble)
             {
-                if (lastChord.frame != int(frame))
+                if (_lastChord.frame != int(frame))
                 {
-                    lastChord.frame = int(frame);
-                    lastChord.previousValues = lastChord.values;
-                    lastChord.values = [];
-                    lastChord.notes = [];
+                    _lastChord.frame = int(frame);
+                    _lastChord.previousValues = _lastChord.values;
+                    _lastChord.values = [];
+                    _lastChord.notes = [];
                 }
-                var value:Object = lastChord.values[lastChord.notes.indexOf(note)];
+                var value:Object = _lastChord.values[_lastChord.notes.indexOf(note)];
                 if (value != null)
                     dir = int(value);
                 else
                 {
-                    while (lastChord.values.indexOf(dir = int(Math.random() * 4)) != -1)
+                    while (_lastChord.values.indexOf(dir = int(Math.random() * 4)) != -1)
                     {
                     }
-                    for (var i:int = 0; i < 3 && modScramble && lastChord.previousValues.indexOf(dir) != -1; i++)
-                        while (lastChord.values.indexOf(dir = int(Math.random() * 4)) != -1)
+                    for (var i:int = 0; i < 3 && _modScramble && _lastChord.previousValues.indexOf(dir) != -1; i++)
+                        while (_lastChord.values.indexOf(dir = int(Math.random() * 4)) != -1)
                         {
                         }
-                    lastChord.values.push(dir);
-                    lastChord.notes.push(note);
+                    _lastChord.values.push(dir);
+                    _lastChord.notes.push(note);
                 }
             }
 
-            if (modColumnColor)
+            if (_modColumnColor)
                 color = (dir % 3) ? "blue" : "red";
 
-            if (modHalfTime)
+            if (_modHalfTime)
                 color = HALF_COLOR[color] || color;
 
             return new Note(directionOfValue(dir), pos, color, int(frame));
@@ -199,53 +203,47 @@ package arc
 
         public function transformTotalNotes():int
         {
-            if (!notes)
+            if (!_notes)
                 return 0;
 
-            if (modIsolation)
+            if (_modIsolation)
             {
-                if (options.isolationLength > 0)
-                {
-                    return Math.min(options.isolationLength, Math.max(1, notes.length - options.isolationOffset));
-                }
+                if (_options.isolationLength > 0)
+                    return Math.min(_options.isolationLength, Math.max(1, _notes.length - _options.isolationOffset));
                 else
-                {
-                    return Math.max(1, notes.length - options.isolationOffset);
-                }
+                    return Math.max(1, _notes.length - _options.isolationOffset);
             }
-            return notes.length;
+            return _notes.length;
         }
 
         public function transformSongLength():Number
         {
-            if (!notes || notes.length <= 0)
+            if (!_notes || _notes.length <= 0)
                 return 0;
 
             var firstNote:Note;
-            var lastNote:Note = notes[notes.length - 1];
+            var lastNote:Note = _notes[_notes.length - 1];
             var time:Number = lastNote.time;
 
-            if (modIsolation)
+            if (_modIsolation)
             {
 
-                if (options.isolationLength > 0)
+                if (_options.isolationLength > 0)
                 {
-                    firstNote = notes[Math.min(notes.length - 1, options.isolationOffset)];
-                    lastNote = notes[Math.min(notes.length - 1, options.isolationOffset + options.isolationLength)];
+                    firstNote = _notes[Math.min(_notes.length - 1, _options.isolationOffset)];
+                    lastNote = _notes[Math.min(_notes.length - 1, _options.isolationOffset + _options.isolationLength)];
                     time = lastNote.time - firstNote.time;
                 }
                 else
                 {
-                    firstNote = notes[Math.min(notes.length - 1, options.isolationOffset)];
+                    firstNote = _notes[Math.min(_notes.length - 1, _options.isolationOffset)];
                     time = lastNote.time - firstNote.time;
                 }
             }
 
             // Rates after everything.
-            if (modRate)
-            {
-                time /= options.settings.songRate;
-            }
+            if (_modRate)
+                time /= _settings.songRate;
 
             return time + 1; // 1 seconds for fade out.
         }

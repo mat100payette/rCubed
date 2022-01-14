@@ -69,22 +69,22 @@ package game
             addChild(_preloader);
 
             //- Frame Listener
-            addEventListener(Event.ENTER_FRAME, updatePreloader);
+            addEventListener(Event.ENTER_FRAME, onPreloaderUpdated);
         }
 
         override public function dispose():void
         {
-            removeEventListener(Event.ENTER_FRAME, updatePreloader);
+            removeEventListener(Event.ENTER_FRAME, onPreloaderUpdated);
 
             if (_cancelLoadButton)
                 _cancelLoadButton.dispose();
 
             if (_preloader)
-                _preloader.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
+                _preloader.removeEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
         }
 
         ///- PreloaderHandlers
-        private function updatePreloader(e:Event):void
+        private function onPreloaderUpdated(e:Event):void
         {
             _loadTimer++;
 
@@ -105,12 +105,12 @@ package game
             else
                 preloaderHtmlText += _songNameHtml;
 
-            _preloader.htmlText = preloaderHtmlText
+            _preloader.htmlText = preloaderHtmlText;
             _preloader.bar.update(_song.progress / 100);
 
             if ((_loadTimer >= 60 || _song.loadFail) && !_cancelLoadButton)
             {
-                _cancelLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, _preloader.y - 35, 75, 25, "Cancel", 12, e_cancelClick);
+                _cancelLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, _preloader.y - 35, 75, 25, "Cancel", 12, onCancelClicked);
             }
 
             if (_song.loadFail)
@@ -119,13 +119,13 @@ package game
                 _gvars.removeSongFile(_song);
                 if (_cancelLoadButton)
                     _cancelLoadButton.text = "Return";
-                removeEventListener(Event.ENTER_FRAME, updatePreloader);
+                removeEventListener(Event.ENTER_FRAME, onPreloaderUpdated);
             }
 
             if (_preloader.bar.isComplete && _song.isLoaded)
             {
-                removeEventListener(Event.ENTER_FRAME, updatePreloader);
-                _preloader.bar.addEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
+                removeEventListener(Event.ENTER_FRAME, onPreloaderUpdated);
+                _preloader.bar.addEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
                 _preloader.bar.remove();
 
                 _blackOverlay = new Sprite();
@@ -138,17 +138,17 @@ package game
             }
         }
 
-        private function e_cancelClick(e:Event):void
+        private function onCancelClicked(e:Event):void
         {
             _gvars.removeSongFile(_song);
 
-            removeEventListener(Event.ENTER_FRAME, updatePreloader);
+            removeEventListener(Event.ENTER_FRAME, onPreloaderUpdated);
             dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
         }
 
-        private function preloaderRemoved(e:Event):void
+        private function onPreloaderRemoved(e:Event):void
         {
-            _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, preloaderRemoved);
+            _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
             dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
         }
     }

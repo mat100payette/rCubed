@@ -72,6 +72,13 @@ package classes.chart
         private var localFileData:ByteArray = null;
         private var localFileHash:String = "";
 
+        private var rateReverse:Boolean = false;
+        private var rateRate:Number = 1;
+        private var rateSound:Sound;
+        private var rateSample:int = 0;
+        private var rateSampleCount:int = 0;
+        private var rateSamples:ByteArray = new ByteArray();
+
         public function Song(songInfo:SongInfo, isPreview:Boolean = false):void
         {
             this.songInfo = songInfo;
@@ -402,13 +409,6 @@ package classes.chart
             return sound;
         }
 
-        private var rateReverse:Boolean = false;
-        private var rateRate:Number = 1;
-        private var rateSound:Sound;
-        private var rateSample:int = 0;
-        private var rateSampleCount:int = 0;
-        private var rateSamples:ByteArray = new ByteArray();
-
         private function onRateSound(e:SampleDataEvent):void
         {
             var osamples:int = 0;
@@ -448,7 +448,7 @@ package classes.chart
             while (osamples < 4096)
             {
                 var sample:int = (e.position + osamples) * rateRate;
-                sample = (chart.Notes[chart.Notes.length - 1].frame * 1470) - sample + (63 - mp3Frame) * 1470 / rateRate;
+                sample = (chart.notes[chart.notes.length - 1].frame * 1470) - sample + (63 - mp3Frame) * 1470 / rateRate;
                 if (sample < 0)
                     return;
                 var sampleDiff:int = sample - rateSample;
@@ -503,7 +503,7 @@ package classes.chart
 
                 case NoteChart.FFR_LEGACY:
                     if (songInfo.note_count == 0)
-                        songInfo.note_count = chart.Notes.length;
+                        songInfo.note_count = chart.notes.length;
                     break;
 
                 case NoteChart.THIRDSTYLE:
@@ -520,7 +520,7 @@ package classes.chart
                 generateModNotes();
             }
 
-            Logger.info(this, "Chart parsed with " + chart.Notes.length + " notes, " + (chart.Notes.length > 0 ? TimeUtil.convertToHHMMSS(chart.Notes[chart.Notes.length - 1].time) : "0:00") + " length.");
+            Logger.info(this, "Chart parsed with " + chart.notes.length + " notes, " + (chart.notes.length > 0 ? TimeUtil.convertToHHMMSS(chart.notes[chart.notes.length - 1].time) : "0:00") + " length.");
 
             loadComplete();
         }
@@ -618,14 +618,12 @@ package classes.chart
         }
 
         ///- Note Functions
-        private var ModNotes:Array = new Array();
+        private var _modNotes:Array = [];
 
         public function generateModNotes():void
         {
-            for (var i:int = chart.Notes.length - 1; i >= 0; i--)
-            {
-                ModNotes[i] = noteMod.transformNote(chart.Notes[i]);
-            }
+            for (var i:int = chart.notes.length - 1; i >= 0; i--)
+                _modNotes[i] = noteMod.transformNote(chart.notes[i]);
         }
 
         public function getNote(index:int):Note
@@ -633,44 +631,32 @@ package classes.chart
             if (noteMod.required())
             {
                 if (NoteChart.FFR_LEGACY)
-                {
                     return noteMod.transformNote(index);
-                }
 
-                return ModNotes[index];
+                return _modNotes[index];
             }
             else
-            {
-                return chart.Notes[index];
-            }
+                return chart.notes[index];
         }
 
         public function get totalNotes():int
         {
             if (noteMod.required())
-            {
                 return noteMod.transformTotalNotes();
-            }
 
-            if (!chart.Notes)
-            {
+            if (!chart.notes)
                 return 0;
-            }
 
-            return chart.Notes.length;
+            return chart.notes.length;
         }
 
         public function get chartTime():Number
         {
             if (noteMod.required())
-            {
                 return noteMod.transformSongLength();
-            }
 
-            if (!chart.Notes || chart.Notes.length <= 0)
-            {
+            if (!chart.notes || chart.notes.length <= 0)
                 return 0;
-            }
 
             return getNote(totalNotes - 1).time + 1; // 1 second for fadeout.
         }
@@ -682,9 +668,7 @@ package classes.chart
             var seconds:String = (totalSecs % 60).toString();
 
             if (seconds.length == 1)
-            {
                 seconds = "0" + seconds;
-            }
 
             return minutes + ":" + seconds;
         }
@@ -704,16 +688,16 @@ package classes.chart
 
         public function updateMusicDelay():void
         {
-            options = _gvars.options;
+            //options = _gvars.options;
             rateReverse = options.modEnabled("reverse");
-            rateRate = options.settings.songRate;
+            //rateRate = options.settings.songRate;
             noteMod.start(options);
             if (options.isolation && totalNotes > 0)
             {
                 if (rateReverse)
-                    musicDelay = Math.max(0, chart.Notes[chart.Notes.length - 1].frame - chart.Notes[Math.max(0, chart.Notes.length - 1 - options.isolationOffset)].frame - 60);
+                    musicDelay = Math.max(0, chart.notes[chart.notes.length - 1].frame - chart.notes[Math.max(0, chart.notes.length - 1 - options.isolationOffset)].frame - 60);
                 else
-                    musicDelay = Math.max(0, chart.Notes[options.isolationOffset].frame - 60);
+                    musicDelay = Math.max(0, chart.notes[options.isolationOffset].frame - 60);
             }
             else
                 musicDelay = 0;

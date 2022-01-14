@@ -1150,7 +1150,7 @@ package game
             var req:URLRequest = new URLRequest(Constant.ALT_SONG_SAVE_URL);
             var scoreSender:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(scoreSender);
-            var sd:Object = {"arrows": gameResult.song.chart.Notes.length, // Playlist XML often lies.
+            var sd:Object = {"arrows": gameResult.song.chart.notes.length, // Playlist XML often lies.
                     "author": gameResult.songInfo.author,
                     "difficulty": gameResult.songInfo.difficulty,
                     "genre": gameResult.songInfo.genre,

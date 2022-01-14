@@ -207,7 +207,7 @@ package classes.chart.parse
                         if (beat.length >= 4)
                             beatPosMS = (beat[3] / 1000);
 
-                        Notes.push(new Note(beat[1], beatPosMS, beat[2] || "blue", beatPos));
+                        notes.push(new Note(beat[1], beatPosMS, beat[2] || "blue", beatPos));
                     }
                 }
             }

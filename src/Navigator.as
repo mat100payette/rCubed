@@ -98,7 +98,10 @@ package
                     onRemoveAllPopupsEvent();
 
                     if (_gvars.options.isEditor)
+                    {
+                        _gvars.options.user = _gvars.activeUser;
                         nextPanel = new GameplayDisplay(_gvars.options);
+                    }
                     else
                     {
                         _gvars.totalSongQueue = _gvars.songQueue.concat();
@@ -111,6 +114,7 @@ package
                     break;
 
                 case Routes.GAME_PLAY:
+                    _gvars.options.user = _gvars.activeUser;
                     nextPanel = new GameplayDisplay(_gvars.options);
                     break;
 

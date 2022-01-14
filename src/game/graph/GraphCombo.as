@@ -34,7 +34,7 @@ package game.graph
             }
             else
             {
-                ratio_x /= song_file.chart.Notes[song_file.chart.Notes.length - 1].frame + 5; // 5 Frame Buffer
+                ratio_x /= song_file.chart.notes[song_file.chart.notes.length - 1].frame + 5; // 5 Frame Buffer
                 ratio_y /= result.max_combo > 0 ? result.max_combo : song_arrows;
                 song_arrows = song_file.totalNotes;
             }

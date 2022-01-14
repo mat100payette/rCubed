@@ -83,13 +83,13 @@ package classes.chart.parse
 
                 // Add Notes
                 if (chunk.charAt(0) == "1" || chunk.charAt(0) == "2")
-                    Notes.push(new Note("L", measure + i / divisor, col));
+                    notes.push(new Note("L", measure + i / divisor, col));
                 if (chunk.charAt(1) == "1" || chunk.charAt(1) == "2")
-                    Notes.push(new Note("D", measure + i / divisor, col));
+                    notes.push(new Note("D", measure + i / divisor, col));
                 if (chunk.charAt(2) == "1" || chunk.charAt(2) == "2")
-                    Notes.push(new Note("U", measure + i / divisor, col));
+                    notes.push(new Note("U", measure + i / divisor, col));
                 if (chunk.charAt(3) == "1" || chunk.charAt(3) == "2")
-                    Notes.push(new Note("R", measure + i / divisor, col));
+                    notes.push(new Note("R", measure + i / divisor, col));
             }
         }
 
@@ -128,7 +128,7 @@ package classes.chart.parse
             {
                 var pos:Number = Number(s.substring(0, s.indexOf("=")));
                 var length:Number = Number(s.substring(s.indexOf("=") + 1));
-                Stops.push(new Stop(pos / 16, length / 1000));
+                stops.push(new Stop(pos / 16, length / 1000));
             }
         }
 

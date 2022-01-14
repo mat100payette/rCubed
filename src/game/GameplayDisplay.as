@@ -209,7 +209,7 @@ package game
         public function init():void
         {
             _song = _options.song;
-            if (!_options.isEditor && _song.chart.Notes.length == 0)
+            if (!_options.isEditor && _song.chart.notes.length == 0)
             {
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
@@ -426,8 +426,8 @@ package game
         private function initCore():void
         {
             // Bound Isolation Note Mod
-            if (_options.isolationOffset >= _song.chart.Notes.length)
-                _options.isolationOffset = _song.chart.Notes.length - 1;
+            if (_options.isolationOffset >= _song.chart.notes.length)
+                _options.isolationOffset = _song.chart.notes.length - 1;
 
             // Song
             _song.updateMusicDelay();

@@ -143,17 +143,16 @@ package classes.replay
                 jsonSettings.scrollSpeed = Number(tempSettings[0]);
                 jsonSettings.scrollDirection = Constant.cleanScrollDirection(tempSettings[2]);
                 jsonSettings.songRate = 1;
+
                 if (tempSettings.length >= 12)
                 {
                     if (tempSettings[11] == "Mirror")
-                    {
                         jsonSettings.activeVisualMods.push("mirror");
-                    }
+
                     else if ((mirrorIndex = jsonSettings.activeVisualMods.indexOf("mirror")) >= 0)
-                    {
                         jsonSettings.activeVisualMods.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
-                    }
                 }
+
                 jsonSettings.globalOffset = 0;
                 jsonSettings.judgeOffset = 0;
                 this.user.settings.update(jsonSettings);
@@ -162,21 +161,19 @@ package classes.replay
             {
                 tempSettings = tempSettings.split(",");
                 for (var ss:int = 0; ss < tempSettings.length; ss++)
-                {
                     tempSettings[ss] = tempSettings[ss].split("|");
-                }
+
                 jsonSettings = _gvars.playerUser.isGuest ? new User().settings : _gvars.playerUser.settings;
                 jsonSettings.scrollSpeed = Number(tempSettings[0][1]);
                 jsonSettings.scrollDirection = Constant.cleanScrollDirection(tempSettings[0][0]);
                 jsonSettings.songRate = 1;
+
                 if (tempSettings[0][2] == "true")
-                {
                     jsonSettings.activeVisualMods.push("mirror");
-                }
+
                 else if ((mirrorIndex = jsonSettings.activeVisualMods.indexOf("mirror")) >= 0)
-                {
                     jsonSettings.activeVisualMods.splice(mirrorIndex, 1); // Remove Mirror is user had it set, but not in the replay.
-                }
+
                 jsonSettings.receptorGap = Number(tempSettings[2][0]);
                 jsonSettings.noteskinId = Number(tempSettings[2][3]);
                 jsonSettings.globalOffset = 0;
@@ -188,6 +185,11 @@ package classes.replay
             else if (data.replayversion == "R^3")
             {
                 this.user.settings.update(JSON.parse(data.replaysettings), UserSettingsCompat.R3_v1_4_REPLAY);
+            }
+
+            if (this.level == 2204)
+            {
+                trace('O');
             }
 
             //- Frames

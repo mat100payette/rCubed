@@ -20,7 +20,7 @@ package classes.chart.parse
             for (var i:int = 0; i < this.chartData.length; i++)
             {
                 var note:Object = this.chartData[i].split(",");
-                this.Notes.push(new Note(note[1], parseInt(note[0], 16) / 30, colorComplete(note[2]), parseInt(note[0], 16) + oldOffsets(id)));
+                this.notes.push(new Note(note[1], parseInt(note[0], 16) / 30, colorComplete(note[2]), parseInt(note[0], 16) + oldOffsets(id)));
             }
         }
 

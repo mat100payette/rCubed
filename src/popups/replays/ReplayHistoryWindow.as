@@ -69,10 +69,10 @@ package popups.replays
 
         override public function stageAdd():void
         {
-            stage.focus = this.stage;
+            stage.focus = stage;
 
             bmp = SpriteUtil.getBitmapSprite(stage);
-            this.addChild(bmp);
+            addChild(bmp);
 
             // background
             box = new Sprite();
@@ -105,7 +105,7 @@ package popups.replays
             box.graphics.moveTo(Main.GAME_WIDTH - 16, 61);
             box.graphics.lineTo(Main.GAME_WIDTH - 16, Main.GAME_HEIGHT);
 
-            this.addChild(box);
+            addChild(box);
 
             // scroll pane
             pane = new ReplayHistoryScrollpane(this, 180, 61, 584, Main.GAME_HEIGHT - 61);
@@ -236,7 +236,7 @@ package popups.replays
                     }
 
                     if (!replay.user.isLoaded())
-                        replay.user.loadFull(_gvars.userSession);
+                        replay.user.loadWithoutSettings();
 
                     _gvars.options = new GameOptions(replay.user);
                     _gvars.options.isolation = false;
