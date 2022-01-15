@@ -7,7 +7,7 @@ package classes
         public function SongPreview(song_id:int)
         {
             super(song_id);
-            this.level = song_id;
+            level = song_id;
         }
 
         public function setupSongPreview(songData:Object = null):void
@@ -15,24 +15,24 @@ package classes
             var _gvars:GlobalVariables = GlobalVariables.instance;
 
             if (!songData)
-                songData = Playlist.instanceCanon.playList[this.level];
+                songData = Playlist.instanceCanon.playList[level];
 
             if (!songData)
                 return;
 
-            this.level = songData.level;
+            level = songData.level;
 
-            this.user = new User(false);
-            this.user.siteId = 1743546;
-            this.user.name = "Song Preview";
-            this.user.skillLevel = _gvars.MAX_DIFFICULTY;
-            this.user.loadAvatar();
+            user = new User(false);
+            user.siteId = 1743546;
+            user.name = "Song Preview";
+            user.skillLevel = _gvars.MAX_DIFFICULTY;
+            user.loadAvatar();
 
-            this.timestamp = Math.floor((new Date()).getTime() / 1000);
-            this.user.settings.update(_gvars.playerUser.settings);
+            timestamp = Math.floor((new Date()).getTime() / 1000);
+            user.settings.update(_gvars.playerUser.settings);
 
-            this.isPreview = true;
-            this.isLoaded = true;
+            isPreview = true;
+            isLoaded = true;
         }
     }
 

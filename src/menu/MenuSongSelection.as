@@ -50,6 +50,7 @@ package menu
     import events.navigation.popups.AddPopupEvent;
     import events.navigation.popups.AddPopupSongNotesEvent;
     import events.navigation.ChangePanelEvent;
+    import classes.replay.Replay;
 
     public class MenuSongSelection extends DisplayLayer
     {
@@ -990,8 +991,6 @@ package menu
          */
         private function onSetAsMenuMusicContextSelected(e:ContextMenuEvent):void
         {
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.fill();
             var songItem:SongItem = (e.contextMenuOwner as SongItem);
             var songInfo:SongInfo = _playlist.getSongInfo(songItem.level);
             if (songInfo != null)
@@ -1015,20 +1014,18 @@ package menu
          */
         private function e_playChartPreviewContextSelect(e:ContextMenuEvent):void
         {
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.fill();
-            _gvars.options.replay = new SongPreview(0);
+            var replay:SongPreview = new SongPreview(0);
 
-            if (!_gvars.options.replay.isLoaded)
+            if (!replay.isLoaded)
             {
-                (_gvars.options.replay as SongPreview).setupSongPreview((e.contextMenuOwner as SongItem).songInfo);
+                replay.setupSongPreview((e.contextMenuOwner as SongItem).songInfo);
             }
 
-            if (_gvars.options.replay.isLoaded)
+            if (replay.isLoaded)
             {
                 // Setup Vars
                 _gvars.songQueue = [];
-                _gvars.songQueue.push(Playlist.instance.getSongInfo(_gvars.options.replay.level));
+                _gvars.songQueue.push(Playlist.instance.getSongInfo(replay.level));
 
                 // Switch to game
                 Alert.add(_lang.string("song_selection_load_play_chart_preview"));
@@ -1043,11 +1040,9 @@ package menu
          */
         private function e_listenToSongPreviewContextSelect(e:ContextMenuEvent):void
         {
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.fill();
-
             var songItem:SongItem = (e.contextMenuOwner as SongItem);
             var songInfo:SongInfo = _playlist.getSongInfo(songItem.level);
+
             if (songInfo != null)
             {
                 var song:Song = _gvars.getSongFile(songInfo, true);
@@ -1568,8 +1563,6 @@ package menu
 
             saveSearchTextAndType();
 
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.fill();
             dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 

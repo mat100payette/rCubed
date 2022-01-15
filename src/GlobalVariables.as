@@ -321,7 +321,7 @@ package
                 songCache.pop();
 
             //- Make new Song
-            var song:Song = new Song(songInfo, preview);
+            var song:Song = new Song(songInfo, preview, activeUser.settings);
 
             //- Push to cache
             if (!preview && engineCache)

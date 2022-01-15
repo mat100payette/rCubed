@@ -49,9 +49,9 @@ package popups.settings
 
             _previousNoteskinId = _settings.noteskinId;
 
-            for (var i:int = 0; i < DEFAULT_SETTINGS.noteColors.length; i++)
+            for (var i:int = 0; i < Constant.DEFAULT_USER_SETTINGS.noteColors.length; i++)
             {
-                const defaultColorName:String = DEFAULT_SETTINGS.noteColors[i];
+                const defaultColorName:String = Constant.DEFAULT_USER_SETTINGS.noteColors[i];
                 const textLocalStringName:String = Lang.OPTIONS_NOTE_COLOR_PREFIX + defaultColorName;
 
                 _noteColorComboItems.push(new NoteColorComboBoxItem(_lang.stringSimple(textLocalStringName), defaultColorName));
@@ -81,7 +81,7 @@ package popups.settings
 
             function addNoteskinColorOption(colorIndex:int):void
             {
-                const defaultColor:String = DEFAULT_SETTINGS.noteColors[colorIndex];
+                const defaultColor:String = Constant.DEFAULT_USER_SETTINGS.noteColors[colorIndex];
                 const currentColor:String = _settings.noteColors[colorIndex];
                 const textLocalStringName:String = Lang.OPTIONS_NOTE_COLOR_PREFIX + defaultColor;
 
@@ -94,7 +94,7 @@ package popups.settings
                 noteColorCombo.setSize(114, 22);
                 noteColorCombo.openPosition = ComboBox.BOTTOM;
                 noteColorCombo.fontSize = 11;
-                noteColorCombo.numVisibleItems = DEFAULT_SETTINGS.noteColors.length;
+                noteColorCombo.numVisibleItems = Constant.DEFAULT_USER_SETTINGS.noteColors.length;
                 noteColorCombo.addEventListener(Event.SELECT, function(e:Event):void
                 {
                     onNoteColorSelected(colorIndex, (noteColorCombo.selectedItem as NoteColorComboBoxItem).colorName);
@@ -179,7 +179,7 @@ package popups.settings
             yOff += 28;
             yOff += drawSeperator(container, xOff, 266, yOff, -3, -4);
 
-            for (var i:int = 0; i < DEFAULT_SETTINGS.noteColors.length; i++)
+            for (var i:int = 0; i < Constant.DEFAULT_USER_SETTINGS.noteColors.length; i++)
                 addNoteskinColorOption(i);
         }
 
@@ -221,10 +221,10 @@ package popups.settings
 
         private function updateNoteImages():void
         {
-            for (var i:int = 0; i < DEFAULT_SETTINGS.noteColors.length; i++)
+            for (var i:int = 0; i < Constant.DEFAULT_USER_SETTINGS.noteColors.length; i++)
             {
                 const noteColorOption:NoteColorOption = _noteColorOptions[i];
-                const defaultColor:String = DEFAULT_SETTINGS.noteColors[i];
+                const defaultColor:String = Constant.DEFAULT_USER_SETTINGS.noteColors[i];
                 const replacedColor:String = _settings.noteColors[i];
 
                 noteColorOption.defaultSprite = replaceNoteImage(noteColorOption.defaultSprite, 22, defaultColor);
@@ -240,7 +240,7 @@ package popups.settings
             for each (var checkOption:NoteskinCheckOption in _noteskinCheckOptions)
                 checkOption.checkbox.checked = (checkOption.noteskinId == _settings.noteskinId);
 
-            for (var i:int = 0; i < DEFAULT_SETTINGS.noteColors.length; i++)
+            for (var i:int = 0; i < Constant.DEFAULT_USER_SETTINGS.noteColors.length; i++)
                 (_noteColorOptions[i] as NoteColorOption).comboBox.selectedItemByData = _settings.noteColors[i];
 
             if (_previousNoteskinId != _settings.noteskinId)

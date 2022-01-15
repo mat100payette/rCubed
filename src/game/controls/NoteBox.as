@@ -149,33 +149,27 @@ package game.controls
         public function spawnArrow(note:Note, currentPosition:int = 0):GameNote
         {
             var direction:String = note.direction;
-            var color:String = options.getNewNoteColor(note.color);
-            if (options.disableNotePool)
+            var color:String = _noteColors[Constant.DEFAULT_USER_SETTINGS.noteColors.indexOf(note.color)];
+
+            var spawnPoolRef:ObjectPool = _notePool[_noteskinId][direction][color];
+            if (!spawnPoolRef)
             {
-                var gameNote:GameNote = new GameNote(_noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, _noteskinId);
+                spawnPoolRef = _notePool[_noteskinId][direction][color] = new ObjectPool();
+            }
+
+            var gameNote:GameNote = spawnPoolRef.getObject();
+            if (gameNote)
+            {
+                gameNote.ID = _noteCount++;
+                gameNote.DIR = direction;
+                gameNote.POSITION = (note.time + 0.5 / 30) * 1000;
+                gameNote.PROGRESS = note.frame;
+                gameNote.alpha = 1;
             }
             else
             {
-                var spawnPoolRef:ObjectPool = _notePool[_noteskinId][direction][color];
-                if (!spawnPoolRef)
-                {
-                    spawnPoolRef = _notePool[_noteskinId][direction][color] = new ObjectPool();
-                }
-
-                gameNote = spawnPoolRef.getObject();
-                if (gameNote)
-                {
-                    gameNote.ID = _noteCount++;
-                    gameNote.DIR = direction;
-                    gameNote.POSITION = (note.time + 0.5 / 30) * 1000;
-                    gameNote.PROGRESS = note.frame;
-                    gameNote.alpha = 1;
-                }
-                else
-                {
-                    gameNote = spawnPoolRef.addObject(new GameNote(_noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, _noteskinId));
-                    addChild(gameNote);
-                }
+                gameNote = spawnPoolRef.addObject(new GameNote(_noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, _noteskinId));
+                addChild(gameNote);
             }
 
             gameNote.SPAWN_PROGRESS = gameNote.POSITION - 1000; // readahead;
@@ -397,15 +391,8 @@ package game.controls
                 removeNoteRef = notes[removeNoteIndex];
                 if (removeNoteRef.ID == id)
                 {
-                    if (!options.disableNotePool)
-                    {
-                        _notePool[removeNoteRef.NOTESKIN][removeNoteRef.DIR][removeNoteRef.COLOR].unmarkObject(removeNoteRef);
-                        removeNoteRef.visible = false;
-                    }
-                    else
-                    {
-                        removeChild(removeNoteRef);
-                    }
+                    _notePool[removeNoteRef.NOTESKIN][removeNoteRef.DIR][removeNoteRef.COLOR].unmarkObject(removeNoteRef);
+                    removeNoteRef.visible = false;
 
                     notes.splice(removeNoteIndex, 1);
                     break;
@@ -417,15 +404,8 @@ package game.controls
         {
             for each (var note:GameNote in notes)
             {
-                if (!options.disableNotePool)
-                {
-                    _notePool[note.NOTESKIN][note.DIR][note.COLOR].unmarkObject(note);
-                    note.visible = false;
-                }
-                else
-                {
-                    removeChild(note);
-                }
+                _notePool[note.NOTESKIN][note.DIR][note.COLOR].unmarkObject(note);
+                note.visible = false;
             }
 
             notes = new Array();

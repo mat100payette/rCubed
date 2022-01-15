@@ -31,12 +31,14 @@ package classes
         private var _columnColor:Boolean;
         private var _halftime:Boolean;
         private var _noBackground:Boolean;
+        private var _flashlight:Boolean;
 
         public function GameMods(settings:UserSettings)
         {
             var mods:Array = settings.activeMods;
             var visualMods:Array = settings.activeVisualMods;
 
+            // Game mods
             _hidden = ArrayUtil.containsAny(mods, ["hidden"]);
             _sudden = ArrayUtil.containsAny(mods, ["sudden"]);
             _blink = ArrayUtil.containsAny(mods, ["blink"]);
@@ -62,6 +64,7 @@ package classes
             _columnColor = ArrayUtil.containsAny(visualMods, ["columncolour"]);
             _halftime = ArrayUtil.containsAny(visualMods, ["halftime"]);
             _noBackground = ArrayUtil.containsAny(visualMods, ["nobackground"]);
+            _flashlight = ArrayUtil.containsAny(visualMods, ["flashlight"]);
         }
 
         public function get hidden():Boolean
@@ -177,6 +180,11 @@ package classes
         public function get noBackground():Boolean
         {
             return _noBackground;
+        }
+
+        public function get flashlight():Boolean
+        {
+            return _flashlight;
         }
     }
 }

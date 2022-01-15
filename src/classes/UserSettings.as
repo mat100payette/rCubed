@@ -90,6 +90,8 @@ package classes
         public var songRate:Number = 1;
         public var isolationOffset:int = 1;
         public var isolationLength:int = 0;
+        public var judgeWindow:Array = [];
+        public var layout:Object = {};
 
         public var songQueues:Vector.<Object> = new <Object>[];
         public var filters:Vector.<EngineLevelFilter> = new <EngineLevelFilter>[];
@@ -118,6 +120,11 @@ package classes
         public function get isLiteUser():Boolean
         {
             return _isLiteUser;
+        }
+
+        public function get mods():GameMods
+        {
+            return new GameMods(this);
         }
 
         /**

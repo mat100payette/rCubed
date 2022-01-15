@@ -217,8 +217,8 @@ package popups.settings
 
         public function checkValidMods():void
         {
-            _gameOptionsTest.fill();
-            _txtModWarning.visible = !_gameOptionsTest.isScoreValid();
+            // TODO: Refactor the score validation somewhere
+            //_txtModWarning.visible = !_user.settings.isScoreValid();
         }
 
         private function onManageSettingsWindowClosed(window:ManageSettingsWindow):void
@@ -329,16 +329,11 @@ package popups.settings
 
         private function openEditor(user:User, fakeMPRoom:Room):void
         {
-            _gvars.options = new GameOptions(user);
-            _gvars.options.isEditor = true;
-            _gvars.options.mpRoom = fakeMPRoom;
-
             const tempSongInfo:SongInfo = new SongInfo();
             tempSongInfo.level = 1337;
             tempSongInfo.chart_type = "EDITOR";
-            _gvars.options.song = new Song(tempSongInfo);
+            var song:Song = new Song(tempSongInfo, false, user.settings);
 
-            _gvars.options.fill();
             dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 

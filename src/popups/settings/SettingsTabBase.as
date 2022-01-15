@@ -13,8 +13,6 @@ package popups.settings
     {
         public var container:ScrollPaneContent;
 
-        protected const DEFAULT_SETTINGS:UserSettings = new UserSettings();
-
         protected var _parent:SettingsWindow;
         protected var _settings:UserSettings;
         protected var _options:Object = {};

@@ -6,6 +6,7 @@ package
     import flash.text.StyleSheet;
     import flash.text.TextFormat;
     import flash.text.TextFormatAlign;
+    import classes.UserSettings;
 
     public class Constant
     {
@@ -89,6 +90,7 @@ package
         public static const NOTESKIN_EDITOR_URL:String = ROOT_URL + "~velocity/ffrjs/noteskin";
         public static const WEBSOCKET_OVERLAY_URL:String = "https://github.com/flashflashrevolution/web-stream-overlay";
         public static const LEGACY_GENRE:int = 13;
+        public static const DEFAULT_USER_SETTINGS:UserSettings = new UserSettings();
         public static const JUDGE_WINDOW:Array = [{t: -118, s: 5, f: -3},
             {t: -85, s: 25, f: -2},
             {t: -51, s: 50, f: -1},

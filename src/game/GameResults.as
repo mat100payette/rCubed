@@ -52,6 +52,8 @@ package game
     import events.navigation.popups.AddPopupSongNotesEvent;
     import events.navigation.popups.AddPopupEvent;
     import events.navigation.ChangePanelEvent;
+    import classes.GameMods;
+    import classes.Room;
 
     public class GameResults extends DisplayLayer
     {
@@ -72,6 +74,8 @@ package game
         private var _settings:UserSettings;
         private var _isReplay:Boolean;
         private var _isReplayEdited:Boolean;
+        private var _isAutoplay:Boolean;
+        private var _mpRoom:Room;
 
         // Results
         private var _resultsTime:String = TimeUtil.getCurrentDate();
@@ -106,13 +110,15 @@ package game
         private var _navHighscores:BoxButton;
         private var _navMenu:BoxButton;
 
-        public function GameResults(settings:UserSettings, isReplay:Boolean, isReplayValid:Boolean)
+        public function GameResults(settings:UserSettings, isReplay:Boolean, isReplayValid:Boolean, isAutoplay:Boolean, mpRoom:Room)
         {
             _settings = new UserSettings();
             _settings.update(settings);
 
             _isReplay = isReplay;
             _isReplayEdited = isReplayValid;
+            _isAutoplay = isAutoplay;
+            _mpRoom = mpRoom;
 
             _songResults = _gvars.songResults.concat();
 
@@ -256,7 +262,7 @@ package game
             // Display Game Result
             displayGameResult(_songResults.length > 1 ? -1 : 0);
 
-            _mp.gameplayResults(this, _songResults);
+            _mp.gameplayResults(_mpRoom, this, _songResults);
         }
 
         override public function dispose():void
@@ -849,6 +855,32 @@ package game
         // Score Saving
         //******************************************************************************************//
 
+        public function isScoreValid(score:Boolean = true, replay:Boolean = true):Boolean
+        {
+            var mods:GameMods = _settings.mods;
+            var ret:Boolean = false;
+
+            // TODO: Make array element equality for judgeWindow
+            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_USER_SETTINGS.judgeWindow);
+
+            ret ||= replay && (mods.reverse || _settings.isolationOffset > 0 || _settings.isolationLength > 0);
+
+            return !ret;
+        }
+
+        public function isScoreUpdated(score:Boolean = true, replay:Boolean = true):Boolean
+        {
+            var mods:GameMods = _settings.mods;
+            var ret:Boolean = false;
+
+            // TODO: Make array element equality for judgeWindow
+            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_USER_SETTINGS.judgeWindow);
+
+            ret ||= replay && (_settings.songRate != 1 || mods.reverse);
+
+            return !ret;
+        }
+
         /**
          * Calculates if a given score is valid and can be saved on the server. Depending on the flags,
          * this checks different criteria.
@@ -862,8 +894,8 @@ package game
         private function canSendScore(result:GameScoreResult, valid_score:Boolean = true, valid_replay:Boolean = true, check_replay:Boolean = true, check_alt_engine:Boolean = true):Boolean
         {
             var ret:Boolean = false;
-            ret ||= valid_score && !result.options.isScoreValid(true, false);
-            ret ||= valid_replay && !result.options.isScoreValid(false, true);
+            ret ||= valid_score && !isScoreValid(true, false);
+            ret ||= valid_replay && !isScoreValid(false, true);
             ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (_isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
@@ -883,8 +915,8 @@ package game
         private function canUpdateScore(result:GameScoreResult, valid_score:Boolean = true, valid_replay:Boolean = true, check_replay:Boolean = true, check_alt_engine:Boolean = true):Boolean
         {
             var ret:Boolean = false;
-            ret ||= valid_score && !result.options.isScoreUpdated(true, false);
-            ret ||= valid_replay && !result.options.isScoreUpdated(false, true);
+            ret ||= valid_score && !isScoreUpdated(true, false);
+            ret ||= valid_replay && !isScoreUpdated(false, true);
             ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (_isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;

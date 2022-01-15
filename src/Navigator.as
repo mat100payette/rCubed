@@ -30,6 +30,11 @@ package
     import flash.events.IEventDispatcher;
     import flash.concurrent.Mutex;
     import flash.events.Event;
+    import classes.chart.Song;
+    import classes.User;
+    import classes.replay.Replay;
+    import classes.Room;
+    import classes.UserSettings;
 
     public class Navigator extends Sprite implements IDisposable
     {
@@ -96,29 +101,58 @@ package
                 case Routes.PANEL_GAME_MENU:
                     onRemoveAllPopupsEvent();
 
-                    if (_gvars.options.isEditor)
+                    // TODO: Get from event
+                    var isEditor2:Boolean = false;
+
+                    if (isEditor2)
                     {
-                        _gvars.options.user = _gvars.activeUser;
-                        nextPanel = new GameplayDisplay(_gvars.options);
+                        // TODO: Get from event
+                        var song2:Song;
+                        var user2:User;
+                        var isAutoplay2:Boolean;
+                        var replay2:Replay;
+                        var mpRoom2:Room;
+
+                        nextPanel = new GameplayDisplay(song2, user2, isEditor2, isAutoplay2, replay2, mpRoom2);
                     }
                     else
                     {
-                        _gvars.totalSongQueue = _gvars.songQueue.concat();
-                        nextPanel = new GameLoading();
+                        var song3:Song;
+
+                        // TODO: What does this do
+                        //_gvars.totalSongQueue = _gvars.songQueue.concat();
+
+                        nextPanel = new GameLoading(song3);
                     }
                     break;
 
                 case Routes.GAME_LOADING:
-                    nextPanel = new GameLoading();
+                    var song4:Song;
+
+                    nextPanel = new GameLoading(song4);
                     break;
 
                 case Routes.GAME_PLAY:
-                    _gvars.options.user = _gvars.activeUser;
-                    nextPanel = new GameplayDisplay(_gvars.options);
+                    var isEditor5:Boolean = false;
+
+                    var song5:Song;
+                    var user5:User;
+                    var isAutoplay5:Boolean;
+                    var replay5:Replay;
+                    var mpRoom5:Room;
+
+                    nextPanel = new GameplayDisplay(song5, user5, isEditor5, isAutoplay5, replay5, mpRoom5);
                     break;
 
                 case Routes.GAME_RESULTS:
-                    nextPanel = new GameResults();
+                    // TODO: Get from event
+                    var settings1:UserSettings;
+                    var isReplay1:Boolean;
+                    var isReplayValid1:Boolean;
+                    var isAutoplay1:Boolean;
+                    var mpRoom1:Room;
+
+                    nextPanel = new GameResults(settings1, isReplay1, isReplayValid1, isAutoplay1, mpRoom1);
                     break;
             }
 
