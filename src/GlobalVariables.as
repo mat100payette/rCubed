@@ -29,7 +29,6 @@ package
     import flash.net.URLVariables;
     import flash.system.Capabilities;
     import flash.utils.ByteArray;
-    import game.GameOptions;
     import game.GameScoreResult;
     import classes.ui.WindowProperties;
 
@@ -47,8 +46,6 @@ package
 
         public var gameMain:Main;
 
-        public var options:GameOptions;
-
         ///- Game Data
         public var TOTAL_GENRES:uint = 13;
         public var TOTAL_SONGS:uint = 0;
@@ -64,8 +61,6 @@ package
         public var NONPUBLIC_GENRES:Array = [];
         public var TOKENS:Object = {};
         public var TOKENS_TYPE:Object = {};
-        public var GAME_MODS:Array = ["hidden", "sudden", "blink", "----", "rotating", "rotate_cw", "rotate_ccw", "wave", "drunk", "tornado", "mini_resize", "tap_pulse", "----", "random", "scramble", "shuffle", "reverse"];
-        public var VISUAL_MODS:Array = ["mirror", "dark", "hide", "mini", "columncolor", "halftime", "----", "nobackground"];
         public var songStartTime:String = "0";
         public var songStartHash:String = "0";
         public var songCache:Array = [];

@@ -1,43 +1,31 @@
 package classes.chart
 {
-    import game.GameOptions;
     import game.GameplayDisplay;
+    import classes.UserSettings;
 
     /**
      * @author FictionVoid
      */
     public class LevelScriptRuntime implements ILevelScriptRuntime
     {
-        private var options:GameOptions;
-        private var gameplay:GameplayDisplay;
-        private var level_script:ILevelScript;
+        private var _settings:UserSettings;
+        private var _levelScript:ILevelScript;
 
-        public function LevelScriptRuntime(gameplay:GameplayDisplay, script:ILevelScript)
+        public function LevelScriptRuntime(settings:UserSettings, script:ILevelScript)
         {
-            this.options = gameplay.getScriptVariable("options") as GameOptions;
-            this.gameplay = gameplay;
-            this.level_script = script;
-            level_script.init(this);
+            _settings = settings;
+            _levelScript = script;
+            _levelScript.init(this);
         }
 
         public function doProgressTick(frame:int):void
         {
-            level_script.doFrameEvent(frame);
+            _levelScript.doFrameEvent(frame);
         }
 
         public function destroy():void
         {
 
-        }
-
-        public function getOptions():GameOptions
-        {
-            return options;
-        }
-
-        public function getGameplay():GameplayDisplay
-        {
-            return gameplay;
         }
 
         public function registerNoteskin(json_data:String):Boolean
@@ -52,22 +40,22 @@ package classes.chart
 
         public function addMod(mod:String):void
         {
-            options.modCache[mod] = true;
+            _settings.modCache[mod] = true;
         }
 
         public function removeMod(mod:String):void
         {
-            delete options.modCache[mod];
+            delete _settings.modCache[mod];
         }
 
         public function setNotescale(value:Number):void
         {
-            options.settings.noteScale = value;
+            _settings.noteScale = value;
         }
 
         public function setNoteskin(id:int):void
         {
-            options.settings.noteskinId = id;
+            _settings.noteskinId = id;
         }
 
         public function setNotePool(enabled:Boolean):void

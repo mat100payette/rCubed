@@ -6,73 +6,78 @@ package game.controls
     import flash.text.TextFormat;
     import flash.text.TextFieldAutoSize;
     import flash.text.AntiAliasType;
-    import game.GameOptions;
     import classes.Language;
 
     public class Combo extends Sprite
     {
-        private var options:GameOptions;
+        private var _isAutoplay:Boolean;
 
-        private var colors:Vector.<Number>;
-        private var colors_dark:Vector.<Number>;
-        private var colors_enabled:Vector.<Boolean>;
+        private var _rawGoodsThreshold:Boolean;
 
-        private var field:TextField;
-        private var fieldShadow:TextField;
+        private var _colors:Vector.<Number>;
+        private var _colorsDark:Vector.<Number>;
+        private var _colorsEnabled:Vector.<Boolean>;
 
-        public function Combo(options:GameOptions)
+        private var _field:TextField;
+        private var _fieldShadow:TextField;
+
+        // TODO: Here "isActive" means "!options.isEditor && !options.mpRoom"
+        public function Combo(colors:Array, enabledCombos:Array, isAutoplay:Boolean, rawGoodsThreshold:int)
         {
-            this.options = options;
+            _isAutoplay = isAutoplay;
+            _rawGoodsThreshold = rawGoodsThreshold;
+
+            var colorCount:int = colors.length;
 
             // Copy Combo Colors
-            colors = new Vector.<Number>(options.settings.comboColors.length, true);
-            colors_dark = new Vector.<Number>(options.settings.comboColors.length, true);
-            for (var i:int = 0; i < options.settings.comboColors.length; i++)
+            _colors = new Vector.<Number>(colorCount, true);
+            _colorsDark = new Vector.<Number>(colorCount, true);
+            for (var i:int = 0; i < colorCount; i++)
             {
-                colors[i] = options.settings.comboColors[i];
-                colors_dark[i] = ColorUtil.darkenColor(options.settings.comboColors[i], 0.5);
+                _colors[i] = colors[i];
+                _colorsDark[i] = ColorUtil.darkenColor(colors[i], 0.5);
             }
 
             // Copy Enabled Colors
-            colors_enabled = new Vector.<Boolean>(options.settings.enableComboColors.length, true);
-            for (i = 0; i < options.settings.enableComboColors.length; i++)
+            _colorsEnabled = new Vector.<Boolean>(colorCount, true);
+            for (i = 0; i < enabledCombos.length; i++)
             {
-                colors_enabled[i] = options.settings.enableComboColors[i];
+                _colorsEnabled[i] = enabledCombos[i];
             }
 
-            fieldShadow = new TextField();
-            fieldShadow.defaultTextFormat = new TextFormat(Language.UNI_FONT_NAME, 50, colors_dark[2], true);
-            fieldShadow.antiAliasType = AntiAliasType.ADVANCED;
-            fieldShadow.embedFonts = true;
-            fieldShadow.selectable = false;
-            fieldShadow.autoSize = TextFieldAutoSize.LEFT;
-            fieldShadow.x = 2;
-            fieldShadow.y = 2;
-            fieldShadow.text = "0";
-            addChild(fieldShadow);
+            _fieldShadow = new TextField();
+            _fieldShadow.defaultTextFormat = new TextFormat(Language.UNI_FONT_NAME, 50, _colorsDark[2], true);
+            _fieldShadow.antiAliasType = AntiAliasType.ADVANCED;
+            _fieldShadow.embedFonts = true;
+            _fieldShadow.selectable = false;
+            _fieldShadow.autoSize = TextFieldAutoSize.LEFT;
+            _fieldShadow.x = 2;
+            _fieldShadow.y = 2;
+            _fieldShadow.text = "0";
+            addChild(_fieldShadow);
 
-            field = new TextField();
-            field.defaultTextFormat = new TextFormat(Language.UNI_FONT_NAME, 50, colors[2], true);
-            field.antiAliasType = AntiAliasType.ADVANCED;
-            field.embedFonts = true;
-            field.selectable = false;
-            field.autoSize = TextFieldAutoSize.LEFT;
-            field.x = 0;
-            field.y = 0;
-            field.text = "0";
-            addChild(field);
+            _field = new TextField();
+            _field.defaultTextFormat = new TextFormat(Language.UNI_FONT_NAME, 50, _colors[2], true);
+            _field.antiAliasType = AntiAliasType.ADVANCED;
+            _field.embedFonts = true;
+            _field.selectable = false;
+            _field.autoSize = TextFieldAutoSize.LEFT;
+            _field.x = 0;
+            _field.y = 0;
+            _field.text = "0";
+            addChild(_field);
 
-            if (options && options.isAutoplay && !options.isEditor && !options.mpRoom)
+            if (_isAutoplay)
             {
-                field.textColor = 0xD00000;
-                fieldShadow.textColor = 0x5B0000;
+                _field.textColor = 0xD00000;
+                _fieldShadow.textColor = 0x5B0000;
             }
         }
 
         public function update(combo:int, amazing:int = 0, perfect:int = 0, good:int = 0, average:int = 0, miss:int = 0, boo:int = 0, raw_goods:Number = 0):void
         {
-            field.text = combo.toString();
-            fieldShadow.text = combo.toString();
+            _field.text = combo.toString();
+            _fieldShadow.text = combo.toString();
 
             /* colors[i]:
                [0] = Normal,
@@ -86,60 +91,60 @@ package game.controls
                [8] = Raw Goods
              */
 
-            if (options && (!options.isAutoplay || options.isEditor || options.mpRoom))
+            if (!_isAutoplay)
             {
-                if (colors_enabled[2] && good + average + boo + miss == 0) // Display AAA color
+                if (_colorsEnabled[2] && good + average + boo + miss == 0) // Display AAA color
                 {
-                    field.textColor = colors[2];
-                    fieldShadow.textColor = colors_dark[2];
+                    _field.textColor = _colors[2];
+                    _fieldShadow.textColor = _colorsDark[2];
                 }
-                else if (colors_enabled[6] && boo == 1 && good + average + miss == 0) // Display Boo Flag color
+                else if (_colorsEnabled[6] && boo == 1 && good + average + miss == 0) // Display Boo Flag color
                 {
-                    field.textColor = colors[6];
-                    fieldShadow.textColor = colors_dark[6];
+                    _field.textColor = _colors[6];
+                    _fieldShadow.textColor = _colorsDark[6];
                 }
-                else if (colors_enabled[4] && good == 1 && average + boo + miss == 0) // Display Black Flag color
+                else if (_colorsEnabled[4] && good == 1 && average + boo + miss == 0) // Display Black Flag color
                 {
-                    field.textColor = colors[4];
-                    fieldShadow.textColor = colors_dark[4];
+                    _field.textColor = _colors[4];
+                    _fieldShadow.textColor = _colorsDark[4];
                 }
-                else if (colors_enabled[5] && average == 1 && good + boo + miss == 0) // Display Average Flag color
+                else if (_colorsEnabled[5] && average == 1 && good + boo + miss == 0) // Display Average Flag color
                 {
-                    field.textColor = colors[5];
-                    fieldShadow.textColor = colors_dark[5];
+                    _field.textColor = _colors[5];
+                    _fieldShadow.textColor = _colorsDark[5];
                 }
-                else if (colors_enabled[7] && miss == 1 && good + average + boo == 0) // Display Miss Flag color
+                else if (_colorsEnabled[7] && miss == 1 && good + average + boo == 0) // Display Miss Flag color
                 {
-                    field.textColor = colors[7];
-                    fieldShadow.textColor = colors_dark[7];
+                    _field.textColor = _colors[7];
+                    _fieldShadow.textColor = _colorsDark[7];
                 }
-                else if (colors_enabled[8] && raw_goods >= options.settings.rawGoodTracker) // Display color for raw good tracker
+                else if (_colorsEnabled[8] && raw_goods >= _rawGoodsThreshold) // Display color for raw good tracker
                 {
-                    field.textColor = colors[8];
-                    fieldShadow.textColor = colors_dark[8];
+                    _field.textColor = _colors[8];
+                    _fieldShadow.textColor = _colorsDark[8];
                 }
-                else if (colors_enabled[3] && raw_goods < 10) // Display SDG color if raw goods < 10
+                else if (_colorsEnabled[3] && raw_goods < 10) // Display SDG color if raw goods < 10
                 {
-                    field.textColor = colors[3];
-                    fieldShadow.textColor = colors_dark[3];
+                    _field.textColor = _colors[3];
+                    _fieldShadow.textColor = _colorsDark[3];
                 }
-                else if (colors_enabled[1] && miss == 0) // Display green for FC
+                else if (_colorsEnabled[1] && miss == 0) // Display green for FC
                 {
-                    field.textColor = colors[1];
-                    fieldShadow.textColor = colors_dark[1];
+                    _field.textColor = _colors[1];
+                    _fieldShadow.textColor = _colorsDark[1];
                 }
                 else // Display blue combo text
                 {
-                    field.textColor = colors[0];
-                    fieldShadow.textColor = colors_dark[0];
+                    _field.textColor = _colors[0];
+                    _fieldShadow.textColor = _colorsDark[0];
                 }
             }
         }
 
         public function set alignment(autosize:String):void
         {
-            field.autoSize = autosize;
-            fieldShadow.autoSize = autosize;
+            _field.autoSize = autosize;
+            _fieldShadow.autoSize = autosize;
         }
     }
 }

@@ -21,7 +21,6 @@ package
     import menu.MainMenu;
     import game.GameplayDisplay;
     import game.GameLoading;
-    import game.GameReplay;
     import game.GameResults;
     import com.greensock.TweenLite;
     import assets.GameBackgroundColor;
@@ -116,10 +115,6 @@ package
                 case Routes.GAME_PLAY:
                     _gvars.options.user = _gvars.activeUser;
                     nextPanel = new GameplayDisplay(_gvars.options);
-                    break;
-
-                case Routes.GAME_REPLAY:
-                    nextPanel = new GameReplay();
                     break;
 
                 case Routes.GAME_RESULTS:

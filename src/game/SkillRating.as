@@ -26,7 +26,7 @@ package game
             {
                 songweight = Math.pow((delta - rawgoods * LAMBDA) / delta * Math.pow(difficulty + ALPHA, BETA), 1 / BETA) - ALPHA;
             }
-            if (songweight < 0 || result.score <= 0 || result.options.settings.songRate != 1 || result.songInfo.engine != null)
+            if (songweight < 0 || result.score <= 0 || result.user.settings.songRate != 1 || result.songInfo.engine != null)
                 songweight = 0;
             return songweight;
         }

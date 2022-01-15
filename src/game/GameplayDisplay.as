@@ -59,6 +59,9 @@ package game
     import sql.SQLSongUserInfo;
     import flash.text.TextFieldAutoSize;
     import events.navigation.ChangePanelEvent;
+    import classes.UserSettings;
+    import classes.replay.Replay;
+    import com.flashfla.utils.VectorUtil;
 
     public class GameplayDisplay extends DisplayLayer
     {
@@ -93,8 +96,14 @@ package game
 
         private var _loader:URLLoader;
 
+        private var _isEditor:Boolean;
+        private var _isAutoplay:Boolean;
+        private var _replay:Replay;
+
         private var _keys:Array;
         private var _song:Song;
+        private var _user:User;
+        private var _settings:UserSettings;
         private var _songBackground:MovieClip;
         private var _legacyMode:Boolean;
         private var _levelScript:LevelScriptRuntime;
@@ -148,7 +157,6 @@ package game
 
         private var _quitDoubleTap:int = -1;
 
-        private var _options:GameOptions;
         private var _mpSpectate:Boolean;
 
         private var _gameLastNoteFrame:Number;
@@ -191,7 +199,7 @@ package game
 
         private var _keyHints:Array;
 
-        private var _GAME_STATE:uint = GAME_PLAY;
+        private var _gameState:uint = GAME_PLAY;
 
         private var _socketSongMessage:Object = {};
         private var _socketScoreMessage:Object = {};
@@ -200,21 +208,28 @@ package game
         private var _gpuPixelBitmapData:BitmapData;
         private var _gpuPixelBitmap:Bitmap;
 
-        public function GameplayDisplay(gameOptions:GameOptions)
+        public function GameplayDisplay(song:Song, user:User, isEditor:Boolean, isAutoplay:Boolean, replay:Replay)
         {
-            _options = gameOptions;
+            _song = song;
+            _user = user;
+            _settings = new UserSettings();
+            _settings.update(_user.settings);
+
+            _isEditor = isEditor;
+            _isAutoplay = isAutoplay;
+            _replay = replay;
+
             init();
         }
 
         public function init():void
         {
-            _song = _options.song;
-            if (!_options.isEditor && _song.chart.notes.length == 0)
+            if (!_isEditor && _song.chart.notes.length == 0)
             {
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
-                var screen:int = _options.settings.startUpScreen;
-                if (!_options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
+                var screen:int = _user.settings.startUpScreen;
+                if (!_user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
                 {
                     MultiplayerState.instance.connection.connect();
                 }
@@ -224,30 +239,22 @@ package game
 
             // --- Per Song Options
             var perSongOptions:SQLSongUserInfo = SQLQueries.getSongUserInfo(_song.songInfo);
-            if (perSongOptions != null && !_options.isEditor && !_options.replay)
+            if (perSongOptions != null && !_isEditor && !_replay)
             {
-                _options.fill(); // Reset
-
                 // Custom Offsets
                 if (perSongOptions.set_custom_offsets)
                 {
-                    _options.settings.judgeOffset = perSongOptions.offset_judge;
-                    _options.settings.globalOffset = perSongOptions.offset_music;
+                    _user.settings.judgeOffset = perSongOptions.offset_judge;
+                    _user.settings.globalOffset = perSongOptions.offset_music;
                 }
 
                 // Invert Mirror Mod
                 if (perSongOptions.set_mirror_invert)
                 {
-                    if (_options.modEnabled("mirror"))
-                    {
-                        _options.settings.activeMods.removeAt(_options.settings.activeMods.indexOf("mirror"));
-                        delete _options.modCache["mirror"];
-                    }
+                    if (_settings.modEnabled("mirror"))
+                        _settings.activeMods.removeAt(_settings.activeMods.indexOf("mirror"));
                     else
-                    {
-                        _options.settings.activeMods.push("mirror");
-                        _options.modCache["mirror"] = true;
-                    }
+                        _settings.activeMods.push("mirror");
                 }
             }
         }
@@ -269,15 +276,15 @@ package game
 
             // Prebuild Websocket Message, this is updated instead of creating a new object every message.
             _socketSongMessage = {"player": {
-                        "settings": _options.settings.stringify(),
-                        "name": _options.user.name,
-                        "userid": _options.user.siteId,
-                        "avatar": Constant.USER_AVATAR_URL + "?uid=" + _options.user.siteId,
-                        "skill_rating": _options.user.skillRating,
-                        "skill_level": _options.user.skillLevel,
-                        "game_rank": _options.user.gameRank,
-                        "game_played": _options.user.gamesPlayed,
-                        "game_grand_total": _options.user.grandTotal
+                        "settings": _settings.stringify(),
+                        "name": _user.name,
+                        "userid": _user.siteId,
+                        "avatar": Constant.USER_AVATAR_URL + "?uid=" + _user.siteId,
+                        "skill_rating": _user.skillRating,
+                        "skill_level": _user.skillLevel,
+                        "game_rank": _user.gameRank,
+                        "game_played": _user.gamesPlayed,
+                        "game_grand_total": _user.grandTotal
                     },
                     "engine": (_song.songInfo.engine == null ? null : {"id": _song.songInfo.engine.id,
                             "name": _song.songInfo.engine.name,
@@ -305,7 +312,7 @@ package game
                         "note_count": _song.totalNotes,
                         "nps_avg": (_song.totalNotes / _song.chartTime)
                     },
-                    "best_score": _options.user.getLevelRank(_song.songInfo)};
+                    "best_score": _user.getLevelRank(_song.songInfo)};
 
             _socketScoreMessage = {"amazing": 0,
                     "perfect": 0,
@@ -320,7 +327,7 @@ package game
                     "last_hit": null};
 
             // Set Defaults for Editor Mode
-            if (_options.isEditor)
+            if (_isEditor)
             {
                 _socketSongMessage["song"]["name"] = "Editor Mode";
                 _socketSongMessage["song"]["author"] = "rCubed Engine";
@@ -343,7 +350,7 @@ package game
             if (_options.mpRoom)
             {
                 MultiplayerState.instance.gameplayPlaying(this);
-                if (!_options.isEditor)
+                if (!_isEditor)
                 {
                     _options.singleplayer = false; // Back to multiplayer lobby
                     _options.mpRoom.connection.addEventListener(Multiplayer.EVENT_GAME_UPDATE, onMultiplayerUpdate);
@@ -355,23 +362,24 @@ package game
             {
                 _options.singleplayer = true; // Back to song selection
             }
-            stage.focus = this.stage;
+
+            stage.focus = stage;
 
             interfaceSetup();
 
             _gvars.gameMain.disablePopups = true;
 
-            if (!_options.isEditor && !_options.replay && !_mpSpectate)
+            if (!_isEditor && !_replay && !_mpSpectate)
                 Mouse.hide();
 
             if (_song.songInfo && _song.songInfo.name)
                 stage.nativeWindow.title = Constant.AIR_WINDOW_TITLE + " - " + _song.songInfo.name;
 
             // Add onEnterFrame Listeners
-            if (_options.isEditor)
+            if (_isEditor)
             {
-                _options.isAutoplay = true;
-                stage.frameRate = _options.settings.frameRate;
+                _isAutoplay = true;
+                stage.frameRate = _settings.frameRate;
                 stage.addEventListener(Event.ENTER_FRAME, editorOnEnterFrame, false, int.MAX_VALUE - 10, true);
                 stage.addEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown, false, int.MAX_VALUE - 10, true);
             }
@@ -387,9 +395,8 @@ package game
         override public function dispose():void
         {
             stage.frameRate = 60;
-            if (_options.isEditor)
+            if (_isEditor)
             {
-                _options.settings.screencutPosition = _options.settings.screencutPosition;
                 stage.removeEventListener(Event.ENTER_FRAME, editorOnEnterFrame);
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown);
             }
@@ -409,7 +416,7 @@ package game
             _gvars.gameMain.disablePopups = false;
 
             // Disable Editor mode when leaving editor.
-            _options.isEditor = false;
+            _isEditor = false;
 
             Mouse.show();
         }
@@ -426,24 +433,24 @@ package game
         private function initCore():void
         {
             // Bound Isolation Note Mod
-            if (_options.isolationOffset >= _song.chart.notes.length)
-                _options.isolationOffset = _song.chart.notes.length - 1;
+            if (_settings.isolationOffset >= _song.chart.notes.length)
+                _settings.isolationOffset = _song.chart.notes.length - 1;
 
             // Song
             _song.updateMusicDelay();
             _legacyMode = (_song.type == NoteChart.FFR || _song.type == NoteChart.FFR_RAW || _song.type == NoteChart.FFR_LEGACY);
-            if (_song.music && (_legacyMode || !_options.modEnabled("nobackground")))
+            if (_song.music && (_legacyMode || !_settings.modEnabled("nobackground")))
             {
                 _songBackground = _song.music as MovieClip;
                 _gameSongFrames = _songBackground.totalFrames;
                 _songBackground.x = 115;
                 _songBackground.y = 42.5;
-                this.addChild(_songBackground);
-                if (_options.modEnabled("nobackground"))
+                addChild(_songBackground);
+                if (_settings.modEnabled("nobackground"))
                     setChildIndex(_songBackground, 0);
             }
             _song.start();
-            _songDelay = _song.mp3Frame / _options.settings.songRate * 1000 / 30 - _globalOffset;
+            _songDelay = _song.mp3Frame / _settings.songRate * 1000 / 30 - _globalOffset;
         }
 
         private function initBackground():void
@@ -451,7 +458,7 @@ package game
             // Anti-GPU Rampdown Hack
             _gpuPixelBitmapData = new BitmapData(1, 1, false, 0x010101);
             _gpuPixelBitmap = new Bitmap(_gpuPixelBitmapData);
-            this.addChild(_gpuPixelBitmap);
+            addChild(_gpuPixelBitmap);
 
             stage.color = GameBackgroundColor.BG_STAGE;
 
@@ -466,11 +473,11 @@ package game
 
         private function initUI():void
         {
-            _noteBox = new NoteBox(_song, _options);
+            _noteBox = new NoteBox(_song, _settings);
             _noteBox.position();
-            this.addChild(_noteBox);
+            addChild(_noteBox);
 
-            if (!_options.isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
+            if (!_isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
             {
                 var isInSoloMode:Boolean = true;
                 MultiplayerState.instance.connection.disconnect(isInSoloMode);
@@ -504,68 +511,68 @@ package game
             buildScreenCut();
 
             _gameplayUI = (_sideScroll ? new viewLR() : new viewUD());
-            this.addChild(_gameplayUI);
+            addChild(_gameplayUI);
 
-            if (!_options.settings.displayGameTopBar)
+            if (!_settings.displayGameTopBar)
                 _gameplayUI.top_bar.visible = false;
 
-            if (!_options.settings.displayGameBottomBar)
+            if (!_settings.displayGameBottomBar)
                 _gameplayUI.bottom_bar.visible = false;
 
-            if (!_options.settings.displayGameTopBar && !_options.settings.displayGameBottomBar)
+            if (!_settings.displayGameTopBar && !_settings.displayGameBottomBar)
                 _gameplayUI.visible = false;
 
-            if (_options.settings.displayPACount)
+            if (_settings.displayPACount)
             {
-                _player1PAWindow = new PAWindow(_options);
+                _player1PAWindow = new PAWindow(_settings.displayAmazing, _settings.judgeColors);
                 if (_sideScroll)
                     _player1PAWindow.alternateLayout();
-                this.addChild(_player1PAWindow);
+                addChild(_player1PAWindow);
             }
 
-            if (_options.settings.displayScore)
+            if (_settings.displayScore)
             {
-                _score = new Score(_options);
-                this.addChild(_score);
+                _score = new Score();
+                addChild(_score);
             }
 
-            if (_options.settings.displayCombo)
+            if (_settings.displayCombo)
             {
-                _player1Combo = new Combo(_options);
+                _player1Combo = new Combo(_settings.comboColors, VectorUtil.toArray(_settings.enableComboColors), _isAutoplay, _settings.rawGoodTracker);
                 if (!_sideScroll)
                     _player1Combo.alignment = TextFieldAutoSize.RIGHT;
-                this.addChild(_player1Combo);
+                addChild(_player1Combo);
 
                 _comboStatic = new TextStatic(_lang.string("game_combo"));
-                this.addChild(_comboStatic);
+                addChild(_comboStatic);
             }
 
-            if (_options.settings.displayTotal)
+            if (_settings.displayTotal)
             {
-                _comboTotal = new Combo(_options);
+                _comboTotal = new Combo(_settings.comboColors, VectorUtil.toArray(_settings.enableComboColors), _isAutoplay, _settings.rawGoodTracker);
                 if (_sideScroll)
                     _comboTotal.alignment = TextFieldAutoSize.RIGHT;
-                this.addChild(_comboTotal);
+                addChild(_comboTotal);
 
                 _comboTotalStatic = new TextStatic(_lang.string("game_combo_total"));
-                this.addChild(_comboTotalStatic);
+                addChild(_comboTotalStatic);
             }
 
-            if (_options.settings.displayAccuracyBar)
+            if (_settings.displayAccuracyBar)
             {
-                _accBar = new AccuracyBar(_options);
+                _accBar = new AccuracyBar(_settings.judgeColors, _settings.judgeWindow);
                 this.addChild(_accBar);
             }
 
-            if (_options.settings.displaySongProgress || _options.replay)
+            if (_settings.displaySongProgress || _replay)
             {
                 _progressDisplay = new ProgressBar(161, 9, 458, 20, 4, 0x545454, 0.1);
                 addChild(_progressDisplay);
 
-                if (_options.replay)
+                if (_replay)
                     _progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
             }
-            if (_options.settings.displaySongProgressText)
+            if (_settings.displaySongProgressText)
             {
                 _progressDisplayText = new TextStatic("0:00");
                 this.addChild(_progressDisplayText);
@@ -580,18 +587,18 @@ package game
             if (_options.mpRoom)
                 buildMultiplayer();
 
-            if (_options.isEditor)
+            if (_isEditor)
             {
                 _gameplayUI.mouseChildren = false;
                 _gameplayUI.mouseEnabled = false;
 
                 function closeEditor(e:MouseEvent):void
                 {
-                    _GAME_STATE = GAME_END;
-                    if (!_options.replay)
+                    _gameState = GAME_END;
+                    if (!_replay)
                     {
-                        _options.user.saveSettingsLocally();
-                        _options.user.saveSettingsOnline(_gvars.userSession);
+                        _user.saveSettingsLocally();
+                        _user.saveSettingsOnline(_gvars.userSession);
                     }
                 }
 
@@ -611,43 +618,43 @@ package game
         private function initPlayerVars():void
         {
             // Force no Judge on SongPreviews
-            if (_options.replay && _options.replay.isPreview)
+            if (_replay && _replay.isPreview)
             {
-                _options.settings.judgeOffset = 0;
-                _options.settings.globalOffset = 0;
-                _options.isAutoplay = true;
+                _settings.judgeOffset = 0;
+                _settings.globalOffset = 0;
+                _isAutoplay = true;
             }
 
-            _reverseMod = _options.modEnabled("reverse");
-            _sideScroll = (_options.settings.scrollDirection == "left" || _options.settings.scrollDirection == "right");
-            _player1JudgeOffset = Math.round(_options.settings.judgeOffset);
-            _globalOffsetRounded = Math.round(_options.settings.globalOffset);
-            _globalOffset = (_options.settings.globalOffset - _globalOffsetRounded) * 1000 / 30;
+            _reverseMod = _settings.modEnabled("reverse");
+            _sideScroll = (_settings.scrollDirection == "left" || _settings.scrollDirection == "right");
+            _player1JudgeOffset = Math.round(_settings.judgeOffset);
+            _globalOffsetRounded = Math.round(_settings.globalOffset);
+            _globalOffset = (_settings.globalOffset - _globalOffsetRounded) * 1000 / 30;
 
-            if (_options.judgeWindow)
-                _judgeSettings = buildJudgeNodes(_options.judgeWindow);
+            if (_settings.judgeWindow)
+                _judgeSettings = buildJudgeNodes(_settings.judgeWindow);
             else
                 _judgeSettings = buildJudgeNodes(Constant.JUDGE_WINDOW);
-            _judgeOffset = _options.settings.judgeOffset * 1000 / 30;
-            _autoJudgeOffset = _options.settings.autoJudgeOffset;
+            _judgeOffset = _settings.judgeOffset * 1000 / 30;
+            _autoJudgeOffset = _settings.autoJudgeOffset;
 
             _mpSpectate = (_options.mpRoom && !_options.mpRoom.connection.currentUser.isPlayer);
             if (_mpSpectate)
             {
-                _options.settings.displayCombo = false;
-                _options.settings.displayTotal = false;
-                _options.settings.displayPACount = false;
+                _settings.displayCombo = false;
+                _settings.displayTotal = false;
+                _settings.displayPACount = false;
             }
             else if (_options.mpRoom)
-                _options.settings.displayTotal = false;
+                _settings.displayTotal = false;
         }
 
         private function initVars(postStart:Boolean = true):void
         {
             // Post Start Time
-            if (postStart && !_options.user.isGuest && !_options.replay && !_options.isEditor && _song.songInfo.engine == null && !_mpSpectate)
+            if (postStart && !_user.isGuest && !_replay && !_isEditor && _song.songInfo.engine == null && !_mpSpectate)
             {
-                Logger.debug(this, "Posting Start of level " + _song.id);
+                Logger.debug(this, "Posting Start of level " + _song.songInfo.level);
                 _loader = new URLLoader();
                 addLoaderListeners();
 
@@ -655,7 +662,7 @@ package game
                 var requestVars:URLVariables = new URLVariables();
                 Constant.addDefaultRequestVariables(requestVars);
                 requestVars.session = _gvars.userSession;
-                requestVars.id = _song.id;
+                requestVars.id = _song.songInfo.level;
                 requestVars.restarts = _gvars.songRestarts;
                 req.data = requestVars;
                 req.method = URLRequestMethod.POST;
@@ -816,7 +823,7 @@ package game
 
             if (_gameProgress >= _gameLastNoteFrame + 20 || _quitDoubleTap == 0)
             {
-                _GAME_STATE = GAME_END;
+                _gameState = GAME_END;
                 return;
             }
 
@@ -839,7 +846,7 @@ package game
                 var curNote:GameNote = notes[n];
 
                 // Game Bot
-                if (_options.isAutoplay && (_gameProgress - curNote.PROGRESS + _player1JudgeOffset) == 0)
+                if (_isAutoplay && (_gameProgress - curNote.PROGRESS + _player1JudgeOffset) == 0)
                 {
                     judgeScore(curNote.DIR, _gameProgress);
                     n--;
@@ -855,14 +862,14 @@ package game
             }
 
             // Replays
-            if (_options.replay && !_options.replay.isPreview)
+            if (_replay && !_replay.isPreview)
             {
-                var newPress:ReplayNote = _options.replay.getPress(_replayPressCount);
-                if (_options.replay.needsBeatboxGeneration)
+                var newPress:ReplayNote = _replay.getPress(_replayPressCount);
+                if (_replay.needsBeatboxGeneration)
                 {
                     var oldPosition:int = _gamePosition;
                     _gamePosition = (_gameProgress + 0.5) * 1000 / 30;
-                    var cutOffReplayNote:uint = _options.replay.generationReplayNotes.length;
+                    var cutOffReplayNote:uint = _replay.generationReplayNotes.length;
                     var readAheadTime:Number = (1 / _frameRate.value) * 1000;
                     // Note Hits
                     for (var rn:int = 0; rn < notes.length; rn++)
@@ -870,12 +877,12 @@ package game
                         var repCurNote:GameNote = notes[rn];
 
                         // Missed Note
-                        if (repCurNote.ID >= cutOffReplayNote || (_options.replay.generationReplayNotes[repCurNote.ID] == null || isNaN(_options.replay.generationReplayNotes[repCurNote.ID].time)))
+                        if (repCurNote.ID >= cutOffReplayNote || (_replay.generationReplayNotes[repCurNote.ID] == null || isNaN(_replay.generationReplayNotes[repCurNote.ID].time)))
                         {
                             continue;
                         }
 
-                        var diffValue:int = _options.replay.generationReplayNotes[repCurNote.ID].time + repCurNote.POSITION;
+                        var diffValue:int = _replay.generationReplayNotes[repCurNote.ID].time + repCurNote.POSITION;
                         if ((_gamePosition + readAheadTime >= diffValue) || _gamePosition >= diffValue)
                         {
                             judgeScorePosition(repCurNote.DIR, diffValue);
@@ -892,7 +899,7 @@ package game
                             _binReplayBoos[_binReplayBoos.length] = new ReplayBinFrame(newPress.time, newPress.direction, _binReplayBoos.length);
                         }
                         _replayPressCount++;
-                        newPress = _options.replay.getPress(_replayPressCount);
+                        newPress = _replay.getPress(_replayPressCount);
                     }
                     _gamePosition = oldPosition;
                 }
@@ -903,7 +910,7 @@ package game
                         judgeScore(newPress.direction, newPress.frame);
 
                         _replayPressCount++;
-                        newPress = _options.replay.getPress(_replayPressCount);
+                        newPress = _replay.getPress(_replayPressCount);
                     }
                 }
             }
@@ -990,21 +997,21 @@ package game
             }
 
             // UI Updates
-            if (_options.settings.displayMPJudge && _options.mpRoom)
+            if (_settings.displayMPJudge && _options.mpRoom)
             {
                 for each (var mpJudgeComponent:Judge in _mpJudge)
                 {
                     mpJudgeComponent.updateJudge(e);
                 }
             }
-            else if (_options.settings.displayJudge && _player1Judge != null)
+            else if (_settings.displayJudge && _player1Judge != null)
             {
                 _player1Judge.updateJudge(e);
             }
 
 
             // Gameplay Logic
-            switch (_GAME_STATE)
+            switch (_gameState)
             {
                 case GAME_PLAY:
                     if (_legacyMode)
@@ -1047,7 +1054,7 @@ package game
                         var threshold:int = Math.round(1 / (_frameRate.value / 60));
                         if (threshold < 1)
                             threshold = 1;
-                        if (_options.replay)
+                        if (_replay)
                             threshold = 0x7fffffff;
 
                         //Logger.debug("GP", "lAP: " + lastAbsolutePosition + " | aP: " + absolutePosition + " | sDS: " + songDelayStarted + " | sD: " + songDelay + " | sOv: " + songOffset.value + " | sGP: " + song.getPosition() + " | sP: " + songPosition + " | gP: " + gamePosition + " | tP: " + targetProgress + " | t: " + threshold);
@@ -1059,12 +1066,12 @@ package game
                             spectateSync();
 
                         if (_reverseMod)
-                            stopClips(_songBackground, 2 + _song.musicDelay - _globalOffsetRounded + _gameProgress * _options.settings.songRate);
+                            stopClips(_songBackground, 2 + _song.musicDelay - _globalOffsetRounded + _gameProgress * _settings.songRate);
                         else
-                            stopClips(_songBackground, 2 + _song.musicDelay - _globalOffsetRounded + _gameProgress * _options.settings.songRate);
+                            stopClips(_songBackground, 2 + _song.musicDelay - _globalOffsetRounded + _gameProgress * _settings.songRate);
                     }
 
-                    if (_options.modEnabled("tap_pulse"))
+                    if (_settings.modEnabled("tap_pulse"))
                     {
                         _noteBoxOffset.x = Math.max(Math.min(Math.abs(_noteBoxOffset.x) < 0.5 ? 0 : (_noteBoxOffset.x * 0.992), _noteBox.positionOffsetMax.max_x), _noteBox.positionOffsetMax.min_x);
                         _noteBoxOffset.y = Math.max(Math.min(Math.abs(_noteBoxOffset.y) < 0.5 ? 0 : (_noteBoxOffset.y * 0.992), _noteBox.positionOffsetMax.max_y), _noteBox.positionOffsetMax.min_y);
@@ -1115,27 +1122,27 @@ package game
             // Handle judgement of key presses.
             if (_gameLife > 0)
             {
-                if (!_options.replay)
+                if (!_replay)
                 {
                     var dir:String = null;
                     switch (keyCode)
                     {
-                        case _options.settings.keyLeft:
+                        case _settings.keyLeft:
                             //case Keyboard.NUMPAD_4:
                             dir = "L";
                             break;
 
-                        case _options.settings.keyRight:
+                        case _settings.keyRight:
                             //case Keyboard.NUMPAD_6:
                             dir = "R";
                             break;
 
-                        case _options.settings.keyUp:
+                        case _settings.keyUp:
                             //case Keyboard.NUMPAD_8:
                             dir = "U";
                             break;
 
-                        case _options.settings.keyDown:
+                        case _settings.keyDown:
                             //case Keyboard.NUMPAD_2:
                             dir = "D";
                             break;
@@ -1153,7 +1160,7 @@ package game
             // Game Restart
             if (keyCode == _gvars.playerUser.settings.keyRestart && !_options.mpRoom)
             {
-                _GAME_STATE = GAME_RESTART;
+                _gameState = GAME_RESTART;
             }
 
             // Quit
@@ -1164,21 +1171,21 @@ package game
                     if (_quitDoubleTap > 0)
                     {
                         _gvars.songQueue = [];
-                        _GAME_STATE = GAME_END;
+                        _gameState = GAME_END;
                     }
                     else
                     {
-                        _quitDoubleTap = _options.settings.frameRate / 4;
+                        _quitDoubleTap = _settings.frameRate / 4;
                     }
                 }
                 else
                 {
-                    _GAME_STATE = GAME_END;
+                    _gameState = GAME_END;
                 }
             }
 
             // Pause
-            else if (keyCode == 19 && (CONFIG::debug || _gvars.playerUser.isAdmin || _gvars.playerUser.isDeveloper || _options.replay))
+            else if (keyCode == 19 && (CONFIG::debug || _gvars.playerUser.isAdmin || _gvars.playerUser.isDeveloper || _replay))
             {
                 togglePause();
             }
@@ -1186,8 +1193,8 @@ package game
             // Auto-Play
             else if (keyCode == Keyboard.F8 && (CONFIG::debug || _gvars.playerUser.isDeveloper || _gvars.playerUser.isAdmin))
             {
-                _options.isAutoplay = !_options.isAutoplay;
-                Alert.add("Bot Play: " + _options.isAutoplay, 60);
+                _isAutoplay = !_isAutoplay;
+                Alert.add("Bot Play: " + _isAutoplay, 60);
             }
 
             e.stopImmediatePropagation();
@@ -1209,7 +1216,7 @@ package game
         private function editorOnEnterFrame(e:Event):void
         {
             // State 0 = Gameplay
-            if (_GAME_STATE == GAME_PLAY)
+            if (_gameState == GAME_PLAY)
             {
                 _gamePosition = getTimer() - _absoluteStart;
                 var targetProgress:int = Math.round(_gamePosition * 30 / 1000);
@@ -1223,7 +1230,7 @@ package game
                 _noteBox.update(_gamePosition);
             }
             // State 1 = End Game
-            else if (_GAME_STATE == GAME_END)
+            else if (_gameState == GAME_END)
             {
                 endGame();
                 return;
@@ -1240,7 +1247,7 @@ package game
 
             if (keyCode == _gvars.playerUser.settings.keyQuit)
             {
-                _GAME_STATE = GAME_END;
+                _gameState = GAME_END;
             }
 
             switch (keyCode)
@@ -1283,9 +1290,9 @@ package game
 
         public function togglePause():void
         {
-            if (_GAME_STATE == GAME_PLAY)
+            if (_gameState == GAME_PLAY)
             {
-                _GAME_STATE = GAME_PAUSE;
+                _gameState = GAME_PAUSE;
                 _songPausePosition = getTimer();
                 _song.pause();
 
@@ -1294,9 +1301,9 @@ package game
                     _gvars.websocketSend("SONG_PAUSE", _socketSongMessage);
                 }
             }
-            else if (_GAME_STATE == GAME_PAUSE)
+            else if (_gameState == GAME_PAUSE)
             {
-                _GAME_STATE = GAME_PLAY;
+                _gameState = GAME_PLAY;
                 _absoluteStart += (getTimer() - _songPausePosition);
                 _song.resume();
 
@@ -1317,12 +1324,12 @@ package game
                 _song.stop();
 
             // Play through to the end of a replay
-            if (_options.replay)
+            if (_replay)
             {
-                _GAME_STATE = GAME_PLAY;
-                while (_gameLife > 0 && _GAME_STATE == GAME_PLAY)
+                _gameState = GAME_PLAY;
+                while (_gameLife > 0 && _gameState == GAME_PLAY)
                     logicTick();
-                _GAME_STATE = GAME_END;
+                _gameState = GAME_END;
             }
 
             // Fill missing notes from replay.
@@ -1339,14 +1346,12 @@ package game
             var noteCount:int = _hitAmazing + _hitPerfect + _hitGood + _hitAverage + _hitMiss;
 
             // Save results for display
-            if (!_mpSpectate && !_options.isEditor)
+            if (!_mpSpectate && !_isEditor)
             {
                 var newGameResults:GameScoreResult = new GameScoreResult();
-                newGameResults.game_index = _gvars.gameIndex++;
-                newGameResults.level = _song.id;
+                newGameResults.gameIndex = _gvars.gameIndex++;
                 newGameResults.song = _song;
-                newGameResults.songInfo = _song.songInfo;
-                newGameResults.note_count = _song.totalNotes;
+                newGameResults.noteCount = _song.totalNotes;
                 newGameResults.amazing = _hitAmazing;
                 newGameResults.perfect = _hitPerfect;
                 newGameResults.good = _hitGood;
@@ -1359,24 +1364,23 @@ package game
                 newGameResults.last_note = noteCount < _song.totalNotes ? noteCount : 0;
                 newGameResults.accuracy = _accuracy.value;
                 newGameResults.accuracy_deviation = _accuracy.deviation;
-                newGameResults.options = _options;
                 newGameResults.restart_stats = _gvars.songStats.data;
                 newGameResults.replayData = _gameReplay.concat();
                 newGameResults.replay_hit = _gameReplayHit.concat();
                 newGameResults.replay_bin_notes = _binReplayNotes;
                 newGameResults.replay_bin_boos = _binReplayBoos;
-                newGameResults.user = _options.replay ? _options.replay.user : _options.user;
-                newGameResults.restarts = _options.replay ? 0 : _gvars.songRestarts;
+                newGameResults.user = _replay ? _replay.user : _user;
+                newGameResults.restarts = _replay ? 0 : _gvars.songRestarts;
                 newGameResults.start_time = _gvars.songStartTime;
                 newGameResults.start_hash = _gvars.songStartHash;
-                newGameResults.end_time = _options.replay ? TimeUtil.getFormattedDate(new Date(_options.replay.timestamp * 1000)) : TimeUtil.getCurrentDate();
+                newGameResults.end_time = _replay ? TimeUtil.getFormattedDate(new Date(_replay.timestamp * 1000)) : TimeUtil.getCurrentDate();
                 newGameResults.song_progress = (_gameProgress / _gameLastNoteFrame);
                 newGameResults.playtime_secs = ((getTimer() - _msStartTime) / 1000);
 
                 // Set Note Counts for Preview Songs
-                if (_options.replay && _options.replay.isPreview)
+                if (_replay && _replay.isPreview)
                 {
-                    newGameResults.is_preview = true;
+                    newGameResults.isPreview = true;
                     newGameResults.score = _song.totalNotes * 50;
                     newGameResults.amazing = _song.totalNotes;
                     newGameResults.max_combo = _song.totalNotes;
@@ -1389,7 +1393,7 @@ package game
             _gvars.sessionStats.addFromStats(_gvars.songStats);
             _gvars.songStats.reset();
 
-            if (!_legacyMode && !_options.replay && !_options.isEditor && !_mpSpectate)
+            if (!_legacyMode && !_replay && !_isEditor && !_mpSpectate)
             {
                 _avars.configMusicOffset = (_avars.configMusicOffset * 0.85) + _songOffset.value * 0.15;
 
@@ -1429,7 +1433,7 @@ package game
 
             if (_songBackground)
             {
-                this.removeChild(_songBackground);
+                removeChild(_songBackground);
                 _songBackground = null;
             }
 
@@ -1442,72 +1446,72 @@ package game
             // Remove UI
             if (_gpuPixelBitmap)
             {
-                this.removeChild(_gpuPixelBitmap);
+                removeChild(_gpuPixelBitmap);
                 _gpuPixelBitmap = null;
                 _gpuPixelBitmapData = null;
             }
             if (_displayBlackBG)
             {
-                this.removeChild(_displayBlackBG);
+                removeChild(_displayBlackBG);
                 _displayBlackBG = null;
             }
             if (_progressDisplay)
             {
-                this.removeChild(_progressDisplay);
+                removeChild(_progressDisplay);
                 _progressDisplay = null;
             }
             if (_player1Life)
             {
-                this.removeChild(_player1Life);
+                removeChild(_player1Life);
                 _player1Life = null;
             }
             if (_player1Judge)
             {
-                this.removeChild(_player1Judge);
+                removeChild(_player1Judge);
                 _player1Judge = null;
             }
             if (_gameplayUI)
             {
-                this.removeChild(_gameplayUI);
+                removeChild(_gameplayUI);
                 _gameplayUI = null;
             }
             if (_noteBox)
             {
-                this.removeChild(_noteBox);
+                removeChild(_noteBox);
                 _noteBox = null;
             }
             if (_displayBlackBG)
             {
-                this.removeChild(_displayBlackBG);
+                removeChild(_displayBlackBG);
                 _displayBlackBG = null;
             }
             if (_flashLight)
             {
-                this.removeChild(_flashLight);
+                removeChild(_flashLight);
                 _flashLight = null;
             }
             if (_screenCut)
             {
-                this.removeChild(_screenCut);
+                removeChild(_screenCut);
                 _screenCut = null;
             }
             if (_exitEditor)
             {
                 _exitEditor.dispose();
-                this.removeChild(_exitEditor);
+                removeChild(_exitEditor);
                 _exitEditor = null;
             }
 
-            _GAME_STATE = GAME_DISPOSE;
+            _gameState = GAME_DISPOSE;
 
-            var screen:int = _options.settings.startUpScreen;
-            if (!_options.user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
+            var screen:int = _settings.startUpScreen;
+            if (!_user.isGuest && (screen == 0 || screen == 1) && !MultiplayerState.instance.connection.connected)
             {
                 MultiplayerState.instance.connection.connect();
             }
 
             // Go to results
-            if (_options.isEditor || _mpSpectate)
+            if (_isEditor || _mpSpectate)
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
             else
                 dispatchEvent(new ChangePanelEvent(Routes.GAME_RESULTS));
@@ -1542,7 +1546,7 @@ package game
 
             // Restart
             _song.reset();
-            _GAME_STATE = GAME_PLAY;
+            _gameState = GAME_PLAY;
             initPlayerVars();
             initVars();
             if (_player1Judge)
@@ -1568,7 +1572,7 @@ package game
            \*#########################################################################################*/
         private function buildFlashlight():void
         {
-            if (_options.modEnabled("flashlight"))
+            if (_settings.modEnabled("flashlight"))
             {
                 if (_flashLight == null)
                     _flashLight = new FlashlightOverlay();
@@ -1584,33 +1588,35 @@ package game
 
         private function buildScreenCut():void
         {
-            if (!_options.settings.displayScreencut)
+            if (!_settings.displayScreencut)
                 return;
 
             if (_screenCut)
             {
-                if (this.contains(_screenCut))
-                    this.removeChild(_screenCut);
+                if (contains(_screenCut))
+                    removeChild(_screenCut);
                 _screenCut = null;
             }
-            _screenCut = new ScreenCut(_options);
-            this.addChild(_screenCut);
+
+            _screenCut = new ScreenCut(_isEditor, _settings.scrollDirection, _settings.screencutPosition);
+            addChild(_screenCut);
         }
 
         private function buildJudge():void
         {
-            if (!_options.settings.displayJudge)
+            if (!_settings.displayJudge)
                 return;
 
-            _player1Judge = new Judge(_options);
+            _player1Judge = new Judge(_settings.displayPerfect, _settings.displayJudgeAnimations, _settings.judgeSpeed, _settings.judgeColors, _isEditor);
             addChild(_player1Judge);
-            if (_options.isEditor)
+
+            if (_isEditor)
                 _player1Judge.showJudge(100, true);
         }
 
         private function buildHealth():void
         {
-            if (!_options.settings.displayHealth)
+            if (!_settings.displayHealth)
                 return;
 
             _player1Life = new LifeBar();
@@ -1626,7 +1632,7 @@ package game
             _mpCombo = [];
             _mpHeader = [];
 
-            if (!_options.settings.displayMPUI && !_mpSpectate)
+            if (!_settings.displayMPUI && !_mpSpectate)
                 return;
 
             for each (var user:User in _options.mpRoom.players)
@@ -1642,9 +1648,9 @@ package game
                     continue;
                 }
 
-                if (_options.settings.displayMPPA)
+                if (_settings.displayMPPA)
                 {
-                    var pa:PAWindow = new PAWindow(_options);
+                    var pa:PAWindow = new PAWindow(_settings.displayAmazing, _settings.judgeColors);
                     addChild(pa);
                     _mpPA[user.playerIdx] = pa;
                 }
@@ -1652,26 +1658,26 @@ package game
                 if (_mpSpectate)
                 {
                     var header:MPHeader = new MPHeader(user);
-                    if (_options.settings.displayMPPA)
+                    if (_settings.displayMPPA)
                         _mpPA[user.playerIdx].addChild(header);
                     else
                         addChild(header);
                     _mpHeader[user.playerIdx] = header;
                 }
 
-                if (_options.settings.displayMPCombo)
+                if (_settings.displayMPCombo)
                 {
-                    var combo:Combo = new Combo(_options);
+                    var combo:Combo = new Combo(_settings.comboColors, VectorUtil.toArray(_settings.enableComboColors), _isAutoplay, _settings.rawGoodTracker);
                     addChild(combo);
                     _mpCombo[user.playerIdx] = combo;
                 }
 
-                if (_options.settings.displayMPJudge)
+                if (_settings.displayMPJudge)
                 {
-                    var judge:Judge = new Judge(_options);
+                    var judge:Judge = new Judge(_settings.displayPerfect, _settings.displayJudgeAnimations, _settings.judgeSpeed, _settings.judgeColors, _isEditor);
                     addChild(judge);
                     _mpJudge[user.playerIdx] = judge;
-                    if (_options.isEditor)
+                    if (_isEditor)
                         judge.showJudge(100, true);
                 }
             }
@@ -1727,7 +1733,7 @@ package game
             _defaultLayout[LAYOUT_MP_COMBO + "1"] = _defaultLayout[LAYOUT_COMBO];
             _defaultLayout[LAYOUT_MP_JUDGE + "1"] = {x: 208, y: 102};
             _defaultLayout[LAYOUT_MP_PA + "1"] = {x: 6, y: 96};
-            if (_options.settings.displayMPPA)
+            if (_settings.displayMPPA)
                 _defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 0, y: -35};
             else
                 _defaultLayout[LAYOUT_MP_HEADER + "1"] = {x: 6, y: 190};
@@ -1735,7 +1741,7 @@ package game
             _defaultLayout[LAYOUT_MP_COMBO + "2"] = _defaultLayout[LAYOUT_COMBO_TOTAL];
             _defaultLayout[LAYOUT_MP_JUDGE + "2"] = {x: 568, y: 102};
             _defaultLayout[LAYOUT_MP_PA + "2"] = {x: 645, y: 96, properties: {alignment: "right"}};
-            if (_options.settings.displayMPPA)
+            if (_settings.displayMPPA)
                 _defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 25, y: -35, properties: {alignment: MPHeader.ALIGN_RIGHT}};
             else
                 _defaultLayout[LAYOUT_MP_HEADER + "2"] = {x: 690, y: 190, properties: {alignment: MPHeader.ALIGN_RIGHT}};
@@ -1767,7 +1773,7 @@ package game
             }
 
             // Editor Mode
-            if (_options.isEditor)
+            if (_isEditor)
             {
                 interfaceEditor(_progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR, false));
                 interfaceEditor(_progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT, false));
@@ -1798,7 +1804,7 @@ package game
                     interfacePosition(_mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx));
 
                     // Multiplayer - Editor
-                    if (_options.isEditor)
+                    if (_isEditor)
                     {
                         interfaceEditor(_mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx, false));
                         interfaceEditor(_mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx, false));
@@ -1943,16 +1949,16 @@ package game
                 commitJudge(dir, booFrame, -5);
             }
 
-            if (_options.modEnabled("tap_pulse"))
+            if (_settings.modEnabled("tap_pulse"))
             {
                 if (dir == "L")
-                    _noteBoxOffset.x -= Math.abs(_options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x -= Math.abs(_settings.receptorGap * 0.20);
                 if (dir == "R")
-                    _noteBoxOffset.x += Math.abs(_options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x += Math.abs(_settings.receptorGap * 0.20);
                 if (dir == "U")
-                    _noteBoxOffset.y -= Math.abs(_options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y -= Math.abs(_settings.receptorGap * 0.15);
                 if (dir == "D")
-                    _noteBoxOffset.y += Math.abs(_options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y += Math.abs(_settings.receptorGap * 0.15);
             }
 
             return Boolean(score);
@@ -1999,16 +2005,16 @@ package game
                     break;
             }
 
-            if (_options.modEnabled("tap_pulse"))
+            if (_settings.modEnabled("tap_pulse"))
             {
                 if (dir == "L")
-                    _noteBoxOffset.x -= Math.abs(_options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x -= Math.abs(_settings.receptorGap * 0.20);
                 if (dir == "R")
-                    _noteBoxOffset.x += Math.abs(_options.settings.receptorGap * 0.20);
+                    _noteBoxOffset.x += Math.abs(_settings.receptorGap * 0.20);
                 if (dir == "U")
-                    _noteBoxOffset.y -= Math.abs(_options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y -= Math.abs(_settings.receptorGap * 0.15);
                 if (dir == "D")
-                    _noteBoxOffset.y += Math.abs(_options.settings.receptorGap * 0.15);
+                    _noteBoxOffset.y += Math.abs(_settings.receptorGap * 0.15);
             }
 
             if (score)
@@ -2038,24 +2044,24 @@ package game
                     _hitCombo++;
                     _gameScore += 50;
                     health = 1;
-                    if (_options.settings.displayAmazing)
+                    if (_settings.displayAmazing)
                     {
-                        checkAutofail(_options.settings.autofail[0], _hitAmazing);
+                        checkAutofail(_settings.autofail[0], _hitAmazing);
                     }
                     else
                     {
                         jscore = 50;
-                        checkAutofail(_options.settings.autofail[0] + _options.settings.autofail[1], _hitAmazing + _hitPerfect);
+                        checkAutofail(_settings.autofail[0] + _settings.autofail[1], _hitAmazing + _hitPerfect);
                     }
-                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
+                    checkAutofail(_settings.autofail[6], _gameRawGoods);
                     break;
                 case 50:
                     _hitPerfect++;
                     _hitCombo++;
                     _gameScore += 50;
                     health = 1;
-                    checkAutofail(_options.settings.autofail[1], _hitPerfect);
-                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
+                    checkAutofail(_settings.autofail[1], _hitPerfect);
+                    checkAutofail(_settings.autofail[6], _gameRawGoods);
                     break;
                 case 25:
                     _hitGood++;
@@ -2063,8 +2069,8 @@ package game
                     _gameScore += 25;
                     _gameRawGoods += 1;
                     health = 1;
-                    checkAutofail(_options.settings.autofail[2], _hitGood);
-                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
+                    checkAutofail(_settings.autofail[2], _hitGood);
+                    checkAutofail(_settings.autofail[6], _gameRawGoods);
                     break;
                 case 5:
                     _hitAverage++;
@@ -2072,8 +2078,8 @@ package game
                     _gameScore += 5;
                     _gameRawGoods += 1.8;
                     health = 1;
-                    checkAutofail(_options.settings.autofail[3], _hitAverage);
-                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
+                    checkAutofail(_settings.autofail[3], _hitAverage);
+                    checkAutofail(_settings.autofail[6], _gameRawGoods);
                     break;
                 case -5:
                     if (frame < _gameFirstNoteFrame)
@@ -2082,8 +2088,8 @@ package game
                     _gameScore -= 5;
                     _gameRawGoods += 0.2;
                     health = -1;
-                    checkAutofail(_options.settings.autofail[5], _hitBoo);
-                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
+                    checkAutofail(_settings.autofail[5], _hitBoo);
+                    checkAutofail(_settings.autofail[6], _gameRawGoods);
                     break;
                 case -10:
                     _hitMiss++;
@@ -2091,12 +2097,12 @@ package game
                     _gameScore -= 10;
                     _gameRawGoods += 2.4;
                     health = -1;
-                    checkAutofail(_options.settings.autofail[4], _hitMiss);
-                    checkAutofail(_options.settings.autofail[6], _gameRawGoods);
+                    checkAutofail(_settings.autofail[4], _hitMiss);
+                    checkAutofail(_settings.autofail[6], _gameRawGoods);
                     break;
             }
 
-            if (_options.isAutoplay)
+            if (_isAutoplay)
             {
                 _gameScore = 0;
                 _hitAmazing = 0;
@@ -2105,7 +2111,7 @@ package game
                 _hitAverage = 0;
             }
 
-            if (_player1Judge && !_options.isEditor)
+            if (_player1Judge && !_isEditor)
                 _player1Judge.showJudge(jscore);
 
             updateHealth(health > 0 ? _gvars.HEALTH_JUDGE_ADD : _gvars.HEALTH_JUDGE_REMOVE);
@@ -2160,7 +2166,7 @@ package game
         private function checkAutofail(autofail:Number, hit:Number):void
         {
             if (autofail > 0 && hit >= autofail)
-                _GAME_STATE = GAME_END;
+                _gameState = GAME_END;
         }
 
         /*#########################################################################################*\
@@ -2177,7 +2183,7 @@ package game
             _gameLife += val;
             if (_gameLife <= 0)
             {
-                _GAME_STATE = GAME_END;
+                _gameState = GAME_END;
             }
             else if (_gameLife > 100)
             {
@@ -2277,7 +2283,7 @@ package game
         public function onMultiplayerResults(event:GameResultsEvent):void
         {
             if (event.room == _options.mpRoom)
-                _GAME_STATE = GAME_END;
+                _gameState = GAME_END;
         }
 
         private function addLoaderListeners():void
@@ -2296,6 +2302,7 @@ package game
 
         public function getScriptVariable(key:String):*
         {
+            // TODO: Important! This was used to refer to "options"
             return this[key];
         }
 

@@ -10,18 +10,15 @@ package game
 
     public class GameScoreResult
     {
-        public var game_index:int;
-        public var level:int;
+        public var gameIndex:int;
         public var song:Song;
-        public var songInfo:SongInfo;
-        public var note_count:int;
+        public var noteCount:int;
 
-        public var is_preview:Boolean = false;
+        public var isPreview:Boolean = false;
 
         public var legacyLastRank:Object;
 
         public var user:User;
-        public var options:GameOptions;
 
         public var amazing:int = 0;
         public var perfect:int = 0;
@@ -32,71 +29,6 @@ package game
         public var combo:int = 0;
         public var max_combo:int = 0;
         public var score:int = 0;
-
-        public function get is_aaa():Boolean
-        {
-            return (((amazing + perfect) == note_count) && max_combo == note_count && good == 0 && average == 0 && boo == 0 && miss == 0);
-        }
-
-        public function get is_fc():Boolean
-        {
-            return (max_combo == note_count && miss == 0);
-        }
-
-        public function get raw_goods():Number
-        {
-            return good + (average * 1.8) + (miss * 2.4) + (boo * 0.2);
-        }
-
-        public var credits:int = 0;
-
-        public var restarts:int;
-        public var restart_stats:Object;
-        public var last_note:int;
-
-        // Accuracy
-        public var accuracy:Number;
-        public var accuracy_deviation:Number;
-
-        public function get accuracy_frames():Number
-        {
-            return 30 * accuracy / 1000;
-        }
-
-        public function get accuracy_deviation_frames():Number
-        {
-            return 30 * accuracy_deviation / 1000;
-        }
-
-        // Replay v3
-        public var replayData:Array; // Probably array of ReplayNote
-        public var replay_hit:Array;
-
-        // Binary Replays (aka Replay v4)
-        public var replay_bin_notes:Vector.<ReplayBinFrame>;
-        public var replay_bin_boos:Vector.<ReplayBinFrame>;
-        private var _replay_bin:ByteArray;
-
-        public function get replayBin():ByteArray
-        {
-            if (_replay_bin == null)
-            {
-                var judgementsEncode:String = JSON.stringify({"amazing": amazing, "perfect": perfect, "good": good, "average": average, "boo": boo, "miss": miss, "maxcombo": max_combo});
-                _replay_bin = ReplayPack.writeReplay(user, options, judgementsEncode, replay_bin_notes, replay_bin_boos);
-            }
-
-            return _replay_bin;
-        }
-
-        public function get replay_bin_encoded():String
-        {
-            if (replayBin == null || replayBin.length == 0)
-                return null;
-
-            var enc:Base64Encoder = new Base64Encoder();
-            enc.encodeBytes(replayBin);
-            return ReplayPack.MAGIC + "|" + enc.toString();
-        }
 
         public var start_time:String;
         public var start_hash:String;
@@ -112,13 +44,83 @@ package game
         public var GAP_TIME:int = 0;
         public var judge:Array;
 
+        public var credits:int = 0;
+
+        public var restarts:int;
+        public var restart_stats:Object;
+        public var last_note:int;
+
+        // Accuracy
+        public var accuracy:Number;
+        public var accuracy_deviation:Number;
+
+        // Replay v3
+        public var replayData:Array; // Probably array of ReplayNote
+        public var replay_hit:Array;
+
+        // Binary Replays (aka Replay v4)
+        public var replay_bin_notes:Vector.<ReplayBinFrame>;
+        public var replay_bin_boos:Vector.<ReplayBinFrame>;
+        private var _replay_bin:ByteArray;
+
+        public function get songInfo():SongInfo
+        {
+            return song.songInfo;
+        }
+
+        public function get is_aaa():Boolean
+        {
+            return (((amazing + perfect) == noteCount) && max_combo == noteCount && good == 0 && average == 0 && boo == 0 && miss == 0);
+        }
+
+        public function get is_fc():Boolean
+        {
+            return (max_combo == noteCount && miss == 0);
+        }
+
+        public function get raw_goods():Number
+        {
+            return good + (average * 1.8) + (miss * 2.4) + (boo * 0.2);
+        }
+
+        public function get accuracy_frames():Number
+        {
+            return 30 * accuracy / 1000;
+        }
+
+        public function get accuracy_deviation_frames():Number
+        {
+            return 30 * accuracy_deviation / 1000;
+        }
+
+        public function get replayBin():ByteArray
+        {
+            if (_replay_bin == null)
+            {
+                var judgementsEncode:String = JSON.stringify({"amazing": amazing, "perfect": perfect, "good": good, "average": average, "boo": boo, "miss": miss, "maxcombo": max_combo});
+                _replay_bin = ReplayPack.writeReplay(user.siteId, songInfo, user.settings, judgementsEncode, replay_bin_notes, replay_bin_boos);
+            }
+
+            return _replay_bin;
+        }
+
+        public function get replay_bin_encoded():String
+        {
+            if (replayBin == null || replayBin.length == 0)
+                return null;
+
+            var enc:Base64Encoder = new Base64Encoder();
+            enc.encodeBytes(replayBin);
+            return ReplayPack.MAGIC + "|" + enc.toString();
+        }
+
         /**
          * Updates variables that need to be calculated after others are set.
          * @param _gvars GlobalVariables reference.
          */
         public function update(_gvars:GlobalVariables):void
         {
-            this.credits = Math.max(0, Math.min(Math.floor(score_total / _gvars.SCORE_PER_CREDIT), _gvars.MAX_CREDITS));
+            credits = Math.max(0, Math.min(Math.floor(score_total / _gvars.SCORE_PER_CREDIT), _gvars.MAX_CREDITS));
             updateJudge();
         }
 
@@ -130,8 +132,8 @@ package game
         {
             // Get Judge Window
             judge = Constant.JUDGE_WINDOW;
-            if (options.judgeWindow)
-                judge = options.judgeWindow;
+            if (user.settings.judgeWindow)
+                judge = user.settings.judgeWindow;
 
             // Get Judge Window Size
             for (var jn:int = 0; jn < judge.length; jn++)
@@ -188,7 +190,7 @@ package game
          */
         public function get screenshot_path():String
         {
-            var rateString:String = options.settings.songRate != 1 ? " (" + options.settings.songRate + "x Rate)" : "";
+            var rateString:String = user.settings.songRate != 1 ? " (" + user.settings.songRate + "x Rate)" : "";
 
             return "R^3 - " + songInfo.name + rateString + " - " + score + " - " + pa_string;
         }
@@ -200,7 +202,7 @@ package game
         public function get replay_cache_object():Object
         {
             var out:Object = {"name": song.songInfo.name,
-                    "rate": options.settings.songRate,
+                    "rate": user.settings.songRate,
                     "score": score,
                     "judge": [(amazing + perfect), good, average, miss, boo, max_combo]}
 

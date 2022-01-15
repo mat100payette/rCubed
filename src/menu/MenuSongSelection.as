@@ -45,7 +45,6 @@ package menu
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
-    import game.GameOptions;
     import menu.MenuSongSelectionOptions;
     import flash.text.TextFormatAlign;
     import events.navigation.popups.AddPopupEvent;
@@ -206,7 +205,7 @@ package menu
 
             songItemContextMenu = new ContextMenu();
             songItemContextMenuItem = new ContextMenuItem(_lang.stringSimple("song_selection_context_menu_music"));
-            songItemContextMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, e_setAsMenuMusicContextSelect);
+            songItemContextMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onSetAsMenuMusicContextSelected);
             songItemContextMenu.customItems.push(songItemContextMenuItem);
 
             songItemContextMenuItem = new ContextMenuItem(_lang.stringSimple("song_selection_context_song_preview"), true);
@@ -989,7 +988,7 @@ package menu
          * or sets the music from the already loaded copy if available.
          * @param e
          */
-        private function e_setAsMenuMusicContextSelect(e:ContextMenuEvent):void
+        private function onSetAsMenuMusicContextSelected(e:ContextMenuEvent):void
         {
             _gvars.options = new GameOptions(_gvars.activeUser);
             _gvars.options.fill();

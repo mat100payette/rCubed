@@ -4,16 +4,14 @@ package com.flashfla.utils
     public class ArrayUtil
     {
 
-        public static function in_array(array:Array, items:Array):Boolean
+        public static function containsAny(array:Array, items:Array):Boolean
         {
             for (var y:int = 0; y < items.length; y++)
             {
                 for (var x:int = 0; x < array.length; x++)
                 {
                     if (array[x] == items[y])
-                    {
                         return true;
-                    }
                 }
             }
             return false;
@@ -62,9 +60,7 @@ package com.flashfla.utils
             for (var i:Number = len; i > -1; i--)
             {
                 if (array[i] === value)
-                {
                     array.splice(i, 1);
-                }
             }
         }
 
@@ -86,9 +82,7 @@ package com.flashfla.utils
         {
             var minArrLen:int = Math.min(array1.length, array2.length);
             for (var i:int = 0; i < minArrLen; i++)
-            {
                 array1[i] = array2[i];
-            }
         }
     }
 }

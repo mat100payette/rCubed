@@ -26,30 +26,32 @@ package classes.chart
     import flash.net.URLLoaderDataFormat;
     import flash.net.URLRequest;
     import flash.utils.ByteArray;
-    import game.GameOptions;
+    import classes.UserSettings;
+    import com.flashfla.utils.ArrayUtil;
 
     public class Song extends EventDispatcher
     {
+        private static const LOAD_MUSIC:String = "music";
+        private static const LOAD_CHART:String = "chart";
+
         private var _gvars:GlobalVariables = GlobalVariables.instance;
 
         public var musicLoader:*;
-        private var chartLoader:URLLoader;
+        private var _chartLoader:URLLoader;
 
-        public var id:uint;
         public var songInfo:SongInfo;
         public var type:String;
         public var chartType:String;
-        public var preview:Boolean;
+        private var _isPreview:Boolean;
         public var sound:Sound;
         public var music:MovieClip;
         public var chart:NoteChart;
-        public var noteMod:NoteMod;
-        public var options:GameOptions;
-        public var soundChannel:SoundChannel;
-        public var musicPausePosition:int;
+        private var _noteMod:NoteMod;
+        private var _soundChannel:SoundChannel;
+        private var _musicPausePosition:int;
         public var musicIsPlaying:Boolean = false;
         public var mp3Frame:int = 0;
-        public var mp3Rate:Number = 1;
+        private var _mp3Rate:Number = 1;
 
         public var isLoaded:Boolean = false;
         public var isChartLoaded:Boolean = false;
@@ -57,51 +59,55 @@ package classes.chart
         public var isMusic2Loaded:Boolean = true;
         public var loadFail:Boolean = false;
 
-        public var isMusicLoaderLoading:Boolean = false;
-        public var isChartLoaderLoading:Boolean = false;
+        private var _isMusicLoaderLoading:Boolean = false;
+        private var _isChartLoaderLoading:Boolean = false;
 
         public var bytesSWF:ByteArray = null;
         public var bytesLoaded:uint = 0;
         public var bytesTotal:uint = 0;
 
-        private static const LOAD_MUSIC:String = "music";
-        private static const LOAD_CHART:String = "chart";
         private var musicForcibleLoader:ForcibleLoader;
         public var musicDelay:int = 0;
 
-        private var localFileData:ByteArray = null;
-        private var localFileHash:String = "";
+        private var _localFileData:ByteArray = null;
+        private var _localFileHash:String = "";
 
-        private var rateReverse:Boolean = false;
-        private var rateRate:Number = 1;
-        private var rateSound:Sound;
-        private var rateSample:int = 0;
-        private var rateSampleCount:int = 0;
-        private var rateSamples:ByteArray = new ByteArray();
+        private var _frameRate:int;
+        private var _isReverse:Boolean;
+        private var _isIsolation:Boolean;
+        private var _isolationOffset:int;
 
-        public function Song(songInfo:SongInfo, isPreview:Boolean = false):void
+        private var _rate:Number = 1;
+        private var _rateSound:Sound;
+        private var _rateSample:int = 0;
+        private var _rateSampleCount:int = 0;
+        private var _rateSamples:ByteArray = new ByteArray();
+
+        public function Song(songInfo:SongInfo, isPreview:Boolean, settings:UserSettings):void
         {
             this.songInfo = songInfo;
-            this.id = songInfo.level;
-            this.preview = isPreview;
-            this.type = songInfo.chart_type || NoteChart.FFR;
-            this.chartType = songInfo.chart_type || NoteChart.FFR_LEGACY;
+            _isPreview = isPreview;
 
-            options = _gvars.options;
-            noteMod = new NoteMod(this, options);
-            rateReverse = options.modEnabled("reverse");
-            rateRate = options.settings.songRate;
+            _rate = settings.songRate;
+            _isReverse = ArrayUtil.containsAny(settings.activeMods, ["reverse"]);
+            _frameRate = settings.frameRate
+            _isIsolation = settings.isolationOffset > 0 || settings.isolationLength > 0;
+            _isolationOffset = settings.isolationOffset;
+
+            type = songInfo.chart_type || NoteChart.FFR;
+            chartType = songInfo.chart_type || NoteChart.FFR_LEGACY;
+            _noteMod = new NoteMod(this, settings);
 
             if (type == "EDITOR")
             {
                 var editorSongInfo:SongInfo = new SongInfo();
                 editorSongInfo.chart_type = NoteChart.FFR_BEATBOX;
-                editorSongInfo.level = this.id;
+                editorSongInfo.level = songInfo.level;
 
                 chart = NoteChart.parseChart(NoteChart.FFR_BEATBOX, editorSongInfo, "_root.beatBox = [];");
             }
-            else if (options.settings.songRate != 1 || options.settings.frameRate > 30 || rateReverse || options.settings.forceNewJudge)
-                this.type = NoteChart.FFR_MP3;
+            else if (_rate != 1 || settings.frameRate > 30 || _isReverse || settings.forceNewJudge)
+                type = NoteChart.FFR_MP3;
 
             load();
         }
@@ -112,15 +118,15 @@ package classes.chart
             isLoaded = isChartLoaded = isMusicLoaded = false;
             isMusic2Loaded = true;
             loadFail = true;
-            if (musicLoader && isMusicLoaderLoading)
+            if (musicLoader && _isMusicLoaderLoading)
             {
                 musicLoader.close();
-                isMusicLoaderLoading = false;
+                _isMusicLoaderLoading = false;
             }
-            if (chartLoader && isChartLoaderLoading)
+            if (_chartLoader && _isChartLoaderLoading)
             {
-                chartLoader.close();
-                isChartLoaderLoading = false;
+                _chartLoader.close();
+                _isChartLoaderLoading = false;
             }
             music = null;
             chart = null;
@@ -132,7 +138,7 @@ package classes.chart
                 musicLoader = new URLLoader();
             else
                 musicLoader = new Loader();
-            chartLoader = new URLLoader();
+            _chartLoader = new URLLoader();
 
             addLoaderListeners();
 
@@ -140,16 +146,16 @@ package classes.chart
             var url_file_hash:String = "";
             if ((_gvars.air_useLocalFileCache) && AirContext.doesFileExist(AirContext.getSongCachePath(this) + "data.bin"))
             {
-                localFileData = AirContext.readFile(AirContext.getAppFile(AirContext.getSongCachePath(this) + "data.bin"), (this.songInfo.engine ? 0 : this.id));
-                localFileHash = MD5.hashBytes(localFileData);
-                url_file_hash = "hash=" + localFileHash + "&";
+                _localFileData = AirContext.readFile(AirContext.getAppFile(AirContext.getSongCachePath(this) + "data.bin"), (songInfo.engine ? 0 : songInfo.level));
+                _localFileHash = MD5.hashBytes(_localFileData);
+                url_file_hash = "hash=" + _localFileHash + "&";
 
-                if (this.songInfo.engine && localFileData && type == NoteChart.FFR_MP3)
+                if (songInfo.engine && _localFileData && type == NoteChart.FFR_MP3)
                 {
                     removeLoaderListeners();
                     musicLoader = new Loader();
                     addLoaderListeners(true);
-                    musicLoader.loadBytes(localFileData, AirContext.getLoaderContext());
+                    musicLoader.loadBytes(_localFileData, AirContext.getLoaderContext());
                     return;
                 }
             }
@@ -165,7 +171,7 @@ package classes.chart
                 case NoteChart.FFR_MP3:
                     musicLoader.dataFormat = URLLoaderDataFormat.BINARY;
                     musicLoader.load(new URLRequest(urlGen(LOAD_MUSIC, url_file_hash)));
-                    isMusicLoaderLoading = true;
+                    _isMusicLoaderLoading = true;
                     break;
                 default:
                     break;
@@ -176,8 +182,8 @@ package classes.chart
                 case NoteChart.FFR:
                 case NoteChart.FFR_BEATBOX:
                 case NoteChart.FFR_RAW:
-                    chartLoader.load(new URLRequest(urlGen(LOAD_CHART)));
-                    isChartLoaderLoading = true;
+                    _chartLoader.load(new URLRequest(urlGen(LOAD_CHART)));
+                    _isChartLoaderLoading = true;
                     break;
                 default:
                     break;
@@ -208,7 +214,7 @@ package classes.chart
                 case NoteChart.FFR:
                 case NoteChart.FFR_RAW:
                 case NoteChart.FFR_MP3:
-                    return Constant.SONG_DATA_URL + "?" + fileHash + "id=" + (preview ? songInfo.preview_hash : songInfo.play_hash) + (preview ? "&mode=2" : "") + (_gvars.userSession != "0" ? "&session=" + _gvars.userSession : "") + "&type=" + NoteChart.FFR + "_" + fileType;
+                    return Constant.SONG_DATA_URL + "?" + fileHash + "id=" + (_isPreview ? songInfo.preview_hash : songInfo.play_hash) + (_isPreview ? "&mode=2" : "") + (_gvars.userSession != "0" ? "&session=" + _gvars.userSession : "") + "&type=" + NoteChart.FFR + "_" + fileType;
 
                 case NoteChart.FFR_LEGACY:
                     return ChartFFRLegacy.songUrl(songInfo);
@@ -227,11 +233,11 @@ package classes.chart
                 music.addEventListener(IOErrorEvent.IO_ERROR, musicLoadError);
                 music.addEventListener(SecurityErrorEvent.SECURITY_ERROR, musicLoadError);
             }
-            if (chartLoader)
+            if (_chartLoader)
             {
-                chartLoader.addEventListener(Event.COMPLETE, chartLoadComplete);
-                chartLoader.addEventListener(IOErrorEvent.IO_ERROR, chartLoadError);
-                chartLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, chartLoadError);
+                _chartLoader.addEventListener(Event.COMPLETE, chartLoadComplete);
+                _chartLoader.addEventListener(IOErrorEvent.IO_ERROR, chartLoadError);
+                _chartLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, chartLoadError);
             }
             if (musicLoader)
                 musicLoader.addEventListener(ProgressEvent.PROGRESS, musicProgressHandler);
@@ -246,11 +252,11 @@ package classes.chart
                 music.removeEventListener(IOErrorEvent.IO_ERROR, musicLoadError);
                 music.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, musicLoadError);
             }
-            if (chartLoader)
+            if (_chartLoader)
             {
-                chartLoader.removeEventListener(Event.COMPLETE, chartLoadComplete);
-                chartLoader.removeEventListener(IOErrorEvent.IO_ERROR, chartLoadError);
-                chartLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, chartLoadError);
+                _chartLoader.removeEventListener(Event.COMPLETE, chartLoadComplete);
+                _chartLoader.removeEventListener(IOErrorEvent.IO_ERROR, chartLoadError);
+                _chartLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, chartLoadError);
             }
             if (musicLoader)
                 musicLoader.removeEventListener(ProgressEvent.PROGRESS, musicProgressHandler);
@@ -298,7 +304,7 @@ package classes.chart
                 if (_gvars.air_useLocalFileCache)
                 {
                     // Alt Engine has Data
-                    if (this.songInfo.engine && localFileData)
+                    if (songInfo.engine && _localFileData)
                     {
 
                     }
@@ -313,13 +319,13 @@ package classes.chart
                         }
                         if (code == "403")
                         {
-                            chartData = localFileData;
-                            bytesLoaded = bytesTotal = localFileData.length;
+                            chartData = _localFileData;
+                            bytesLoaded = bytesTotal = _localFileData.length;
                         }
                     }
                     else
                     {
-                        storeChartData = AirContext.encodeData(chartData, (this.songInfo.engine ? 0 : this.id));
+                        storeChartData = AirContext.encodeData(chartData, (songInfo.engine ? 0 : songInfo.level));
                     }
                 }
 
@@ -328,14 +334,14 @@ package classes.chart
                 var bytes:ByteArray = MP3Extraction.extractSound(chartData, metadata);
                 bytes.position = 0;
                 mp3Frame = metadata.frame - 2;
-                mp3Rate = MP3Extraction.formatRate(metadata.format) / 44100;
+                _mp3Rate = MP3Extraction.formatRate(metadata.format) / 44100;
                 sound = new Sound();
                 sound.loadCompressedDataFromByteArray(bytes, bytes.length);
-                if (rateRate != 1 || rateReverse)
+                if (_rate != 1 || _isReverse)
                 {
-                    rateSound = sound;
+                    _rateSound = sound;
                     sound = new Sound();
-                    if (rateReverse)
+                    if (_isReverse)
                         sound.addEventListener("sampleData", onReverseSound);
                     else
                         sound.addEventListener("sampleData", onRateSound);
@@ -359,7 +365,7 @@ package classes.chart
                 {
                     try
                     {
-                        Logger.info(this, "Saving Cache File for " + this.id);
+                        Logger.info(this, "Saving Cache File for " + songInfo.level);
                         AirContext.writeFile(AirContext.getAppFile(AirContext.getSongCachePath(this) + "data.bin"), storeChartData);
                     }
                     catch (err:Error)
@@ -404,8 +410,8 @@ package classes.chart
 
         public function getSoundObject():Sound
         {
-            if (rateRate != 1 || rateReverse)
-                return rateSound;
+            if (_rate != 1 || _isReverse)
+                return _rateSound;
             return sound;
         }
 
@@ -416,28 +422,28 @@ package classes.chart
             var sampleDiff:int = 0;
             while (osamples < 4096)
             {
-                sample = (e.position + osamples) * rateRate;
-                sampleDiff = sample - rateSample;
-                while (sampleDiff < 0 || sampleDiff >= rateSampleCount)
+                sample = (e.position + osamples) * _rate;
+                sampleDiff = sample - _rateSample;
+                while (sampleDiff < 0 || sampleDiff >= _rateSampleCount)
                 {
-                    rateSample += rateSampleCount;
-                    rateSamples.position = 0;
-                    sampleDiff = sample - rateSample;
+                    _rateSample += _rateSampleCount;
+                    _rateSamples.position = 0;
+                    sampleDiff = sample - _rateSample;
                     var seekExtract:Boolean = (sampleDiff < 0 || sampleDiff > 8192);
-                    rateSampleCount = (rateSound as Object).extract(rateSamples, 4096, seekExtract ? sample * mp3Rate : -1);
+                    _rateSampleCount = (_rateSound as Object).extract(_rateSamples, 4096, seekExtract ? sample * _mp3Rate : -1);
 
                     if (seekExtract)
                     {
-                        rateSample = sample;
-                        sampleDiff = sample - rateSample;
+                        _rateSample = sample;
+                        sampleDiff = sample - _rateSample;
                     }
 
-                    if (rateSampleCount <= 0)
+                    if (_rateSampleCount <= 0)
                         return;
                 }
-                rateSamples.position = 8 * sampleDiff;
-                e.data.writeFloat(rateSamples.readFloat());
-                e.data.writeFloat(rateSamples.readFloat());
+                _rateSamples.position = 8 * sampleDiff;
+                e.data.writeFloat(_rateSamples.readFloat());
+                e.data.writeFloat(_rateSamples.readFloat());
                 osamples++;
             }
         }
@@ -447,35 +453,35 @@ package classes.chart
             var osamples:int = 0;
             while (osamples < 4096)
             {
-                var sample:int = (e.position + osamples) * rateRate;
-                sample = (chart.notes[chart.notes.length - 1].frame * 1470) - sample + (63 - mp3Frame) * 1470 / rateRate;
+                var sample:int = (e.position + osamples) * _rate;
+                sample = (chart.notes[chart.notes.length - 1].frame * 1470) - sample + (63 - mp3Frame) * 1470 / _rate;
                 if (sample < 0)
                     return;
-                var sampleDiff:int = sample - rateSample;
-                if (sampleDiff < 0 || sampleDiff >= rateSampleCount)
+                var sampleDiff:int = sample - _rateSample;
+                if (sampleDiff < 0 || sampleDiff >= _rateSampleCount)
                 {
-                    rateSample += rateSampleCount;
-                    rateSamples.position = 0;
-                    sampleDiff = sample - rateSample;
+                    _rateSample += _rateSampleCount;
+                    _rateSamples.position = 0;
+                    sampleDiff = sample - _rateSample;
                     var seekPosition:int = sample - 4095;
-                    rateSampleCount = (rateSound as Object).extract(rateSamples, 4096, seekPosition * mp3Rate);
-                    rateSample = seekPosition;
-                    sampleDiff = sample - rateSample;
+                    _rateSampleCount = (_rateSound as Object).extract(_rateSamples, 4096, seekPosition * _mp3Rate);
+                    _rateSample = seekPosition;
+                    sampleDiff = sample - _rateSample;
 
-                    if (rateSampleCount < 4096)
+                    if (_rateSampleCount < 4096)
                     {
-                        rateSamples.position = rateSampleCount * 8;
-                        for (var i:int = rateSampleCount; i < 4096; i++)
+                        _rateSamples.position = _rateSampleCount * 8;
+                        for (var i:int = _rateSampleCount; i < 4096; i++)
                         {
-                            rateSamples.writeFloat(0);
-                            rateSamples.writeFloat(0);
+                            _rateSamples.writeFloat(0);
+                            _rateSamples.writeFloat(0);
                         }
-                        rateSampleCount = 4096;
+                        _rateSampleCount = 4096;
                     }
                 }
-                rateSamples.position = 8 * sampleDiff;
-                e.data.writeFloat(rateSamples.readFloat());
-                e.data.writeFloat(rateSamples.readFloat());
+                _rateSamples.position = 8 * sampleDiff;
+                e.data.writeFloat(_rateSamples.readFloat());
+                e.data.writeFloat(_rateSamples.readFloat());
                 osamples++;
             }
         }
@@ -488,7 +494,7 @@ package classes.chart
         private function chartLoadComplete(e:Event):void
         {
             Logger.info(this, "Chart Load Success");
-            isChartLoaderLoading = false;
+            _isChartLoaderLoading = false;
             switch (chartType)
             {
                 case NoteChart.FFR:
@@ -515,7 +521,7 @@ package classes.chart
             }
             isChartLoaded = true;
 
-            if (noteMod.required() && chartType != NoteChart.FFR_LEGACY)
+            if (_noteMod.required() && chartType != NoteChart.FFR_LEGACY)
             {
                 generateModNotes();
             }
@@ -528,7 +534,7 @@ package classes.chart
         private function musicLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Music Load Error: " + Logger.event_error(err));
-            isMusicLoaderLoading = false;
+            _isMusicLoaderLoading = false;
             //_gvars.gameMain.addPopup(new PopupMessage(_gvars.gameMain, "An error occured while loading the music.", "ERROR"));
             removeLoaderListeners();
             loadFail = true;
@@ -538,7 +544,7 @@ package classes.chart
         {
             Logger.error(this, "Chart Load Error: " + Logger.event_error(err));
             //_gvars.gameMain.addPopup(new PopupMessage(_gvars.gameMain, "An error occured while loading the chart file.", "ERROR"));
-            isChartLoaderLoading = false;
+            _isChartLoaderLoading = false;
             removeLoaderListeners();
             loadFail = true;
         }
@@ -547,16 +553,16 @@ package classes.chart
         public function start(seek:int = 0):void
         {
             updateMusicDelay();
-            if (soundChannel)
+            if (_soundChannel)
             {
-                soundChannel.removeEventListener(Event.SOUND_COMPLETE, stopSound);
-                soundChannel.stop();
+                _soundChannel.removeEventListener(Event.SOUND_COMPLETE, stopSound);
+                _soundChannel.stop();
             }
             if (sound)
             {
-                soundChannel = sound.play(musicDelay * 1000 / options.settings.songRate / 30 + seek);
-                soundChannel.soundTransform = SoundMixer.soundTransform;
-                soundChannel.addEventListener(Event.SOUND_COMPLETE, stopSound);
+                _soundChannel = sound.play(musicDelay * 1000 / _rate / 30 + seek);
+                _soundChannel.soundTransform = SoundMixer.soundTransform;
+                _soundChannel.addEventListener(Event.SOUND_COMPLETE, stopSound);
             }
             if (music)
                 music.gotoAndPlay(2 + musicDelay + int(seek * 30 / 1000));
@@ -567,12 +573,12 @@ package classes.chart
         {
             if (music)
                 music.stop();
-            if (soundChannel)
+            if (_soundChannel)
             {
-                soundChannel.removeEventListener(Event.SOUND_COMPLETE, stopSound);
-                soundChannel.stop();
-                musicPausePosition = 0;
-                soundChannel = null;
+                _soundChannel.removeEventListener(Event.SOUND_COMPLETE, stopSound);
+                _soundChannel.stop();
+                _musicPausePosition = 0;
+                _soundChannel = null;
             }
             musicIsPlaying = false;
         }
@@ -580,10 +586,10 @@ package classes.chart
         public function pause():void
         {
             var pausePosition:int = 0;
-            if (soundChannel)
-                pausePosition = soundChannel.position;
+            if (_soundChannel)
+                pausePosition = _soundChannel.position;
             stop();
-            musicPausePosition = pausePosition;
+            _musicPausePosition = pausePosition;
         }
 
         public function resume():void
@@ -592,8 +598,8 @@ package classes.chart
                 music.play();
             if (sound)
             {
-                soundChannel = sound.play(musicPausePosition);
-                soundChannel.addEventListener(Event.SOUND_COMPLETE, stopSound);
+                _soundChannel = sound.play(_musicPausePosition);
+                _soundChannel.addEventListener(Event.SOUND_COMPLETE, stopSound);
             }
             musicIsPlaying = true;
         }
@@ -623,15 +629,15 @@ package classes.chart
         public function generateModNotes():void
         {
             for (var i:int = chart.notes.length - 1; i >= 0; i--)
-                _modNotes[i] = noteMod.transformNote(chart.notes[i]);
+                _modNotes[i] = _noteMod.transformNote(chart.notes[i]);
         }
 
         public function getNote(index:int):Note
         {
-            if (noteMod.required())
+            if (_noteMod.required())
             {
                 if (NoteChart.FFR_LEGACY)
-                    return noteMod.transformNote(index);
+                    return _noteMod.transformNote(index);
 
                 return _modNotes[index];
             }
@@ -641,8 +647,8 @@ package classes.chart
 
         public function get totalNotes():int
         {
-            if (noteMod.required())
-                return noteMod.transformTotalNotes();
+            if (_noteMod.required())
+                return _noteMod.transformTotalNotes();
 
             if (!chart.notes)
                 return 0;
@@ -652,8 +658,8 @@ package classes.chart
 
         public function get chartTime():Number
         {
-            if (noteMod.required())
-                return noteMod.transformSongLength();
+            if (_noteMod.required())
+                return _noteMod.transformSongLength();
 
             if (!chart.notes || chart.notes.length <= 0)
                 return 0;
@@ -683,21 +689,18 @@ package classes.chart
 
         public function get frameRate():int
         {
-            return type == NoteChart.FFR_MP3 ? _gvars.activeUser.settings.frameRate : chart.framerate;
+            return type == NoteChart.FFR_MP3 ? _frameRate : chart.framerate;
         }
 
         public function updateMusicDelay():void
         {
-            //options = _gvars.options;
-            rateReverse = options.modEnabled("reverse");
-            //rateRate = options.settings.songRate;
-            noteMod.start(options);
-            if (options.isolation && totalNotes > 0)
+            _noteMod.start();
+            if (_isIsolation && totalNotes > 0)
             {
-                if (rateReverse)
-                    musicDelay = Math.max(0, chart.notes[chart.notes.length - 1].frame - chart.notes[Math.max(0, chart.notes.length - 1 - options.isolationOffset)].frame - 60);
+                if (_isReverse)
+                    musicDelay = Math.max(0, chart.notes[chart.notes.length - 1].frame - chart.notes[Math.max(0, chart.notes.length - 1 - _isolationOffset)].frame - 60);
                 else
-                    musicDelay = Math.max(0, chart.notes[options.isolationOffset].frame - 60);
+                    musicDelay = Math.max(0, chart.notes[_isolationOffset].frame - 60);
             }
             else
                 musicDelay = 0;
@@ -714,7 +717,7 @@ package classes.chart
 
                 case NoteChart.FFR_MP3:
                 case NoteChart.THIRDSTYLE:
-                    return soundChannel ? soundChannel.position - musicDelay / options.settings.songRate * 1000 / 30 : 0;
+                    return _soundChannel ? _soundChannel.position - musicDelay / _rate * 1000 / 30 : 0;
 
                 default:
                     return 0;

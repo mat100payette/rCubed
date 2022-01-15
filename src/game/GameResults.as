@@ -60,7 +60,7 @@ package game
         public static const GRAPH_COMBO:int = 0;
         public static const GRAPH_ACCURACY:int = 1;
 
-        private var graphCache:Object = {"0": {}, "1": {}};
+        private var _graphCache:Object = {"0": {}, "1": {}};
 
         private var _mp:MultiplayerState = MultiplayerState.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
@@ -69,50 +69,55 @@ package game
         private var _loader:DynamicURLLoader;
         private var _playlist:Playlist = Playlist.instance;
 
+        private var _settings:UserSettings;
+        private var _isReplay:Boolean;
+        private var _isReplayEdited:Boolean;
+
         // Results
-        private var resultsTime:String = TimeUtil.getCurrentDate();
-        private var resultIndex:int = 0;
-        private var songResults:Vector.<GameScoreResult>;
-        private var songRankIndex:int = -1;
+        private var _resultsTime:String = TimeUtil.getCurrentDate();
+        private var _resultIndex:int = 0;
+        private var _songResults:Vector.<GameScoreResult>;
+        private var _songRankIndex:int = -1;
 
         // Title Bar
-        private var navSaveReplay:BoxIcon;
-        private var navScreenShot:BoxIcon;
-        private var navRandomSong:BoxIcon;
+        private var _navSaveReplay:BoxIcon;
+        private var _navScreenShot:BoxIcon;
+        private var _navRandomSong:BoxIcon;
 
         // Game Result
-        private var resultsDisplay:ResultsBackground;
-        private var navRating:Sprite;
-        private var navPrev:BoxButton;
-        private var navNext:BoxButton;
-        private var resultsMods:Text;
+        private var _resultsDisplay:ResultsBackground;
+        private var _navRating:Sprite;
+        private var _navPrev:BoxButton;
+        private var _navNext:BoxButton;
+        private var _resultsMods:Text;
 
         // Graph
-        private var graphType:int = 0;
-        private var graphToggle:BoxIcon;
-        private var graphAccuracy:BoxIcon;
-        private var activeGraph:GraphBase;
-        private var graphDraw:Sprite;
-        private var graphOverlay:Sprite;
-        private var graphOverlayText:Text;
+        private var _graphType:int = 0;
+        private var _graphToggle:BoxIcon;
+        private var _graphAccuracy:BoxIcon;
+        private var _activeGraph:GraphBase;
+        private var _graphDraw:Sprite;
+        private var _graphOverlay:Sprite;
+        private var _graphOverlayText:Text;
 
         // Menu Bar
-        private var navReplay:BoxButton;
-        private var navOptions:BoxButton;
-        private var navHighscores:BoxButton;
-        private var navMenu:BoxButton;
+        private var _navReplay:BoxButton;
+        private var _navOptions:BoxButton;
+        private var _navHighscores:BoxButton;
+        private var _navMenu:BoxButton;
 
-        public function GameResults()
+        public function GameResults(settings:UserSettings, isReplay:Boolean, isReplayValid:Boolean)
         {
-            init();
-        }
+            _settings = new UserSettings();
+            _settings.update(settings);
 
-        public function init():void
-        {
-            songResults = _gvars.songResults.concat();
+            _isReplay = isReplay;
+            _isReplayEdited = isReplayValid;
+
+            _songResults = _gvars.songResults.concat();
 
             // Send last score
-            if (!_gvars.options.replay)
+            if (!isReplay)
             {
                 sendScore();
                 saveLocalReplay();
@@ -141,22 +146,23 @@ package game
             stage.nativeWindow.title = Constant.AIR_WINDOW_TITLE;
 
             // Get Graph Type
-            graphType = LocalStore.getVariable("result_graph_type", 0);
+            _graphType = LocalStore.getVariable("result_graph_type", 0);
 
             // Background
-            resultsDisplay = new ResultsBackground();
-            resultsDisplay.song_description.styleSheet = Constant.STYLESHEET;
-            this.addChild(resultsDisplay);
+            _resultsDisplay = new ResultsBackground();
+            _resultsDisplay.song_description.styleSheet = Constant.STYLESHEET;
+            addChild(_resultsDisplay);
 
             // Background Noise
             var noiseSource:BitmapData = new BitmapData(780, 480, false, 0x00000000);
             noiseSource.perlinNoise(780, 480, 12, getTimer(), true, false, 7, true);
+
             var noiseImage:Bitmap = new Bitmap(noiseSource);
             noiseImage.alpha = 0.3;
-            resultsDisplay.blueBackground.addChild(noiseImage);
+            _resultsDisplay.blueBackground.addChild(noiseImage);
 
             // Avatar
-            var result:GameScoreResult = songResults[songResults.length - 1];
+            var result:GameScoreResult = _songResults[_songResults.length - 1];
             if (result.user)
             {
                 var userAvatar:DisplayObject = result.user.avatar;
@@ -172,23 +178,23 @@ package game
             var buttonMenuItems:Array = [];
             buttonMenu.x = 22;
             buttonMenu.y = 428;
-            this.addChild(buttonMenu);
+            addChild(buttonMenu);
 
             // Main Bavigation Buttons
-            navOptions = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_options"), 17, eventHandler);
-            buttonMenuItems.push(navOptions);
+            _navOptions = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_options"), 17, eventHandler);
+            buttonMenuItems.push(_navOptions);
 
-            navHighscores = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_highscores"), 17, eventHandler);
-            buttonMenuItems.push(navHighscores);
+            _navHighscores = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_highscores"), 17, eventHandler);
+            buttonMenuItems.push(_navHighscores);
 
             if (!_mp.gameplayPlayingStatus())
             {
-                navReplay = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_replay_song"), 17, eventHandler);
-                buttonMenuItems.push(navReplay);
+                _navReplay = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_replay_song"), 17, eventHandler);
+                buttonMenuItems.push(_navReplay);
             }
 
-            navMenu = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_exit_menu"), 17, eventHandler);
-            buttonMenuItems.push(navMenu);
+            _navMenu = new BoxButton(buttonMenu, 0, 0, 170, 40, _lang.string("game_results_menu_exit_menu"), 17, eventHandler);
+            buttonMenuItems.push(_navMenu);
 
             var BUTTON_GAP:int = 11;
             var BUTTON_WIDTH:int = (735 - (Math.max(0, (buttonMenuItems.length - 1)) * BUTTON_GAP)) / buttonMenuItems.length;
@@ -199,58 +205,58 @@ package game
             }
 
             // Song Notes / Star Rating Button
-            navRating = new Sprite();
-            navRating.buttonMode = true;
-            navRating.mouseChildren = false;
-            navRating.addEventListener(MouseEvent.CLICK, eventHandler);
-            StarSelector.drawStar(navRating.graphics, 18, 0, 0, true, 0xF2D60D, 1);
-            resultsDisplay.addChild(navRating);
+            _navRating = new Sprite();
+            _navRating.buttonMode = true;
+            _navRating.mouseChildren = false;
+            _navRating.addEventListener(MouseEvent.CLICK, eventHandler);
+            StarSelector.drawStar(_navRating.graphics, 18, 0, 0, true, 0xF2D60D, 1);
+            _resultsDisplay.addChild(_navRating);
 
             // Song Results Buttons
-            navScreenShot = new BoxIcon(this, 522, 6, 32, 32, new iconPhoto(), eventHandler);
-            navScreenShot.setIconColor("#E2FEFF");
-            navScreenShot.setHoverText(_lang.string("game_results_queue_save_screenshot"), "bottom");
+            _navScreenShot = new BoxIcon(this, 522, 6, 32, 32, new iconPhoto(), eventHandler);
+            _navScreenShot.setIconColor("#E2FEFF");
+            _navScreenShot.setHoverText(_lang.string("game_results_queue_save_screenshot"), "bottom");
 
-            navSaveReplay = new BoxIcon(this, 485, 6, 32, 32, new iconVideo(), eventHandler);
-            navSaveReplay.setIconColor("#E2FEFF");
-            navSaveReplay.setHoverText(_lang.string("game_results_queue_save_replay"), "bottom");
+            _navSaveReplay = new BoxIcon(this, 485, 6, 32, 32, new iconVideo(), eventHandler);
+            _navSaveReplay.setIconColor("#E2FEFF");
+            _navSaveReplay.setHoverText(_lang.string("game_results_queue_save_replay"), "bottom");
 
-            navRandomSong = new BoxIcon(this, 448, 6, 32, 32, new iconRandom(), eventHandler);
-            navRandomSong.setIconColor("#E2FEFF");
-            navRandomSong.setHoverText(_lang.string("game_results_play_random_song"), "bottom");
+            _navRandomSong = new BoxIcon(this, 448, 6, 32, 32, new iconRandom(), eventHandler);
+            _navRandomSong.setIconColor("#E2FEFF");
+            _navRandomSong.setHoverText(_lang.string("game_results_play_random_song"), "bottom");
 
             // Song Results - Song Queue
-            navPrev = new BoxButton(this, 18, 62, 90, 32, _lang.string("game_results_queue_previous"), 12, eventHandler);
-            navNext = new BoxButton(this, 672, 62, 90, 32, _lang.string("game_results_queue_next"), 12, eventHandler);
+            _navPrev = new BoxButton(this, 18, 62, 90, 32, _lang.string("game_results_queue_previous"), 12, eventHandler);
+            _navNext = new BoxButton(this, 672, 62, 90, 32, _lang.string("game_results_queue_next"), 12, eventHandler);
 
             // Graph
-            resultsMods = new Text(this, 18, 276, "---");
+            _resultsMods = new Text(this, 18, 276, "---");
 
-            graphDraw = new Sprite();
-            graphDraw.x = 30;
-            graphDraw.y = 298;
-            graphDraw.cacheAsBitmap = true;
-            this.addChild(graphDraw);
+            _graphDraw = new Sprite();
+            _graphDraw.x = 30;
+            _graphDraw.y = 298;
+            _graphDraw.cacheAsBitmap = true;
+            addChild(_graphDraw);
 
-            graphOverlay = new Sprite();
-            graphOverlay.x = 30;
-            graphOverlay.y = 298;
-            graphOverlay.mouseChildren = false;
-            graphOverlay.mouseEnabled = false;
-            this.addChild(graphOverlay);
+            _graphOverlay = new Sprite();
+            _graphOverlay.x = 30;
+            _graphOverlay.y = 298;
+            _graphOverlay.mouseChildren = false;
+            _graphOverlay.mouseEnabled = false;
+            addChild(_graphOverlay);
 
-            graphToggle = new BoxIcon(this, 10, 298, 16, 18, new iconRight(), eventHandler);
-            graphToggle.padding = 6;
-            graphToggle.setHoverText(_lang.string("result_next_graph_type"), "right");
+            _graphToggle = new BoxIcon(this, 10, 298, 16, 18, new iconRight(), eventHandler);
+            _graphToggle.padding = 6;
+            _graphToggle.setHoverText(_lang.string("result_next_graph_type"), "right");
 
-            graphAccuracy = new BoxIcon(this, 10, 318, 16, 18, new iconSmallT());
-            graphAccuracy.padding = 6;
-            graphAccuracy.delay = 250;
+            _graphAccuracy = new BoxIcon(this, 10, 318, 16, 18, new iconSmallT());
+            _graphAccuracy.padding = 6;
+            _graphAccuracy.delay = 250;
 
             // Display Game Result
-            displayGameResult(songResults.length > 1 ? -1 : 0);
+            displayGameResult(_songResults.length > 1 ? -1 : 0);
 
-            _mp.gameplayResults(this, songResults);
+            _mp.gameplayResults(this, _songResults);
         }
 
         override public function dispose():void
@@ -271,27 +277,27 @@ package game
         public function displayGameResult(gameIndex:int):void
         {
             // Set Index
-            resultIndex = gameIndex;
+            _resultIndex = gameIndex;
 
             // Buttons
-            navScreenShot.enabled = false;
-            navSaveReplay.enabled = false;
-            navPrev.visible = false;
-            navNext.visible = false;
+            _navScreenShot.enabled = false;
+            _navSaveReplay.enabled = false;
+            _navPrev.visible = false;
+            _navNext.visible = false;
 
-            if (songResults.length > 1)
+            if (_songResults.length > 1)
             {
                 if (gameIndex > -1)
                 {
-                    navPrev.visible = true;
-                    navPrev.text = (gameIndex == 0 ? _lang.string("game_results_queue_total") : _lang.string("game_results_queue_previous"));
+                    _navPrev.visible = true;
+                    _navPrev.text = (gameIndex == 0 ? _lang.string("game_results_queue_total") : _lang.string("game_results_queue_previous"));
                 }
-                if (gameIndex < songResults.length - 1)
-                    navNext.visible = true;
+                if (gameIndex < _songResults.length - 1)
+                    _navNext.visible = true;
             }
 
             // Variables
-            var skillLevel:String = (songResults[0].user != null) ? ("[Lv." + songResults[0].user.skillLevel + "]" + " ") : "";
+            var skillLevel:String = (_songResults[0].user != null) ? ("[Lv." + _songResults[0].user.skillLevel + "]" + " ") : "";
             var displayTime:String = "";
             var songInfo:SongInfo;
             var songTitle:String = "";
@@ -305,18 +311,17 @@ package game
             // Song Queue (Multiple Songs)
             if (gameIndex == -1)
             {
-                navHighscores.enabled = false;
+                _navHighscores.enabled = false;
                 result = new GameScoreResult();
-                result.user = songResults[0].user;
-                result.options = songResults[0].options;
+                result.user = _songResults[0].user;
                 result.replay_hit = [];
 
-                for (var x:int = 0; x < songResults.length; x++)
+                for (var x:int = 0; x < _songResults.length; x++)
                 {
-                    var tempResult:GameScoreResult = songResults[x];
+                    var tempResult:GameScoreResult = _songResults[x];
                     songInfo = tempResult.songInfo;
                     songSubTitle += songInfo.name + ", ";
-                    result.note_count += tempResult.note_count;
+                    result.noteCount += tempResult.noteCount;
                     result.amazing += tempResult.amazing;
                     result.perfect += tempResult.perfect;
                     result.good += tempResult.good;
@@ -337,22 +342,22 @@ package game
                 result.update(_gvars);
 
                 result.max_combo = getMaxCombo(result);
-                songTitle = sprintf(_lang.string("game_results_total_songs"), {"total": NumberUtil.numberFormat(songResults.length)});
+                songTitle = sprintf(_lang.string("game_results_total_songs"), {"total": NumberUtil.numberFormat(_songResults.length)});
                 songSubTitle = songSubTitle.substr(0, songSubTitle.length - 2);
-                displayTime = resultsTime;
+                displayTime = _resultsTime;
 
                 // Index
-                songRankIndex = -1;
+                _songRankIndex = -1;
             }
 
             // Single Song
             else
             {
-                navHighscores.enabled = true;
-                result = songResults[resultIndex];
+                _navHighscores.enabled = true;
+                result = _songResults[_resultIndex];
                 songInfo = result.songInfo;
 
-                var songRate:Number = result.options.settings.songRate;
+                var songRate:Number = result.user.settings.songRate;
                 var seconds:Number = Math.floor(songInfo.time_secs * (1 / songRate));
                 var songLength:String = (Math.floor(seconds / 60)) + ":" + (seconds % 60 >= 10 ? "" : "0") + (seconds % 60);
                 var rateString:String = songRate != 1 ? " (" + songRate + "x Rate)" : "";
@@ -369,28 +374,28 @@ package game
                 scoreTotal = result.score_total;
 
                 // Song Notes / Star
-                navRating.visible = (result.songInfo != null);
+                _navRating.visible = (result.songInfo != null);
 
                 // Highscores
                 if (result.songInfo && result.songInfo.engine)
-                    navHighscores.enabled = false;
+                    _navHighscores.enabled = false;
 
                 // Cached Rank Index
-                songRankIndex = result.game_index + 1;
+                _songRankIndex = result.gameIndex + 1;
 
                 // Save Replay Button
-                navSaveReplay.enabled = true;
-                if (!canSendScore(result, true, false, true, true) || result.is_preview)
-                    navSaveReplay.enabled = false;
+                _navSaveReplay.enabled = true;
+                if (!canSendScore(result, true, false, true, true) || result.isPreview)
+                    _navSaveReplay.enabled = false;
             }
 
             // Save Screenshot
-            if (!result.is_preview)
-                navScreenShot.enabled = true;
+            if (!result.isPreview)
+                _navScreenShot.enabled = true;
 
             // Random Song Button
-            if (result.options.replay || result.is_preview || _mp.gameplayPlayingStatus())
-                navRandomSong.enabled = false;
+            if (_isReplay || result.isPreview || _mp.gameplayPlayingStatus())
+                _navRandomSong.enabled = false;
 
             // Skill rating
             var song_weight:Number = SkillRating.getSongWeight(result);
@@ -399,100 +404,100 @@ package game
 
             // Display Results
             if (Text.isUnicode(songTitle))
-                resultsDisplay.song_title.defaultTextFormat.font = Language.UNI_FONT_NAME;
+                _resultsDisplay.song_title.defaultTextFormat.font = Language.UNI_FONT_NAME;
             if (Text.isUnicode(songSubTitle))
-                resultsDisplay.song_description.defaultTextFormat.font = Language.UNI_FONT_NAME;
+                _resultsDisplay.song_description.defaultTextFormat.font = Language.UNI_FONT_NAME;
 
-            resultsDisplay.results_username.htmlText = "<B>" + (result.options.replay ? "Replay r" : "R") + "esults for " + skillLevel + result.user.name + ":</B>";
-            resultsDisplay.results_time.htmlText = "<B>" + displayTime + "</B>";
-            resultsDisplay.song_title.htmlText = "<B>" + _lang.wrapFont(songTitle) + "</B>";
-            resultsDisplay.song_description.htmlText = "<B>" + songSubTitle + "</B>";
-            resultsDisplay.result_amazing.htmlText = "<B>" + NumberUtil.numberFormat(result.amazing) + "</B>";
-            resultsDisplay.result_perfect.htmlText = "<B>" + NumberUtil.numberFormat(result.perfect) + "</B>";
-            resultsDisplay.result_good.htmlText = "<B>" + NumberUtil.numberFormat(result.good) + "</B>";
-            resultsDisplay.result_average.htmlText = "<B>" + NumberUtil.numberFormat(result.average) + "</B>";
-            resultsDisplay.result_miss.htmlText = "<B>" + NumberUtil.numberFormat(result.miss) + "</B>";
-            resultsDisplay.result_boo.htmlText = "<B>" + NumberUtil.numberFormat(result.boo) + "</B>";
-            resultsDisplay.result_maxcombo.htmlText = "<B>" + NumberUtil.numberFormat(result.max_combo) + "</B>";
-            resultsDisplay.result_rawscore.htmlText = "<B>" + NumberUtil.numberFormat(result.score) + "</B>";
-            resultsDisplay.result_total.htmlText = "<B>" + NumberUtil.numberFormat(scoreTotal) + "</B>";
-            resultsDisplay.result_credits.htmlText = "<B>" + NumberUtil.numberFormat(result.credits) + "</B>";
-            resultsDisplay.result_rawgoods.htmlText = "<B>" + NumberUtil.numberFormat(result.raw_goods, 1, true) + "</B>";
-            resultsDisplay.result_equivalency.htmlText = "<B>" + NumberUtil.numberFormat(song_weight, 2, true) + "</B>";
+            _resultsDisplay.results_username.htmlText = "<B>" + (_isReplay ? "Replay r" : "R") + "esults for " + skillLevel + result.user.name + ":</B>";
+            _resultsDisplay.results_time.htmlText = "<B>" + displayTime + "</B>";
+            _resultsDisplay.song_title.htmlText = "<B>" + _lang.wrapFont(songTitle) + "</B>";
+            _resultsDisplay.song_description.htmlText = "<B>" + songSubTitle + "</B>";
+            _resultsDisplay.result_amazing.htmlText = "<B>" + NumberUtil.numberFormat(result.amazing) + "</B>";
+            _resultsDisplay.result_perfect.htmlText = "<B>" + NumberUtil.numberFormat(result.perfect) + "</B>";
+            _resultsDisplay.result_good.htmlText = "<B>" + NumberUtil.numberFormat(result.good) + "</B>";
+            _resultsDisplay.result_average.htmlText = "<B>" + NumberUtil.numberFormat(result.average) + "</B>";
+            _resultsDisplay.result_miss.htmlText = "<B>" + NumberUtil.numberFormat(result.miss) + "</B>";
+            _resultsDisplay.result_boo.htmlText = "<B>" + NumberUtil.numberFormat(result.boo) + "</B>";
+            _resultsDisplay.result_maxcombo.htmlText = "<B>" + NumberUtil.numberFormat(result.max_combo) + "</B>";
+            _resultsDisplay.result_rawscore.htmlText = "<B>" + NumberUtil.numberFormat(result.score) + "</B>";
+            _resultsDisplay.result_total.htmlText = "<B>" + NumberUtil.numberFormat(scoreTotal) + "</B>";
+            _resultsDisplay.result_credits.htmlText = "<B>" + NumberUtil.numberFormat(result.credits) + "</B>";
+            _resultsDisplay.result_rawgoods.htmlText = "<B>" + NumberUtil.numberFormat(result.raw_goods, 1, true) + "</B>";
+            _resultsDisplay.result_equivalency.htmlText = "<B>" + NumberUtil.numberFormat(song_weight, 2, true) + "</B>";
 
             // Align Rating Star to Song Title
-            navRating.x = resultsDisplay.song_title.x + (resultsDisplay.song_title.width / 2) - (resultsDisplay.song_title.textWidth / 2) - 22;
-            navRating.y = resultsDisplay.song_title.y + 4;
+            _navRating.x = _resultsDisplay.song_title.x + (_resultsDisplay.song_title.width / 2) - (_resultsDisplay.song_title.textWidth / 2) - 22;
+            _navRating.y = _resultsDisplay.song_title.y + 4;
 
             /// - Rank Text
             // Has R3 Highscore
-            if (_gvars.songResultRanks[songRankIndex] != null)
+            if (_gvars.songResultRanks[_songRankIndex] != null)
             {
-                resultsDisplay.result_rank.htmlText = "<B>Rank: " + _gvars.songResultRanks[songRankIndex].new_ranking;
-                resultsDisplay.result_last_best.htmlText = "<B>Last Best: " + _gvars.songResultRanks[songRankIndex].old_ranking;
+                _resultsDisplay.result_rank.htmlText = "<B>Rank: " + _gvars.songResultRanks[_songRankIndex].new_ranking;
+                _resultsDisplay.result_last_best.htmlText = "<B>Last Best: " + _gvars.songResultRanks[_songRankIndex].old_ranking;
             }
             // Alt Engine Score
             else if (result.songInfo && result.songInfo.engine)
             {
-                resultsDisplay.result_credits.htmlText = "<B>--</B>";
+                _resultsDisplay.result_credits.htmlText = "<B>--</B>";
                 var rank:Object = result.legacyLastRank;
                 if (rank)
                 {
-                    resultsDisplay.result_rank.htmlText = "<B>" + (rank.score < result.score ? "Last" : "Current") + " Best: " + rank.score;
-                    resultsDisplay.result_last_best.htmlText = rank.results;
+                    _resultsDisplay.result_rank.htmlText = "<B>" + (rank.score < result.score ? "Last" : "Current") + " Best: " + rank.score;
+                    _resultsDisplay.result_last_best.htmlText = rank.results;
                 }
                 else
                 {
-                    resultsDisplay.result_rank.htmlText = "Saved score locally";
-                    resultsDisplay.result_last_best.htmlText = "";
+                    _resultsDisplay.result_rank.htmlText = "Saved score locally";
+                    _resultsDisplay.result_last_best.htmlText = "";
                 }
             }
             // Getting Rank / Unsendable Score
-            else if (!result.options.replay && gameIndex != -1 && !result.user.isGuest)
+            else if (!_isReplay && gameIndex != -1 && !result.user.isGuest)
             {
-                resultsDisplay.result_rank.htmlText = canSendScore(result, true, true, false, false) ? "Saving score..." : "Score not saved";
-                resultsDisplay.result_last_best.htmlText = "";
+                _resultsDisplay.result_rank.htmlText = canSendScore(result, true, true, false, false) ? "Saving score..." : "Score not saved";
+                _resultsDisplay.result_last_best.htmlText = "";
             }
             // Blank
             else
             {
-                resultsDisplay.result_rank.htmlText = "";
-                resultsDisplay.result_last_best.htmlText = "";
+                _resultsDisplay.result_rank.htmlText = "";
+                _resultsDisplay.result_last_best.htmlText = "";
             }
 
             // Edited Replay
-            if (result.options.replay && result.options.replay.isEdited)
+            if (_isReplay && _isReplayEdited)
             {
-                resultsDisplay.result_rank.htmlText = _lang.string("results_replay_modified");
-                resultsDisplay.result_rank.textColor = 0xF06868;
+                _resultsDisplay.result_rank.htmlText = _lang.string("results_replay_modified");
+                _resultsDisplay.result_rank.textColor = 0xF06868;
             }
 
             // Song Preview
-            if (result.is_preview)
+            if (result.isPreview)
             {
-                resultsDisplay.results_username.htmlText = "<B>Song Preview:</B>";
-                resultsDisplay.result_credits.htmlText = "<B>0</B>";
+                _resultsDisplay.results_username.htmlText = "<B>Song Preview:</B>";
+                _resultsDisplay.result_credits.htmlText = "<B>0</B>";
             }
 
             // Mod Text
-            resultsMods.text = "Scroll Speed: " + result.options.settings.scrollSpeed;
+            _resultsMods.text = "Scroll Speed: " + _settings.scrollSpeed;
             if (result.restarts > 0)
-                resultsMods.text += ", Restarts: " + result.restarts;
+                _resultsMods.text += ", Restarts: " + result.restarts;
 
             var mods:Array = [];
-            for each (var mod:String in result.options.settings.activeMods)
+            for each (var mod:String in _settings.activeMods)
                 mods.push(_lang.string("options_mod_" + mod));
 
-            if (result.options.judgeWindow)
+            if (_settings.judgeWindow)
                 mods.push(_lang.string("options_mod_judge"));
             if (mods.length > 0)
-                resultsMods.text += ", Game Mods: " + mods.join(", ");
+                _resultsMods.text += ", Game Mods: " + mods.join(", ");
             if (result.last_note > 0)
-                resultsMods.text += ", Last Note: " + result.last_note;
+                _resultsMods.text += ", Last Note: " + result.last_note;
 
             if (gameIndex != -1)
             {
-                graphAccuracy.setHoverText(sprintf(_lang.string("result_accuracy_deviation"), {"acc_frame": result.accuracy_frames.toFixed(3),
+                _graphAccuracy.setHoverText(sprintf(_lang.string("result_accuracy_deviation"), {"acc_frame": result.accuracy_frames.toFixed(3),
                         "acc_dev_frame": result.accuracy_deviation_frames.toFixed(3),
                         "acc_ms": result.accuracy.toFixed(3),
                         "acc_dev_ms": result.accuracy_deviation.toFixed(3)}), "right");
@@ -513,26 +518,26 @@ package game
          */
         private function drawResultGraph(result:GameScoreResult):void
         {
-            var graph_type:int = graphType;
+            var graph_type:int = _graphType;
 
             // Check for Totals Index
             if (graph_type == GRAPH_ACCURACY && (result.song == null || result.replay_bin_notes == null))
                 graph_type = GRAPH_COMBO;
 
             // Graph Toggle
-            graphToggle.visible = (result.song != null);
-            graphAccuracy.visible = (result.song != null);
+            _graphToggle.visible = (result.song != null);
+            _graphAccuracy.visible = (result.song != null);
 
             // Remove Old Graph
-            if (activeGraph != null)
+            if (_activeGraph != null)
             {
-                activeGraph.onStageRemove();
+                _activeGraph.onStageRemove();
             }
 
-            activeGraph = getGraph(graph_type, result);
-            activeGraph.onStage(this);
-            activeGraph.draw();
-            activeGraph.drawOverlay(stage.mouseX - graphOverlay.x, stage.mouseY - graphOverlay.y);
+            _activeGraph = getGraph(graph_type, result);
+            _activeGraph.onStage(this);
+            _activeGraph.draw();
+            _activeGraph.drawOverlay(stage.mouseX - _graphOverlay.x, stage.mouseY - _graphOverlay.y);
         }
 
         /**
@@ -543,12 +548,12 @@ package game
          */
         public function getGraph(graphType:int, result:GameScoreResult):GraphBase
         {
-            var cacheId:String = graphType + "_" + resultIndex;
+            var cacheId:String = graphType + "_" + _resultIndex;
 
             // From Cache
-            if (graphCache[cacheId] != null)
+            if (_graphCache[cacheId] != null)
             {
-                return graphCache[cacheId];
+                return _graphCache[cacheId];
             }
 
             // Create New
@@ -558,14 +563,14 @@ package game
 
                 if (graphType == GRAPH_ACCURACY)
                 {
-                    newGraph = new GraphAccuracy(graphDraw, graphOverlay, result);
+                    newGraph = new GraphAccuracy(_graphDraw, _graphOverlay, result);
                 }
                 else
                 {
-                    newGraph = new GraphCombo(graphDraw, graphOverlay, result);
+                    newGraph = new GraphCombo(_graphDraw, _graphOverlay, result);
                 }
 
-                graphCache[cacheId] = newGraph;
+                _graphCache[cacheId] = newGraph;
 
                 return newGraph;
             }
@@ -578,9 +583,9 @@ package game
         private function e_graphHover(e:MouseEvent):void
         {
             //trace(e.stageX - graphOverlay.x, e.stageY - graphOverlay.y); 
-            if (activeGraph != null)
+            if (_activeGraph != null)
             {
-                activeGraph.drawOverlay(e.stageX - graphOverlay.x, e.stageY - graphOverlay.y);
+                _activeGraph.drawOverlay(e.stageX - _graphOverlay.x, e.stageY - _graphOverlay.y);
             }
         }
 
@@ -682,21 +687,21 @@ package game
             {
                 target = null;
                 var keyCode:int = e.keyCode;
-                if ((keyCode == _gvars.playerUser.settings.keyLeft || keyCode == Keyboard.LEFT) && navPrev.visible)
+                if ((keyCode == _gvars.playerUser.settings.keyLeft || keyCode == Keyboard.LEFT) && _navPrev.visible)
                 {
-                    target = navPrev;
+                    target = _navPrev;
                 }
-                else if ((keyCode == _gvars.playerUser.settings.keyRight || keyCode == Keyboard.RIGHT) && navNext.visible)
+                else if ((keyCode == _gvars.playerUser.settings.keyRight || keyCode == Keyboard.RIGHT) && _navNext.visible)
                 {
-                    target = navNext;
+                    target = _navNext;
                 }
                 else if (keyCode == _gvars.playerUser.settings.keyRestart)
                 {
-                    target = navReplay;
+                    target = _navReplay;
                 }
                 else if (keyCode == _gvars.playerUser.settings.keyQuit)
                 {
-                    target = navMenu;
+                    target = _navMenu;
                     stage.removeEventListener(KeyboardEvent.KEY_DOWN, eventHandler);
                 }
             }
@@ -705,37 +710,34 @@ package game
                 return;
 
             // Based on target
-            if (target == navSaveReplay)
+            if (target == _navSaveReplay)
             {
                 saveServerReplay();
             }
 
-            else if (target == navScreenShot)
+            else if (target == _navScreenShot)
             {
                 var ext:String = "";
-                if (resultIndex >= 0)
+                if (_resultIndex >= 0)
                 {
-                    ext = songResults[resultIndex].screenshot_path;
+                    ext = _songResults[_resultIndex].screenshot_path;
                 }
                 _gvars.takeScreenShot(ext);
             }
 
-            else if (target == navPrev)
+            else if (target == _navPrev)
             {
-                displayGameResult(resultIndex - 1);
+                displayGameResult(_resultIndex - 1);
             }
 
-            else if (target == navNext)
+            else if (target == _navNext)
             {
-                displayGameResult(resultIndex + 1);
+                displayGameResult(_resultIndex + 1);
             }
 
-            else if (target == navReplay)
+            else if (target == _navReplay)
             {
-                var skipload:Boolean = (songResults.length == 1 && songResults[0].song && songResults[0].song.isLoaded);
-
-                if (!_gvars.options.replay)
-                    _gvars.options.fill();
+                var skipload:Boolean = (_songResults.length == 1 && _songResults[0].song && _songResults[0].song.isLoaded);
 
                 if (skipload)
                 {
@@ -749,7 +751,7 @@ package game
                 }
             }
 
-            else if (target == navRandomSong)
+            else if (target == _navRandomSong)
             {
                 var songList:Array = _playlist.playList;
                 var selectedSong:Object;
@@ -778,39 +780,43 @@ package game
                 if (songList.length > 0)
                 {
                     selectedSong = songList[Math.floor(Math.random() * (songList.length - 1))];
-                    _gvars.songQueue.push(selectedSong);
-                    _gvars.options = new GameOptions(_gvars.activeUser);
-                    _gvars.options.fill();
+
+                    // TODO: Refactor this into an event with the random selected song
+                    /*
+                       _gvars.songQueue.push(selectedSong);
+                       _gvars.options = new GameOptions(_gvars.activeUser);
+                       _gvars.options.fill();
+                     */
 
                     dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
                 }
             }
 
-            else if (target == navOptions)
+            else if (target == _navOptions)
                 dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
 
-            else if (target == navHighscores)
+            else if (target == _navHighscores)
             {
-                if (resultIndex >= 0)
-                    dispatchEvent(new AddPopupHighscoresEvent(songResults[resultIndex].songInfo));
+                if (_resultIndex >= 0)
+                    dispatchEvent(new AddPopupHighscoresEvent(_songResults[_resultIndex].songInfo));
             }
 
-            else if (target == navMenu)
+            else if (target == _navMenu)
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
 
-            else if (target == navRating)
+            else if (target == _navRating)
             {
-                if (resultIndex >= 0)
-                    dispatchEvent(new AddPopupSongNotesEvent(songResults[resultIndex].songInfo));
+                if (_resultIndex >= 0)
+                    dispatchEvent(new AddPopupSongNotesEvent(_songResults[_resultIndex].songInfo));
             }
 
-            else if (target == graphToggle)
+            else if (target == _graphToggle)
             {
-                if (resultIndex >= 0)
+                if (_resultIndex >= 0)
                 {
-                    graphType = (graphType + 1) % 2;
-                    LocalStore.setVariable("result_graph_type", graphType);
-                    drawResultGraph(songResults[resultIndex]);
+                    _graphType = (_graphType + 1) % 2;
+                    LocalStore.setVariable("result_graph_type", _graphType);
+                    drawResultGraph(_songResults[_resultIndex]);
                 }
             }
         }
@@ -858,7 +864,7 @@ package game
             var ret:Boolean = false;
             ret ||= valid_score && !result.options.isScoreValid(true, false);
             ret ||= valid_replay && !result.options.isScoreValid(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (result.options.replay && result.options.replay.isEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (_isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
         }
@@ -879,7 +885,7 @@ package game
             var ret:Boolean = false;
             ret ||= valid_score && !result.options.isScoreUpdated(true, false);
             ret ||= valid_replay && !result.options.isScoreUpdated(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (result.options.replay && result.options.replay.isEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (_isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
         }
@@ -891,7 +897,7 @@ package game
         private function sendScore():void
         {
             // Get last score
-            var gameResult:GameScoreResult = songResults[songResults.length - 1];
+            var gameResult:GameScoreResult = _songResults[_songResults.length - 1];
 
             // Update Judge Offset
             updateJudgeOffset(gameResult);
@@ -918,9 +924,9 @@ package game
             Constant.addDefaultRequestVariables(scoreSender);
 
             // Post Game Data
-            scoreSender.level = gameResult.level;
+            scoreSender.level = gameResult.song.songInfo.level;
             scoreSender.update = canUpdateScore(gameResult, true, true, false, false);
-            scoreSender.rate = gameResult.options.settings.songRate;
+            scoreSender.rate = _settings.songRate;
             scoreSender.restarts = gameResult.restarts;
             scoreSender.accuracy = gameResult.accuracy_frames;
             scoreSender.amazing = gameResult.amazing;
@@ -932,7 +938,7 @@ package game
             scoreSender.max_combo = gameResult.max_combo;
             scoreSender.score = gameResult.score;
             scoreSender.replay = Replay.getReplayString(gameResult.replayData);
-            scoreSender.save_settings = gameResult.options.settings.stringify();
+            scoreSender.save_settings = _settings.stringify();
             scoreSender.restart_stats = JSON.stringify(gameResult.restart_stats);
             scoreSender.session = _gvars.userSession;
             scoreSender.start_time = gameResult.start_time;
@@ -974,8 +980,8 @@ package game
 
                 Alert.add(_lang.string("error_failed_to_save_results") + " (ERR: JSON_ERROR)", 360, Alert.RED);
 
-                if (resultsDisplay != null)
-                    resultsDisplay.result_rank.htmlText = "Score save failed!";
+                if (_resultsDisplay != null)
+                    _resultsDisplay.result_rank.htmlText = "Score save failed!";
 
                 return;
             }
@@ -1068,17 +1074,17 @@ package game
                     _gvars.songResultRanks[e.target.rank_index] = {old_ranking: data.old_ranking, new_ranking: data.new_ranking};
 
                     // Update Rank Display if current score.
-                    var gameIndex:int = (songResults.length == 1 ? e.target.rank_index : songRankIndex);
-                    if (e.target.rank_index == gameIndex && resultsDisplay != null)
+                    var gameIndex:int = (_songResults.length == 1 ? e.target.rank_index : _songRankIndex);
+                    if (e.target.rank_index == gameIndex && _resultsDisplay != null)
                     {
-                        resultsDisplay.result_rank.htmlText = "<B>Rank: " + _gvars.songResultRanks[gameIndex].new_ranking;
-                        resultsDisplay.result_last_best.htmlText = "<B>Last Best: " + _gvars.songResultRanks[gameIndex].old_ranking;
+                        _resultsDisplay.result_rank.htmlText = "<B>Rank: " + _gvars.songResultRanks[gameIndex].new_ranking;
+                        _resultsDisplay.result_last_best.htmlText = "<B>Last Best: " + _gvars.songResultRanks[gameIndex].old_ranking;
                     }
                 }
                 else
                 {
-                    resultsDisplay.result_rank.htmlText = "Game Mods";
-                    resultsDisplay.result_last_best.htmlText = "Enabled";
+                    _resultsDisplay.result_rank.htmlText = "Game Mods";
+                    _resultsDisplay.result_last_best.htmlText = "Enabled";
                 }
 
                 _gvars.activeUser.grandTotal += gameResult.score_total;
@@ -1088,10 +1094,10 @@ package game
             }
             else
             {
-                if (resultsDisplay != null)
+                if (_resultsDisplay != null)
                 {
-                    resultsDisplay.result_rank.htmlText = data.ignore ? "" : "Score save failed!";
-                    resultsDisplay.result_last_best.htmlText = data.ignore ? "" : "(ERR: " + data.result + ")";
+                    _resultsDisplay.result_rank.htmlText = data.ignore ? "" : "Score save failed!";
+                    _resultsDisplay.result_last_best.htmlText = data.ignore ? "" : "(ERR: " + data.result + ")";
                 }
             }
         }
@@ -1105,8 +1111,8 @@ package game
             removeLoaderListeners(siteLoadComplete, siteLoadError);
             Alert.add(_lang.string("error_server_connection_failure"), 120, Alert.RED);
 
-            if (resultsDisplay != null)
-                resultsDisplay.result_rank.htmlText = "Score save failed!";
+            if (_resultsDisplay != null)
+                _resultsDisplay.result_rank.htmlText = "Score save failed!";
         }
 
         //******************************************************************************************//
@@ -1121,7 +1127,7 @@ package game
         private function sendAltEngineScore():void
         {
             // Get last score
-            var gameResult:GameScoreResult = songResults[songResults.length - 1];
+            var gameResult:GameScoreResult = _songResults[_songResults.length - 1];
 
             if (!gameResult.songInfo.engine)
                 return;
@@ -1164,8 +1170,8 @@ package game
             var dataObject:Object = {};
             dataObject.engine = gameResult.songInfo.engine;
             dataObject.song_data = sd;
-            dataObject.level = gameResult.level;
-            dataObject.rate = gameResult.options.settings.songRate;
+            dataObject.level = gameResult.song.songInfo.level;
+            dataObject.rate = _settings.songRate;
             dataObject.restarts = gameResult.restarts;
             dataObject.accuracy = gameResult.accuracy_frames;
             dataObject.amazing = gameResult.amazing;
@@ -1177,7 +1183,7 @@ package game
             dataObject.max_combo = gameResult.max_combo;
             dataObject.score = gameResult.score;
             dataObject.replay = gameResult.replay_bin_encoded;
-            dataObject.save_settings = gameResult.options.settings;
+            dataObject.save_settings = _settings;
             dataObject.session = _gvars.userSession;
             dataObject.hashMap = getSaveHash(dataObject);
 
@@ -1270,7 +1276,7 @@ package game
          */
         private function saveLocalReplay():void
         {
-            var result:GameScoreResult = songResults[songResults.length - 1];
+            var result:GameScoreResult = _songResults[_songResults.length - 1];
 
             if (!canSendScore(result, true, false, true, false))
                 return;
@@ -1306,7 +1312,7 @@ package game
                 try
                 {
                     var path:String = AirContext.getReplayPath(result.song);
-                    path += (result.song.songInfo.level_id ? result.song.songInfo.level_id : result.song.id.toString())
+                    path += (result.song.songInfo.level_id ? result.song.songInfo.level_id : result.song.songInfo.level.toString())
                     path += "_" + (new Date().getTime())
                     path += "_" + (result.pa_string + "-" + result.max_combo);
                     path += ".txt";
@@ -1335,7 +1341,7 @@ package game
          */
         private function saveServerReplay():void
         {
-            var gameResult:GameScoreResult = songResults[resultIndex];
+            var gameResult:GameScoreResult = _songResults[_resultIndex];
 
             // Loader
             _loader = new DynamicURLLoader();
@@ -1346,9 +1352,9 @@ package game
             Constant.addDefaultRequestVariables(scoreSender);
 
             // Post Game Data
-            scoreSender.level = gameResult.level;
+            scoreSender.level = gameResult.song.songInfo.level;
             scoreSender.update = canUpdateScore(gameResult, true, true, false, false);
-            scoreSender.rate = gameResult.options.settings.songRate;
+            scoreSender.rate = _settings.songRate;
             scoreSender.restarts = gameResult.restarts;
             scoreSender.accuracy = gameResult.accuracy_frames;
             scoreSender.amazing = gameResult.amazing;
@@ -1361,7 +1367,7 @@ package game
             scoreSender.score = gameResult.score;
             scoreSender.replay = Replay.getReplayString(gameResult.replayData);
             scoreSender.replay_bin = gameResult.replay_bin_encoded;
-            scoreSender.save_settings = gameResult.options.settings.stringify();
+            scoreSender.save_settings = _settings.stringify();
             scoreSender.session = _gvars.userSession;
             scoreSender.start_time = gameResult.start_time;
             scoreSender.start_hash = gameResult.start_hash;

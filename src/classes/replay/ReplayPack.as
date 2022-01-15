@@ -4,8 +4,9 @@ package classes.replay
     import classes.User;
     import com.flashfla.utils.StringUtil;
     import flash.utils.ByteArray;
-    import game.GameOptions;
     import classes.UserSettings;
+    import classes.chart.Song;
+    import classes.SongInfo;
 
     /**
      * A Class needed to pack and unpack a binary based R3 replay.
@@ -353,21 +354,18 @@ package classes.replay
             return binReplay;
         }
 
-        static public function writeReplay(activeUser:User, options:GameOptions, judgements:String, binReplayNotes:Vector.<ReplayBinFrame>, binReplayBoos:Vector.<ReplayBinFrame>):ByteArray
+        static public function writeReplay(userSiteId:int, songInfo:SongInfo, settings:UserSettings, judgements:String, binReplayNotes:Vector.<ReplayBinFrame>, binReplayBoos:Vector.<ReplayBinFrame>):ByteArray
         {
             // No replay to make.
             if (binReplayNotes.length == 0 && binReplayBoos.length == 0)
                 return null;
 
             // No Custom Judge Windows, not supported.
-            if (options.judgeWindow)
+            if (settings.judgeWindow)
                 return null;
 
-            // Get Alt engine Settings
-            // TODO: Does this need a `new UserSettings()` ?
-            var settings:UserSettings = options.settings;
-            if (options.song.songInfo.engine)
-                settings.update({"arc_engine": ArcGlobals.instance.legacyEncode(options.song.songInfo)});
+            if (songInfo.engine)
+                settings.update({"arc_engine": ArcGlobals.instance.legacyEncode(songInfo)});
 
             var timestamp:Number = Math.floor(new Date().getTime() / 1000);
             var settingsEncode:String = settings.stringify();
@@ -376,16 +374,16 @@ package classes.replay
             binReplay.writeByte(MAJOR_VER); // Major Version
             binReplay.writeByte(MINOR_VER); // Minor Version
             binReplay.writeByte(1); // Header Flag
-            binReplay.writeUnsignedInt(activeUser.siteId); // Userid
-            binReplay.writeUnsignedInt(options.song.id); // Song ID
-            binReplay.writeFloat(options.settings.songRate) // Song Rate
+            binReplay.writeUnsignedInt(userSiteId); // Userid
+            binReplay.writeUnsignedInt(songInfo.level); // Song ID
+            binReplay.writeFloat(settings.songRate) // Song Rate
             binReplay.writeUnsignedInt(timestamp);
             binReplay.writeUTF(judgements);
             binReplay.writeUTF(settingsEncode);
             binReplay.writeBytes(pack(binReplayNotes, binReplayBoos)); // Replay Pack
             binReplay.writeUnsignedInt(checksum(binReplay));
 
-            if (!verifyReplayWrite(binReplay, activeUser, options, judgements, binReplayNotes, binReplayBoos, settingsEncode, timestamp))
+            if (!verifyReplayWrite(binReplay, userSiteId, songInfo, settings, judgements, binReplayNotes, binReplayBoos, settingsEncode, timestamp))
             {
                 return null;
             }
@@ -450,7 +448,7 @@ package classes.replay
             return replay;
         }
 
-        static private function verifyReplayWrite(binReplay:ByteArray, activeUser:User, options:GameOptions, judgements:String, binReplayNotes:Vector.<ReplayBinFrame>, binReplayBoos:Vector.<ReplayBinFrame>, settingsEncode:String, timestamp:Number):Boolean
+        static private function verifyReplayWrite(binReplay:ByteArray, userSiteId:int, songInfo:SongInfo, settings:UserSettings, judgements:String, binReplayNotes:Vector.<ReplayBinFrame>, binReplayBoos:Vector.<ReplayBinFrame>, settingsEncode:String, timestamp:Number):Boolean
         {
             // Read Replay to Verify Write
             var test:ReplayPacked = readReplay(binReplay, true);
@@ -474,19 +472,19 @@ package classes.replay
                 trace("MINOR_VER failed comparison", MINOR_VER, test.MINOR_VER);
                 return false;
             }
-            if (activeUser.siteId != test.user_id)
+            if (userSiteId != test.user_id)
             {
-                trace("user_id failed comparison", activeUser.siteId, test.user_id);
+                trace("user_id failed comparison", userSiteId, test.user_id);
                 return false;
             }
-            if (options.song.id != test.song_id)
+            if (songInfo.level != test.song_id)
             {
-                trace("song_id failed comparison", options.song.id, test.song_id);
+                trace("song_id failed comparison", songInfo.level, test.song_id);
                 return false;
             }
-            if (options.settings.songRate.toFixed(3) != test.song_rate.toFixed(3))
+            if (settings.songRate.toFixed(3) != test.song_rate.toFixed(3))
             {
-                trace("song_rate failed comparison", options.settings.songRate, test.song_rate);
+                trace("song_rate failed comparison", settings.songRate, test.song_rate);
                 return false;
             }
             if (timestamp != test.timestamp)

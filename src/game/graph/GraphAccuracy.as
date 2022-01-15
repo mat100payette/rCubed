@@ -89,7 +89,7 @@ package game.graph
             judgeMaxTime = new Text(buttons, 0, 0, sprintf(_lang.string("game_results_graph_graph_late"), {"value": ((result.MAX_TIME > 0 ? "+" : "") + (result.MAX_TIME + 1))}));
             judgeMaxTime.alpha = 0.2;
 
-            maxNotes = new Text(buttons, graphWidth - 2, -3, sprintf(_lang.string("game_results_graph_note_count"), {"notes": result.note_count}));
+            maxNotes = new Text(buttons, graphWidth - 2, -3, sprintf(_lang.string("game_results_graph_note_count"), {"notes": result.noteCount}));
             maxNotes.alpha = 0.2;
             maxNotes.align = TextFormatAlign.RIGHT;
 
@@ -304,7 +304,7 @@ package game.graph
             boo_points = new <GraphCrossPoint>[];
 
             // Judge 
-            var song_arrows:int = result.note_count;
+            var song_arrows:int = result.noteCount;
 
             var i:int;
 
@@ -402,7 +402,7 @@ package game.graph
             }
 
             // Fill in Misses, Overlay uses cross point length.
-            if (result.note_count > 0)
+            if (result.noteCount > 0)
             {
                 while (cross_points.length < result.last_note)
                 {

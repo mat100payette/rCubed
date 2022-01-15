@@ -8,69 +8,87 @@ package game.controls
     import flash.utils.getTimer;
     import flash.display.Sprite;
     import flash.display.MovieClip;
-    import game.GameOptions;
     import com.flashfla.utils.ObjectPool;
+    import classes.UserSettings;
+    import classes.GameMods;
 
     public class NoteBox extends Sprite
     {
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _noteskins:NoteskinsList = NoteskinsList.instance;
-        private var options:GameOptions;
-        private var song:Song;
 
-        private var scrollSpeed:Number;
-        private var readahead:Number;
-        private var totalNotes:int;
-        private var noteCount:int;
-        private var notePool:Array;
+        private var _song:Song;
+        private var _noteskinId:int;
+        private var _noteColors:Array;
+        private var _judgeColors:Array;
+        private var _receptorGap:Number;
+        private var _receptorAnimationSpeed:Number;
+        private var _displayReceptorAnimations:Boolean;
+        private var _scrollDirection:String;
+        private var _scrollSpeed:Number;
+        private var _noteScale:Number;
+        private var _mods:GameMods;
+
+        private var _readahead:Number;
+        private var _totalNotes:int;
+        private var _noteCount:int;
+        private var _notePool:Array;
+
+        private var _leftReceptor:MovieClip;
+        private var _downReceptor:MovieClip;
+        private var _upReceptor:MovieClip;
+        private var _rightReceptor:MovieClip;
+        private var _receptorArray:Array;
+
+        private var _isSideScroll:Boolean;
+        private var _receptorAlpha:Number;
+
+        public var positionOffsetMax:Object;
         public var notes:Array;
 
-        public var leftReceptor:MovieClip;
-        public var downReceptor:MovieClip;
-        public var upReceptor:MovieClip;
-        public var rightReceptor:MovieClip;
-        public var receptorArray:Array;
-        public var positionOffsetMax:Object;
-        private var sideScroll:Boolean;
-        private var receptorAlpha:Number;
-
-        public function NoteBox(song:Song, options:GameOptions)
+        public function NoteBox(song:Song, settings:UserSettings)
         {
-            this.song = song;
-            this.options = options;
+            _song = song;
+            _noteskinId = settings.noteskinId;
+            _noteColors = settings.noteColors;
+            _judgeColors = settings.judgeColors;
+            _receptorGap = settings.receptorGap;
+            _receptorAnimationSpeed = settings.receptorAnimationSpeed;
+            _displayReceptorAnimations = settings.displayReceptorAnimations;
+            _scrollDirection = settings.scrollDirection;
+            _scrollSpeed = settings.scrollSpeed;
+            _noteScale = settings.noteScale;
+            _mods = new GameMods(settings);
 
             // Create Object Pools
-            notePool = [];
+            _notePool = [];
             for each (var item:Object in _noteskins.noteskins)
             {
-                notePool[item.id] = {"L": [], "D": [], "U": [], "R": []};
-                for each (var direction:String in GameOptions.NOTE_DIRECTIONS)
+                _notePool[item.id] = {"L": [], "D": [], "U": [], "R": []};
+                for each (var direction:String in Constant.NOTE_DIRECTIONS)
                 {
-                    for each (var color:String in options.settings.noteColors)
-                    {
-                        notePool[item.id][direction][color] = new ObjectPool();
-                    }
+                    for each (var color:String in _noteColors)
+                        _notePool[item.id][direction][color] = new ObjectPool();
                 }
             }
 
             // Check for invalid Noteskin / Pool
-            if (notePool[options.settings.noteskinId] == null)
-            {
-                options.settings.noteskinId = 1;
-            }
+            // TODO: Do something for this check
+            if (_notePool[_noteskinId] == null)
+                null;
 
             // Prefill Object Pools for active noteskin.
             var i:int = 0;
             var preLoadCount:int = 4;
-            for each (var pre_dir:String in GameOptions.NOTE_DIRECTIONS)
+            for each (var pre_dir:String in Constant.NOTE_DIRECTIONS)
             {
-                for each (var pre_color:String in options.settings.noteColors)
+                for each (var pre_color:String in _noteColors)
                 {
-                    var pool:ObjectPool = notePool[options.settings.noteskinId][pre_dir][pre_color];
+                    var pool:ObjectPool = _notePool[_noteskinId][pre_dir][pre_color];
 
                     for (i = 0; i < preLoadCount; i++)
                     {
-                        var gameNote:GameNote = pool.addObject(new GameNote(0, pre_dir, pre_color, 1 * 1000, 0, 0, options.settings.noteskinId));
+                        var gameNote:GameNote = pool.addObject(new GameNote(0, pre_dir, pre_color, 1 * 1000, 0, 0, _noteskinId));
                         gameNote.visible = false;
                         pool.unmarkObject(gameNote);
                         addChild(gameNote);
@@ -79,36 +97,36 @@ package game.controls
             }
 
             // Setup Receptors
-            leftReceptor = _noteskins.getReceptor(options.settings.noteskinId, "L");
-            leftReceptor.KEY = "Left";
-            downReceptor = _noteskins.getReceptor(options.settings.noteskinId, "D");
-            downReceptor.KEY = "Down";
-            upReceptor = _noteskins.getReceptor(options.settings.noteskinId, "U");
-            upReceptor.KEY = "Up";
-            rightReceptor = _noteskins.getReceptor(options.settings.noteskinId, "R");
-            rightReceptor.KEY = "Right";
+            _leftReceptor = _noteskins.getReceptor(_noteskinId, "L");
+            _leftReceptor.KEY = "Left";
+            _downReceptor = _noteskins.getReceptor(_noteskinId, "D");
+            _downReceptor.KEY = "Down";
+            _upReceptor = _noteskins.getReceptor(_noteskinId, "U");
+            _upReceptor.KEY = "Up";
+            _rightReceptor = _noteskins.getReceptor(_noteskinId, "R");
+            _rightReceptor.KEY = "Right";
 
-            if (leftReceptor is GameReceptor)
+            if (_leftReceptor is GameReceptor)
             {
-                (leftReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
-                (downReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
-                (upReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
-                (rightReceptor as GameReceptor).animationSpeed = options.settings.receptorAnimationSpeed;
+                (_leftReceptor as GameReceptor).animationSpeed = _receptorAnimationSpeed;
+                (_downReceptor as GameReceptor).animationSpeed = _receptorAnimationSpeed;
+                (_upReceptor as GameReceptor).animationSpeed = _receptorAnimationSpeed;
+                (_rightReceptor as GameReceptor).animationSpeed = _receptorAnimationSpeed;
             }
 
-            addChildAt(leftReceptor, 0);
-            addChildAt(downReceptor, 0);
-            addChildAt(upReceptor, 0);
-            addChildAt(rightReceptor, 0);
+            addChildAt(_leftReceptor, 0);
+            addChildAt(_downReceptor, 0);
+            addChildAt(_upReceptor, 0);
+            addChildAt(_rightReceptor, 0);
 
             // Other Stuff
-            sideScroll = options.settings.scrollDirection == "left" || options.settings.scrollDirection == "right";
-            scrollSpeed = options.settings.scrollSpeed * (sideScroll ? 1.5 : 1);
-            readahead = ((sideScroll ? Main.GAME_WIDTH : Main.GAME_HEIGHT) / 300 * 1000 / scrollSpeed);
-            receptorAlpha = 1.0;
+            _isSideScroll = _scrollDirection == "left" || _scrollDirection == "right";
+            _scrollSpeed = _scrollSpeed * (_isSideScroll ? 1.5 : 1);
+            _readahead = ((_isSideScroll ? Main.GAME_WIDTH : Main.GAME_HEIGHT) / 300 * 1000 / _scrollSpeed);
+            _receptorAlpha = 1.0;
             notes = [];
-            noteCount = 0;
-            totalNotes = song.totalNotes;
+            _noteCount = 0;
+            _totalNotes = song.totalNotes;
         }
 
         public function noteRealSpawnRotation(dir:String, noteskin:int):Number
@@ -128,26 +146,26 @@ package game.controls
             return rot;
         }
 
-        public function spawnArrow(note:Note, current_position:int = 0):GameNote
+        public function spawnArrow(note:Note, currentPosition:int = 0):GameNote
         {
             var direction:String = note.direction;
             var color:String = options.getNewNoteColor(note.color);
             if (options.disableNotePool)
             {
-                var gameNote:GameNote = new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.noteskinId);
+                var gameNote:GameNote = new GameNote(_noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, _noteskinId);
             }
             else
             {
-                var spawnPoolRef:ObjectPool = notePool[options.settings.noteskinId][direction][color];
+                var spawnPoolRef:ObjectPool = _notePool[_noteskinId][direction][color];
                 if (!spawnPoolRef)
                 {
-                    spawnPoolRef = notePool[options.settings.noteskinId][direction][color] = new ObjectPool();
+                    spawnPoolRef = _notePool[_noteskinId][direction][color] = new ObjectPool();
                 }
 
                 gameNote = spawnPoolRef.getObject();
                 if (gameNote)
                 {
-                    gameNote.ID = noteCount++;
+                    gameNote.ID = _noteCount++;
                     gameNote.DIR = direction;
                     gameNote.POSITION = (note.time + 0.5 / 30) * 1000;
                     gameNote.PROGRESS = note.frame;
@@ -155,7 +173,7 @@ package game.controls
                 }
                 else
                 {
-                    gameNote = spawnPoolRef.addObject(new GameNote(noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, options.settings.noteskinId));
+                    gameNote = spawnPoolRef.addObject(new GameNote(_noteCount++, direction, color, (note.time + 0.5 / 30) * 1000, note.frame, 0, _noteskinId));
                     addChild(gameNote);
                 }
             }
@@ -163,31 +181,26 @@ package game.controls
             gameNote.SPAWN_PROGRESS = gameNote.POSITION - 1000; // readahead;
             gameNote.rotation = getReceptor(direction).rotation;
 
-            if (options.modEnabled("_spawn_noteskin_data_rotation"))
-                gameNote.rotation = noteRealSpawnRotation(direction, options.settings.noteskinId);
+            // TODO: Mayyybe re-add this?
+            /*
+               if (options.modEnabled("_spawn_noteskin_data_rotation"))
+               gameNote.rotation = noteRealSpawnRotation(direction, _noteskinId);
+             */
 
-            if (options.settings.noteScale != 1.0)
-            {
-                gameNote.scaleX = gameNote.scaleY = options.settings.noteScale;
-            }
-            else if (options.modEnabled("mini") && !options.modEnabled("mini_resize") && options.settings.noteScale == 1.0)
-            {
+            if (_noteScale != 1.0)
+                gameNote.scaleX = gameNote.scaleY = _noteScale;
+            else if (_mods.mini && !_mods.miniResize && _noteScale == 1.0)
                 gameNote.scaleX = gameNote.scaleY = 0.75;
-            }
             else
-            {
                 gameNote.scaleX = gameNote.scaleY = 1;
-            }
 
-            if (options.modEnabled("note_dark"))
-            {
+            if (_mods.dark)
                 gameNote.alpha = 0.2;
-            }
 
             gameNote.visible = true;
             notes.push(gameNote);
 
-            updateNotePosition(gameNote, current_position);
+            updateNotePosition(gameNote, currentPosition);
 
             return gameNote;
         }
@@ -197,20 +210,20 @@ package game.controls
             switch (dir)
             {
                 case "L":
-                    return leftReceptor;
+                    return _leftReceptor;
                 case "D":
-                    return downReceptor;
+                    return _downReceptor;
                 case "U":
-                    return upReceptor;
+                    return _upReceptor;
                 case "R":
-                    return rightReceptor;
+                    return _rightReceptor;
             }
             return null;
         }
 
         public function receptorFeedback(dir:String, score:int):void
         {
-            if (!options.settings.displayReceptorAnimations)
+            if (!_displayReceptorAnimations)
                 return;
 
             var f:int = 2;
@@ -221,16 +234,16 @@ package game.controls
                 case 100:
                 case 50:
                     f = 2;
-                    c = options.settings.judgeColors[0];
+                    c = _judgeColors[0];
                     break;
                 case 25:
                     f = 7;
-                    c = options.settings.judgeColors[2];
+                    c = _judgeColors[2];
                     break;
                 case 5:
                 case -5:
                     f = 12;
-                    c = options.settings.judgeColors[3];
+                    c = _judgeColors[3];
                     break;
                 default:
                     return;
@@ -238,18 +251,14 @@ package game.controls
 
             var recepterFeedbackRef:MovieClip = getReceptor(dir);
             if (recepterFeedbackRef is GameReceptor)
-            {
                 (recepterFeedbackRef as GameReceptor).playAnimation(c);
-            }
             else
-            {
                 recepterFeedbackRef.gotoAndPlay(f);
-            }
         }
 
         public function get nextNote():Note
         {
-            return noteCount < totalNotes ? song.getNote(noteCount) : null;
+            return _noteCount < _totalNotes ? _song.getNote(_noteCount) : null;
         }
 
         public function spawnNextNote(current_position:int = 0):GameNote
@@ -265,16 +274,16 @@ package game.controls
         public function update(position:int):void
         {
             var nextRef:Note = nextNote;
-            while (nextRef && (nextRef.time + 0.5 / 30) * 1000 - position < readahead)
+            while (nextRef && (nextRef.time + 0.5 / 30) * 1000 - position < _readahead)
             {
                 spawnArrow(nextRef, position);
                 nextRef = nextNote;
             }
 
-            if (options.modEnabled("wave"))
+            if (_mods.wave)
             {
                 var waveOffset:int = 0;
-                for each (var receptor:MovieClip in receptorArray)
+                for each (var receptor:MovieClip in _receptorArray)
                 {
                     if (receptor.VERTEX == "x")
                     {
@@ -288,30 +297,28 @@ package game.controls
                 }
             }
 
-            if (options.modEnabled("drunk"))
+            if (_mods.drunk)
             {
                 var drunkOffset:int = 0;
-                for each (receptor in receptorArray)
+                for each (receptor in _receptorArray)
                 {
                     receptor.rotation = receptor.ORIG_ROT + (Math.sin((getTimer() + drunkOffset) / 1387) * 25);
                     drunkOffset += 165;
                 }
             }
 
-            if (options.modEnabled("dizzy"))
+            if (_mods.dizzy)
             {
-                for each (receptor in receptorArray)
-                {
+                for each (receptor in _receptorArray)
                     receptor.rotation += 12;
-                }
             }
 
-            if (options.modEnabled("hide"))
+            if (_mods.hide)
             {
-                leftReceptor.alpha = (leftReceptor.currentFrame == 1) ? 0.0 : receptorAlpha;
-                downReceptor.alpha = (downReceptor.currentFrame == 1) ? 0.0 : receptorAlpha;
-                upReceptor.alpha = (upReceptor.currentFrame == 1) ? 0.0 : receptorAlpha;
-                rightReceptor.alpha = (rightReceptor.currentFrame == 1) ? 0.0 : receptorAlpha;
+                _leftReceptor.alpha = (_leftReceptor.currentFrame == 1) ? 0.0 : _receptorAlpha;
+                _downReceptor.alpha = (_downReceptor.currentFrame == 1) ? 0.0 : _receptorAlpha;
+                _upReceptor.alpha = (_upReceptor.currentFrame == 1) ? 0.0 : _receptorAlpha;
+                _rightReceptor.alpha = (_rightReceptor.currentFrame == 1) ? 0.0 : _receptorAlpha;
             }
 
             for each (var note:GameNote in notes)
@@ -327,7 +334,7 @@ package game.controls
         public function updateNotePosition(note:GameNote, position:int):void
         {
             updateReceptorRef = getReceptor(note.DIR);
-            updateOffsetRef = (note.POSITION - position) / 1000 * 300 * scrollSpeed;
+            updateOffsetRef = (note.POSITION - position) / 1000 * 300 * _scrollSpeed;
             updateBaseOffsetRef = (position - note.SPAWN_PROGRESS) / (note.POSITION - note.SPAWN_PROGRESS);
 
             if (updateReceptorRef.VERTEX == "x")
@@ -342,43 +349,32 @@ package game.controls
             }
 
             // Position Mods
-            if (options.modEnabled("tornado"))
+            if (_mods.tornado)
             {
-                var tornadoOffset:Number = Math.sin(updateBaseOffsetRef * Math.PI) * (options.settings.receptorGap / 2);
+                var tornadoOffset:Number = Math.sin(updateBaseOffsetRef * Math.PI) * (_receptorGap / 2);
                 if (updateReceptorRef.VERTEX == "x")
-                {
                     note.y += tornadoOffset;
-                }
+
                 if (updateReceptorRef.VERTEX == "y")
-                {
                     note.x += tornadoOffset;
-                }
             }
 
             // Rotation Mods
-            if (options.modEnabled("rotating"))
-            {
+            if (_mods.tornado)
                 note.rotation = (updateBaseOffsetRef * 6 * 90) + updateReceptorRef.rotation;
-            }
 
-            if (options.modEnabled("dizzy"))
-            {
+            if (_mods.dizzy)
                 note.rotation += 18;
-            }
 
             // Alpha Mods
             // switched hidden and sudden, mods were reversed!
-            if (options.modEnabled("hidden"))
-            {
+            if (_mods.hidden)
                 note.alpha = 1 - updateBaseOffsetRef;
-            }
 
-            if (options.modEnabled("sudden"))
-            {
+            if (_mods.sudden)
                 note.alpha = updateBaseOffsetRef;
-            }
 
-            if (options.modEnabled("blink"))
+            if (_mods.blink)
             {
                 var blink_offset:Number = (1 - updateBaseOffsetRef) % 0.4;
                 var blink_hidden:Boolean = (blink_offset > 0.2);
@@ -386,10 +382,8 @@ package game.controls
             }
 
             // Scale Mods
-            if (options.settings.noteScale == 1 && options.modEnabled("mini_resize") && !options.modEnabled("mini"))
-            {
+            if (_noteScale == 1 && _mods.miniResize && !_mods.mini)
                 note.scaleX = note.scaleY = 1 - (updateBaseOffsetRef * 0.65);
-            }
 
         }
 
@@ -405,7 +399,7 @@ package game.controls
                 {
                     if (!options.disableNotePool)
                     {
-                        notePool[removeNoteRef.NOTESKIN][removeNoteRef.DIR][removeNoteRef.COLOR].unmarkObject(removeNoteRef);
+                        _notePool[removeNoteRef.NOTESKIN][removeNoteRef.DIR][removeNoteRef.COLOR].unmarkObject(removeNoteRef);
                         removeNoteRef.visible = false;
                     }
                     else
@@ -425,7 +419,7 @@ package game.controls
             {
                 if (!options.disableNotePool)
                 {
-                    notePool[note.NOTESKIN][note.DIR][note.COLOR].unmarkObject(note);
+                    _notePool[note.NOTESKIN][note.DIR][note.COLOR].unmarkObject(note);
                     note.visible = false;
                 }
                 else
@@ -435,20 +429,20 @@ package game.controls
             }
 
             notes = new Array();
-            noteCount = 0;
+            _noteCount = 0;
         }
 
         public function resetNoteCount(value:int):void
         {
-            noteCount = value;
+            _noteCount = value;
         }
 
         public function position():void
         {
-            var data:Object = _noteskins.getInfo(options.settings.noteskinId);
+            var data:Object = _noteskins.getInfo(_noteskinId);
             var rotation:Number = data.rotation;
-            var gap:int = options.settings.receptorGap;
-            var noteScale:Number = options.settings.noteScale;
+            var gap:int = _receptorGap;
+            var noteScale:Number = _noteScale;
             var centerOffset:int = 160;
 
             //if (data.width > 64)
@@ -463,249 +457,250 @@ package game.controls
                     noteScale = 2.0; // max
                 gap *= noteScale
             }
-            else if (options.modEnabled("mini") && !options.modEnabled("mini_resize"))
+            else if (_mods.mini && !_mods.miniResize)
             {
                 gap *= 0.75;
             }
 
-            switch (options.settings.scrollDirection)
+            switch (_scrollDirection)
             {
                 case "down":
-                    downReceptor.x = int(-gap / 2) + centerOffset;
-                    downReceptor.y = 400;
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "y";
-                    downReceptor.DIRECTION = 1;
+                    _downReceptor.x = int(-gap / 2) + centerOffset;
+                    _downReceptor.y = 400;
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "y";
+                    _downReceptor.DIRECTION = 1;
 
-                    leftReceptor.x = downReceptor.x - gap;
-                    leftReceptor.y = downReceptor.y;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "y";
-                    leftReceptor.DIRECTION = 1;
+                    _leftReceptor.x = _downReceptor.x - gap;
+                    _leftReceptor.y = _downReceptor.y;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "y";
+                    _leftReceptor.DIRECTION = 1;
 
-                    upReceptor.x = int(gap / 2) + centerOffset;
-                    upReceptor.y = downReceptor.y;
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "y";
-                    upReceptor.DIRECTION = 1;
+                    _upReceptor.x = int(gap / 2) + centerOffset;
+                    _upReceptor.y = _downReceptor.y;
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "y";
+                    _upReceptor.DIRECTION = 1;
 
-                    rightReceptor.x = upReceptor.x + gap;
-                    rightReceptor.y = downReceptor.y;
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "y";
-                    rightReceptor.DIRECTION = 1;
+                    _rightReceptor.x = _upReceptor.x + gap;
+                    _rightReceptor.y = _downReceptor.y;
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "y";
+                    _rightReceptor.DIRECTION = 1;
 
-                    receptorArray = [leftReceptor, downReceptor, upReceptor, rightReceptor];
+                    _receptorArray = [_leftReceptor, _downReceptor, _upReceptor, _rightReceptor];
                     positionOffsetMax = {"min_x": -150, "max_x": 150, "min_y": -150, "max_y": 50};
                     break;
                 case "right":
                     centerOffset += 80;
-                    leftReceptor.x = 460;
-                    leftReceptor.y = int(gap / 2) + centerOffset + gap;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "x";
-                    leftReceptor.DIRECTION = 1;
+                    _leftReceptor.x = 460;
+                    _leftReceptor.y = int(gap / 2) + centerOffset + gap;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "x";
+                    _leftReceptor.DIRECTION = 1;
 
-                    upReceptor.x = leftReceptor.x;
-                    upReceptor.y = int(-gap / 2) + centerOffset;
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "x";
-                    upReceptor.DIRECTION = 1;
+                    _upReceptor.x = _leftReceptor.x;
+                    _upReceptor.y = int(-gap / 2) + centerOffset;
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "x";
+                    _upReceptor.DIRECTION = 1;
 
-                    rightReceptor.x = leftReceptor.x;
-                    rightReceptor.y = int(-gap / 2) + centerOffset - gap
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "x";
-                    rightReceptor.DIRECTION = 1;
+                    _rightReceptor.x = _leftReceptor.x;
+                    _rightReceptor.y = int(-gap / 2) + centerOffset - gap
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "x";
+                    _rightReceptor.DIRECTION = 1;
 
-                    downReceptor.x = leftReceptor.x;
-                    downReceptor.y = int(gap / 2) + centerOffset;
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "x";
-                    downReceptor.DIRECTION = 1;
+                    _downReceptor.x = _leftReceptor.x;
+                    _downReceptor.y = int(gap / 2) + centerOffset;
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "x";
+                    _downReceptor.DIRECTION = 1;
 
-                    receptorArray = [upReceptor, rightReceptor, leftReceptor, downReceptor];
+                    _receptorArray = [_upReceptor, _rightReceptor, _leftReceptor, _downReceptor];
                     positionOffsetMax = {"min_x": -150, "max_x": 50, "min_y": -120, "max_y": 120};
                     break;
                 case "left":
                     centerOffset += 80;
-                    leftReceptor.x = -140;
-                    leftReceptor.y = int(gap / 2) + centerOffset + gap;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "x";
-                    leftReceptor.DIRECTION = -1;
+                    _leftReceptor.x = -140;
+                    _leftReceptor.y = int(gap / 2) + centerOffset + gap;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "x";
+                    _leftReceptor.DIRECTION = -1;
 
-                    upReceptor.x = leftReceptor.x;
-                    upReceptor.y = int(-gap / 2) + centerOffset;
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "x";
-                    upReceptor.DIRECTION = -1;
+                    _upReceptor.x = _leftReceptor.x;
+                    _upReceptor.y = int(-gap / 2) + centerOffset;
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "x";
+                    _upReceptor.DIRECTION = -1;
 
-                    rightReceptor.x = leftReceptor.x;
-                    rightReceptor.y = int(-gap / 2) + centerOffset - gap
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "x";
-                    rightReceptor.DIRECTION = -1;
+                    _rightReceptor.x = _leftReceptor.x;
+                    _rightReceptor.y = int(-gap / 2) + centerOffset - gap
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "x";
+                    _rightReceptor.DIRECTION = -1;
 
-                    downReceptor.x = leftReceptor.x;
-                    downReceptor.y = int(gap / 2) + centerOffset;
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "x";
-                    downReceptor.DIRECTION = -1;
+                    _downReceptor.x = _leftReceptor.x;
+                    _downReceptor.y = int(gap / 2) + centerOffset;
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "x";
+                    _downReceptor.DIRECTION = -1;
 
-                    receptorArray = [upReceptor, rightReceptor, leftReceptor, downReceptor];
+                    _receptorArray = [_upReceptor, _rightReceptor, _leftReceptor, _downReceptor];
                     positionOffsetMax = {"min_x": -50, "max_x": 150, "min_y": -120, "max_y": 120};
                     break;
                 case "split":
-                    downReceptor.x = int(-gap / 2) + centerOffset;
-                    downReceptor.y = 400;
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "y";
-                    downReceptor.DIRECTION = 1;
+                    _downReceptor.x = int(-gap / 2) + centerOffset;
+                    _downReceptor.y = 400;
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "y";
+                    _downReceptor.DIRECTION = 1;
 
-                    leftReceptor.x = downReceptor.x - gap;
-                    leftReceptor.y = 90;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "y";
-                    leftReceptor.DIRECTION = -1;
+                    _leftReceptor.x = _downReceptor.x - gap;
+                    _leftReceptor.y = 90;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "y";
+                    _leftReceptor.DIRECTION = -1;
 
-                    upReceptor.x = int(gap / 2) + centerOffset;
-                    upReceptor.y = 400;
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "y";
-                    upReceptor.DIRECTION = 1;
+                    _upReceptor.x = int(gap / 2) + centerOffset;
+                    _upReceptor.y = 400;
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "y";
+                    _upReceptor.DIRECTION = 1;
 
-                    rightReceptor.x = upReceptor.x + gap;
-                    rightReceptor.y = 90;
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "y";
-                    rightReceptor.DIRECTION = -1;
+                    _rightReceptor.x = _upReceptor.x + gap;
+                    _rightReceptor.y = 90;
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "y";
+                    _rightReceptor.DIRECTION = -1;
 
-                    receptorArray = [leftReceptor, downReceptor, upReceptor, rightReceptor];
+                    _receptorArray = [_leftReceptor, _downReceptor, _upReceptor, _rightReceptor];
                     positionOffsetMax = {"min_x": -150, "max_x": 150, "min_y": -50, "max_y": 50};
                     break;
                 case "split_down":
-                    downReceptor.x = int(-gap / 2) + centerOffset;
-                    downReceptor.y = 90;
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "y";
-                    downReceptor.DIRECTION = -1;
+                    _downReceptor.x = int(-gap / 2) + centerOffset;
+                    _downReceptor.y = 90;
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "y";
+                    _downReceptor.DIRECTION = -1;
 
-                    leftReceptor.x = downReceptor.x - gap;
-                    leftReceptor.y = 400;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "y";
-                    leftReceptor.DIRECTION = 1;
+                    _leftReceptor.x = _downReceptor.x - gap;
+                    _leftReceptor.y = 400;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "y";
+                    _leftReceptor.DIRECTION = 1;
 
-                    upReceptor.x = int(gap / 2) + centerOffset;
-                    upReceptor.y = 90;
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "y";
-                    upReceptor.DIRECTION = -1;
+                    _upReceptor.x = int(gap / 2) + centerOffset;
+                    _upReceptor.y = 90;
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "y";
+                    _upReceptor.DIRECTION = -1;
 
-                    rightReceptor.x = upReceptor.x + gap;
-                    rightReceptor.y = 400;
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "y";
-                    rightReceptor.DIRECTION = 1;
+                    _rightReceptor.x = _upReceptor.x + gap;
+                    _rightReceptor.y = 400;
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "y";
+                    _rightReceptor.DIRECTION = 1;
 
-                    receptorArray = [leftReceptor, downReceptor, upReceptor, rightReceptor];
+                    _receptorArray = [_leftReceptor, _downReceptor, _upReceptor, _rightReceptor];
                     positionOffsetMax = {"min_x": -150, "max_x": 150, "min_y": -50, "max_y": 50};
                     break;
                 case "plus":
-                    downReceptor.x = centerOffset;
-                    downReceptor.y = centerOffset + 80 + int(gap / 2);
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "y";
-                    downReceptor.DIRECTION = -1;
+                    _downReceptor.x = centerOffset;
+                    _downReceptor.y = centerOffset + 80 + int(gap / 2);
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "y";
+                    _downReceptor.DIRECTION = -1;
 
-                    leftReceptor.x = centerOffset - int(gap / 2);
-                    leftReceptor.y = centerOffset + 80;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "x";
-                    leftReceptor.DIRECTION = 1;
+                    _leftReceptor.x = centerOffset - int(gap / 2);
+                    _leftReceptor.y = centerOffset + 80;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "x";
+                    _leftReceptor.DIRECTION = 1;
 
-                    upReceptor.x = centerOffset;
-                    upReceptor.y = centerOffset + 80 - int(gap / 2);
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "y";
-                    upReceptor.DIRECTION = 1;
+                    _upReceptor.x = centerOffset;
+                    _upReceptor.y = centerOffset + 80 - int(gap / 2);
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "y";
+                    _upReceptor.DIRECTION = 1;
 
-                    rightReceptor.x = centerOffset + int(gap / 2);
-                    rightReceptor.y = centerOffset + 80;
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "x";
-                    rightReceptor.DIRECTION = -1;
+                    _rightReceptor.x = centerOffset + int(gap / 2);
+                    _rightReceptor.y = centerOffset + 80;
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "x";
+                    _rightReceptor.DIRECTION = -1;
 
-                    receptorArray = [upReceptor, rightReceptor, downReceptor, leftReceptor];
+                    _receptorArray = [_upReceptor, _rightReceptor, _downReceptor, _leftReceptor];
                     positionOffsetMax = {"min_x": -150, "max_x": 150, "min_y": -150, "max_y": 150};
                     break;
                 default:
-                    downReceptor.x = int(-gap / 2) + centerOffset;
-                    downReceptor.y = 90;
-                    downReceptor.rotation = 0;
-                    downReceptor.VERTEX = "y";
-                    downReceptor.DIRECTION = -1;
+                    _downReceptor.x = int(-gap / 2) + centerOffset;
+                    _downReceptor.y = 90;
+                    _downReceptor.rotation = 0;
+                    _downReceptor.VERTEX = "y";
+                    _downReceptor.DIRECTION = -1;
 
-                    leftReceptor.x = downReceptor.x - gap;
-                    leftReceptor.y = downReceptor.y;
-                    leftReceptor.rotation = rotation;
-                    leftReceptor.VERTEX = "y";
-                    leftReceptor.DIRECTION = -1;
+                    _leftReceptor.x = _downReceptor.x - gap;
+                    _leftReceptor.y = _downReceptor.y;
+                    _leftReceptor.rotation = rotation;
+                    _leftReceptor.VERTEX = "y";
+                    _leftReceptor.DIRECTION = -1;
 
-                    upReceptor.x = int(gap / 2) + centerOffset;
-                    upReceptor.y = downReceptor.y;
-                    upReceptor.rotation = rotation * 2;
-                    upReceptor.VERTEX = "y";
-                    upReceptor.DIRECTION = -1;
+                    _upReceptor.x = int(gap / 2) + centerOffset;
+                    _upReceptor.y = _downReceptor.y;
+                    _upReceptor.rotation = rotation * 2;
+                    _upReceptor.VERTEX = "y";
+                    _upReceptor.DIRECTION = -1;
 
-                    rightReceptor.x = upReceptor.x + gap;
-                    rightReceptor.y = downReceptor.y;
-                    rightReceptor.rotation = rotation * -1;
-                    rightReceptor.VERTEX = "y";
-                    rightReceptor.DIRECTION = -1;
+                    _rightReceptor.x = _upReceptor.x + gap;
+                    _rightReceptor.y = _downReceptor.y;
+                    _rightReceptor.rotation = rotation * -1;
+                    _rightReceptor.VERTEX = "y";
+                    _rightReceptor.DIRECTION = -1;
 
-                    receptorArray = [leftReceptor, downReceptor, upReceptor, rightReceptor];
+                    _receptorArray = [_leftReceptor, _downReceptor, _upReceptor, _rightReceptor];
                     positionOffsetMax = {"min_x": -150, "max_x": 150, "min_y": -50, "max_y": 150};
                     break;
             }
 
-            for each (var item:MovieClip in receptorArray)
+            for each (var item:MovieClip in _receptorArray)
             {
                 item.ORIG_X = item.x;
                 item.ORIG_Y = item.y;
                 item.ORIG_ROT = item.rotation;
             }
 
-            if (options.modEnabled("rotate_cw"))
+            if (_mods.rotateCW)
             {
-                leftReceptor.rotation += 90;
-                downReceptor.rotation += 90;
-                upReceptor.rotation += 90;
-                rightReceptor.rotation += 90;
-            }
-            if (options.modEnabled("rotate_ccw"))
-            {
-                leftReceptor.rotation -= 90;
-                downReceptor.rotation -= 90;
-                upReceptor.rotation -= 90;
-                rightReceptor.rotation -= 90;
+                _leftReceptor.rotation += 90;
+                _downReceptor.rotation += 90;
+                _upReceptor.rotation += 90;
+                _rightReceptor.rotation += 90;
             }
 
-            if (options.settings.noteScale != 1.0)
-                downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = options.settings.noteScale;
+            if (_mods.rotateCCW)
+            {
+                _leftReceptor.rotation -= 90;
+                _downReceptor.rotation -= 90;
+                _upReceptor.rotation -= 90;
+                _rightReceptor.rotation -= 90;
+            }
 
-            if (options.modEnabled("mini") && !options.modEnabled("mini_resize") && options.settings.noteScale == 1.0)
-                downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = 0.75;
+            if (_noteScale != 1.0)
+                _downReceptor.scaleX = _downReceptor.scaleY = _leftReceptor.scaleX = _leftReceptor.scaleY = _upReceptor.scaleX = _upReceptor.scaleY = _rightReceptor.scaleX = _rightReceptor.scaleY = _noteScale;
+
+            if (_mods.mini && !_mods.miniResize && _noteScale == 1.0)
+                _downReceptor.scaleX = _downReceptor.scaleY = _leftReceptor.scaleX = _leftReceptor.scaleY = _upReceptor.scaleX = _upReceptor.scaleY = _rightReceptor.scaleX = _rightReceptor.scaleY = 0.75;
 
 
-            if (options.modEnabled("mini_resize") && !options.modEnabled("mini") && options.settings.noteScale == 1.0)
-                downReceptor.scaleX = downReceptor.scaleY = leftReceptor.scaleX = leftReceptor.scaleY = upReceptor.scaleX = upReceptor.scaleY = rightReceptor.scaleX = rightReceptor.scaleY = 0.5;
+            if (_mods.miniResize && !_mods.mini && _noteScale == 1.0)
+                _downReceptor.scaleX = _downReceptor.scaleY = _leftReceptor.scaleX = _leftReceptor.scaleY = _upReceptor.scaleX = _upReceptor.scaleY = _rightReceptor.scaleX = _rightReceptor.scaleY = 0.5;
 
-            if (options.modEnabled("dark"))
-                receptorAlpha = 0.3;
+            if (_mods.dark)
+                _receptorAlpha = 0.3;
 
-            leftReceptor.alpha = downReceptor.alpha = upReceptor.alpha = rightReceptor.alpha = receptorAlpha;
+            _leftReceptor.alpha = _downReceptor.alpha = _upReceptor.alpha = _rightReceptor.alpha = _receptorAlpha;
         }
     }
 }

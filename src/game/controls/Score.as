@@ -5,18 +5,15 @@ package game.controls
     import flash.text.TextFormat;
     import flash.text.TextFieldAutoSize;
     import flash.text.AntiAliasType;
-    import game.GameOptions;
     import classes.Language;
 
     public class Score extends Sprite
     {
-        private var options:GameOptions;
 
         private var field:TextField;
 
-        public function Score(options:GameOptions = null)
+        public function Score()
         {
-            this.options = options;
             field = new TextField();
             field.defaultTextFormat = new TextFormat(Language.UNI_FONT_NAME, 25, 0xFFFFFF, false);
             field.antiAliasType = AntiAliasType.ADVANCED;

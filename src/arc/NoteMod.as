@@ -2,7 +2,6 @@ package arc
 {
     import classes.chart.Note;
     import classes.chart.Song;
-    import game.GameOptions;
     import classes.UserSettings;
 
     public class NoteMod extends Object
@@ -10,12 +9,12 @@ package arc
         private const DIRECTIONS:Array = ["L", "D", "U", "R"];
         private const HALF_COLOR:Object = {"red": "red", "blue": "red", "purple": "purple", "yellow": "blue", "pink": "purple", "orange": "yellow", "cyan": "pink", "green": "orange", "white": "white"}
 
+        // TODO: Remove this circular dependency to Song
         private var _song:Song;
         private var _notes:Array;
         private var _shuffle:Array;
         private var _lastChord:Object;
 
-        private var _options:GameOptions;
         private var _settings:UserSettings;
 
         private var _modDark:Boolean;
@@ -37,43 +36,49 @@ package arc
         private var _reverseLastFrame:int;
         private var _reverseLastPos:Number;
 
-        public function NoteMod(song:Song, options:GameOptions)
+        public function NoteMod(song:Song, settings:UserSettings)
         {
             _song = song;
-            _options = options;
             _settings = new UserSettings();
-            _settings.update(options.settings);
+            _settings.update(settings);
 
             updateMods();
         }
 
+        private function modEnabled(mod:String):Boolean
+        {
+            for each (var activeMod:String in _settings.activeMods)
+                if (mod == activeMod)
+                    return true;
+
+            return false;
+        }
+
         public function updateMods():void
         {
-            _modDark = _options.modEnabled("dark");
-            _modHidden = _options.modEnabled("hidden");
-            _modMirror = _options.modEnabled("mirror");
-            _modRandom = _options.modEnabled("random");
-            _modScramble = _options.modEnabled("scramble");
-            _modShuffle = _options.modEnabled("shuffle");
-            _modReverse = _options.modEnabled("reverse");
-            _modColumnColor = _options.modEnabled("columncolor");
-            _modHalfTime = _options.modEnabled("halftime");
-            _modNoBackground = _options.modEnabled("nobackground");
-            _modIsolation = _options.isolation;
-            _modOffset = _options.settings.globalOffset != 0;
-            _modRate = _options.settings.songRate != 1;
-            _modFPS = _options.settings.frameRate > 30;
-            _modJudgeWindow = Boolean(_options.judgeWindow);
+            _modDark = modEnabled("dark");
+            _modHidden = modEnabled("hidden");
+            _modMirror = modEnabled("mirror");
+            _modRandom = modEnabled("random");
+            _modScramble = modEnabled("scramble");
+            _modShuffle = modEnabled("shuffle");
+            _modReverse = modEnabled("reverse");
+            _modColumnColor = modEnabled("columncolor");
+            _modHalfTime = modEnabled("halftime");
+            _modNoBackground = modEnabled("nobackground");
+            _modIsolation = _settings.isolationOffset > 0 || _settings.isolationLength > 0;
+            _modOffset = _settings.globalOffset != 0;
+            _modRate = _settings.songRate != 1;
+            _modFPS = _settings.frameRate > 30;
+            _modJudgeWindow = Boolean(_settings.judgeWindow);
 
             _reverseLastFrame = -1;
             _reverseLastPos = -1;
         }
 
-        public function start(options:GameOptions):void
+        public function start():void
         {
-            //this.options = options;
-
-            //updateMods();
+            updateMods();
 
             if (_modShuffle)
             {
@@ -103,12 +108,6 @@ package arc
             return DIRECTIONS[value].toString();
         }
 
-        public static function noteModRequired(options:GameOptions):Boolean
-        {
-            var mod:NoteMod = new NoteMod(null, options);
-            return mod.required();
-        }
-
         public function required():Boolean
         {
             return _modIsolation || _modRandom || _modScramble || _modShuffle || _modColumnColor || _modHalfTime || _modMirror || _modOffset || _modRate;
@@ -117,7 +116,7 @@ package arc
         public function transformNote(index:int):Note
         {
             if (_modIsolation)
-                index += _options.isolationOffset;
+                index += _settings.isolationOffset;
 
             if (_modReverse)
             {
@@ -208,10 +207,10 @@ package arc
 
             if (_modIsolation)
             {
-                if (_options.isolationLength > 0)
-                    return Math.min(_options.isolationLength, Math.max(1, _notes.length - _options.isolationOffset));
+                if (_settings.isolationLength > 0)
+                    return Math.min(_settings.isolationLength, Math.max(1, _notes.length - _settings.isolationOffset));
                 else
-                    return Math.max(1, _notes.length - _options.isolationOffset);
+                    return Math.max(1, _notes.length - _settings.isolationOffset);
             }
             return _notes.length;
         }
@@ -228,15 +227,15 @@ package arc
             if (_modIsolation)
             {
 
-                if (_options.isolationLength > 0)
+                if (_settings.isolationLength > 0)
                 {
-                    firstNote = _notes[Math.min(_notes.length - 1, _options.isolationOffset)];
-                    lastNote = _notes[Math.min(_notes.length - 1, _options.isolationOffset + _options.isolationLength)];
+                    firstNote = _notes[Math.min(_notes.length - 1, _settings.isolationOffset)];
+                    lastNote = _notes[Math.min(_notes.length - 1, _settings.isolationOffset + _settings.isolationLength)];
                     time = lastNote.time - firstNote.time;
                 }
                 else
                 {
-                    firstNote = _notes[Math.min(_notes.length - 1, _options.isolationOffset)];
+                    firstNote = _notes[Math.min(_notes.length - 1, _settings.isolationOffset)];
                     time = lastNote.time - firstNote.time;
                 }
             }

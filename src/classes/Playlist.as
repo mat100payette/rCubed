@@ -338,7 +338,7 @@ package classes
             _gvars.TOTAL_SONGS = indexList.length;
             _gvars.TOTAL_PUBLIC_SONGS = indexList.filter(function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
             {
-                return !ArrayUtil.in_array([item.genre], _gvars.NONPUBLIC_GENRES)
+                return !ArrayUtil.containsAny([item.genre], _gvars.NONPUBLIC_GENRES)
             }).length;
         }
 

@@ -17,7 +17,6 @@ package popups.replays
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
-    import game.GameOptions;
     import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
     import events.navigation.ChangePanelEvent;
@@ -238,18 +237,12 @@ package popups.replays
                     if (!replay.user.isLoaded())
                         replay.user.loadWithoutSettings();
 
-                    _gvars.options = new GameOptions(replay.user);
-                    _gvars.options.isolation = false;
-                    _gvars.options.replay = replay;
-                    _gvars.options.loadPreview = true;
-                    _gvars.options.fillFromReplay();
-                    _gvars.options.fillFromArcGlobals();
-
                     _gvars.songResults.length = 0;
                     _gvars.songQueue = [replay.song];
 
                     //_gvars.gameMain.removePopup();
 
+                    // TODO: Change this to a replay event with the replay object
                     dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
                 }
 
@@ -257,14 +250,11 @@ package popups.replays
                 {
                     var replayString:String = replay.getEncode();
                     var success:Boolean = SystemUtil.setClipboard(replayString);
+
                     if (success)
-                    {
                         Alert.add(_lang.string("clipboard_success"), 120, Alert.GREEN);
-                    }
                     else
-                    {
                         Alert.add(_lang.string("clipboard_failure"), 120, Alert.RED);
-                    }
                 }
             }
         }

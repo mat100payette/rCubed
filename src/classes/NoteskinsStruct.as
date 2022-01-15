@@ -1,25 +1,24 @@
 package classes
 {
-    import game.GameOptions;
 
     public class NoteskinsStruct
     {
         public static function getDefaultStruct():Object
         {
-            var DEFAULT_OPTIONS:GameOptions = new GameOptions(null);
-            DEFAULT_OPTIONS.settings.noteColors.push("receptor");
+            var userSettings:UserSettings = new UserSettings();
+            userSettings.noteColors.push("receptor");
 
             var output:Object = {"options": {"grid_dim": "5,2", "rotate": "90"}};
-            for (var c:int = 0; c < DEFAULT_OPTIONS.settings.noteColors.length; c++)
+            for (var c:int = 0; c < userSettings.noteColors.length; c++)
             {
                 var color_obj:Object = {};
 
-                for (var d:int = 0; d < GameOptions.NOTE_DIRECTIONS; d++)
+                for (var d:int = 0; d < Constant.NOTE_DIRECTIONS.length; d++)
                 {
                     var dir_obj:Object = {"r": "", "c": ""};
-                    color_obj[GameOptions.NOTE_DIRECTIONS[d]] = dir_obj;
+                    color_obj[Constant.NOTE_DIRECTIONS[d]] = dir_obj;
                 }
-                output[DEFAULT_OPTIONS.settings.noteColors[c]] = color_obj;
+                output[userSettings.noteColors[c]] = color_obj;
             }
             return output;
         }

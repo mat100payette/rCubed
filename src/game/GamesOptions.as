@@ -7,10 +7,8 @@ package game
     import classes.replay.Replay;
     import classes.UserSettings;
 
-    public class GameOptions extends Object
+    public class GamesOptions extends Object
     {
-        public static const NOTE_DIRECTIONS:Array = ["D", "L", "U", "R"];
-
         public var user:User = new User();
 
         public var disableNotePool:Boolean = false;
@@ -32,7 +30,7 @@ package game
         public var isolationOffset:int = 0;
         public var isolationLength:int = 0;
 
-        public function GameOptions(user:User):void
+        public function GamesOptions(user:User):void
         {
             if (user != null)
                 user = user;

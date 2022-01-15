@@ -6,45 +6,45 @@ package game.controls
     import flash.display.BitmapData;
     import flash.geom.ColorTransform;
     import flash.geom.Rectangle;
-    import game.GameOptions;
 
     public class AccuracyBar extends Sprite
     {
         private static var CLEAR_TRANSFORM:ColorTransform = new ColorTransform(1, 1, 1, 0);
         private static var ADJUST_TRANSFORM:ColorTransform = new ColorTransform(1, 1, 1, 0.95)
 
-        private var options:GameOptions;
+        private const LINE_WIDTH:int = 3;
+
+        private var _judgeWindow:Array;
 
         private var _renderTarget:Shape;
         private var _displayBM:Bitmap;
         private var _displayBMD:BitmapData;
         private var _alphaArea:Rectangle;
 
-        private var fade_tick:int = 33;
-        private var fade_timer:int = 0;
+        private var _fadeTick:int = 33;
+        private var _fadeTimer:int = 0;
 
-        private const LINE_WIDTH:int = 3;
-
-        private var bound_lower:int = -117;
-        private var bound_upper:int = 117;
-        private var bound_range:int = 234;
+        private var _boundLower:int = -117;
+        private var _boundUpper:int = 117;
+        private var _boundRange:int = 234;
 
         private var _width:Number = 200;
         private var _height:Number = 16;
 
         private var _colors:Array;
 
-        public function AccuracyBar(options:GameOptions):void
+        public function AccuracyBar(colors:Array, judgeWindow:Array):void
         {
-            this.options = options;
+            _judgeWindow = judgeWindow;
+
             updateJudge();
 
             // Parse Colors
             _colors = [];
-            _colors[100] = options.settings.judgeColors[0];
-            _colors[50] = options.settings.judgeColors[1];
-            _colors[25] = options.settings.judgeColors[2];
-            _colors[5] = options.settings.judgeColors[3];
+            _colors[100] = colors[0];
+            _colors[50] = colors[1];
+            _colors[25] = colors[2];
+            _colors[5] = colors[3];
 
             // Setup ColorTransform for Fade
             _renderTarget = new Shape();
@@ -59,7 +59,7 @@ package game.controls
             _renderTarget.graphics.clear();
 
             _renderTarget.graphics.beginFill(_colors[_score], 1);
-            _renderTarget.graphics.drawRect((_judgeMS / bound_range * (_width - LINE_WIDTH)) + (_width / 2), 0, LINE_WIDTH, _height);
+            _renderTarget.graphics.drawRect((_judgeMS / _boundRange * (_width - LINE_WIDTH)) + (_width / 2), 0, LINE_WIDTH, _height);
             _renderTarget.graphics.endFill();
 
             _displayBMD.draw(_renderTarget);
@@ -79,21 +79,21 @@ package game.controls
         {
             // Get Judge Window
             var judge:Array = Constant.JUDGE_WINDOW;
-            if (options.judgeWindow)
-                judge = options.judgeWindow;
+            if (_judgeWindow)
+                judge = _judgeWindow;
 
             // Get Judge Window Size
             for (var jn:int = 0; jn < judge.length; jn++)
             {
                 var jni:Object = judge[jn];
-                if (jni.t < bound_lower)
-                    bound_lower = jni.t;
+                if (jni.t < _boundLower)
+                    _boundLower = jni.t;
 
-                if (jni.t > bound_upper)
-                    bound_upper = jni.t;
+                if (jni.t > _boundUpper)
+                    _boundUpper = jni.t;
             }
 
-            bound_range = bound_upper - bound_lower;
+            _boundRange = _boundUpper - _boundLower;
         }
 
         public function draw():void
@@ -128,14 +128,14 @@ package game.controls
         {
             // Get Judge Window
             var judge:Array = Constant.JUDGE_WINDOW;
-            if (options.judgeWindow)
-                judge = options.judgeWindow;
+            if (_judgeWindow)
+                judge = _judgeWindow;
 
             this.graphics.lineStyle(1, 0xFFFFFF, 0.13);
 
             for (var jn:int = 1; jn < judge.length - 1; jn++)
             {
-                var dX:Number = _width * ((judge[jn]["t"] - bound_lower) / bound_range);
+                var dX:Number = _width * ((judge[jn]["t"] - _boundLower) / _boundRange);
                 this.graphics.moveTo(-(_width / 2) + dX, -(_height / 2) + 1);
                 this.graphics.lineTo(-(_width / 2) + dX, (_height / 2) - 1);
             }

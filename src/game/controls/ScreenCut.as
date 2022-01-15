@@ -4,98 +4,102 @@ package game.controls
     import flash.display.Sprite;
     import flash.events.MouseEvent;
     import flash.geom.Rectangle;
-    import game.GameOptions;
 
     public class ScreenCut extends Sprite
     {
         private var self:ScreenCut;
 
-        public function ScreenCut(options:GameOptions):void
+        public function ScreenCut(isEditor:Boolean, scrollDirection:String, position:Number):void
         {
-            this.self = this;
-            this.graphics.lineStyle(3, GameBackgroundColor.BG_STATIC, 1);
-            this.graphics.beginFill(0x000000);
+            self = this;
+            graphics.lineStyle(3, GameBackgroundColor.BG_STATIC, 1);
+            graphics.beginFill(0x000000);
 
-            switch (options.settings.scrollDirection)
+            switch (scrollDirection)
             {
                 case "down":
-                    this.x = 0;
-                    this.y = options.settings.screencutPosition * Main.GAME_HEIGHT;
-                    this.graphics.drawRect(-Main.GAME_WIDTH, -(Main.GAME_HEIGHT * 3), Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
+                    x = 0;
+                    y = position * Main.GAME_HEIGHT;
+                    graphics.drawRect(-Main.GAME_WIDTH, -(Main.GAME_HEIGHT * 3), Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
 
-                    if (options.isEditor)
+                    if (isEditor)
                     {
-                        this.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
                         {
                             self.startDrag(false, new Rectangle(0, 5, 0, Main.GAME_HEIGHT - 7));
                         });
-                        this.addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
                         {
                             self.stopDrag();
-                            options.settings.screencutPosition = (self.y / Main.GAME_HEIGHT);
+                            position = (self.y / Main.GAME_HEIGHT);
                         });
                     }
                     break;
+
                 case "right":
-                    this.x = options.settings.screencutPosition * Main.GAME_WIDTH;
-                    this.y = 0;
-                    this.graphics.drawRect(-Main.GAME_WIDTH * 3, -Main.GAME_HEIGHT, Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
+                    x = position * Main.GAME_WIDTH;
+                    y = 0;
+                    graphics.drawRect(-Main.GAME_WIDTH * 3, -Main.GAME_HEIGHT, Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
 
-                    if (options.isEditor)
+                    if (isEditor)
                     {
-                        this.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
                         {
                             self.startDrag(false, new Rectangle(0, 0, Main.GAME_WIDTH - 7, 0));
                         });
-                        this.addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
                         {
                             self.stopDrag();
-                            options.settings.screencutPosition = (self.x / Main.GAME_WIDTH);
+                            position = (self.x / Main.GAME_WIDTH);
                         });
                     }
                     break;
+
                 case "left":
-                    this.x = Main.GAME_WIDTH - (options.settings.screencutPosition * Main.GAME_WIDTH);
-                    this.y = 0;
-                    this.graphics.drawRect(0, -Main.GAME_HEIGHT, Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
+                    x = Main.GAME_WIDTH - (position * Main.GAME_WIDTH);
+                    y = 0;
+                    graphics.drawRect(0, -Main.GAME_HEIGHT, Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
 
-                    if (options.isEditor)
+                    if (isEditor)
                     {
-                        this.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
                         {
                             self.startDrag(false, new Rectangle(0, 0, Main.GAME_WIDTH - 7, 0));
                         });
-                        this.addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
                         {
                             self.stopDrag();
-                            options.settings.screencutPosition = 1 - (self.x / Main.GAME_WIDTH);
+                            position = 1 - (self.x / Main.GAME_WIDTH);
                         });
                     }
                     break;
-                default:
-                    this.x = 0;
-                    this.y = Main.GAME_HEIGHT - (options.settings.screencutPosition * Main.GAME_HEIGHT);
-                    this.graphics.drawRect(-Main.GAME_WIDTH, 0, Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
 
-                    if (options.isEditor)
+                default:
+                    x = 0;
+                    y = Main.GAME_HEIGHT - (position * Main.GAME_HEIGHT);
+                    graphics.drawRect(-Main.GAME_WIDTH, 0, Main.GAME_WIDTH * 3, Main.GAME_HEIGHT * 3);
+
+                    if (isEditor)
                     {
-                        this.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void
                         {
                             self.startDrag(false, new Rectangle(0, 5, 0, Main.GAME_HEIGHT - 7));
                         });
-                        this.addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
+                        addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
                         {
                             self.stopDrag();
-                            options.settings.screencutPosition = 1 - (self.y / Main.GAME_HEIGHT);
+                            position = 1 - (self.y / Main.GAME_HEIGHT);
                         });
                     }
                     break;
             }
-            this.graphics.endFill();
-            if (options.isEditor)
+
+            graphics.endFill();
+
+            if (isEditor)
             {
-                this.buttonMode = true;
-                this.useHandCursor = true;
+                buttonMode = true;
+                useHandCursor = true;
             }
         }
     }

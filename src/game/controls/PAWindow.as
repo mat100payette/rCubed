@@ -6,35 +6,34 @@ package game.controls
     import flash.text.TextFormat;
     import flash.text.TextFieldAutoSize;
     import flash.text.AntiAliasType;
-    import game.GameOptions;
 
     public class PAWindow extends Sprite
     {
         private static var _lang:Language = Language.instance;
 
-        public var scores:Array;
-        private var labels:Array;
+        private var _displayAmazing:Boolean;
 
-        private var options:GameOptions;
+        private var _scores:Array;
+        private var _labels:Array;
 
-        public function PAWindow(options:GameOptions)
+        public function PAWindow(displayAmazing:Boolean, judgeColors:Array)
         {
-            this.options = options;
+            _displayAmazing = displayAmazing;
 
-            labels = new Array();
-            scores = new Array();
+            _labels = [];
+            _scores = [];
 
             var ypos:int = 0;
             var scoreSize:int = 36;
 
-            var labelDesc:Array = [{color: options.settings.judgeColors[0], title: _lang.stringSimple("game_amazing")},
-                {color: options.settings.judgeColors[1], title: _lang.stringSimple("game_perfect")},
-                {color: options.settings.judgeColors[2], title: _lang.stringSimple("game_good")},
-                {color: options.settings.judgeColors[3], title: _lang.stringSimple("game_average")},
-                {color: options.settings.judgeColors[4], title: _lang.stringSimple("game_miss")},
-                {color: options.settings.judgeColors[5], title: _lang.stringSimple("game_boo")}];
+            var labelDesc:Array = [{color: judgeColors[0], title: _lang.stringSimple("game_amazing")},
+                {color: judgeColors[1], title: _lang.stringSimple("game_perfect")},
+                {color: judgeColors[2], title: _lang.stringSimple("game_good")},
+                {color: judgeColors[3], title: _lang.stringSimple("game_average")},
+                {color: judgeColors[4], title: _lang.stringSimple("game_miss")},
+                {color: judgeColors[5], title: _lang.stringSimple("game_boo")}];
 
-            if (!options.settings.displayAmazing)
+            if (!_displayAmazing)
             {
                 labelDesc.splice(0, 1);
                 ypos = 49;
@@ -53,7 +52,7 @@ package game.controls
                 field.width = 10;
                 field.text = label.title;
                 addChild(field);
-                labels.push(field);
+                _labels.push(field);
 
                 field = new TextField();
                 field.defaultTextFormat = new TextFormat(_lang.font(), scoreSize--, label.color, true);
@@ -65,7 +64,7 @@ package game.controls
                 field.x = 60;
                 field.text = "0";
                 addChild(field);
-                scores.push(field);
+                _scores.push(field);
 
                 ypos += 49;
             }
@@ -79,7 +78,7 @@ package game.controls
         public function update(amazing:int, perfect:int, good:int, average:int, miss:int, boo:int):void
         {
             var offset:int = 0;
-            if (options.settings.displayAmazing)
+            if (_displayAmazing)
             {
                 updateScore(0, amazing);
                 updateScore(1, perfect);
@@ -98,7 +97,7 @@ package game.controls
 
         public function updateScore(field:int, score:int):void
         {
-            scores[field].text = score.toString();
+            _scores[field].text = score.toString();
         }
 
         public function alternateLayout():void
@@ -106,10 +105,11 @@ package game.controls
             var xpos:int = 50;
             var ypos:int = 0;
             var scoreSize:int = 0;
-            for (var i:int = 0; i < labels.length; i++)
+
+            for (var i:int = 0; i < _labels.length; i++)
             {
-                var label:TextField = labels[i];
-                var score:TextField = scores[i];
+                var label:TextField = _labels[i];
+                var score:TextField = _scores[i];
 
                 label.x = xpos - label.textWidth;
                 label.y = ypos;
@@ -131,10 +131,10 @@ package game.controls
         {
             if (val == "right")
             {
-                for (var i:int = 0; i < labels.length; i++)
+                for (var i:int = 0; i < _labels.length; i++)
                 {
-                    var label:TextField = labels[i];
-                    var score:TextField = scores[i];
+                    var label:TextField = _labels[i];
+                    var score:TextField = _scores[i];
 
                     score.text = "0";
 
@@ -146,12 +146,10 @@ package game.controls
             }
         }
 
-        public function set show_labels(val:Boolean):void
+        public function set showLabels(val:Boolean):void
         {
-            for (var i:int = 0; i < labels.length; i++)
-            {
-                labels[i].visible = val;
-            }
+            for (var i:int = 0; i < _labels.length; i++)
+                _labels[i].visible = val;
         }
     }
 }

@@ -1,6 +1,5 @@
 package classes.chart
 {
-    import game.GameOptions;
     import game.GameplayDisplay;
 
     /**
@@ -21,7 +20,6 @@ package classes.chart
 
         function setNotePool(enabled:Boolean):void;
 
-        function getOptions():GameOptions;
         function getGameplay():GameplayDisplay;
     }
 

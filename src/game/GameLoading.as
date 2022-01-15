@@ -30,29 +30,31 @@ package game
         private var _song:Song;
         private var _songNameHtml:String = "";
 
-        public function GameLoading()
+        public function GameLoading(song:Song)
         {
-            init();
-        }
+            _song = song;
 
-        public function init():void
-        {
-            _gvars.songRestarts = 0;
-            //- Set Active Song
-            if (_gvars.songQueue.length > 0)
-            {
-                var songInfo:SongInfo = _gvars.songQueue[0];
-                _gvars.songQueue.shift();
+            // TODO: Refactor this elsewhere
+            /*
+               _gvars.songRestarts = 0;
+               //- Set Active Song
+               if (_gvars.songQueue.length > 0)
+               {
+               var songInfo:SongInfo = _gvars.songQueue[0];
+               _gvars.songQueue.shift();
 
-                _song = _gvars.getSongFile(songInfo, _gvars.options.loadPreview);
-                _gvars.options.song = _song;
-            }
-            else if (_gvars.options.song)
-                _song = _gvars.options.song;
-            else
-            { // No songs in queue? Something went wrong...
-                dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
-            }
+               _song = _gvars.getSongFile(songInfo, _gvars.options.loadPreview);
+               _gvars.options.song = _song;
+               }
+               else if (_gvars.options.song)
+               _song = _gvars.options.song;
+               else
+               {
+               // No songs in queue? Something went wrong...
+               dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+               }
+             */
+
             if (_song && _song.isLoaded)
                 dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
         }

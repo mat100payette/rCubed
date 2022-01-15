@@ -226,7 +226,7 @@ package popups.settings
 
         private function onAmazingJudgeColorReset():void
         {
-            _settings.judgeColors[0] = DEFAULT_OPTIONS.settings.judgeColors[0];
+            _settings.judgeColors[0] = DEFAULT_SETTINGS.judgeColors[0];
             setValues();
         }
 
@@ -237,7 +237,7 @@ package popups.settings
 
         private function onPerfectJudgeColorReset():void
         {
-            _settings.judgeColors[1] = DEFAULT_OPTIONS.settings.judgeColors[1];
+            _settings.judgeColors[1] = DEFAULT_SETTINGS.judgeColors[1];
             setValues();
         }
 
@@ -248,7 +248,7 @@ package popups.settings
 
         private function onGoodJudgeColorReset():void
         {
-            _settings.judgeColors[2] = DEFAULT_OPTIONS.settings.judgeColors[2];
+            _settings.judgeColors[2] = DEFAULT_SETTINGS.judgeColors[2];
             setValues();
         }
 
@@ -259,7 +259,7 @@ package popups.settings
 
         private function onAverageJudgeColorReset():void
         {
-            _settings.judgeColors[3] = DEFAULT_OPTIONS.settings.judgeColors[3];
+            _settings.judgeColors[3] = DEFAULT_SETTINGS.judgeColors[3];
             setValues();
         }
 
@@ -270,7 +270,7 @@ package popups.settings
 
         private function onMissJudgeColorReset():void
         {
-            _settings.judgeColors[4] = DEFAULT_OPTIONS.settings.judgeColors[4];
+            _settings.judgeColors[4] = DEFAULT_SETTINGS.judgeColors[4];
             setValues();
         }
 
@@ -281,7 +281,7 @@ package popups.settings
 
         private function onBooJudgeColorReset():void
         {
-            _settings.judgeColors[5] = DEFAULT_OPTIONS.settings.judgeColors[5];
+            _settings.judgeColors[5] = DEFAULT_SETTINGS.judgeColors[5];
             setValues();
         }
 
@@ -294,8 +294,8 @@ package popups.settings
 
         private function onGameAColorReset():void
         {
-            _settings.gameColors[0] = DEFAULT_OPTIONS.settings.gameColors[0];
-            _settings.gameColors[2] = ColorUtil.darkenColor(DEFAULT_OPTIONS.settings.gameColors[0], 0.27);
+            _settings.gameColors[0] = DEFAULT_SETTINGS.gameColors[0];
+            _settings.gameColors[2] = ColorUtil.darkenColor(DEFAULT_SETTINGS.gameColors[0], 0.27);
             setValues();
         }
 
@@ -308,8 +308,8 @@ package popups.settings
 
         private function onGameBColorReset():void
         {
-            _settings.gameColors[0] = DEFAULT_OPTIONS.settings.gameColors[0];
-            _settings.gameColors[3] = ColorUtil.brightenColor(DEFAULT_OPTIONS.settings.gameColors[1], 0.08);
+            _settings.gameColors[0] = DEFAULT_SETTINGS.gameColors[0];
+            _settings.gameColors[3] = ColorUtil.brightenColor(DEFAULT_SETTINGS.gameColors[1], 0.08);
             setValues();
         }
 
@@ -320,7 +320,7 @@ package popups.settings
 
         private function onGameCColorReset():void
         {
-            _settings.gameColors[4] = DEFAULT_OPTIONS.settings.gameColors[4];
+            _settings.gameColors[4] = DEFAULT_SETTINGS.gameColors[4];
             setValues();
         }
 
@@ -331,7 +331,7 @@ package popups.settings
 
         private function onNormalComboColorReset():void
         {
-            _settings.comboColors[0] = DEFAULT_OPTIONS.settings.comboColors[0];
+            _settings.comboColors[0] = DEFAULT_SETTINGS.comboColors[0];
             setValues();
         }
 
@@ -342,7 +342,7 @@ package popups.settings
 
         private function onFCComboColorReset():void
         {
-            _settings.comboColors[1] = DEFAULT_OPTIONS.settings.comboColors[1];
+            _settings.comboColors[1] = DEFAULT_SETTINGS.comboColors[1];
             setValues();
         }
 
@@ -358,7 +358,7 @@ package popups.settings
 
         private function onAAAComboColorReset():void
         {
-            _settings.comboColors[2] = DEFAULT_OPTIONS.settings.comboColors[2];
+            _settings.comboColors[2] = DEFAULT_SETTINGS.comboColors[2];
             setValues();
         }
 
@@ -374,7 +374,7 @@ package popups.settings
 
         private function onSDGComboColorReset():void
         {
-            _settings.comboColors[3] = DEFAULT_OPTIONS.settings.comboColors[2];
+            _settings.comboColors[3] = DEFAULT_SETTINGS.comboColors[2];
             setValues();
         }
 
@@ -390,7 +390,7 @@ package popups.settings
 
         private function onBlackflagComboColorReset():void
         {
-            _settings.comboColors[4] = DEFAULT_OPTIONS.settings.comboColors[4];
+            _settings.comboColors[4] = DEFAULT_SETTINGS.comboColors[4];
             setValues();
         }
 
@@ -406,7 +406,7 @@ package popups.settings
 
         private function onAvflagComboColorReset():void
         {
-            _settings.comboColors[5] = DEFAULT_OPTIONS.settings.comboColors[5];
+            _settings.comboColors[5] = DEFAULT_SETTINGS.comboColors[5];
             setValues();
         }
 
@@ -422,7 +422,7 @@ package popups.settings
 
         private function onBooflagComboColorReset():void
         {
-            _settings.comboColors[6] = DEFAULT_OPTIONS.settings.comboColors[6];
+            _settings.comboColors[6] = DEFAULT_SETTINGS.comboColors[6];
             setValues();
         }
 
@@ -438,7 +438,7 @@ package popups.settings
 
         private function onMissflagComboColorReset():void
         {
-            _settings.comboColors[7] = DEFAULT_OPTIONS.settings.comboColors[7];
+            _settings.comboColors[7] = DEFAULT_SETTINGS.comboColors[7];
             setValues();
         }
 

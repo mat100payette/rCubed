@@ -106,7 +106,7 @@ package menu
             //- Add Main Panel to Stage
 
             // Guests
-            if (GlobalVariables.instance.activeUser.isGuest || (_gvars.options && _gvars.options.singleplayer))
+            if (GlobalVariables.instance.activeUser.isGuest)
                 setActiveLayer(Routes.PANEL_SONGSELECTION);
             else
             {

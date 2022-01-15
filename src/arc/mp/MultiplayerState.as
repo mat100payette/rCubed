@@ -33,11 +33,11 @@ package arc.mp
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
     import flash.utils.Timer;
-    import game.GameOptions;
     import game.GameScoreResult;
     import menu.DisplayLayer;
     import flash.events.EventDispatcher;
     import events.navigation.ChangePanelEvent;
+    import game.GameplayDisplay;
 
     public class MultiplayerState extends EventDispatcher
     {
@@ -301,8 +301,6 @@ package arc.mp
         // Starts loading the selected song.
         public function gameplayLoading():void
         {
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.fill();
             _currentSongFile = _gvars.getSongFile(_currentSongInfo);
 
             _currentStatus = Multiplayer.STATUS_LOADING;
@@ -417,16 +415,18 @@ package arc.mp
         public function spectateGame(room:Room):void
         {
             var song:SongInfo = room.songInfo;
-            _gvars.songQueue = [song];
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.mpRoom = room;
-            _gvars.options.fill();
-            if (_gvars.options.settings.frameRate <= 30)
-                _gvars.options.settings.frameRate = 60;
-            _gvars.options.isAutoplay = true;
-            _gvars.options.settings.songRate = 1;
-            _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
-            _gvars.options.loadPreview = true;
+            /*_gvars.songQueue = [song];
+               _gvars.options = new GameOptions(_gvars.activeUser);
+               _gvars.options.mpRoom = room;
+               _gvars.options.fill();
+               if (_gvars.options.settings.frameRate <= 30)
+               _gvars.options.settings.frameRate = 60;
+               _gvars.options.isAutoplay = true;
+               _gvars.options.settings.songRate = 1;
+               _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
+               _gvars.options.loadPreview = true;*/
+
+            // TODO: Add spectate event
 
             dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
@@ -435,19 +435,14 @@ package arc.mp
         {
             _currentStatus = Multiplayer.STATUS_PLAYING;
 
-            _gvars.options = new GameOptions(_gvars.activeUser);
-            _gvars.options.mpRoom = room;
-            _gvars.options.fill();
-            _gvars.options.song = _currentSongFile;
-            _gvars.options.judgeWindow = null;
-            _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
+            // TODO: gameplay start event
 
             dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
         }
 
-        public function gameplayPlaying(play:Object):Boolean
+        public function gameplayPlaying(play:GameplayDisplay):Boolean
         {
-            if (!_gvars.options.mpRoom || _currentStatus != Multiplayer.STATUS_PLAYING)
+            if (_currentStatus != Multiplayer.STATUS_PLAYING)
                 return false;
 
             play.addEventListener(Multiplayer.EVENT_GAME_UPDATE, onGameUpdate);
@@ -456,7 +451,7 @@ package arc.mp
 
         private function onGameUpdate(event:GameUpdateEvent):void
         {
-            if (!_gvars.options.mpRoom || _currentStatus != Multiplayer.STATUS_PLAYING)
+            if (_currentStatus != Multiplayer.STATUS_PLAYING)
                 return;
 
             var gameplay:Gameplay = currentUser.gameplay;
@@ -475,10 +470,8 @@ package arc.mp
             propagateCurrentUserScore();
         }
 
-        public function gameplayResults(gameResults:DisplayLayer, songResults:Vector.<GameScoreResult>):void
+        public function gameplayResults(room:Room, gameResults:DisplayLayer, songResults:Vector.<GameScoreResult>):void
         {
-            var room:Room = _gvars.options.mpRoom;
-
             if (!room || !room.isPlayer(currentUser) || _currentStatus != Multiplayer.STATUS_PLAYING)
                 return;
 
@@ -495,11 +488,12 @@ package arc.mp
                     break;
                 }
             }
+
             if (results && results.song)
             {
                 for each (var r:Replay in _gvars.replayHistory)
                 {
-                    if (r.level == results.song.id && r.score == results.score)
+                    if (r.level == results.song.songInfo.level && r.score == results.score)
                     {
                         replay = r;
                         break;

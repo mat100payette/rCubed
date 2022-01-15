@@ -23,7 +23,6 @@ package popups.settings
     import flash.media.SoundMixer;
     import flash.media.SoundTransform;
     import flash.text.TextFormatAlign;
-    import game.GameOptions;
     import menu.MainMenu;
     import menu.DisplayLayer;
     import menu.MenuSongSelection;
@@ -63,8 +62,6 @@ package popups.settings
         private var _btnEditorGameplay:TabButton;
         private var _btnEditorMultiplayer:TabButton;
         private var _btnEditorSpectator:TabButton;
-
-        private var _gameOptionsTest:GameOptions = new GameOptions(null);
 
         private var _editorFakeDataCreated:Boolean = false;
         private var _fakePlayer1:User;
