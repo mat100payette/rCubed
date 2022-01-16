@@ -78,7 +78,7 @@ package game.controls
         public function updateJudge():void
         {
             // Get Judge Window
-            var judge:Array = Constant.JUDGE_WINDOW;
+            var judge:Array = Constant.DEFAULT_JUDGE_WINDOW;
             if (_judgeWindow)
                 judge = _judgeWindow;
 
@@ -127,7 +127,7 @@ package game.controls
         public function drawJudgeRegions():void
         {
             // Get Judge Window
-            var judge:Array = Constant.JUDGE_WINDOW;
+            var judge:Array = Constant.DEFAULT_JUDGE_WINDOW;
             if (_judgeWindow)
                 judge = _judgeWindow;
 

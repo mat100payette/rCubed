@@ -38,6 +38,7 @@ package arc.mp
     import flash.events.EventDispatcher;
     import events.navigation.ChangePanelEvent;
     import game.GameplayDisplay;
+    import events.navigation.SpectateGameEvent;
 
     public class MultiplayerState extends EventDispatcher
     {
@@ -414,21 +415,7 @@ package arc.mp
 
         public function spectateGame(room:Room):void
         {
-            var song:SongInfo = room.songInfo;
-            /*_gvars.songQueue = [song];
-               _gvars.options = new GameOptions(_gvars.activeUser);
-               _gvars.options.mpRoom = room;
-               _gvars.options.fill();
-               if (_gvars.options.settings.frameRate <= 30)
-               _gvars.options.settings.frameRate = 60;
-               _gvars.options.isAutoplay = true;
-               _gvars.options.settings.songRate = 1;
-               _gvars.options.isolationOffset = _gvars.options.isolationLength = 0;
-               _gvars.options.loadPreview = true;*/
-
-            // TODO: Add spectate event
-
-            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+            dispatchEvent(new SpectateGameEvent(room));
         }
 
         public function gameplayStart(room:Room):void
@@ -437,7 +424,7 @@ package arc.mp
 
             // TODO: gameplay start event
 
-            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAMEPLAY));
         }
 
         public function gameplayPlaying(play:GameplayDisplay):Boolean

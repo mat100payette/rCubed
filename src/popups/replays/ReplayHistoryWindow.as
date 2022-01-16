@@ -21,6 +21,7 @@ package popups.replays
     import flash.text.TextFormatAlign;
     import events.navigation.ChangePanelEvent;
     import events.navigation.popups.RemovePopupEvent;
+    import events.navigation.WatchReplayEvent;
 
     public class ReplayHistoryWindow extends DisplayLayer
     {
@@ -228,7 +229,7 @@ package popups.replays
 
                 if (target == entry.btnPlay)
                 {
-                    if (replay.song == null)
+                    if (replay.songInfo == null)
                     {
                         Alert.add(_lang.string("popup_replay_missing_song_data"));
                         return;
@@ -238,12 +239,9 @@ package popups.replays
                         replay.user.loadWithoutSettings();
 
                     _gvars.songResults.length = 0;
-                    _gvars.songQueue = [replay.song];
+                    _gvars.songQueue = [replay.songInfo];
 
-                    //_gvars.gameMain.removePopup();
-
-                    // TODO: Change this to a replay event with the replay object
-                    dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+                    dispatchEvent(new WatchReplayEvent(replay));
                 }
 
                 if (target == entry.btnCopy)

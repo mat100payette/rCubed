@@ -7,16 +7,11 @@ package
         public static const PANEL_GAME_UPDATE:String = "GameAirUpdatePanel";
         public static const PANEL_GAME_LOGIN:String = "GameLoginPanel";
         public static const PANEL_MAIN_MENU:String = "GameMenuPanel";
-        public static const PANEL_GAME_MENU:String = "GamePlayPanel";
-
+        public static const PANEL_GAMEPLAY:String = "GamePlay";
         public static const PANEL_SONGSELECTION:String = "MenuSongSelection";
         public static const PANEL_MULTIPLAYER:String = "MenuMultiplayer";
         public static const PANEL_TOKENS:String = "MenuTokens";
-
-        public static const GAME_LOADING:String = "GameLoading";
-        public static const GAME_PLAY:String = "GamePlay";
-        public static const GAME_REPLAY:String = "GameReplay";
-        public static const GAME_RESULTS:String = "GameResults";
+        public static const PANEL_RESULTS:String = "GameResults";
 
         public static const REMOVE_POPUP:String = "RemovePopup";
 

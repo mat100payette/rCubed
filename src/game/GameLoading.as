@@ -2,7 +2,6 @@ package game
 {
     import classes.Language;
     import classes.Playlist;
-    import classes.SongInfo;
     import classes.chart.Song;
     import classes.ui.BoxButton;
     import classes.ui.PreloaderStatusBar;
@@ -13,6 +12,7 @@ package game
     import flash.text.TextFormat;
     import menu.DisplayLayer;
     import events.navigation.ChangePanelEvent;
+    import events.navigation.StartGameplayEvent;
 
     public class GameLoading extends DisplayLayer
     {
@@ -34,29 +34,8 @@ package game
         {
             _song = song;
 
-            // TODO: Refactor this elsewhere
-            /*
-               _gvars.songRestarts = 0;
-               //- Set Active Song
-               if (_gvars.songQueue.length > 0)
-               {
-               var songInfo:SongInfo = _gvars.songQueue[0];
-               _gvars.songQueue.shift();
-
-               _song = _gvars.getSongFile(songInfo, _gvars.options.loadPreview);
-               _gvars.options.song = _song;
-               }
-               else if (_gvars.options.song)
-               _song = _gvars.options.song;
-               else
-               {
-               // No songs in queue? Something went wrong...
-               dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
-               }
-             */
-
             if (_song && _song.isLoaded)
-                dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
+                dispatchEvent(new StartGameplayEvent(_song));
         }
 
         override public function stageAdd():void
@@ -151,7 +130,7 @@ package game
         private function onPreloaderRemoved(e:Event):void
         {
             _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
-            dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
+            dispatchEvent(new StartGameplayEvent(_song));
         }
     }
 }

@@ -50,7 +50,8 @@ package menu
     import events.navigation.popups.AddPopupEvent;
     import events.navigation.popups.AddPopupSongNotesEvent;
     import events.navigation.ChangePanelEvent;
-    import classes.replay.Replay;
+    import events.navigation.WatchPreviewEvent;
+    import events.navigation.StartGameplayEvent;
 
     public class MenuSongSelection extends DisplayLayer
     {
@@ -1014,22 +1015,19 @@ package menu
          */
         private function e_playChartPreviewContextSelect(e:ContextMenuEvent):void
         {
-            var replay:SongPreview = new SongPreview(0);
+            var preview:SongPreview = new SongPreview(0);
 
-            if (!replay.isLoaded)
-            {
-                replay.setupSongPreview((e.contextMenuOwner as SongItem).songInfo);
-            }
-
-            if (replay.isLoaded)
+            if (!preview.isLoaded)
+                preview.setupSongPreview((e.contextMenuOwner as SongItem).songInfo);
+            else
             {
                 // Setup Vars
                 _gvars.songQueue = [];
-                _gvars.songQueue.push(Playlist.instance.getSongInfo(replay.level));
+                _gvars.songQueue.push(Playlist.instance.getSongInfo(preview.level));
 
                 // Switch to game
                 Alert.add(_lang.string("song_selection_load_play_chart_preview"));
-                dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+                dispatchEvent(new WatchPreviewEvent(preview));
             }
         }
 
@@ -1563,7 +1561,7 @@ package menu
 
             saveSearchTextAndType();
 
-            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+            dispatchEvent(new StartGameplayEvent(_gvars.getSongFile(_gvars.songQueue[0])));
         }
 
         /**

@@ -62,6 +62,7 @@ package game
     import classes.replay.Replay;
     import com.flashfla.utils.VectorUtil;
     import classes.Room;
+    import events.navigation.ShowGameResultsEvent;
 
     public class GameplayDisplay extends DisplayLayer
     {
@@ -630,8 +631,7 @@ package game
 
             if (_settings.judgeWindow)
                 _judgeSettings = buildJudgeNodes(_settings.judgeWindow);
-            else
-                _judgeSettings = buildJudgeNodes(Constant.JUDGE_WINDOW);
+
             _judgeOffset = _settings.judgeOffset * 1000 / 30;
             _autoJudgeOffset = _settings.autoJudgeOffset;
 
@@ -1505,7 +1505,7 @@ package game
             if (_isEditor || _mpSpectate)
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
             else
-                dispatchEvent(new ChangePanelEvent(Routes.GAME_RESULTS));
+                dispatchEvent(new ShowGameResultsEvent(_song, _isAutoplay, _replay, _mpRoom));
         }
 
         private function restartGame():void

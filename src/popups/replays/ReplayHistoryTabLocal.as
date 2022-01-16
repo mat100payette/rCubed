@@ -88,10 +88,10 @@ package popups.replays
             var render_list:Array = [];
             for each (var r:Replay in REPLAYS)
             {
-                if (r.song == null)
+                if (r.songInfo == null)
                     continue;
 
-                if (parent.searchText.length >= 1 && r.song.name.toLowerCase().indexOf(parent.searchText) == -1)
+                if (parent.searchText.length >= 1 && r.songInfo.name.toLowerCase().indexOf(parent.searchText) == -1)
                     continue;
 
                 render_list[render_list.length] = r;
@@ -119,8 +119,8 @@ package popups.replays
                 r = new Replay(TIME + idx);
                 r.filePath = key;
 
-                r.song = new SongInfo();
-                r.song.name = cacheObj["name"];
+                r.songInfo = new SongInfo();
+                r.songInfo.name = cacheObj["name"];
 
                 r.score = cacheObj["score"];
                 r.perfect = cacheObj["judge"][0];
@@ -139,7 +139,7 @@ package popups.replays
 
                     r.arc_engine = {engineID: cacheObj["engine"]};
 
-                    r.song.engine = engine;
+                    r.songInfo.engine = engine;
                 }
 
                 REPLAYS[REPLAYS.length] = r;
@@ -300,17 +300,17 @@ package popups.replays
                     {
                         r.loadSongInfo();
 
-                        if (r.song != null)
+                        if (r.songInfo != null)
                         {
                             REPLAYS[REPLAYS.length] = r;
 
-                            cacheObj = {"name": r.song.name,
+                            cacheObj = {"name": r.songInfo.name,
                                     "rate": r.user.settings.songRate,
                                     "score": r.score,
                                     "judge": [r.perfect, r.good, r.average, r.miss, r.boo, r.maxcombo]}
 
                             if (r.arc_engine != null)
-                                cacheObj["engine"] = r.song.engine.id;
+                                cacheObj["engine"] = r.songInfo.engine.id;
 
                             _gvars.file_replay_cache.setValue(chartFile.parent.name + "/" + chartFile.name, cacheObj);
                         }

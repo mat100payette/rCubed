@@ -110,7 +110,7 @@ package popups.replays
         public function setData(item:Replay):void
         {
             replay = item;
-            info = item.song;
+            info = item.songInfo;
 
             _title.text = info.name;
 

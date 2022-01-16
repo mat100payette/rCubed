@@ -15,6 +15,7 @@ package popups.settings
 
         protected var _parent:SettingsWindow;
         protected var _settings:UserSettings;
+        protected var _defaultSettings:UserSettings;
         protected var _options:Object = {};
         private var _hoverMessage:MouseTooltip;
 
@@ -22,6 +23,8 @@ package popups.settings
         {
             _parent = settingsWindow;
             _settings = settings;
+
+            _defaultSettings = new UserSettings();
         }
 
         public function get name():String

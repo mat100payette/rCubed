@@ -28,6 +28,7 @@ package popups.settings
     import menu.MenuSongSelection;
     import events.navigation.popups.RemovePopupEvent;
     import events.navigation.ChangePanelEvent;
+    import events.navigation.OpenEditorEvent;
 
 
     public class SettingsWindow extends DisplayLayer
@@ -260,81 +261,29 @@ package popups.settings
             cancelBtn.textColor = "#000000";
         }
 
-        private function createEditorFakeData():void
-        {
-            _fakePlayer1 = new User();
-            _fakePlayer1.settings.update(_user.settings);
-            _fakePlayer1.id = 1;
-            _fakePlayer1.playerIdx = 1;
-            _fakePlayer1.isPlayer = true;
-            _fakePlayer1.name = "Player 1";
-            _fakePlayer1.siteId = 1830376;
-
-            _fakePlayer2 = new User();
-            _fakePlayer2.id = 2
-            _fakePlayer2.playerIdx = 2;
-            _fakePlayer2.isPlayer = true;
-            _fakePlayer2.name = "Player 2";
-            _fakePlayer2.siteId = 249481;
-
-            _fakeSpectator = new User();
-            _fakeSpectator.settings.update(_user.settings);
-            _fakeSpectator.id = 3;
-            _fakeSpectator.playerIdx = 3;
-            _fakeSpectator.isPlayer = false;
-            _fakeSpectator.name = "Spectator";
-            _fakeSpectator.siteId = 0;
-
-            // Editor - MP
-            _fakeMP1 = new Multiplayer();
-            _fakeMP1.currentUser = _fakePlayer1;
-
-            _fakeMPRoom1 = new Room(0);
-            _fakeMPRoom1.connection = _fakeMP1;
-            _fakeMPRoom1.addUser(_fakePlayer1);
-            _fakeMPRoom1.addUser(_fakePlayer2);
-            _fakeMPRoom1.addPlayer(_fakePlayer1);
-            _fakeMPRoom1.addPlayer(_fakePlayer2);
-
-            // Editor - MP Spectate
-            _fakeMP2 = new Multiplayer();
-            _fakeMP2.currentUser = _fakeSpectator;
-
-            _fakeMPRoom2 = new Room(0);
-            _fakeMPRoom2.connection = _fakeMP2;
-            _fakeMPRoom2.addUser(_fakePlayer1);
-            _fakeMPRoom2.addUser(_fakePlayer2);
-            _fakeMPRoom2.addUser(_fakeSpectator);
-            _fakeMPRoom2.addPlayer(_fakePlayer1);
-            _fakeMPRoom2.addPlayer(_fakePlayer2);
-        }
-
         private function onSoloEditorTabClicked(e:Event):void
         {
-            createEditorFakeData();
-            openEditor(_fakePlayer1, null);
+            openEditor();
         }
 
         private function onMPEditorTabClicked(e:Event):void
         {
-            createEditorFakeData();
-            openEditor(_fakePlayer1, _fakeMPRoom1);
+            openEditor();
         }
 
         private function onMPSpectatorEditorTabClicked(e:Event):void
         {
-            createEditorFakeData();
-            openEditor(_fakeSpectator, _fakeMPRoom2);
+            openEditor();
         }
 
-        private function openEditor(user:User, fakeMPRoom:Room):void
+        private function openEditor():void
         {
             const tempSongInfo:SongInfo = new SongInfo();
             tempSongInfo.level = 1337;
             tempSongInfo.chart_type = "EDITOR";
-            var song:Song = new Song(tempSongInfo, false, user.settings);
+            var song:Song = new Song(tempSongInfo, false, _user.settings);
 
-            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+            dispatchEvent(new OpenEditorEvent(song, _user));
         }
 
         private function onManageSettingsClicked(e:Event):void

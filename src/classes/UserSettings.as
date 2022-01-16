@@ -90,7 +90,7 @@ package classes
         public var songRate:Number = 1;
         public var isolationOffset:int = 1;
         public var isolationLength:int = 0;
-        public var judgeWindow:Array = [];
+        public var judgeWindow:Array = Constant.DEFAULT_JUDGE_WINDOW.concat();
         public var layout:Object = {};
 
         public var songQueues:Vector.<Object> = new <Object>[];

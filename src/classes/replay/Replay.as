@@ -50,7 +50,7 @@ package classes.replay
         public var replayData:Array;
         public var timestamp:Number;
 
-        public var song:SongInfo;
+        public var songInfo:SongInfo;
         public var arc_engine:Object;
 
         public function Replay(id:Number, doLoad:Boolean = false)
@@ -305,12 +305,12 @@ package classes.replay
 
         public function get songname():String
         {
-            return song.name;
+            return songInfo.name;
         }
 
         public function loadSongInfo():void
         {
-            song = arc_engine ? ArcGlobals.instance.legacyDecode(arc_engine) : Playlist.instanceCanon.getSongInfo(level);
+            songInfo = arc_engine ? ArcGlobals.instance.legacyDecode(arc_engine) : Playlist.instanceCanon.getSongInfo(level);
         }
 
         private function getDirCol(noteDir:String):String

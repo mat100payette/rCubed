@@ -39,12 +39,12 @@ package game.controls
 
             animationSpeed = animationSpeed;
 
-            _labelDesc[100] = {color: colors.judgeColors[0], title: "AMAZING!!!"};
-            _labelDesc[50] = {color: colors.judgeColors[1], title: "PERFECT!"};
-            _labelDesc[25] = {color: colors.judgeColors[2], title: "GOOD"};
-            _labelDesc[5] = {color: colors.judgeColors[3], title: "AVERAGE"};
-            _labelDesc[-5] = {color: colors.judgeColors[5], title: "BOO!!"};
-            _labelDesc[-10] = {color: colors.judgeColors[4], title: "MISS!"};
+            _labelDesc[100] = {color: colors[0], title: "AMAZING!!!"};
+            _labelDesc[50] = {color: colors[1], title: "PERFECT!"};
+            _labelDesc[25] = {color: colors[2], title: "GOOD"};
+            _labelDesc[5] = {color: colors[3], title: "AVERAGE"};
+            _labelDesc[-5] = {color: colors[5], title: "BOO!!"};
+            _labelDesc[-10] = {color: colors[4], title: "MISS!"};
 
             const textFormat:TextFormat = new TextFormat(new AachenLight().fontName, 42, 0xffffff, true);
 

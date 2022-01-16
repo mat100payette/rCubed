@@ -4,10 +4,10 @@ package classes
 
     public class SongPreview extends Replay
     {
-        public function SongPreview(song_id:int)
+        public function SongPreview(songId:int)
         {
-            super(song_id);
-            level = song_id;
+            super(songId);
+            level = songId;
         }
 
         public function setupSongPreview(songData:Object = null):void

@@ -42,9 +42,7 @@ package game
     import game.graph.GraphBase;
     import game.graph.GraphCombo;
     import menu.DisplayLayer;
-    import popups.PopupHighscores;
     import popups.PopupMessage;
-    import popups.PopupSongNotes;
     import popups.PopupTokenUnlock;
     import popups.replays.ReplayHistoryTabLocal;
     import classes.UserSettings;
@@ -54,6 +52,8 @@ package game
     import events.navigation.ChangePanelEvent;
     import classes.GameMods;
     import classes.Room;
+    import events.navigation.StartGameplayEvent;
+    import classes.chart.Song;
 
     public class GameResults extends DisplayLayer
     {
@@ -128,12 +128,6 @@ package game
                 sendScore();
                 saveLocalReplay();
             }
-
-            // More songs to play, jump to gameplay or loading.
-            if (_gvars.songQueue.length > 0)
-                dispatchEvent(new ChangePanelEvent(Routes.GAME_LOADING));
-            else
-                _gvars.songResults.length = 0;
         }
 
         //******************************************************************************************//
@@ -748,19 +742,19 @@ package game
                 if (skipload)
                 {
                     _gvars.songRestarts++;
-                    dispatchEvent(new ChangePanelEvent(Routes.GAME_PLAY));
+                    dispatchEvent(new StartGameplayEvent(_songResults[0].song));
                 }
                 else
                 {
+                    // TODO: Fix this queue logic
                     _gvars.songQueue = _gvars.totalSongQueue.concat();
-                    dispatchEvent(new ChangePanelEvent(Routes.GAME_LOADING));
+                        //dispatchEvent(new ChangePanelEvent(Routes.PANEL_LOADING));
                 }
             }
 
             else if (target == _navRandomSong)
             {
                 var songList:Array = _playlist.playList;
-                var selectedSong:Object;
 
                 //Check for filters and filter the songs list
                 if (_gvars.activeFilter != null)
@@ -785,16 +779,8 @@ package game
                 // Check for at least 1 possible playable song.
                 if (songList.length > 0)
                 {
-                    selectedSong = songList[Math.floor(Math.random() * (songList.length - 1))];
-
-                    // TODO: Refactor this into an event with the random selected song
-                    /*
-                       _gvars.songQueue.push(selectedSong);
-                       _gvars.options = new GameOptions(_gvars.activeUser);
-                       _gvars.options.fill();
-                     */
-
-                    dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_MENU));
+                    var selectedSong:Song = songList[Math.floor(Math.random() * (songList.length - 1))];
+                    dispatchEvent(new StartGameplayEvent(selectedSong));
                 }
             }
 
@@ -861,7 +847,7 @@ package game
             var ret:Boolean = false;
 
             // TODO: Make array element equality for judgeWindow
-            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_USER_SETTINGS.judgeWindow);
+            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_JUDGE_WINDOW);
 
             ret ||= replay && (mods.reverse || _settings.isolationOffset > 0 || _settings.isolationLength > 0);
 
@@ -874,7 +860,7 @@ package game
             var ret:Boolean = false;
 
             // TODO: Make array element equality for judgeWindow
-            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_USER_SETTINGS.judgeWindow);
+            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_JUDGE_WINDOW);
 
             ret ||= replay && (_settings.songRate != 1 || mods.reverse);
 
@@ -1328,7 +1314,7 @@ package game
             nR.replayData = result.replayData;
             nR.replayBin = result.replayBin;
             nR.timestamp = int(new Date().getTime() / 1000);
-            nR.song = result.songInfo;
+            nR.songInfo = result.songInfo;
             _gvars.replayHistory.unshift(nR);
 
             // Display F2 Shortcut key only once per session.

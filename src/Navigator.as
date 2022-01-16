@@ -35,6 +35,12 @@ package
     import classes.replay.Replay;
     import classes.Room;
     import classes.UserSettings;
+    import events.navigation.OpenEditorEvent;
+    import events.navigation.SpectateGameEvent;
+    import events.navigation.WatchPreviewEvent;
+    import events.navigation.StartGameplayEvent;
+    import events.navigation.WatchReplayEvent;
+    import events.navigation.ShowGameResultsEvent;
 
     public class Navigator extends Sprite implements IDisposable
     {
@@ -60,7 +66,7 @@ package
             _bg = bg;
             _versionText = versionText;
 
-            _target.addEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent);
+            _target.addEventListener(ChangePanelEvent.EVENT_TYPE, onChangePanelEvent, false, 100);
             _target.addEventListener(AddPopupEvent.EVENT_TYPE, onAddPopupEvent);
             _target.addEventListener(RemovePopupEvent.EVENT_TYPE, onRemovePopupEvent);
         }
@@ -98,61 +104,46 @@ package
                         nextPanel = new MainMenu();
                     break;
 
-                case Routes.PANEL_GAME_MENU:
+                case Routes.PANEL_GAMEPLAY:
                     onRemoveAllPopupsEvent();
 
-                    // TODO: Get from event
-                    var isEditor2:Boolean = false;
-
-                    if (isEditor2)
+                    if (e is OpenEditorEvent)
                     {
-                        // TODO: Get from event
-                        var song2:Song;
-                        var user2:User;
-                        var isAutoplay2:Boolean;
-                        var replay2:Replay;
-                        var mpRoom2:Room;
-
-                        nextPanel = new GameplayDisplay(song2, user2, isEditor2, isAutoplay2, replay2, mpRoom2);
+                        var openEditorEvent:OpenEditorEvent = e as OpenEditorEvent;
+                        nextPanel = new GameplayDisplay(openEditorEvent.song, openEditorEvent.user, true, false, null, null);
                     }
-                    else
+                    else if (e is SpectateGameEvent)
                     {
-                        var song3:Song;
+                        var spectateGameEvent:OpenEditorEvent = e as OpenEditorEvent;
+                        nextPanel = new GameLoading(spectateGameEvent.song);
+                    }
+                    else if (e is WatchReplayEvent)
+                    {
+                        var watchReplayEvent:WatchReplayEvent = e as WatchReplayEvent;
+                            // TODO: Let GameLoading know what the loading is for (play/replay/preview/etc)
+                            //nextPanel = new GameLoading(watchPreviewEvent.replay.songInfo);
+                    }
+                    else if (e is WatchPreviewEvent)
+                    {
+                        var watchPreviewEvent:WatchPreviewEvent = e as WatchPreviewEvent;
+                            // TODO: Let GameLoading know what the loading is for (play/replay/preview/etc)
+                            //nextPanel = new GameLoading(watchPreviewEvent.replay.songInfo);
+                    }
+                    else if (e is StartGameplayEvent)
+                    {
+                        var startGameplayEvent:StartGameplayEvent = e as StartGameplayEvent;
+                        var startGameplaySong:Song = startGameplayEvent.song;
 
-                        // TODO: What does this do
-                        //_gvars.totalSongQueue = _gvars.songQueue.concat();
-
-                        nextPanel = new GameLoading(song3);
+                        if (startGameplaySong.isLoaded)
+                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, false, false, null, null);
+                        else
+                            nextPanel = new GameLoading(startGameplaySong);
                     }
                     break;
 
-                case Routes.GAME_LOADING:
-                    var song4:Song;
-
-                    nextPanel = new GameLoading(song4);
-                    break;
-
-                case Routes.GAME_PLAY:
-                    var isEditor5:Boolean = false;
-
-                    var song5:Song;
-                    var user5:User;
-                    var isAutoplay5:Boolean;
-                    var replay5:Replay;
-                    var mpRoom5:Room;
-
-                    nextPanel = new GameplayDisplay(song5, user5, isEditor5, isAutoplay5, replay5, mpRoom5);
-                    break;
-
-                case Routes.GAME_RESULTS:
-                    // TODO: Get from event
-                    var settings1:UserSettings;
-                    var isReplay1:Boolean;
-                    var isReplayValid1:Boolean;
-                    var isAutoplay1:Boolean;
-                    var mpRoom1:Room;
-
-                    nextPanel = new GameResults(settings1, isReplay1, isReplayValid1, isAutoplay1, mpRoom1);
+                case Routes.PANEL_RESULTS:
+                    var gameResultsEvent:ShowGameResultsEvent = e as ShowGameResultsEvent;
+                    nextPanel = new GameResults(_gvars.activeUser.settings, gameResultsEvent.replay != null, true, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
                     break;
             }
 

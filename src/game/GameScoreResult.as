@@ -131,7 +131,7 @@ package game
         public function updateJudge():void
         {
             // Get Judge Window
-            judge = Constant.JUDGE_WINDOW;
+            judge = Constant.DEFAULT_JUDGE_WINDOW;
             if (user.settings.judgeWindow)
                 judge = user.settings.judgeWindow;
 

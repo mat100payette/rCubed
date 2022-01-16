@@ -17,6 +17,8 @@ package game.controls
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _noteskins:NoteskinsList = NoteskinsList.instance;
 
+        private var _defaultNoteColors:Array;
+
         private var _song:Song;
         private var _noteskinId:int;
         private var _noteColors:Array;
@@ -48,6 +50,8 @@ package game.controls
 
         public function NoteBox(song:Song, settings:UserSettings)
         {
+            _defaultNoteColors = new UserSettings().noteColors;
+
             _song = song;
             _noteskinId = settings.noteskinId;
             _noteColors = settings.noteColors;
@@ -149,7 +153,7 @@ package game.controls
         public function spawnArrow(note:Note, currentPosition:int = 0):GameNote
         {
             var direction:String = note.direction;
-            var color:String = _noteColors[Constant.DEFAULT_USER_SETTINGS.noteColors.indexOf(note.color)];
+            var color:String = _noteColors[_defaultNoteColors.indexOf(note.color)];
 
             var spawnPoolRef:ObjectPool = _notePool[_noteskinId][direction][color];
             if (!spawnPoolRef)
