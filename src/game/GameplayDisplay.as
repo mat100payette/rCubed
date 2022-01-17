@@ -600,27 +600,27 @@ package game
                 _gameplayUI.mouseChildren = false;
                 _gameplayUI.mouseEnabled = false;
 
-                function closeEditor(e:MouseEvent):void
-                {
-                    _gameState = GAME_END;
-                    if (!_replay)
-                    {
-                        _user.saveSettingsLocally();
-                        _user.saveSettingsOnline(_gvars.userSession);
-                    }
-                }
-
-                function resetLayout(e:MouseEvent):void
-                {
-                    for (var key:String in _settings.layout)
-                        delete _settings.layout[key];
-
-                    interfaceSetup();
-                }
-
-                _exitEditor = new BoxButton(this, (Main.GAME_WIDTH - 75) / 2, (Main.GAME_HEIGHT - 30) / 2, 75, 30, _lang.string("menu_close"), 12, closeEditor);
-                _resetEditor = new BoxButton(this, _exitEditor.x, _exitEditor.y + 35, 75, 30, _lang.string("menu_reset"), 12, resetLayout);
+                _exitEditor = new BoxButton(this, (Main.GAME_WIDTH - 75) / 2, (Main.GAME_HEIGHT - 30) / 2, 75, 30, _lang.string("menu_close"), 12, onCloseEditorClicked);
+                _resetEditor = new BoxButton(this, _exitEditor.x, _exitEditor.y + 35, 75, 30, _lang.string("menu_reset"), 12, onResetLayoutClicked);
             }
+        }
+
+        private function onCloseEditorClicked(e:MouseEvent):void
+        {
+            _gameState = GAME_END;
+            if (!_replay)
+            {
+                _user.saveSettingsLocally();
+                _user.saveSettingsOnline(_gvars.userSession);
+            }
+        }
+
+        private function onResetLayoutClicked(e:MouseEvent):void
+        {
+            for (var key:String in _settings.layout[layoutKey])
+                delete _settings.layout[layoutKey][key];
+
+            interfaceSetup();
         }
 
         private function initPlayerVars():void
@@ -1699,31 +1699,33 @@ package game
             }
             else
             {
-                for (var i:int = 0; i < 2; i++)
+                for (var i:int = 1; i <= 2; i++)
                     setStuff(_user, i);
             }
         }
 
         private function interfaceLayout(key:String, defaults:Boolean = true):Object
         {
-            if (defaults)
+            var i:String;
+
+            if (!_settings.layout[layoutKey])
+                _settings.layout[layoutKey] = {};
+
+            if (!_settings.layout[layoutKey][_settings.scrollDirection])
+                _settings.layout[layoutKey][_settings.scrollDirection] = {};
+
+            if (!_settings.layout[layoutKey][_settings.scrollDirection][key] || _settings.layout[layoutKey][_settings.scrollDirection][key] is Array)
             {
-                var ret:Object = {};
+                var settingsLayout:Object = _settings.layout[layoutKey][_settings.scrollDirection][key] = {};
 
-                var def:Object = _defaultLayout[key];
-                for (var i:String in def)
-                    ret[i] = def[i];
-
-                var layout:Object = _settings.layout[key];
-                for (i in layout)
-                    ret[i] = layout[i];
-
-                return ret;
+                if (defaults)
+                {
+                    for (i in _defaultLayout[key])
+                        settingsLayout[i] = _defaultLayout[key][i];
+                }
             }
-            else if (!_settings.layout[key])
-                _settings.layout[key] = {};
 
-            return _settings.layout[key];
+            return _settings.layout[layoutKey][_settings.scrollDirection][key];
         }
 
         private function interfaceSetup():void
@@ -1790,68 +1792,91 @@ package game
             interfacePosition(_comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC));
             interfacePosition(_comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC));
 
-            // Editor Mode
-            if (isEditor)
+            if (!_mpRoom && _editorFlag == EDITOR_FLAG_OFF || _editorFlag == EDITOR_FLAG_SOLO)
             {
-                interfaceEditor(_progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR, false));
-                interfaceEditor(_progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT, false));
-                interfaceEditor(_noteBox, interfaceLayout(LAYOUT_RECEPTORS, false));
-                interfaceEditor(_accBar, interfaceLayout(LAYOUT_ACCURACY_BAR, false));
-                interfaceEditor(_player1Life, interfaceLayout(LAYOUT_HEALTH, false));
-                interfaceEditor(_score, interfaceLayout(LAYOUT_SCORE, false));
-                interfaceEditor(_comboTotal, interfaceLayout(LAYOUT_COMBO_TOTAL, false));
-                interfaceEditor(_comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC, false));
-                interfaceEditor(_comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC, false));
-
-                if (_editorFlag == EDITOR_FLAG_SOLO)
+                interfacePosition(_player1PAWindow, interfaceLayout(LAYOUT_PA));
+                interfacePosition(_player1Combo, interfaceLayout(LAYOUT_COMBO));
+                interfacePosition(_player1Judge, interfaceLayout(LAYOUT_JUDGE));
+            }
+            else
+            {
+                // Multiplayer
+                if (_editorFlag == EDITOR_FLAG_MP || _editorFlag == EDITOR_FLAG_SPECTATOR)
                 {
-                    interfaceEditor(_player1PAWindow, interfaceLayout(LAYOUT_PA, false));
-                    interfaceEditor(_player1Combo, interfaceLayout(LAYOUT_COMBO, false));
-                    interfaceEditor(_player1Judge, interfaceLayout(LAYOUT_JUDGE, false));
-                }
-                else if (_editorFlag == EDITOR_FLAG_MP || _editorFlag == EDITOR_FLAG_MP)
-                {
-                    for (var i:int = 0; i < 2; i++)
+                    for (var i:int = 1; i <= 2; i++)
                     {
-                        interfaceEditor(_mpJudge[i], interfaceLayout(LAYOUT_MP_JUDGE + i, false));
-                        interfaceEditor(_mpCombo[i], interfaceLayout(LAYOUT_MP_COMBO + i, false));
-                        interfaceEditor(_mpPA[i], interfaceLayout(LAYOUT_MP_PA + i, false));
-                        interfaceEditor(_mpHeader[i], interfaceLayout(LAYOUT_MP_HEADER + i, false));
+                        interfacePosition(_mpJudge[i], interfaceLayout(LAYOUT_MP_JUDGE + i));
+                        interfacePosition(_mpCombo[i], interfaceLayout(LAYOUT_MP_COMBO + i));
+                        interfacePosition(_mpPA[i], interfaceLayout(LAYOUT_MP_PA + i));
+                        interfacePosition(_mpHeader[i], interfaceLayout(LAYOUT_MP_HEADER + i));
+                    }
+                }
+                else
+                {
+                    for each (var user:User in _mpRoom.players)
+                    {
+                        i = user.playerIdx;
+                        interfacePosition(_mpJudge[i], interfaceLayout(LAYOUT_MP_JUDGE + i));
+                        interfacePosition(_mpCombo[i], interfaceLayout(LAYOUT_MP_COMBO + i));
+                        interfacePosition(_mpPA[i], interfaceLayout(LAYOUT_MP_PA + i));
+                        interfacePosition(_mpHeader[i], interfaceLayout(LAYOUT_MP_HEADER + i));
                     }
                 }
             }
 
-            // Multiplayer
-            if (_mpRoom)
+            // Editor Mode
+            if (isEditor)
             {
-                for each (var user:User in _mpRoom.players)
+                interfaceEditor(LAYOUT_PROGRESS_BAR, _progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR, false));
+                interfaceEditor(LAYOUT_PROGRESS_TEXT, _progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT, false));
+                interfaceEditor(LAYOUT_RECEPTORS, _noteBox, interfaceLayout(LAYOUT_RECEPTORS, false));
+                interfaceEditor(LAYOUT_ACCURACY_BAR, _accBar, interfaceLayout(LAYOUT_ACCURACY_BAR, false));
+                interfaceEditor(LAYOUT_HEALTH, _player1Life, interfaceLayout(LAYOUT_HEALTH, false));
+                interfaceEditor(LAYOUT_SCORE, _score, interfaceLayout(LAYOUT_SCORE, false));
+                interfaceEditor(LAYOUT_COMBO_TOTAL, _comboTotal, interfaceLayout(LAYOUT_COMBO_TOTAL, false));
+                interfaceEditor(LAYOUT_COMBO_STATIC, _comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC, false));
+                interfaceEditor(LAYOUT_COMBO_TOTAL_STATIC, _comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC, false));
+
+                if (_editorFlag == EDITOR_FLAG_SOLO)
                 {
-                    interfacePosition(_mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx));
-                    interfacePosition(_mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx));
-                    interfacePosition(_mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx));
-                    interfacePosition(_mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx));
+                    interfaceEditor(LAYOUT_PA, _player1PAWindow, interfaceLayout(LAYOUT_PA, false));
+                    interfaceEditor(LAYOUT_COMBO, _player1Combo, interfaceLayout(LAYOUT_COMBO, false));
+                    interfaceEditor(LAYOUT_JUDGE, _player1Judge, interfaceLayout(LAYOUT_JUDGE, false));
+                }
+                else if (_editorFlag == EDITOR_FLAG_MP || _editorFlag == EDITOR_FLAG_SPECTATOR)
+                {
+                    for (i = 1; i <= 2; i++)
+                    {
+                        interfaceEditor(LAYOUT_MP_JUDGE + i, _mpJudge[i], interfaceLayout(LAYOUT_MP_JUDGE + i, false));
+                        interfaceEditor(LAYOUT_MP_COMBO + i, _mpCombo[i], interfaceLayout(LAYOUT_MP_COMBO + i, false));
+                        interfaceEditor(LAYOUT_MP_PA + i, _mpPA[i], interfaceLayout(LAYOUT_MP_PA + i, false));
+                        interfaceEditor(LAYOUT_MP_HEADER + i, _mpHeader[i], interfaceLayout(LAYOUT_MP_HEADER + i, false));
+                    }
                 }
             }
         }
 
-        private function interfacePosition(sprite:Sprite, layout:Object):void
+        private function interfacePosition(sprite:Sprite, layoutElement:Object):void
         {
             if (!sprite)
                 return;
 
-            if ("x" in layout)
-                sprite.x = layout["x"];
-            if ("y" in layout)
-                sprite.y = layout["y"];
-            if ("rotation" in layout)
-                sprite.rotation = layout["rotation"];
-            if ("visible" in layout)
-                sprite.visible = layout["visible"];
-            for (var p:String in layout.properties)
-                sprite[p] = layout.properties[p];
+            if ("x" in layoutElement)
+                sprite.x = layoutElement["x"];
+            if ("y" in layoutElement)
+                sprite.y = layoutElement["y"];
+            if ("rotation" in layoutElement)
+                sprite.rotation = layoutElement["rotation"];
+            if ("visible" in layoutElement)
+                sprite.visible = layoutElement["visible"];
+            if ("properties" in layoutElement)
+            {
+                if ("alignment" in layoutElement.properties)
+                    sprite["alignment"] = layoutElement.properties.alignment;
+            }
         }
 
-        private function interfaceEditor(sprite:Sprite, layout:Object):void
+        private function interfaceEditor(key:String, sprite:Sprite, layout:Object):void
         {
             if (!sprite)
                 return;
@@ -1866,21 +1891,25 @@ package game
             });
             sprite.addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
             {
-                onSpriteMouseUp(sprite, layout);
+                onSpriteMouseUp(key, sprite, layout);
             });
         }
 
-        private function onSpriteMouseUp(sprite:Sprite, layout:Object):void
+        private function get layoutKey():String
+        {
+            if (_editorFlag == EDITOR_FLAG_SOLO)
+                return "sp";
+            else if (_editorFlag == EDITOR_FLAG_MP)
+                return "mp";
+            else if (_editorFlag == EDITOR_FLAG_SPECTATOR)
+                return "mpspec";
+
+            return "";
+        }
+
+        private function onSpriteMouseUp(key:String, sprite:Sprite, layout:Object):void
         {
             sprite.stopDrag();
-
-            var layoutKey:String;
-            if (_editorFlag == EDITOR_FLAG_SOLO)
-                layoutKey = "sp";
-            else if (_editorFlag == EDITOR_FLAG_MP)
-                layoutKey = "mp";
-            else if (_editorFlag == EDITOR_FLAG_SPECTATOR)
-                layoutKey = "mpspec";
 
             if (!_settings.layout[layoutKey])
                 _settings.layout[layoutKey] = {};
@@ -1890,9 +1919,9 @@ package game
             if (!layoutElement[layoutKeyDir])
                 layoutElement[layoutKeyDir] = {};
 
-            _settings.layout[layoutKey][layoutKeyDir] = {};
-            _settings.layout[layoutKey][layoutKeyDir]["x"] = sprite.x;
-            _settings.layout[layoutKey][layoutKeyDir]["y"] = sprite.y;
+            var layoutSetting:Object = _settings.layout[layoutKey][layoutKeyDir][key] = {};
+            layoutSetting["x"] = sprite.x;
+            layoutSetting["y"] = sprite.y;
         }
 
         /*#########################################################################################*\

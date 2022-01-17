@@ -21,7 +21,6 @@ package game.controls
         private var _field:TextField;
         private var _fieldShadow:TextField;
 
-        // TODO: Here "isActive" means "!options.isEditor && !options.mpRoom"
         public function Combo(colors:Array, enabledCombos:Array, isAutoplay:Boolean, rawGoodsThreshold:int)
         {
             _isAutoplay = isAutoplay;
