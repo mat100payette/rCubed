@@ -996,7 +996,7 @@ package menu
             var songInfo:SongInfo = _playlist.getSongInfo(songItem.level);
             if (songInfo != null)
             {
-                var song:Song = _gvars.getSongFile(songInfo, true);
+                var song:Song = _gvars.getSongFile(songInfo, null, true);
                 if (song.isLoaded)
                 {
                     writeMenuMusicBytes(song);
@@ -1043,7 +1043,7 @@ package menu
 
             if (songInfo != null)
             {
-                var song:Song = _gvars.getSongFile(songInfo, true);
+                var song:Song = _gvars.getSongFile(songInfo, null, true);
                 if (song.isLoaded)
                 {
                     playSongPreview(song);
@@ -1561,7 +1561,8 @@ package menu
 
             saveSearchTextAndType();
 
-            dispatchEvent(new StartGameplayEvent(_gvars.getSongFile(_gvars.songQueue[0])));
+            var nextSong:Song = _gvars.getSongFile(_gvars.songQueue[0]);
+            dispatchEvent(new StartGameplayEvent(nextSong, false));
         }
 
         /**

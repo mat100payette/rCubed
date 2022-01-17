@@ -13,6 +13,8 @@ package game
     import menu.DisplayLayer;
     import events.navigation.ChangePanelEvent;
     import events.navigation.StartGameplayEvent;
+    import classes.replay.Replay;
+    import events.navigation.StartReplayEvent;
 
     public class GameLoading extends DisplayLayer
     {
@@ -28,14 +30,35 @@ package game
         private var _cancelLoadButton:BoxButton;
 
         private var _song:Song;
+        private var _replay:Replay;
+
         private var _songNameHtml:String = "";
 
-        public function GameLoading(song:Song)
-        {
-            _song = song;
+        private var _isAutoplay:Boolean;
 
-            if (_song && _song.isLoaded)
-                dispatchEvent(new StartGameplayEvent(_song));
+        public function GameLoading(song:Song, replay:Replay, isAutoplay:Boolean)
+        {
+            if (song && replay)
+                throw new Error("Game loading cannot be given both a song and a replay.");
+
+            _replay = replay;
+            _isAutoplay = isAutoplay;
+
+            if (_replay)
+                _song = _gvars.getSongFile(replay.songInfo, replay.user.settings);
+            else
+                _song = song;
+
+            if (!_song)
+                throw new Error("No song found to load.");
+
+            if (_song.isLoaded)
+            {
+                if (_replay)
+                    dispatchEvent(new StartReplayEvent(_replay));
+                else
+                    dispatchEvent(new StartGameplayEvent(_song, _isAutoplay));
+            }
         }
 
         override public function stageAdd():void
@@ -130,7 +153,11 @@ package game
         private function onPreloaderRemoved(e:Event):void
         {
             _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
-            dispatchEvent(new StartGameplayEvent(_song));
+
+            if (!_replay)
+                dispatchEvent(new StartGameplayEvent(_song, _isAutoplay));
+            else
+                dispatchEvent(new StartReplayEvent(_replay));
         }
     }
 }

@@ -23,6 +23,7 @@ package popups
     import menu.MenuSongSelection;
     import flash.text.TextFormatAlign;
     import com.flashfla.utils.SpriteUtil;
+    import events.navigation.popups.RemovePopupEvent;
 
     public class PopupFilterManager extends DisplayLayer
     {
@@ -291,6 +292,8 @@ package popups
                     msmenu.buildInfoBox();
                 }
             }
+
+            dispatchEvent(new RemovePopupEvent());
         }
 
         private function onToggleTabClicked(e:Event):void

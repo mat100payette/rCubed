@@ -24,8 +24,6 @@ package arc
 
         public var configJudge:Array;
 
-        public var configInterface:Object = {};
-
         public var configMPSize:int = 10;
 
         public function ArcGlobals(en:SingletonEnforcer)
@@ -130,11 +128,6 @@ package arc
             return songInfo;
         }
 
-        public function interfaceSave():void
-        {
-            LocalOptions.setVariable("layouts", configInterface);
-        }
-
         public function musicOffsetSave():void
         {
             LocalOptions.setVariable("rolling_music_offset", configMusicOffset);
@@ -191,7 +184,6 @@ package arc
 
             legacyDefaultEngine = LocalOptions.getVariable("legacy_default_engine", null);
             configMusicOffset = LocalOptions.getVariable("rolling_music_offset", 0);
-            configInterface = LocalOptions.getVariable("layouts", {});
             configMPSize = LocalOptions.getVariable("mp_text_size", 10);
         }
 

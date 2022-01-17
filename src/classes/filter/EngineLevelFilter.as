@@ -344,7 +344,7 @@ package classes.filter
         /*
          * Override of toJSON to be used by `JSON.stringify()`.
          */
-        public function toJSON():Object
+        public function toJSON(_:*):Object
         {
             try
             {

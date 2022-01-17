@@ -88,7 +88,7 @@ package classes
         public var frameRate:int = 60;
         public var forceNewJudge:Boolean = false;
         public var songRate:Number = 1;
-        public var isolationOffset:int = 1;
+        public var isolationOffset:int = 0;
         public var isolationLength:int = 0;
         public var judgeWindow:Array = Constant.DEFAULT_JUDGE_WINDOW.concat();
         public var layout:Object = {};
@@ -344,10 +344,16 @@ package classes
                 gameVolume = settings.gameVolume;
 
             if (settings.isolationOffset != null)
-                settings.isolationOffset = settings.isolationOffset;
+                isolationOffset = settings.isolationOffset;
 
             if (settings.isolationLength != null)
-                settings.isolationLength = settings.isolationLength;
+                isolationLength = settings.isolationLength;
+
+            if (settings.layout != null)
+                layout = settings.layout;
+
+            if (settings.judgeWindow != null)
+                judgeWindow = settings.judgeWindow;
 
             if (settings.startUpScreen != null)
                 startUpScreen = Math.max(0, Math.min(2, settings.startUpScreen));
@@ -428,7 +434,7 @@ package classes
             var filters:Array = [];
             for each (var item:EngineLevelFilter in this.filters)
             {
-                var filter:Object = item.toJSON();
+                var filter:Object = item.toJSON(null);
                 if (filter)
                     filters.push(filter);
             }

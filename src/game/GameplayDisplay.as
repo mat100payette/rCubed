@@ -72,6 +72,11 @@ package game
         public static const GAME_RESTART:int = 2;
         public static const GAME_PAUSE:int = 3;
 
+        public static const EDITOR_FLAG_OFF:int = -1;
+        public static const EDITOR_FLAG_SOLO:int = 0;
+        public static const EDITOR_FLAG_MP:int = 1;
+        public static const EDITOR_FLAG_SPECTATOR:int = 2;
+
         public static const LAYOUT_PROGRESS_BAR:String = "progressbar";
         public static const LAYOUT_PROGRESS_TEXT:String = "progresstext";
         public static const LAYOUT_RECEPTORS:String = "receptors";
@@ -97,7 +102,7 @@ package game
 
         private var _loader:URLLoader;
 
-        private var _isEditor:Boolean;
+        private var _editorFlag:int;
         private var _isAutoplay:Boolean;
         private var _replay:Replay;
 
@@ -209,14 +214,18 @@ package game
         private var _gpuPixelBitmapData:BitmapData;
         private var _gpuPixelBitmap:Bitmap;
 
-        public function GameplayDisplay(song:Song, user:User, isEditor:Boolean, isAutoplay:Boolean, replay:Replay, mpRoom:Room)
+        public function GameplayDisplay(song:Song, user:User, editorFlag:int, isAutoplay:Boolean, replay:Replay, mpRoom:Room)
         {
-            _song = song;
-            _user = user;
+            if (replay)
+                _song = _gvars.getSongFile(replay.songInfo);
+            else
+                _song = song;
+
+            _user = replay ? replay.user : user;
             _settings = new UserSettings();
             _settings.update(_user.settings);
 
-            _isEditor = isEditor;
+            _editorFlag = editorFlag;
             _isAutoplay = isAutoplay;
             _replay = replay;
             _mpRoom = mpRoom;
@@ -224,9 +233,14 @@ package game
             init();
         }
 
+        public function get isEditor():Boolean
+        {
+            return _editorFlag >= 0;
+        }
+
         public function init():void
         {
-            if (!_isEditor && _song.chart.notes.length == 0)
+            if (!isEditor && _song.chart.notes.length == 0)
             {
                 Alert.add(_lang.string("error_chart_has_no_notes"), 120, Alert.RED);
 
@@ -241,7 +255,7 @@ package game
 
             // --- Per Song Options
             var perSongOptions:SQLSongUserInfo = SQLQueries.getSongUserInfo(_song.songInfo);
-            if (perSongOptions != null && !_isEditor && !_replay)
+            if (perSongOptions != null && !isEditor && !_replay)
             {
                 // Custom Offsets
                 if (perSongOptions.set_custom_offsets)
@@ -329,7 +343,7 @@ package game
                     "last_hit": null};
 
             // Set Defaults for Editor Mode
-            if (_isEditor)
+            if (isEditor)
             {
                 _socketSongMessage["song"]["name"] = "Editor Mode";
                 _socketSongMessage["song"]["author"] = "rCubed Engine";
@@ -352,7 +366,7 @@ package game
             if (_mpRoom)
             {
                 MultiplayerState.instance.gameplayPlaying(this);
-                if (!_isEditor)
+                if (!isEditor)
                 {
                     _mpRoom.connection.addEventListener(Multiplayer.EVENT_GAME_UPDATE, onMultiplayerUpdate);
                     if (_mpSpectate)
@@ -366,14 +380,14 @@ package game
 
             _gvars.gameMain.disablePopups = true;
 
-            if (!_isEditor && !_replay && !_mpSpectate)
+            if (!isEditor && !_replay && !_mpSpectate)
                 Mouse.hide();
 
             if (_song.songInfo && _song.songInfo.name)
                 stage.nativeWindow.title = Constant.AIR_WINDOW_TITLE + " - " + _song.songInfo.name;
 
             // Add onEnterFrame Listeners
-            if (_isEditor)
+            if (isEditor)
             {
                 _isAutoplay = true;
                 stage.frameRate = _settings.frameRate;
@@ -392,7 +406,7 @@ package game
         override public function dispose():void
         {
             stage.frameRate = 60;
-            if (_isEditor)
+            if (isEditor)
             {
                 stage.removeEventListener(Event.ENTER_FRAME, editorOnEnterFrame);
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, editorKeyboardKeyDown);
@@ -411,9 +425,6 @@ package game
             }
 
             _gvars.gameMain.disablePopups = false;
-
-            // Disable Editor mode when leaving editor.
-            _isEditor = false;
 
             Mouse.show();
         }
@@ -474,7 +485,7 @@ package game
             _noteBox.position();
             addChild(_noteBox);
 
-            if (!_isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
+            if (!isEditor && MultiplayerState.instance.connection.connected && !MultiplayerState.instance.isInRoom())
             {
                 var isInSoloMode:Boolean = true;
                 MultiplayerState.instance.connection.disconnect(isInSoloMode);
@@ -558,7 +569,7 @@ package game
             if (_settings.displayAccuracyBar)
             {
                 _accBar = new AccuracyBar(_settings.judgeColors, _settings.judgeWindow);
-                this.addChild(_accBar);
+                addChild(_accBar);
             }
 
             if (_settings.displaySongProgress || _replay)
@@ -572,19 +583,19 @@ package game
             if (_settings.displaySongProgressText)
             {
                 _progressDisplayText = new TextStatic("0:00");
-                this.addChild(_progressDisplayText);
+                addChild(_progressDisplayText);
             }
 
-            if (!_mpSpectate)
+            if (!_mpSpectate || _editorFlag == EDITOR_FLAG_SOLO || _editorFlag == EDITOR_FLAG_MP)
             {
                 buildJudge();
                 buildHealth();
             }
 
-            if (_mpRoom)
+            if (_mpRoom || _editorFlag == EDITOR_FLAG_MP || _editorFlag == EDITOR_FLAG_SPECTATOR)
                 buildMultiplayer();
 
-            if (_isEditor)
+            if (isEditor)
             {
                 _gameplayUI.mouseChildren = false;
                 _gameplayUI.mouseEnabled = false;
@@ -604,7 +615,6 @@ package game
                     for (var key:String in _settings.layout)
                         delete _settings.layout[key];
 
-                    _avars.interfaceSave();
                     interfaceSetup();
                 }
 
@@ -649,7 +659,7 @@ package game
         private function initVars(postStart:Boolean = true):void
         {
             // Post Start Time
-            if (postStart && !_user.isGuest && !_replay && !_isEditor && _song.songInfo.engine == null && !_mpSpectate)
+            if (postStart && !_user.isGuest && !_replay && !isEditor && _song.songInfo.engine == null && !_mpSpectate)
             {
                 Logger.debug(this, "Posting Start of level " + _song.songInfo.level);
                 _loader = new URLLoader();
@@ -1199,11 +1209,14 @@ package game
             var seek:int = (e.localX / e.target.width) * _gameLastNoteFrame;
             if (seek < _gameProgress)
                 restartGame();
+
             _absoluteStart = getTimer();
             _songOffset.reset(seek * 1000 / 30);
             _song.start(seek * 1000 / 30);
+
             while (_gameProgress < seek)
                 logicTick();
+
             _songDelayStarted = true;
         }
 
@@ -1217,18 +1230,13 @@ package game
 
                 // Update Notes
                 while (_gameProgress < targetProgress)
-                {
                     logicTick();
-                }
 
                 _noteBox.update(_gamePosition);
             }
             // State 1 = End Game
             else if (_gameState == GAME_END)
-            {
                 endGame();
-                return;
-            }
         }
 
         private function editorKeyboardKeyDown(e:KeyboardEvent):void
@@ -1239,30 +1247,24 @@ package game
             var keyCode:int = e.keyCode;
             var dir:String = "";
 
-            if (keyCode == _gvars.playerUser.settings.keyQuit)
-            {
+            if (keyCode == _settings.keyQuit)
                 _gameState = GAME_END;
-            }
 
             switch (keyCode)
             {
-                case _gvars.playerUser.settings.keyLeft:
-                    //case Keyboard.NUMPAD_4:
+                case _settings.keyLeft:
                     dir = "L";
                     break;
 
-                case _gvars.playerUser.settings.keyRight:
-                    //case Keyboard.NUMPAD_6:
+                case _settings.keyRight:
                     dir = "R";
                     break;
 
-                case _gvars.playerUser.settings.keyUp:
-                    //case Keyboard.NUMPAD_8:
+                case _settings.keyUp:
                     dir = "U";
                     break;
 
-                case _gvars.playerUser.settings.keyDown:
-                    //case Keyboard.NUMPAD_2:
+                case _settings.keyDown:
                     dir = "D";
                     break;
             }
@@ -1337,7 +1339,7 @@ package game
             var noteCount:int = _hitAmazing + _hitPerfect + _hitGood + _hitAverage + _hitMiss;
 
             // Save results for display
-            if (!_mpSpectate && !_isEditor)
+            if (!_mpSpectate && !isEditor)
             {
                 var newGameResults:GameScoreResult = new GameScoreResult();
                 newGameResults.gameIndex = _gvars.gameIndex++;
@@ -1384,7 +1386,7 @@ package game
             _gvars.sessionStats.addFromStats(_gvars.songStats);
             _gvars.songStats.reset();
 
-            if (!_legacyMode && !_replay && !_isEditor && !_mpSpectate)
+            if (!_legacyMode && !_replay && !isEditor && !_mpSpectate)
             {
                 _avars.configMusicOffset = (_avars.configMusicOffset * 0.85) + _songOffset.value * 0.15;
 
@@ -1430,9 +1432,7 @@ package game
 
             // Remove Notes
             if (_noteBox != null)
-            {
                 _noteBox.reset();
-            }
 
             // Remove UI
             if (_gpuPixelBitmap)
@@ -1441,51 +1441,61 @@ package game
                 _gpuPixelBitmap = null;
                 _gpuPixelBitmapData = null;
             }
+
             if (_displayBlackBG)
             {
                 removeChild(_displayBlackBG);
                 _displayBlackBG = null;
             }
+
             if (_progressDisplay)
             {
                 removeChild(_progressDisplay);
                 _progressDisplay = null;
             }
+
             if (_player1Life)
             {
                 removeChild(_player1Life);
                 _player1Life = null;
             }
+
             if (_player1Judge)
             {
                 removeChild(_player1Judge);
                 _player1Judge = null;
             }
+
             if (_gameplayUI)
             {
                 removeChild(_gameplayUI);
                 _gameplayUI = null;
             }
+
             if (_noteBox)
             {
                 removeChild(_noteBox);
                 _noteBox = null;
             }
+
             if (_displayBlackBG)
             {
                 removeChild(_displayBlackBG);
                 _displayBlackBG = null;
             }
+
             if (_flashLight)
             {
                 removeChild(_flashLight);
                 _flashLight = null;
             }
+
             if (_screenCut)
             {
                 removeChild(_screenCut);
                 _screenCut = null;
             }
+
             if (_exitEditor)
             {
                 _exitEditor.dispose();
@@ -1502,7 +1512,7 @@ package game
             }
 
             // Go to results
-            if (_isEditor || _mpSpectate)
+            if (isEditor || _mpSpectate)
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
             else
                 dispatchEvent(new ShowGameResultsEvent(_song, _isAutoplay, _replay, _mpRoom));
@@ -1589,7 +1599,7 @@ package game
                 _screenCut = null;
             }
 
-            _screenCut = new ScreenCut(_isEditor, _settings.scrollDirection, _settings.screencutPosition);
+            _screenCut = new ScreenCut(isEditor, _settings.scrollDirection, _settings.screencutPosition);
             addChild(_screenCut);
         }
 
@@ -1598,10 +1608,10 @@ package game
             if (!_settings.displayJudge)
                 return;
 
-            _player1Judge = new Judge(_settings.displayPerfect, _settings.displayJudgeAnimations, _settings.judgeSpeed, _settings.judgeColors, _isEditor);
+            _player1Judge = new Judge(_settings.displayPerfect, _settings.displayJudgeAnimations, _settings.judgeSpeed, _settings.judgeColors, isEditor);
             addChild(_player1Judge);
 
-            if (_isEditor)
+            if (isEditor)
                 _player1Judge.showJudge(100, true);
         }
 
@@ -1626,51 +1636,71 @@ package game
             if (!_settings.displayMPUI && !_mpSpectate)
                 return;
 
-            for each (var user:User in _mpRoom.players)
+            var players:Vector.<User>;
+            if (_mpRoom)
+                players = _mpRoom.players;
+            else if (_editorFlag == EDITOR_FLAG_MP || _editorFlag == EDITOR_FLAG_SPECTATOR)
             {
-                if (user.id == _mpRoom.connection.currentUser.id)
+                players = new Vector.<User>();
+                players.push(_user, _user);
+            }
+
+            function setStuff(user:User, playerIdx:int):void
+            {
+                if (!_mpRoom && playerIdx == 1 || _mpRoom && user.id == _mpRoom.connection.currentUser.id)
                 {
                     if (_player1PAWindow)
-                        _mpPA[user.playerIdx] = _player1PAWindow;
+                        _mpPA[playerIdx] = _player1PAWindow;
                     if (_player1Combo)
-                        _mpCombo[user.playerIdx] = _player1Combo;
+                        _mpCombo[playerIdx] = _player1Combo;
                     if (_player1Judge)
-                        _mpJudge[user.playerIdx] = _player1Judge;
-                    continue;
+                        _mpJudge[playerIdx] = _player1Judge;
+                    return;
                 }
 
                 if (_settings.displayMPPA)
                 {
                     var pa:PAWindow = new PAWindow(_settings.displayAmazing, _settings.judgeColors);
                     addChild(pa);
-                    _mpPA[user.playerIdx] = pa;
+                    _mpPA[playerIdx] = pa;
                 }
 
-                if (_mpSpectate)
+                if (_mpSpectate || _editorFlag == EDITOR_FLAG_SPECTATOR)
                 {
                     var header:MPHeader = new MPHeader(user);
                     if (_settings.displayMPPA)
-                        _mpPA[user.playerIdx].addChild(header);
+                        _mpPA[playerIdx].addChild(header);
                     else
                         addChild(header);
-                    _mpHeader[user.playerIdx] = header;
+                    _mpHeader[playerIdx] = header;
                 }
 
                 if (_settings.displayMPCombo)
                 {
                     var combo:Combo = new Combo(_settings.comboColors, VectorUtil.toArray(_settings.enableComboColors), _isAutoplay, _settings.rawGoodTracker);
                     addChild(combo);
-                    _mpCombo[user.playerIdx] = combo;
+                    _mpCombo[playerIdx] = combo;
                 }
 
                 if (_settings.displayMPJudge)
                 {
-                    var judge:Judge = new Judge(_settings.displayPerfect, _settings.displayJudgeAnimations, _settings.judgeSpeed, _settings.judgeColors, _isEditor);
+                    var judge:Judge = new Judge(_settings.displayPerfect, _settings.displayJudgeAnimations, _settings.judgeSpeed, _settings.judgeColors, isEditor);
                     addChild(judge);
-                    _mpJudge[user.playerIdx] = judge;
-                    if (_isEditor)
+                    _mpJudge[playerIdx] = judge;
+                    if (isEditor)
                         judge.showJudge(100, true);
                 }
+            }
+
+            if (_mpRoom)
+            {
+                for each (var user:User in players)
+                    setStuff(user, user.playerIdx);
+            }
+            else
+            {
+                for (var i:int = 0; i < 2; i++)
+                    setStuff(_user, i);
             }
         }
 
@@ -1679,16 +1709,20 @@ package game
             if (defaults)
             {
                 var ret:Object = {};
+
                 var def:Object = _defaultLayout[key];
                 for (var i:String in def)
                     ret[i] = def[i];
+
                 var layout:Object = _settings.layout[key];
                 for (i in layout)
                     ret[i] = layout[i];
+
                 return ret;
             }
             else if (!_settings.layout[key])
                 _settings.layout[key] = {};
+
             return _settings.layout[key];
         }
 
@@ -1756,15 +1790,8 @@ package game
             interfacePosition(_comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC));
             interfacePosition(_comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC));
 
-            if (!_mpRoom)
-            {
-                interfacePosition(_player1PAWindow, interfaceLayout(LAYOUT_PA));
-                interfacePosition(_player1Combo, interfaceLayout(LAYOUT_COMBO));
-                interfacePosition(_player1Judge, interfaceLayout(LAYOUT_JUDGE));
-            }
-
             // Editor Mode
-            if (_isEditor)
+            if (isEditor)
             {
                 interfaceEditor(_progressDisplay, interfaceLayout(LAYOUT_PROGRESS_BAR, false));
                 interfaceEditor(_progressDisplayText, interfaceLayout(LAYOUT_PROGRESS_TEXT, false));
@@ -1776,11 +1803,21 @@ package game
                 interfaceEditor(_comboStatic, interfaceLayout(LAYOUT_COMBO_STATIC, false));
                 interfaceEditor(_comboTotalStatic, interfaceLayout(LAYOUT_COMBO_TOTAL_STATIC, false));
 
-                if (!_mpRoom)
+                if (_editorFlag == EDITOR_FLAG_SOLO)
                 {
                     interfaceEditor(_player1PAWindow, interfaceLayout(LAYOUT_PA, false));
                     interfaceEditor(_player1Combo, interfaceLayout(LAYOUT_COMBO, false));
                     interfaceEditor(_player1Judge, interfaceLayout(LAYOUT_JUDGE, false));
+                }
+                else if (_editorFlag == EDITOR_FLAG_MP || _editorFlag == EDITOR_FLAG_MP)
+                {
+                    for (var i:int = 0; i < 2; i++)
+                    {
+                        interfaceEditor(_mpJudge[i], interfaceLayout(LAYOUT_MP_JUDGE + i, false));
+                        interfaceEditor(_mpCombo[i], interfaceLayout(LAYOUT_MP_COMBO + i, false));
+                        interfaceEditor(_mpPA[i], interfaceLayout(LAYOUT_MP_PA + i, false));
+                        interfaceEditor(_mpHeader[i], interfaceLayout(LAYOUT_MP_HEADER + i, false));
+                    }
                 }
             }
 
@@ -1793,15 +1830,6 @@ package game
                     interfacePosition(_mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx));
                     interfacePosition(_mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx));
                     interfacePosition(_mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx));
-
-                    // Multiplayer - Editor
-                    if (_isEditor)
-                    {
-                        interfaceEditor(_mpJudge[user.playerIdx], interfaceLayout(LAYOUT_MP_JUDGE + user.playerIdx, false));
-                        interfaceEditor(_mpCombo[user.playerIdx], interfaceLayout(LAYOUT_MP_COMBO + user.playerIdx, false));
-                        interfaceEditor(_mpPA[user.playerIdx], interfaceLayout(LAYOUT_MP_PA + user.playerIdx, false));
-                        interfaceEditor(_mpHeader[user.playerIdx], interfaceLayout(LAYOUT_MP_HEADER + user.playerIdx, false));
-                    }
                 }
             }
         }
@@ -1841,7 +1869,23 @@ package game
                 sprite.stopDrag();
                 layout["x"] = sprite.x;
                 layout["y"] = sprite.y;
-                _avars.interfaceSave();
+
+                var layoutKey:String;
+                if (_editorFlag == EDITOR_FLAG_SOLO)
+                    layoutKey = "sp";
+                else if (_editorFlag == EDITOR_FLAG_MP)
+                    layoutKey = "mp";
+                else if (_editorFlag == EDITOR_FLAG_SPECTATOR)
+                    layoutKey = "mpspec";
+
+                if (!_settings.layout[layoutKey])
+                    _settings.layout[layoutKey] = {};
+                layout = _settings.layout[layoutKey];
+
+                layoutKey = _settings.scrollDirection;
+                if (!layout[layoutKey])
+                    layout[layoutKey] = {};
+                layout = layout[layoutKey];
             });
         }
 
@@ -2102,7 +2146,7 @@ package game
                 _hitAverage = 0;
             }
 
-            if (_player1Judge && !_isEditor)
+            if (_player1Judge && !isEditor)
                 _player1Judge.showJudge(jscore);
 
             updateHealth(health > 0 ? _gvars.HEALTH_JUDGE_ADD : _gvars.HEALTH_JUDGE_REMOVE);

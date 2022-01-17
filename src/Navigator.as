@@ -41,6 +41,8 @@ package
     import events.navigation.StartGameplayEvent;
     import events.navigation.WatchReplayEvent;
     import events.navigation.ShowGameResultsEvent;
+    import game.GameScoreResult;
+    import events.navigation.StartReplayEvent;
 
     public class Navigator extends Sprite implements IDisposable
     {
@@ -110,34 +112,44 @@ package
                     if (e is OpenEditorEvent)
                     {
                         var openEditorEvent:OpenEditorEvent = e as OpenEditorEvent;
-                        nextPanel = new GameplayDisplay(openEditorEvent.song, openEditorEvent.user, true, false, null, null);
+                        var editorFlag:int = openEditorEvent.editorFlag;
+
+                        nextPanel = new GameplayDisplay(openEditorEvent.song, openEditorEvent.user, editorFlag, false, null, null);
                     }
                     else if (e is SpectateGameEvent)
                     {
                         var spectateGameEvent:OpenEditorEvent = e as OpenEditorEvent;
-                        nextPanel = new GameLoading(spectateGameEvent.song);
+                        nextPanel = new GameLoading(spectateGameEvent.song, null, true);
                     }
                     else if (e is WatchReplayEvent)
                     {
                         var watchReplayEvent:WatchReplayEvent = e as WatchReplayEvent;
-                            // TODO: Let GameLoading know what the loading is for (play/replay/preview/etc)
-                            //nextPanel = new GameLoading(watchPreviewEvent.replay.songInfo);
+                        nextPanel = new GameLoading(null, watchReplayEvent.replay, false);
                     }
                     else if (e is WatchPreviewEvent)
                     {
                         var watchPreviewEvent:WatchPreviewEvent = e as WatchPreviewEvent;
-                            // TODO: Let GameLoading know what the loading is for (play/replay/preview/etc)
-                            //nextPanel = new GameLoading(watchPreviewEvent.replay.songInfo);
+                        var previewSong:Song = _gvars.getSongFile(watchPreviewEvent.replay.songInfo, null, true);
+                        nextPanel = new GameLoading(previewSong, null, true);
+                    }
+
+                    else if (e is StartReplayEvent)
+                    {
+                        var startReplayEvent:StartReplayEvent = e as StartReplayEvent;
+                        nextPanel = new GameplayDisplay(null, startReplayEvent.replay.user, GameplayDisplay.EDITOR_FLAG_OFF, null, startReplayEvent.replay, null);
                     }
                     else if (e is StartGameplayEvent)
                     {
                         var startGameplayEvent:StartGameplayEvent = e as StartGameplayEvent;
                         var startGameplaySong:Song = startGameplayEvent.song;
 
+                        // TODO: Add queue logic here
+                        _gvars.songResults = new Vector.<GameScoreResult>();
+
                         if (startGameplaySong.isLoaded)
-                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, false, false, null, null);
+                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, GameplayDisplay.EDITOR_FLAG_OFF, null, null, null);
                         else
-                            nextPanel = new GameLoading(startGameplaySong);
+                            nextPanel = new GameLoading(startGameplaySong, null, false);
                     }
                     break;
 

@@ -162,9 +162,6 @@ package menu
         {
             if (menuItemBox != null)
             {
-                removeChild(menuItemBox);
-                menuItemBox = null;
-
                 removeChild(userText);
                 userText = null;
             }

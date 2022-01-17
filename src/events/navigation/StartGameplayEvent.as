@@ -7,10 +7,13 @@ package events.navigation
     public class StartGameplayEvent extends ChangePanelEvent
     {
         private var _song:Song;
+        private var _isAutoplay:Boolean;
 
-        public function StartGameplayEvent(song:Song):void
+        public function StartGameplayEvent(song:Song, isAutoplay:Boolean):void
         {
             _song = song;
+            _isAutoplay = isAutoplay;
+
             super(Routes.PANEL_GAMEPLAY);
         }
 
@@ -19,9 +22,14 @@ package events.navigation
             return _song;
         }
 
+        public function get isAutoplay():Boolean
+        {
+            return _isAutoplay;
+        }
+
         override public function clone():Event
         {
-            return new StartGameplayEvent(_song);
+            return new StartGameplayEvent(_song, _isAutoplay);
         }
     }
 }

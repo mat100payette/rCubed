@@ -90,7 +90,7 @@ package classes.chart
 
             _rate = settings.songRate;
             _isReverse = ArrayUtil.containsAny(settings.activeMods, ["reverse"]);
-            _frameRate = settings.frameRate
+            _frameRate = settings.frameRate;
             _isIsolation = settings.isolationOffset > 0 || settings.isolationLength > 0;
             _isolationOffset = settings.isolationOffset;
 

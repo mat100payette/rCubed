@@ -31,6 +31,7 @@ package
     import flash.utils.ByteArray;
     import game.GameScoreResult;
     import classes.ui.WindowProperties;
+    import classes.UserSettings;
 
     public class GlobalVariables extends EventDispatcher
     {
@@ -298,8 +299,11 @@ package
         }
 
         //- Song Data
-        public function getSongFile(songInfo:SongInfo, preview:Boolean = false):Song
+        public function getSongFile(songInfo:SongInfo, settings:UserSettings = null, preview:Boolean = false):Song
         {
+            if (!settings)
+                settings = activeUser.settings;
+
             if (!preview && songInfo.engine == Playlist.instance.engine && (!songInfo.engine || !songInfo.engine.ignoreCache))
             {
                 for (var s:int = 0; s < songCache.length; s++)
@@ -310,10 +314,10 @@ package
                 }
             }
 
-            return loadSongFile(songInfo, preview);
+            return loadSongFile(songInfo, settings, preview);
         }
 
-        private function loadSongFile(songInfo:SongInfo, preview:Boolean = false):Song
+        private function loadSongFile(songInfo:SongInfo, settings:UserSettings, preview:Boolean = false):Song
         {
             //- Only Cache 10 Songs
             var engineCache:Boolean = (songInfo.engine == Playlist.instance.engine) && (!songInfo.engine || !songInfo.engine.ignoreCache);
@@ -321,7 +325,7 @@ package
                 songCache.pop();
 
             //- Make new Song
-            var song:Song = new Song(songInfo, preview, activeUser.settings);
+            var song:Song = new Song(songInfo, preview, settings);
 
             //- Push to cache
             if (!preview && engineCache)

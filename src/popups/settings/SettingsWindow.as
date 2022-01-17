@@ -29,6 +29,7 @@ package popups.settings
     import events.navigation.popups.RemovePopupEvent;
     import events.navigation.ChangePanelEvent;
     import events.navigation.OpenEditorEvent;
+    import game.GameplayDisplay;
 
 
     public class SettingsWindow extends DisplayLayer
@@ -263,27 +264,27 @@ package popups.settings
 
         private function onSoloEditorTabClicked(e:Event):void
         {
-            openEditor();
+            openEditor(GameplayDisplay.EDITOR_FLAG_SOLO);
         }
 
         private function onMPEditorTabClicked(e:Event):void
         {
-            openEditor();
+            openEditor(GameplayDisplay.EDITOR_FLAG_MP);
         }
 
         private function onMPSpectatorEditorTabClicked(e:Event):void
         {
-            openEditor();
+            openEditor(GameplayDisplay.EDITOR_FLAG_SPECTATOR);
         }
 
-        private function openEditor():void
+        private function openEditor(editorFlag:int):void
         {
             const tempSongInfo:SongInfo = new SongInfo();
             tempSongInfo.level = 1337;
             tempSongInfo.chart_type = "EDITOR";
             var song:Song = new Song(tempSongInfo, false, _user.settings);
 
-            dispatchEvent(new OpenEditorEvent(song, _user));
+            dispatchEvent(new OpenEditorEvent(song, _user, editorFlag));
         }
 
         private function onManageSettingsClicked(e:Event):void
