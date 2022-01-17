@@ -138,6 +138,7 @@ package classes
             for (var key:String in _compatSettings)
                 json[key] = _compatSettings[key];
 
+            var aa:String = JSON.stringify(layout);
             var stringified:String = JSON.stringify(json);
 
             return stringified;
@@ -349,8 +350,14 @@ package classes
             if (settings.isolationLength != null)
                 isolationLength = settings.isolationLength;
 
+            // TODO: This desperately needs a class
             if (settings.layout != null)
-                layout = settings.layout;
+            {
+                if (settings.layout is Array)
+                    layout = {};
+                else
+                    layout = settings.layout as Object;
+            }
 
             if (settings.judgeWindow != null)
                 judgeWindow = settings.judgeWindow;

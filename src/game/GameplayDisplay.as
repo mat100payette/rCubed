@@ -1866,27 +1866,33 @@ package game
             });
             sprite.addEventListener(MouseEvent.MOUSE_UP, function(e:MouseEvent):void
             {
-                sprite.stopDrag();
-                layout["x"] = sprite.x;
-                layout["y"] = sprite.y;
-
-                var layoutKey:String;
-                if (_editorFlag == EDITOR_FLAG_SOLO)
-                    layoutKey = "sp";
-                else if (_editorFlag == EDITOR_FLAG_MP)
-                    layoutKey = "mp";
-                else if (_editorFlag == EDITOR_FLAG_SPECTATOR)
-                    layoutKey = "mpspec";
-
-                if (!_settings.layout[layoutKey])
-                    _settings.layout[layoutKey] = {};
-                layout = _settings.layout[layoutKey];
-
-                layoutKey = _settings.scrollDirection;
-                if (!layout[layoutKey])
-                    layout[layoutKey] = {};
-                layout = layout[layoutKey];
+                onSpriteMouseUp(sprite, layout);
             });
+        }
+
+        private function onSpriteMouseUp(sprite:Sprite, layout:Object):void
+        {
+            sprite.stopDrag();
+
+            var layoutKey:String;
+            if (_editorFlag == EDITOR_FLAG_SOLO)
+                layoutKey = "sp";
+            else if (_editorFlag == EDITOR_FLAG_MP)
+                layoutKey = "mp";
+            else if (_editorFlag == EDITOR_FLAG_SPECTATOR)
+                layoutKey = "mpspec";
+
+            if (!_settings.layout[layoutKey])
+                _settings.layout[layoutKey] = {};
+            var layoutElement:Object = _settings.layout[layoutKey];
+
+            var layoutKeyDir:String = _settings.scrollDirection;
+            if (!layoutElement[layoutKeyDir])
+                layoutElement[layoutKeyDir] = {};
+
+            _settings.layout[layoutKey][layoutKeyDir] = {};
+            _settings.layout[layoutKey][layoutKeyDir]["x"] = sprite.x;
+            _settings.layout[layoutKey][layoutKeyDir]["y"] = sprite.y;
         }
 
         /*#########################################################################################*\
