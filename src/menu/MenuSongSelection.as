@@ -1562,7 +1562,7 @@ package menu
             saveSearchTextAndType();
 
             var nextSong:Song = _gvars.getSongFile(_gvars.songQueue[0]);
-            dispatchEvent(new StartGameplayEvent(nextSong, false));
+            dispatchEvent(new StartGameplayEvent(nextSong, false, null));
         }
 
         /**

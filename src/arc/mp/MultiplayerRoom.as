@@ -14,7 +14,6 @@ package arc.mp
     import flash.display.DisplayObjectContainer;
     import flash.events.Event;
     import flash.events.MouseEvent;
-    import menu.MainMenu;
     import classes.Alert;
     import classes.Language;
     import classes.Room;
@@ -179,7 +178,9 @@ package arc.mp
             if (event.room /*== room && GlobalVariables.instance.gameMain.activePanel is MainMenu*/)
             {
                 connection.lastRoomGamePlayerCount = room.playerCount;
-                MultiplayerState.instance.spectateGame(room);
+
+                if (currentUser.isSpec)
+                    MultiplayerState.instance.spectateGame(room);
             }
         }
 

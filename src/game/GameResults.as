@@ -742,7 +742,7 @@ package game
                 if (skipload)
                 {
                     _gvars.songRestarts++;
-                    dispatchEvent(new StartGameplayEvent(_songResults[0].song, false));
+                    dispatchEvent(new StartGameplayEvent(_songResults[0].song, false, _mpRoom));
                 }
                 else
                 {
@@ -780,7 +780,7 @@ package game
                 if (songList.length > 0)
                 {
                     var selectedSong:Song = _gvars.getSongFile(songList[Math.floor(Math.random() * (songList.length - 1))], _settings, false);
-                    dispatchEvent(new StartGameplayEvent(selectedSong, false));
+                    dispatchEvent(new StartGameplayEvent(selectedSong, false, _mpRoom));
                 }
             }
 

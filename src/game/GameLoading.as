@@ -15,6 +15,8 @@ package game
     import events.navigation.StartGameplayEvent;
     import classes.replay.Replay;
     import events.navigation.StartReplayEvent;
+    import classes.Room;
+    import events.navigation.StartSpectatingEvent;
 
     public class GameLoading extends DisplayLayer
     {
@@ -30,19 +32,23 @@ package game
         private var _cancelLoadButton:BoxButton;
 
         private var _song:Song;
+        private var _mpRoom:Room;
         private var _replay:Replay;
+        private var _isSpectating:Boolean;
 
         private var _songNameHtml:String = "";
 
         private var _isAutoplay:Boolean;
 
-        public function GameLoading(song:Song, replay:Replay, isAutoplay:Boolean)
+        public function GameLoading(song:Song, replay:Replay, mpRoom:Room, isAutoplay:Boolean)
         {
             if (song && replay)
                 throw new Error("Game loading cannot be given both a song and a replay.");
 
             _replay = replay;
+            _mpRoom = mpRoom;
             _isAutoplay = isAutoplay;
+            _isSpectating = _isAutoplay && mpRoom;
 
             if (_replay)
                 _song = _gvars.getSongFile(replay.songInfo, replay.user.settings);
@@ -57,7 +63,7 @@ package game
                 if (_replay)
                     dispatchEvent(new StartReplayEvent(_replay));
                 else
-                    dispatchEvent(new StartGameplayEvent(_song, _isAutoplay));
+                    dispatchEvent(new StartGameplayEvent(_song, _isAutoplay, mpRoom));
             }
         }
 
@@ -154,10 +160,13 @@ package game
         {
             _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
 
-            if (!_replay)
-                dispatchEvent(new StartGameplayEvent(_song, _isAutoplay));
-            else
+            if (_replay)
                 dispatchEvent(new StartReplayEvent(_replay));
+            else if (_isSpectating)
+                dispatchEvent(new StartSpectatingEvent(_mpRoom));
+            else
+                dispatchEvent(new StartGameplayEvent(_song, _isAutoplay, _mpRoom));
+
         }
     }
 }

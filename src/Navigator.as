@@ -31,10 +31,6 @@ package
     import flash.concurrent.Mutex;
     import flash.events.Event;
     import classes.chart.Song;
-    import classes.User;
-    import classes.replay.Replay;
-    import classes.Room;
-    import classes.UserSettings;
     import events.navigation.OpenEditorEvent;
     import events.navigation.SpectateGameEvent;
     import events.navigation.WatchPreviewEvent;
@@ -43,6 +39,7 @@ package
     import events.navigation.ShowGameResultsEvent;
     import game.GameScoreResult;
     import events.navigation.StartReplayEvent;
+    import events.navigation.StartSpectatingEvent;
 
     public class Navigator extends Sprite implements IDisposable
     {
@@ -103,7 +100,9 @@ package
                         return;
                     }
                     else
-                        nextPanel = new MainMenu();
+                    {
+                        nextPanel = new MainMenu(panelName);
+                    }
                     break;
 
                 case Routes.PANEL_GAMEPLAY:
@@ -118,25 +117,30 @@ package
                     }
                     else if (e is SpectateGameEvent)
                     {
-                        var spectateGameEvent:OpenEditorEvent = e as OpenEditorEvent;
-                        nextPanel = new GameLoading(spectateGameEvent.song, null, true);
+                        var spectateGameEvent:SpectateGameEvent = e as SpectateGameEvent;
+                        nextPanel = new GameLoading(_gvars.getSongFile(spectateGameEvent.room.songInfo), null, spectateGameEvent.room, true);
                     }
                     else if (e is WatchReplayEvent)
                     {
                         var watchReplayEvent:WatchReplayEvent = e as WatchReplayEvent;
-                        nextPanel = new GameLoading(null, watchReplayEvent.replay, false);
+                        nextPanel = new GameLoading(null, watchReplayEvent.replay, null, false);
                     }
                     else if (e is WatchPreviewEvent)
                     {
                         var watchPreviewEvent:WatchPreviewEvent = e as WatchPreviewEvent;
                         var previewSong:Song = _gvars.getSongFile(watchPreviewEvent.replay.songInfo, null, true);
-                        nextPanel = new GameLoading(previewSong, null, true);
+                        nextPanel = new GameLoading(previewSong, null, null, true);
                     }
 
                     else if (e is StartReplayEvent)
                     {
                         var startReplayEvent:StartReplayEvent = e as StartReplayEvent;
                         nextPanel = new GameplayDisplay(null, startReplayEvent.replay.user, GameplayDisplay.EDITOR_FLAG_OFF, null, startReplayEvent.replay, null);
+                    }
+                    else if (e is StartSpectatingEvent)
+                    {
+                        var startSpectatingEvent:StartSpectatingEvent = e as StartSpectatingEvent;
+                        nextPanel = new GameplayDisplay(null, _gvars.activeUser, GameplayDisplay.EDITOR_FLAG_OFF, true, null, startSpectatingEvent.room);
                     }
                     else if (e is StartGameplayEvent)
                     {
@@ -147,9 +151,9 @@ package
                         _gvars.songResults = new Vector.<GameScoreResult>();
 
                         if (startGameplaySong.isLoaded)
-                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, GameplayDisplay.EDITOR_FLAG_OFF, null, null, null);
+                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, GameplayDisplay.EDITOR_FLAG_OFF, false, null, startGameplayEvent.mpRoom);
                         else
-                            nextPanel = new GameLoading(startGameplaySong, null, false);
+                            nextPanel = new GameLoading(startGameplaySong, null, startGameplayEvent.mpRoom, false);
                     }
                     break;
 

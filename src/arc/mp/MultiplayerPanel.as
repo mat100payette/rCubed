@@ -134,6 +134,11 @@ package arc.mp
             _updateTimer.addEventListener(TimerEvent.TIMER, onUpdateTimer);
         }
 
+        override public function dispose():void
+        {
+            var i:int = 0;
+        }
+
         public function get currentUser():User
         {
             return _connection.currentUser;

@@ -218,6 +218,8 @@ package game
         {
             if (replay)
                 _song = _gvars.getSongFile(replay.songInfo);
+            else if (mpRoom)
+                _song = _gvars.getSongFile(mpRoom.songInfo);
             else
                 _song = song;
 

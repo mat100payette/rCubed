@@ -56,18 +56,26 @@ package menu
         private var statUpdaterBtn:SimpleBoxButton;
         private var rankUpdateThrobber:Throbber;
 
+        private var _initialPanelName:String;
+        private static var _lastPanelName:String;
+        private static var _currentPanelName:String;
         public var currentPanel:DisplayLayer;
 
         ///- Constructor
-        public function MainMenu()
+        public function MainMenu(initialPanelName:String)
         {
             super();
 
             ArcGlobals.instance.resetConfig();
-            init();
         }
 
-        public function init():void
+        override public function dispose():void
+        {
+            _lastPanelName = _currentPanelName;
+            super.dispose();
+        }
+
+        override public function stageAdd():void
         {
             //- Add Logo
             logo = new Logo();
@@ -105,6 +113,12 @@ package menu
 
             //- Add Main Panel to Stage
 
+            if (_lastPanelName)
+            {
+                setActiveLayer(_lastPanelName);
+                return;
+            }
+
             // Guests
             if (GlobalVariables.instance.activeUser.isGuest)
                 setActiveLayer(Routes.PANEL_SONGSELECTION);
@@ -135,24 +149,27 @@ package menu
                     if (_layerSongSelection == null)
                         _layerSongSelection = new MenuSongSelection();
                     newPanel = _layerSongSelection;
+                    _lastPanelName = panelName;
                     break;
 
                 case Routes.PANEL_MULTIPLAYER:
                     newPanel = MultiplayerState.instance.getPanel();
+                    _lastPanelName = panelName;
                     break;
 
                 case Routes.PANEL_TOKENS:
                     if (_layerTokens == null)
                         _layerTokens = new MenuTokens();
                     newPanel = _layerTokens;
+                    _lastPanelName = panelName;
                     break;
             }
 
-            if (currentPanel != null && currentPanel != newPanel)
-                removeChild(currentPanel);
-
             if (newPanel != null)
             {
+                if (currentPanel != null && currentPanel != newPanel)
+                    removeChild(currentPanel);
+
                 currentPanel = newPanel;
                 addChild(currentPanel);
             }

@@ -39,6 +39,7 @@ package arc.mp
     import events.navigation.ChangePanelEvent;
     import game.GameplayDisplay;
     import events.navigation.SpectateGameEvent;
+    import events.navigation.StartGameplayEvent;
 
     public class MultiplayerState extends EventDispatcher
     {
@@ -70,8 +71,8 @@ package arc.mp
 
         public function setUserCredentials(username:String, password:String):void
         {
-            this._username = username;
-            this._password = password;
+            _username = username;
+            _password = password;
         }
 
         public static function destroyInstance():void
@@ -110,7 +111,7 @@ package arc.mp
 
         public function get currentUser():User
         {
-            return connection.currentUser
+            return connection.currentUser;
         }
 
         private function onError(event:ErrorEvent):void
@@ -415,16 +416,13 @@ package arc.mp
 
         public function spectateGame(room:Room):void
         {
-            dispatchEvent(new SpectateGameEvent(room));
+            _panel.dispatchEvent(new SpectateGameEvent(room));
         }
 
         public function gameplayStart(room:Room):void
         {
             _currentStatus = Multiplayer.STATUS_PLAYING;
-
-            // TODO: gameplay start event
-
-            dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAMEPLAY));
+            _panel.dispatchEvent(new StartGameplayEvent(_currentSongFile, false, room));
         }
 
         public function gameplayPlaying(play:GameplayDisplay):Boolean
