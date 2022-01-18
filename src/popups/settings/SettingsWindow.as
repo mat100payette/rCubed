@@ -264,17 +264,17 @@ package popups.settings
 
         private function onSoloEditorTabClicked(e:Event):void
         {
-            openEditor(GameplayDisplay.EDITOR_FLAG_SOLO);
+            openEditor(GameplayDisplay.SOLO);
         }
 
         private function onMPEditorTabClicked(e:Event):void
         {
-            openEditor(GameplayDisplay.EDITOR_FLAG_MP);
+            openEditor(GameplayDisplay.MP);
         }
 
         private function onMPSpectatorEditorTabClicked(e:Event):void
         {
-            openEditor(GameplayDisplay.EDITOR_FLAG_SPECTATOR);
+            openEditor(GameplayDisplay.SPECTATOR);
         }
 
         private function openEditor(editorFlag:int):void

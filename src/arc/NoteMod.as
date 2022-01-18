@@ -45,6 +45,11 @@ package arc
             updateMods();
         }
 
+        public function get settings():UserSettings
+        {
+            return _settings;
+        }
+
         private function modEnabled(mod:String):Boolean
         {
             for each (var activeMod:String in _settings.activeMods)

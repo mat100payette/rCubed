@@ -111,36 +111,36 @@ package
                     if (e is OpenEditorEvent)
                     {
                         var openEditorEvent:OpenEditorEvent = e as OpenEditorEvent;
-                        var editorFlag:int = openEditorEvent.editorFlag;
+                        var editorMode:int = openEditorEvent.editorMode;
 
-                        nextPanel = new GameplayDisplay(openEditorEvent.song, openEditorEvent.user, editorFlag, false, null, null);
+                        nextPanel = new GameplayDisplay(openEditorEvent.song, openEditorEvent.user, editorMode, true, false, null, null);
                     }
                     else if (e is SpectateGameEvent)
                     {
                         var spectateGameEvent:SpectateGameEvent = e as SpectateGameEvent;
-                        nextPanel = new GameLoading(_gvars.getSongFile(spectateGameEvent.room.songInfo), null, spectateGameEvent.room, true);
+                        nextPanel = new GameLoading(_gvars.getSongFile(spectateGameEvent.room.songInfo), null, GameplayDisplay.SPECTATOR, spectateGameEvent.room, true);
                     }
                     else if (e is WatchReplayEvent)
                     {
                         var watchReplayEvent:WatchReplayEvent = e as WatchReplayEvent;
-                        nextPanel = new GameLoading(null, watchReplayEvent.replay, null, false);
+                        nextPanel = new GameLoading(null, watchReplayEvent.replay, GameplayDisplay.SOLO, null, false);
                     }
                     else if (e is WatchPreviewEvent)
                     {
                         var watchPreviewEvent:WatchPreviewEvent = e as WatchPreviewEvent;
                         var previewSong:Song = _gvars.getSongFile(watchPreviewEvent.replay.songInfo, null, true);
-                        nextPanel = new GameLoading(previewSong, null, null, true);
+                        nextPanel = new GameLoading(previewSong, null, GameplayDisplay.SOLO, null, true);
                     }
 
                     else if (e is StartReplayEvent)
                     {
                         var startReplayEvent:StartReplayEvent = e as StartReplayEvent;
-                        nextPanel = new GameplayDisplay(null, startReplayEvent.replay.user, GameplayDisplay.EDITOR_FLAG_OFF, null, startReplayEvent.replay, null);
+                        nextPanel = new GameplayDisplay(startReplayEvent.song, startReplayEvent.replay.user, GameplayDisplay.SOLO, false, null, startReplayEvent.replay, null);
                     }
                     else if (e is StartSpectatingEvent)
                     {
                         var startSpectatingEvent:StartSpectatingEvent = e as StartSpectatingEvent;
-                        nextPanel = new GameplayDisplay(null, _gvars.activeUser, GameplayDisplay.EDITOR_FLAG_OFF, true, null, startSpectatingEvent.room);
+                        nextPanel = new GameplayDisplay(null, _gvars.activeUser, GameplayDisplay.SPECTATOR, false, true, null, startSpectatingEvent.room);
                     }
                     else if (e is StartGameplayEvent)
                     {
@@ -151,15 +151,15 @@ package
                         _gvars.songResults = new Vector.<GameScoreResult>();
 
                         if (startGameplaySong.isLoaded)
-                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, GameplayDisplay.EDITOR_FLAG_OFF, false, null, startGameplayEvent.mpRoom);
+                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, startGameplayEvent.mode, false, false, null, startGameplayEvent.mpRoom);
                         else
-                            nextPanel = new GameLoading(startGameplaySong, null, startGameplayEvent.mpRoom, false);
+                            nextPanel = new GameLoading(startGameplaySong, null, startGameplayEvent.mode, startGameplayEvent.mpRoom, false);
                     }
                     break;
 
                 case Routes.PANEL_RESULTS:
                     var gameResultsEvent:ShowGameResultsEvent = e as ShowGameResultsEvent;
-                    nextPanel = new GameResults(_gvars.activeUser.settings, gameResultsEvent.replay != null, true, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
+                    nextPanel = new GameResults(gameResultsEvent.song, _gvars.activeUser.settings, gameResultsEvent.replay, true, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
                     break;
             }
 

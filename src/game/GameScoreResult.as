@@ -65,6 +65,9 @@ package game
 
         public function get songInfo():SongInfo
         {
+            if (!song)
+                return null;
+
             return song.songInfo;
         }
 

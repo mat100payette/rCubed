@@ -54,6 +54,8 @@ package game
     import classes.Room;
     import events.navigation.StartGameplayEvent;
     import classes.chart.Song;
+    import classes.Gameplay;
+    import events.navigation.StartReplayEvent;
 
     public class GameResults extends DisplayLayer
     {
@@ -72,10 +74,11 @@ package game
         private var _playlist:Playlist = Playlist.instance;
 
         private var _settings:UserSettings;
-        private var _isReplay:Boolean;
-        private var _isReplayEdited:Boolean;
+        private var _replay:Replay;
+        private var isReplayEdited:Boolean;
         private var _isAutoplay:Boolean;
         private var _mpRoom:Room;
+        private var _song:Song;
 
         // Results
         private var _resultsTime:String = TimeUtil.getCurrentDate();
@@ -110,15 +113,16 @@ package game
         private var _navHighscores:BoxButton;
         private var _navMenu:BoxButton;
 
-        public function GameResults(settings:UserSettings, isReplay:Boolean, isReplayValid:Boolean, isAutoplay:Boolean, mpRoom:Room)
+        public function GameResults(song:Song, settings:UserSettings, replay:Replay, isReplayValid:Boolean, isAutoplay:Boolean, mpRoom:Room)
         {
             _settings = new UserSettings();
             _settings.update(settings);
 
-            _isReplay = isReplay;
-            _isReplayEdited = isReplayValid;
+            _replay = replay;
+            isReplayEdited = isReplayValid;
             _isAutoplay = isAutoplay;
             _mpRoom = mpRoom;
+            _song = song;
 
             _songResults = _gvars.songResults.concat();
 
@@ -259,6 +263,11 @@ package game
             _mp.gameplayResults(_mpRoom, this, _songResults);
         }
 
+        private function get isReplay():Boolean
+        {
+            return _replay != null;
+        }
+
         override public function dispose():void
         {
             // Remove keyboard navigation
@@ -355,7 +364,11 @@ package game
             {
                 _navHighscores.enabled = true;
                 result = _songResults[_resultIndex];
-                songInfo = result.songInfo;
+
+                if (isReplay)
+                    songInfo = _replay.songInfo;
+                else
+                    songInfo = result.songInfo;
 
                 var songRate:Number = result.user.settings.songRate;
                 var seconds:Number = Math.floor(songInfo.time_secs * (1 / songRate));
@@ -394,7 +407,7 @@ package game
                 _navScreenShot.enabled = true;
 
             // Random Song Button
-            if (_isReplay || result.isPreview || _mp.gameplayPlayingStatus())
+            if (isReplay || result.isPreview || _mp.gameplayPlayingStatus())
                 _navRandomSong.enabled = false;
 
             // Skill rating
@@ -408,7 +421,7 @@ package game
             if (Text.isUnicode(songSubTitle))
                 _resultsDisplay.song_description.defaultTextFormat.font = Language.UNI_FONT_NAME;
 
-            _resultsDisplay.results_username.htmlText = "<B>" + (_isReplay ? "Replay r" : "R") + "esults for " + skillLevel + result.user.name + ":</B>";
+            _resultsDisplay.results_username.htmlText = "<B>" + (isReplay ? "Replay r" : "R") + "esults for " + skillLevel + result.user.name + ":</B>";
             _resultsDisplay.results_time.htmlText = "<B>" + displayTime + "</B>";
             _resultsDisplay.song_title.htmlText = "<B>" + _lang.wrapFont(songTitle) + "</B>";
             _resultsDisplay.song_description.htmlText = "<B>" + songSubTitle + "</B>";
@@ -453,7 +466,7 @@ package game
                 }
             }
             // Getting Rank / Unsendable Score
-            else if (!_isReplay && gameIndex != -1 && !result.user.isGuest)
+            else if (!isReplay && gameIndex != -1 && !result.user.isGuest)
             {
                 _resultsDisplay.result_rank.htmlText = canSendScore(result, true, true, false, false) ? "Saving score..." : "Score not saved";
                 _resultsDisplay.result_last_best.htmlText = "";
@@ -466,7 +479,7 @@ package game
             }
 
             // Edited Replay
-            if (_isReplay && _isReplayEdited)
+            if (isReplay && isReplayEdited)
             {
                 _resultsDisplay.result_rank.htmlText = _lang.string("results_replay_modified");
                 _resultsDisplay.result_rank.textColor = 0xF06868;
@@ -742,13 +755,16 @@ package game
                 if (skipload)
                 {
                     _gvars.songRestarts++;
-                    dispatchEvent(new StartGameplayEvent(_songResults[0].song, false, _mpRoom));
+                    if (isReplay)
+                        dispatchEvent(new StartReplayEvent(_songResults[0].song, _replay));
+                    else
+                        dispatchEvent(new StartGameplayEvent(_songResults[0].song, false, GameplayDisplay.SOLO, _mpRoom));
                 }
                 else
                 {
                     // TODO: Fix this queue logic
                     _gvars.songQueue = _gvars.totalSongQueue.concat();
-                        //dispatchEvent(new ChangePanelEvent(Routes.PANEL_LOADING));
+                    dispatchEvent(new StartGameplayEvent(_songResults[0].song, false, GameplayDisplay.SOLO, _mpRoom));
                 }
             }
 
@@ -780,7 +796,7 @@ package game
                 if (songList.length > 0)
                 {
                     var selectedSong:Song = _gvars.getSongFile(songList[Math.floor(Math.random() * (songList.length - 1))], _settings, false);
-                    dispatchEvent(new StartGameplayEvent(selectedSong, false, _mpRoom));
+                    dispatchEvent(new StartGameplayEvent(selectedSong, false, GameplayDisplay.SOLO, _mpRoom));
                 }
             }
 
@@ -794,7 +810,12 @@ package game
             }
 
             else if (target == _navMenu)
+            {
+                if (_replay)
+                    _song.unload();
+
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
+            }
 
             else if (target == _navRating)
             {
@@ -882,7 +903,7 @@ package game
             var ret:Boolean = false;
             ret ||= valid_score && !isScoreValid(true, false);
             ret ||= valid_replay && !isScoreValid(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (_isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
         }
@@ -903,7 +924,7 @@ package game
             var ret:Boolean = false;
             ret ||= valid_score && !isScoreUpdated(true, false);
             ret ||= valid_replay && !isScoreUpdated(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (_isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
         }

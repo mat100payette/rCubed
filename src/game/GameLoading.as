@@ -35,12 +35,13 @@ package game
         private var _mpRoom:Room;
         private var _replay:Replay;
         private var _isSpectating:Boolean;
+        private var _mode:int;
 
         private var _songNameHtml:String = "";
 
         private var _isAutoplay:Boolean;
 
-        public function GameLoading(song:Song, replay:Replay, mpRoom:Room, isAutoplay:Boolean)
+        public function GameLoading(song:Song, replay:Replay, mode:int, mpRoom:Room, isAutoplay:Boolean)
         {
             if (song && replay)
                 throw new Error("Game loading cannot be given both a song and a replay.");
@@ -49,11 +50,12 @@ package game
             _mpRoom = mpRoom;
             _isAutoplay = isAutoplay;
             _isSpectating = _isAutoplay && mpRoom;
+            _mode = mode;
 
             if (_replay)
                 _song = _gvars.getSongFile(replay.songInfo, replay.user.settings);
             else
-                _song = song;
+                _song = _gvars.getSongFile(song.songInfo);
 
             if (!_song)
                 throw new Error("No song found to load.");
@@ -61,9 +63,9 @@ package game
             if (_song.isLoaded)
             {
                 if (_replay)
-                    dispatchEvent(new StartReplayEvent(_replay));
+                    dispatchEvent(new StartReplayEvent(_song, _replay));
                 else
-                    dispatchEvent(new StartGameplayEvent(_song, _isAutoplay, mpRoom));
+                    dispatchEvent(new StartGameplayEvent(_song, _isAutoplay, _mode, _mpRoom));
             }
         }
 
@@ -161,11 +163,11 @@ package game
             _preloader.bar.removeEventListener(Event.REMOVED_FROM_STAGE, onPreloaderRemoved);
 
             if (_replay)
-                dispatchEvent(new StartReplayEvent(_replay));
+                dispatchEvent(new StartReplayEvent(_song, _replay));
             else if (_isSpectating)
                 dispatchEvent(new StartSpectatingEvent(_mpRoom));
             else
-                dispatchEvent(new StartGameplayEvent(_song, _isAutoplay, _mpRoom));
+                dispatchEvent(new StartGameplayEvent(_song, _isAutoplay, _mode, _mpRoom));
 
         }
     }

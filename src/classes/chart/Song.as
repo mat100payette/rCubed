@@ -112,6 +112,11 @@ package classes.chart
             load();
         }
 
+        public function get rate():Number
+        {
+            return _rate;
+        }
+
         public function unload():void
         {
             removeLoaderListeners();

@@ -9,12 +9,14 @@ package events.navigation
     {
         private var _song:Song;
         private var _isAutoplay:Boolean;
+        private var _mode:int;
         private var _mpRoom:Room;
 
-        public function StartGameplayEvent(song:Song, isAutoplay:Boolean, mpRoom:Room):void
+        public function StartGameplayEvent(song:Song, isAutoplay:Boolean, mode:int, mpRoom:Room):void
         {
             _song = song;
             _isAutoplay = isAutoplay;
+            _mode = mode;
             _mpRoom = mpRoom;
 
             super(Routes.PANEL_GAMEPLAY);
@@ -30,6 +32,11 @@ package events.navigation
             return _isAutoplay;
         }
 
+        public function get mode():int
+        {
+            return _mode;
+        }
+
         public function get mpRoom():Room
         {
             return _mpRoom;
@@ -37,7 +44,7 @@ package events.navigation
 
         override public function clone():Event
         {
-            return new StartGameplayEvent(_song, _isAutoplay, _mpRoom);
+            return new StartGameplayEvent(_song, _isAutoplay, _mode, _mpRoom);
         }
     }
 }

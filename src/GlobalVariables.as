@@ -304,12 +304,14 @@ package
             if (!settings)
                 settings = activeUser.settings;
 
+            // TODO: Redo caching logic
             if (!preview && songInfo.engine == Playlist.instance.engine && (!songInfo.engine || !songInfo.engine.ignoreCache))
             {
-                for (var s:int = 0; s < songCache.length; s++)
+                for (var i:int = 0; i < songCache.length; i++)
                 {
-                    var song:Song = songCache[s];
-                    if (song != null && song.songInfo.level == songInfo.level)
+                    var song:Song = songCache[i];
+
+                    if (song != null && song.songInfo.level == songInfo.level && song.frameRate == settings.frameRate && song.rate == settings.songRate)
                         return song;
                 }
             }
@@ -328,7 +330,7 @@ package
             var song:Song = new Song(songInfo, preview, settings);
 
             //- Push to cache
-            if (!preview && engineCache)
+            if (!preview)
                 songCache.push(song);
 
             return song;

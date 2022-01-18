@@ -52,6 +52,7 @@ package menu
     import events.navigation.ChangePanelEvent;
     import events.navigation.WatchPreviewEvent;
     import events.navigation.StartGameplayEvent;
+    import game.GameplayDisplay;
 
     public class MenuSongSelection extends DisplayLayer
     {
@@ -1562,7 +1563,7 @@ package menu
             saveSearchTextAndType();
 
             var nextSong:Song = _gvars.getSongFile(_gvars.songQueue[0]);
-            dispatchEvent(new StartGameplayEvent(nextSong, false, null));
+            dispatchEvent(new StartGameplayEvent(nextSong, false, GameplayDisplay.SOLO, null));
         }
 
         /**

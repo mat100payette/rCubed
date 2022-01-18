@@ -9,13 +9,13 @@ package events.navigation
     {
         private var _song:Song;
         private var _user:User;
-        private var _editorFlag:int;
+        private var _editorMode:int;
 
-        public function OpenEditorEvent(song:Song, user:User, editorFlag:int):void
+        public function OpenEditorEvent(song:Song, user:User, editorMode:int):void
         {
             _song = song;
             _user = user;
-            _editorFlag = editorFlag;
+            _editorMode = editorMode;
             super(Routes.PANEL_GAMEPLAY);
         }
 
@@ -29,14 +29,14 @@ package events.navigation
             return _user;
         }
 
-        public function get editorFlag():int
+        public function get editorMode():int
         {
-            return _editorFlag;
+            return _editorMode;
         }
 
         override public function clone():Event
         {
-            return new OpenEditorEvent(_song, _user, _editorFlag);
+            return new OpenEditorEvent(_song, _user, _editorMode);
         }
     }
 }

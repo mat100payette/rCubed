@@ -422,7 +422,10 @@ package arc.mp
         public function gameplayStart(room:Room):void
         {
             _currentStatus = Multiplayer.STATUS_PLAYING;
-            _panel.dispatchEvent(new StartGameplayEvent(_currentSongFile, false, room));
+
+            var mode:int = room.playerCount == 1 ? GameplayDisplay.SOLO : GameplayDisplay.MP;
+
+            _panel.dispatchEvent(new StartGameplayEvent(_currentSongFile, false, mode, room));
         }
 
         public function gameplayPlaying(play:GameplayDisplay):Boolean
