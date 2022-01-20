@@ -358,7 +358,7 @@ package game.controls
             }
 
             // Rotation Mods
-            if (_mods.tornado)
+            if (_mods.rotating)
                 note.rotation = (updateBaseOffsetRef * 6 * 90) + updateReceptorRef.rotation;
 
             if (_mods.dizzy)

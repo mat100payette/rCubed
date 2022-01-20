@@ -54,7 +54,6 @@ package game
     import classes.Room;
     import events.navigation.StartGameplayEvent;
     import classes.chart.Song;
-    import classes.Gameplay;
     import events.navigation.StartReplayEvent;
 
     public class GameResults extends DisplayLayer
@@ -75,7 +74,7 @@ package game
 
         private var _settings:UserSettings;
         private var _replay:Replay;
-        private var isReplayEdited:Boolean;
+        private var _isReplayEdited:Boolean;
         private var _isAutoplay:Boolean;
         private var _mpRoom:Room;
         private var _song:Song;
@@ -113,13 +112,13 @@ package game
         private var _navHighscores:BoxButton;
         private var _navMenu:BoxButton;
 
-        public function GameResults(song:Song, settings:UserSettings, replay:Replay, isReplayValid:Boolean, isAutoplay:Boolean, mpRoom:Room)
+        public function GameResults(song:Song, settings:UserSettings, replay:Replay, isAutoplay:Boolean, mpRoom:Room)
         {
             _settings = new UserSettings();
             _settings.update(settings);
 
             _replay = replay;
-            isReplayEdited = isReplayValid;
+            _isReplayEdited = replay == null ? false : replay.isEdited;
             _isAutoplay = isAutoplay;
             _mpRoom = mpRoom;
             _song = song;
@@ -479,7 +478,7 @@ package game
             }
 
             // Edited Replay
-            if (isReplay && isReplayEdited)
+            if (isReplay && _isReplayEdited)
             {
                 _resultsDisplay.result_rank.htmlText = _lang.string("results_replay_modified");
                 _resultsDisplay.result_rank.textColor = 0xF06868;
@@ -868,7 +867,7 @@ package game
             var ret:Boolean = false;
 
             // TODO: Make array element equality for judgeWindow
-            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_JUDGE_WINDOW);
+            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW));
 
             ret ||= replay && (mods.reverse || _settings.isolationOffset > 0 || _settings.isolationLength > 0);
 
@@ -881,7 +880,7 @@ package game
             var ret:Boolean = false;
 
             // TODO: Make array element equality for judgeWindow
-            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || _settings.judgeWindow != Constant.DEFAULT_JUDGE_WINDOW);
+            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW));
 
             ret ||= replay && (_settings.songRate != 1 || mods.reverse);
 
@@ -903,7 +902,7 @@ package game
             var ret:Boolean = false;
             ret ||= valid_score && !isScoreValid(true, false);
             ret ||= valid_replay && !isScoreValid(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
         }
@@ -924,7 +923,7 @@ package game
             var ret:Boolean = false;
             ret ||= valid_score && !isScoreUpdated(true, false);
             ret ||= valid_replay && !isScoreUpdated(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
             return !ret;
         }

@@ -320,6 +320,9 @@ package classes
             if (settings.forceNewJudge != null)
                 forceNewJudge = settings.forceNewJudge;
 
+            if (settings.activeMods != null)
+                activeMods = settings.activeMods;
+
             if (settings.activeVisualMods != null)
                 activeVisualMods = settings.activeVisualMods;
 

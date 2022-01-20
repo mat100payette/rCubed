@@ -159,7 +159,7 @@ package
 
                 case Routes.PANEL_RESULTS:
                     var gameResultsEvent:ShowGameResultsEvent = e as ShowGameResultsEvent;
-                    nextPanel = new GameResults(gameResultsEvent.song, _gvars.activeUser.settings, gameResultsEvent.replay, true, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
+                    nextPanel = new GameResults(gameResultsEvent.song, _gvars.activeUser.settings, gameResultsEvent.replay, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
                     break;
             }
 

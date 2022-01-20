@@ -3,6 +3,7 @@ package arc
     import classes.chart.Note;
     import classes.chart.Song;
     import classes.UserSettings;
+    import classes.GameMods;
 
     public class NoteMod extends Object
     {
@@ -17,21 +18,12 @@ package arc
 
         private var _settings:UserSettings;
 
-        private var _modDark:Boolean;
-        private var _modHidden:Boolean;
-        private var _modMirror:Boolean;
-        private var _modRandom:Boolean;
-        private var _modScramble:Boolean;
-        private var _modShuffle:Boolean;
-        private var _modReverse:Boolean;
-        private var _modColumnColor:Boolean;
-        private var _modHalfTime:Boolean;
-        private var _modNoBackground:Boolean;
-        private var _modIsolation:Boolean;
-        private var _modOffset:Boolean;
-        private var _modRate:Boolean;
-        private var _modFPS:Boolean;
-        private var _modJudgeWindow:Boolean;
+        private var _mods:GameMods;
+
+        private var _isIsolation:Boolean;
+        private var _isGlobalOffset:Boolean;
+        private var _isRate:Boolean;
+        private var _isCustomJudgeWindow:Boolean;
 
         private var _reverseLastFrame:int;
         private var _reverseLastPos:Number;
@@ -42,7 +34,15 @@ package arc
             _settings = new UserSettings();
             _settings.update(settings);
 
-            updateMods();
+            _mods = new GameMods(_settings);
+
+            _isIsolation = _settings.isolationOffset > 0 || _settings.isolationLength > 0;
+            _isGlobalOffset = _settings.globalOffset != 0;
+            _isRate = _settings.songRate != 1;
+            _isCustomJudgeWindow = _settings.judgeWindow != Constant.DEFAULT_JUDGE_WINDOW;
+
+            _reverseLastFrame = -1;
+            _reverseLastPos = -1;
         }
 
         public function get settings():UserSettings
@@ -50,42 +50,9 @@ package arc
             return _settings;
         }
 
-        private function modEnabled(mod:String):Boolean
-        {
-            for each (var activeMod:String in _settings.activeMods)
-                if (mod == activeMod)
-                    return true;
-
-            return false;
-        }
-
-        public function updateMods():void
-        {
-            _modDark = modEnabled("dark");
-            _modHidden = modEnabled("hidden");
-            _modMirror = modEnabled("mirror");
-            _modRandom = modEnabled("random");
-            _modScramble = modEnabled("scramble");
-            _modShuffle = modEnabled("shuffle");
-            _modReverse = modEnabled("reverse");
-            _modColumnColor = modEnabled("columncolor");
-            _modHalfTime = modEnabled("halftime");
-            _modNoBackground = modEnabled("nobackground");
-            _modIsolation = _settings.isolationOffset > 0 || _settings.isolationLength > 0;
-            _modOffset = _settings.globalOffset != 0;
-            _modRate = _settings.songRate != 1;
-            _modFPS = _settings.frameRate > 30;
-            _modJudgeWindow = Boolean(_settings.judgeWindow);
-
-            _reverseLastFrame = -1;
-            _reverseLastPos = -1;
-        }
-
         public function start():void
         {
-            updateMods();
-
-            if (_modShuffle)
+            if (_mods.shuffle)
             {
                 _shuffle = new Array();
                 for (var i:int = 0; i < 4; i++)
@@ -115,15 +82,15 @@ package arc
 
         public function required():Boolean
         {
-            return _modIsolation || _modRandom || _modScramble || _modShuffle || _modColumnColor || _modHalfTime || _modMirror || _modOffset || _modRate;
+            return _isIsolation || _mods.random || _mods.scramble || _mods.shuffle || _mods.columnColor || _mods.halftime || _mods.mirror || _isGlobalOffset || _isRate;
         }
 
         public function transformNote(index:int):Note
         {
-            if (_modIsolation)
+            if (_isIsolation)
                 index += _settings.isolationOffset;
 
-            if (_modReverse)
+            if (_mods.reverse)
             {
                 index = _notes.length - 1 - index;
                 if (_reverseLastFrame < 0)
@@ -145,32 +112,32 @@ package arc
             frame -= _song.musicDelay;
             pos -= (_song.musicDelay / 30);
 
-            if (_modReverse)
+            if (_mods.reverse)
             {
                 frame = _reverseLastFrame - frame + _song.mp3Frame + 60;
                 pos = _reverseLastPos - pos + (_song.mp3Frame + 60) / 30;
             }
 
-            if (_modRate)
+            if (_isRate)
             {
                 pos /= _settings.songRate;
                 frame /= _settings.songRate;
             }
 
-            if (_modOffset)
+            if (_isGlobalOffset)
             {
                 var goffset:int = Math.round(_settings.globalOffset);
                 frame += goffset;
                 pos += goffset / 30;
             }
 
-            if (_modMirror)
+            if (_mods.mirror)
                 dir = -dir + 3;
 
-            if (_modShuffle)
+            if (_mods.shuffle)
                 dir = _shuffle[dir];
 
-            if (_modRandom || _modScramble)
+            if (_mods.random || _mods.scramble)
             {
                 if (_lastChord.frame != int(frame))
                 {
@@ -179,27 +146,37 @@ package arc
                     _lastChord.values = [];
                     _lastChord.notes = [];
                 }
+
                 var value:Object = _lastChord.values[_lastChord.notes.indexOf(note)];
                 if (value != null)
                     dir = int(value);
                 else
                 {
-                    while (_lastChord.values.indexOf(dir = int(Math.random() * 4)) != -1)
+                    do
                     {
-                    }
-                    for (var i:int = 0; i < 3 && _modScramble && _lastChord.previousValues.indexOf(dir) != -1; i++)
-                        while (_lastChord.values.indexOf(dir = int(Math.random() * 4)) != -1)
+                        dir = int(Math.random() * 4);
+                    } while (_lastChord.values.indexOf(dir) != -1);
+
+                    if (_mods.scramble)
+                    {
+                        for (var i:int = 0; i < 3 && _lastChord.previousValues.indexOf(dir) != -1; i++)
                         {
+                            do
+                            {
+                                dir = int(Math.random() * 4);
+                            } while (_lastChord.values.indexOf(dir) != -1);
                         }
+                    }
+
                     _lastChord.values.push(dir);
                     _lastChord.notes.push(note);
                 }
             }
 
-            if (_modColumnColor)
+            if (_mods.columnColor)
                 color = (dir % 3) ? "blue" : "red";
 
-            if (_modHalfTime)
+            if (_mods.halftime)
                 color = HALF_COLOR[color] || color;
 
             return new Note(directionOfValue(dir), pos, color, int(frame));
@@ -210,13 +187,14 @@ package arc
             if (!_notes)
                 return 0;
 
-            if (_modIsolation)
+            if (_isIsolation)
             {
                 if (_settings.isolationLength > 0)
                     return Math.min(_settings.isolationLength, Math.max(1, _notes.length - _settings.isolationOffset));
                 else
                     return Math.max(1, _notes.length - _settings.isolationOffset);
             }
+
             return _notes.length;
         }
 
@@ -229,7 +207,7 @@ package arc
             var lastNote:Note = _notes[_notes.length - 1];
             var time:Number = lastNote.time;
 
-            if (_modIsolation)
+            if (_isIsolation)
             {
 
                 if (_settings.isolationLength > 0)
@@ -246,7 +224,7 @@ package arc
             }
 
             // Rates after everything.
-            if (_modRate)
+            if (_isRate)
                 time /= _settings.songRate;
 
             return time + 1; // 1 seconds for fade out.
