@@ -7,7 +7,7 @@ package
     import be.aboutme.airserver.messages.Message;
     import classes.Playlist;
     import classes.SongInfo;
-    import classes.SongPlayerBytes;
+    import classes.SongBytes;
     import classes.StatTracker;
     import classes.User;
     import classes.chart.Song;
@@ -90,7 +90,7 @@ package
         public var sessionStats:StatTracker = new StatTracker();
         public var songStats:StatTracker = new StatTracker();
 
-        public var menuMusic:SongPlayerBytes;
+        public var menuMusic:SongBytes;
         public var menuMusicSoundVolume:Number = 1;
         public var menuMusicSoundTransform:SoundTransform = new SoundTransform();
 
@@ -258,7 +258,7 @@ package
                 var file_bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
                 if (file_bytes && file_bytes.length > 0)
                 {
-                    menuMusic = new SongPlayerBytes(file_bytes);
+                    menuMusic = new SongBytes(file_bytes);
                 }
             }
             // Convert MP3 if exist.
@@ -267,7 +267,7 @@ package
                 var mp3Bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_MP3_PATH));
                 if (mp3Bytes && mp3Bytes.length > 0)
                 {
-                    menuMusic = new SongPlayerBytes(mp3Bytes, true);
+                    menuMusic = new SongBytes(mp3Bytes, true);
                     LocalStore.setVariable("menu_music", "External MP3");
                 }
             }
@@ -398,7 +398,7 @@ package
             var songIcon:int = 0;
             if (_rank)
             {
-                var arrows:int = _songInfo.note_count;
+                var arrows:int = _songInfo.noteCount;
                 var scoreRaw:int = _songInfo.score_raw;
                 if (_rank.arrows > 0)
                 {
@@ -445,7 +445,7 @@ package
             var songIcon:int = SONG_ICON_NO_SCORE;
             if (_rank)
             {
-                var arrows:int = _songInfo.note_count;
+                var arrows:int = _songInfo.noteCount;
                 var scoreRaw:int = _songInfo.score_raw;
                 if (_rank.arrows > 0)
                 {

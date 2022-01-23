@@ -111,7 +111,7 @@ package game
                 else
                     preloaderHtmlText += "Connecting..."
 
-                if (_song.loadFail)
+                if (_song.loadFailed)
                     preloaderHtmlText += " --- <font color=\"#FFC4C4\">[Loading Failed]</font>";
             }
             else
@@ -120,12 +120,12 @@ package game
             _preloader.htmlText = preloaderHtmlText;
             _preloader.bar.update(_song.progress / 100);
 
-            if ((_loadTimer >= 60 || _song.loadFail) && !_cancelLoadButton)
+            if ((_loadTimer >= 60 || _song.loadFailed) && !_cancelLoadButton)
             {
                 _cancelLoadButton = new BoxButton(this, Main.GAME_WIDTH - 85, _preloader.y - 35, 75, 25, "Cancel", 12, onCancelClicked);
             }
 
-            if (_song.loadFail)
+            if (_song.loadFailed)
             {
                 // Loading Failed :/
                 _gvars.removeSongFile(_song);

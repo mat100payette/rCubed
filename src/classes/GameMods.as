@@ -29,7 +29,7 @@ package classes
         private var _hide:Boolean;
         private var _mini:Boolean;
         private var _columnColor:Boolean;
-        private var _halftime:Boolean;
+        private var _halvedNoteskin:Boolean;
         private var _noBackground:Boolean;
         private var _flashlight:Boolean;
 
@@ -62,9 +62,19 @@ package classes
             _hide = ArrayUtil.containsAny(visualMods, ["hide"]);
             _mini = ArrayUtil.containsAny(visualMods, ["mini"]);
             _columnColor = ArrayUtil.containsAny(visualMods, ["columncolour"]);
-            _halftime = ArrayUtil.containsAny(visualMods, ["halftime"]);
+            _halvedNoteskin = ArrayUtil.containsAny(visualMods, ["halftime"]);
             _noBackground = ArrayUtil.containsAny(visualMods, ["nobackground"]);
             _flashlight = ArrayUtil.containsAny(visualMods, ["flashlight"]);
+        }
+
+        public function get isScoringCompatible():Boolean
+        {
+            return !_shuffle && !_random && !_scramble && !_reverse;
+        }
+
+        public function get isReplayCompatible():Boolean
+        {
+            return !_reverse;
         }
 
         public function get hidden():Boolean
@@ -172,9 +182,9 @@ package classes
             return _columnColor;
         }
 
-        public function get halftime():Boolean
+        public function get halvedNoteskin():Boolean
         {
-            return _halftime;
+            return _halvedNoteskin;
         }
 
         public function get noBackground():Boolean

@@ -137,13 +137,13 @@ package classes.filter
                     return compareNumber(songInfo.difficulty, input_number);
 
                 case FILTER_ARROWCOUNT:
-                    return compareNumber(songInfo.note_count, input_number);
+                    return compareNumber(songInfo.noteCount, input_number);
 
                 case FILTER_MIN_NPS:
-                    return compareNumber(songInfo.min_nps, input_number);
+                    return compareNumber(songInfo.minNps, input_number);
 
                 case FILTER_MAX_NPS:
-                    return compareNumber(songInfo.max_nps, input_number);
+                    return compareNumber(songInfo.maxNps, input_number);
 
                 case FILTER_RANK:
                     return compareNumber(userData.getLevelRank(songInfo).rank, input_number);
@@ -155,10 +155,10 @@ package classes.filter
                     return compareNumber(userData.getLevelRank(songInfo)[input_stat], input_number);
 
                 case FILTER_TIME:
-                    return compareNumber(songInfo.time_secs, input_number);
+                    return compareNumber(songInfo.timeSecs, input_number);
 
                 case FILTER_SONG_RATING:
-                    return compareNumber(songInfo.song_rating, input_number);
+                    return compareNumber(songInfo.songRating, input_number);
 
                 case FILTER_PERSONAL_SONG_RATING:
                     return compareNumber(userData.getSongRating(songInfo), input_number);

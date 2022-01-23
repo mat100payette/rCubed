@@ -370,7 +370,7 @@ package game
                     songInfo = result.songInfo;
 
                 var songRate:Number = result.user.settings.songRate;
-                var seconds:Number = Math.floor(songInfo.time_secs * (1 / songRate));
+                var seconds:Number = Math.floor(songInfo.timeSecs * (1 / songRate));
                 var songLength:String = (Math.floor(seconds / 60)) + ":" + (seconds % 60 >= 10 ? "" : "0") + (seconds % 60);
                 var rateString:String = songRate != 1 ? " (" + songRate + "x Rate)" : "";
 
@@ -378,9 +378,9 @@ package game
                 songTitle = songInfo.engine ? songInfo.name + rateString : "<a href=\"" + Constant.LEVEL_STATS_URL + songInfo.level + "\">" + songInfo.name + rateString + "</a>";
                 songSubTitle = sprintf(_lang.string("game_results_subtitle_difficulty"), {"value": songInfo.difficulty}) + " - " + sprintf(_lang.string("game_results_subtitle_length"), {"value": songLength});
                 if (songInfo.author != "")
-                    songSubTitle += " - " + _lang.wrapFont(sprintf(_lang.stringSimple("game_results_subtitle_author"), {"value": songInfo.author_html}));
+                    songSubTitle += " - " + _lang.wrapFont(sprintf(_lang.stringSimple("game_results_subtitle_author"), {"value": songInfo.authorHtml}));
                 if (songInfo.stepauthor != "")
-                    songSubTitle += " - " + _lang.wrapFont(sprintf(_lang.stringSimple("game_results_subtitle_stepauthor"), {"value": songInfo.stepauthor_html}));
+                    songSubTitle += " - " + _lang.wrapFont(sprintf(_lang.stringSimple("game_results_subtitle_stepauthor"), {"value": songInfo.stepauthorHtml}));
 
                 displayTime = result.end_time;
                 scoreTotal = result.score_total;
@@ -866,10 +866,9 @@ package game
             var mods:GameMods = _settings.mods;
             var ret:Boolean = false;
 
-            // TODO: Make array element equality for judgeWindow
-            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW));
+            ret ||= score && (_isAutoplay || mods.isScoringCompatible || JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW));
 
-            ret ||= replay && (mods.reverse || _settings.isolationOffset > 0 || _settings.isolationLength > 0);
+            ret ||= replay && (mods.isReplayCompatible || _settings.isolationOffset > 0 || _settings.isolationLength > 0);
 
             return !ret;
         }
@@ -879,10 +878,9 @@ package game
             var mods:GameMods = _settings.mods;
             var ret:Boolean = false;
 
-            // TODO: Make array element equality for judgeWindow
-            ret ||= score && (_isAutoplay || mods.shuffle || mods.random || mods.scramble || JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW));
+            ret ||= score && (_isAutoplay || mods.isScoringCompatible || JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW));
 
-            ret ||= replay && (_settings.songRate != 1 || mods.reverse);
+            ret ||= replay && (mods.isReplayCompatible || _settings.songRate != 1);
 
             return !ret;
         }
@@ -1199,7 +1197,7 @@ package game
                     "difficulty": gameResult.songInfo.difficulty,
                     "genre": gameResult.songInfo.genre,
                     "level": gameResult.songInfo.level,
-                    "levelid": gameResult.songInfo.level_id,
+                    "levelid": gameResult.songInfo.levelId,
                     "name": gameResult.songInfo.name,
                     "stepauthor": gameResult.songInfo.stepauthor,
                     "time": gameResult.songInfo.time};
@@ -1350,7 +1348,7 @@ package game
                 try
                 {
                     var path:String = AirContext.getReplayPath(result.song);
-                    path += (result.song.songInfo.level_id ? result.song.songInfo.level_id : result.song.songInfo.level.toString())
+                    path += (result.song.songInfo.levelId ? result.song.songInfo.levelId : result.song.songInfo.level.toString())
                     path += "_" + (new Date().getTime())
                     path += "_" + (result.pa_string + "-" + result.max_combo);
                     path += ".txt";

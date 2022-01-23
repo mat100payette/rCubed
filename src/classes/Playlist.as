@@ -181,24 +181,24 @@ package classes
                     // Important to note that the dynamic fields aren't all exactly the same name
                     var newSongInfo:SongInfo = new SongInfo();
                     newSongInfo.author = dynamicSongInfo.author;
-                    newSongInfo.author_url = dynamicSongInfo.authorURL;
+                    newSongInfo.authorUrl = dynamicSongInfo.authorURL;
                     newSongInfo.credits = dynamicSongInfo.credits;
                     newSongInfo.difficulty = dynamicSongInfo.difficulty;
                     newSongInfo.genre = dynamicSongInfo.genre;
                     newSongInfo.level = dynamicSongInfo.level;
-                    newSongInfo.min_nps = dynamicSongInfo.min_nps;
-                    newSongInfo.max_nps = dynamicSongInfo.max_nps;
+                    newSongInfo.minNps = dynamicSongInfo.min_nps;
+                    newSongInfo.maxNps = dynamicSongInfo.max_nps;
                     newSongInfo.name = dynamicSongInfo.name;
-                    newSongInfo.note_count = dynamicSongInfo.arrows;
+                    newSongInfo.noteCount = dynamicSongInfo.arrows;
                     newSongInfo.order = dynamicSongInfo.order;
-                    newSongInfo.play_hash = dynamicSongInfo.playhash;
+                    newSongInfo.playHash = dynamicSongInfo.playhash;
                     newSongInfo.prerelease = dynamicSongInfo.prerelease;
-                    newSongInfo.preview_hash = dynamicSongInfo.previewhash;
+                    newSongInfo.previewHash = dynamicSongInfo.previewhash;
                     newSongInfo.price = dynamicSongInfo.price;
-                    newSongInfo.release_date = dynamicSongInfo.releasedate;
-                    newSongInfo.song_rating = dynamicSongInfo.song_rating;
+                    newSongInfo.release_Date = dynamicSongInfo.releasedate;
+                    newSongInfo.songRating = dynamicSongInfo.song_rating;
                     newSongInfo.stepauthor = dynamicSongInfo.stepauthor;
-                    newSongInfo.stepauthor_url = dynamicSongInfo.stepauthorURL;
+                    newSongInfo.stepauthorUrl = dynamicSongInfo.stepauthorURL;
                     newSongInfo.style = dynamicSongInfo.style;
                     newSongInfo.time = dynamicSongInfo.time;
 
@@ -210,30 +210,30 @@ package classes
                     songInfo.time = "0:00";
 
                 // Note Count
-                if (isNaN(Number(songInfo.note_count)))
-                    songInfo.note_count = 0;
+                if (isNaN(Number(songInfo.noteCount)))
+                    songInfo.noteCount = 0;
 
                 // Extra Info
                 songInfo.index = genreList[songInfo.genre].length;
-                songInfo.time_secs = (Number(songInfo.time.split(":")[0]) * 60) + Number(songInfo.time.split(":")[1]);
+                songInfo.timeSecs = (Number(songInfo.time.split(":")[0]) * 60) + Number(songInfo.time.split(":")[1]);
 
                 // Author with URL
-                if (songInfo.author_url != null && songInfo.author_url.length > 7)
-                    songInfo.author_html = "<a href=\"" + songInfo.author_url + "\">" + songInfo.author + "</a>";
+                if (songInfo.authorUrl != null && songInfo.authorUrl.length > 7)
+                    songInfo.authorHtml = "<a href=\"" + songInfo.authorUrl + "\">" + songInfo.author + "</a>";
                 else
-                    songInfo.author_html = songInfo.author;
+                    songInfo.authorHtml = songInfo.author;
 
                 // Multiple Step Authors
                 if (songInfo.stepauthor != null && songInfo.stepauthor.indexOf(" & ") !== false)
                 {
                     var stepAuthors:Array = songInfo.stepauthor.split(" & ");
-                    songInfo.stepauthor_html = "<a href=\"" + Constant.ROOT_URL + "profile/" + Crypt.urlencode(stepAuthors[0]) + "\">" + stepAuthors[0] + "</a>";
+                    songInfo.stepauthorHtml = "<a href=\"" + Constant.ROOT_URL + "profile/" + Crypt.urlencode(stepAuthors[0]) + "\">" + stepAuthors[0] + "</a>";
 
                     for (var i:int = 1; i < stepAuthors.length; i++)
-                        songInfo.stepauthor_html += " & <a href=\"" + Constant.ROOT_URL + "profile/" + Crypt.urlencode(stepAuthors[i]) + "\">" + stepAuthors[i] + "</a>";
+                        songInfo.stepauthorHtml += " & <a href=\"" + Constant.ROOT_URL + "profile/" + Crypt.urlencode(stepAuthors[i]) + "\">" + stepAuthors[i] + "</a>";
                 }
                 else
-                    songInfo.stepauthor_html = "<a href=\"" + Constant.ROOT_URL + "profile/" + Crypt.urlencode(songInfo.stepauthor) + "\">" + songInfo.stepauthor + "</a>";
+                    songInfo.stepauthorHtml = "<a href=\"" + Constant.ROOT_URL + "profile/" + Crypt.urlencode(songInfo.stepauthor) + "\">" + songInfo.stepauthor + "</a>";
 
                 // Song Price
                 if (isNaN(Number(songInfo.price)))
@@ -244,8 +244,8 @@ package classes
                     songInfo.credits = -1;
 
                 // Max Score Totals
-                songInfo.score_total = songInfo.note_count * 1550;
-                songInfo.score_raw = songInfo.note_count * 50;
+                songInfo.score_total = songInfo.noteCount * 1550;
+                songInfo.score_raw = songInfo.noteCount * 50;
 
                 // Legacy Sync
                 if (!legacy && isNaN(songInfo.sync))

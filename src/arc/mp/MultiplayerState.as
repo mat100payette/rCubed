@@ -331,7 +331,7 @@ package arc.mp
                         timer.stop();
                     else
                     {
-                        if (_currentSongFile && _currentSongFile.loadFail)
+                        if (_currentSongFile && _currentSongFile.loadFailed)
                         {
                             _gvars.removeSongFile(_currentSongFile);
                             Alert.add(_currentSongInfo.name + " failed to load");

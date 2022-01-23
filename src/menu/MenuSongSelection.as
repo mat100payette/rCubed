@@ -16,7 +16,7 @@ package menu
     import classes.Language;
     import classes.Playlist;
     import classes.SongInfo;
-    import classes.SongPlayerBytes;
+    import classes.SongBytes;
     import classes.SongPreview;
     import classes.SongQueueItem;
     import classes.chart.Song;
@@ -112,7 +112,7 @@ package menu
         private var songItemContextMenu:ContextMenu;
         private var songItemRemoveQueueContext:ContextMenuItem;
 
-        public static var previewMusic:SongPlayerBytes;
+        public static var previewMusic:SongBytes;
 
         ///- Constructor
         public function MenuSongSelection()
@@ -1218,7 +1218,7 @@ package menu
             var songTotalLength:int = 0;
             for (var qS:String in _gvars.songQueue)
             {
-                songTotalLength += (_gvars.songQueue[qS] as SongInfo).time_secs;
+                songTotalLength += (_gvars.songQueue[qS] as SongInfo).timeSecs;
             }
 
             infoTitle = new Text(infoBox, 5, tY, _lang.string("song_selection_queue_panel_title"), 14, "#DDDDDD");
@@ -1365,7 +1365,7 @@ package menu
             var infoDisplay:Array = [["song", songInfo.name],
                 ["author", songInfo.author],
                 ["stepfile", songInfo.stepauthor],
-                ["length", (songInfo.note_count > 0 ? sprintf(_lang.string("song_selection_song_panel_length_value"), {"time": songInfo.time, "note_count": songInfo.note_count}) : songInfo.time)],
+                ["length", (songInfo.noteCount > 0 ? sprintf(_lang.string("song_selection_song_panel_length_value"), {"time": songInfo.time, "note_count": songInfo.noteCount}) : songInfo.time)],
                 ["style", songInfo.style],
                 ["best", (infoRanks.score > 0 ? "\n" + NumberUtil.numberFormat(infoRanks.score) + "\n" + infoRanks.results : _lang.string("song_selection_song_panel_unplayed"))]];
 
@@ -2198,7 +2198,7 @@ package menu
             if (previewMusic)
                 previewMusic.stop();
 
-            _gvars.menuMusic = new SongPlayerBytes(song.bytesSWF);
+            _gvars.menuMusic = new SongBytes(song.bytesSWF);
             _gvars.menuMusic.start();
         }
 
@@ -2216,7 +2216,7 @@ package menu
             if (previewMusic)
                 previewMusic.stop();
 
-            previewMusic = new SongPlayerBytes(song.bytesSWF, false, true);
+            previewMusic = new SongBytes(song.bytesSWF, false, true);
             previewMusic.start();
         }
 

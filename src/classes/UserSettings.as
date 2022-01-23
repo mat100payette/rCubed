@@ -15,6 +15,8 @@ package classes
 
         private var _compatSettings:Object = {};
 
+        private var _versionTag:uint = 0;
+
         public var language:String = "us";
 
         public var startUpScreen:int = 0; // 0 = MP Connect + MP Screen   |   1 = MP Connect + Song List   |   2 = Song List
@@ -101,6 +103,11 @@ package classes
             _isLiteUser = isLiteUser;
         }
 
+        public function get versionTag():uint
+        {
+            return _versionTag;
+        }
+
         // This replacer manages the filters to avoid circular dependencies
         public static function replacer(settings:UserSettings):Function
         {
@@ -124,6 +131,7 @@ package classes
 
         public function get mods():GameMods
         {
+            // TODO: Change this, it's obviously very inefficient
             return new GameMods(this);
         }
 
@@ -132,13 +140,17 @@ package classes
          */
         public function stringify():String
         {
-            var preStringified:String = JSON.stringify(this, replacer(this));
+            const preStringified:String = JSON.stringify(this, replacer(this));
             var json:Object = JSON.parse(preStringified);
 
             for (var key:String in _compatSettings)
                 json[key] = _compatSettings[key];
 
-            var aa:String = JSON.stringify(layout);
+            delete json["_compatSettings"];
+            delete json["isLiteUser"];
+            delete json["mods"];
+            delete json["versionTag"];
+
             var stringified:String = JSON.stringify(json);
 
             return stringified;

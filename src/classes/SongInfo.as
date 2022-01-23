@@ -22,38 +22,38 @@ package classes
         public var level:int;
         public var name:String;
         public var difficulty:int;
-        public var note_count:int;
+        public var noteCount:int;
         public var order:int;
         public var style:String;
 
         public var author:String;
-        public var author_url:String;
-        public var author_html:String;
+        public var authorUrl:String;
+        public var authorHtml:String;
 
         public var stepauthor:String;
-        public var stepauthor_url:String;
-        public var stepauthor_html:String;
+        public var stepauthorUrl:String;
+        public var stepauthorHtml:String;
 
-        public var play_hash:String;
-        public var preview_hash:String;
+        public var playHash:String;
+        public var previewHash:String;
 
         public var prerelease:Boolean;
-        public var release_date:uint;
+        public var release_Date:uint;
 
-        public var min_nps:int;
-        public var max_nps:int;
+        public var minNps:int;
+        public var maxNps:int;
 
         public var time:String;
-        public var time_secs:int;
+        public var timeSecs:int;
 
         // Song - Optional
         public var price:int;
         public var credits:int;
-        public var song_rating:Number;
+        public var songRating:Number;
 
         // Alt Engines Variables
         public var engine:Object;
-        public var level_id:String;
+        public var levelId:String;
         public var sync:int;
 
         public function SongInfo()
@@ -77,7 +77,7 @@ package classes
             if (s1.level > 0 && s2.level > 0 && s1.level != s2.level)
                 return false;
 
-            if (s1.level_id && s2.level_id && s1.level_id != s2.level_id)
+            if (s1.levelId && s2.levelId && s1.levelId != s2.levelId)
                 return false;
 
             return true;

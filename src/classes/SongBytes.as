@@ -6,7 +6,7 @@ package classes
     import flash.media.SoundChannel;
     import flash.utils.ByteArray;
 
-    public class SongPlayerBytes
+    public class SongBytes
     {
         public var sound:Sound;
         public var soundChannel:SoundChannel;
@@ -18,7 +18,7 @@ package classes
         private var pausePosition:int = 0;
         private var _noRepeat:Boolean;
 
-        public function SongPlayerBytes(swfBytes:ByteArray, isMP3File:Boolean = false, noRepeat:Boolean = false)
+        public function SongBytes(swfBytes:ByteArray, isMP3File:Boolean = false, noRepeat:Boolean = false)
         {
             if (swfBytes && swfBytes.length > 0)
             {

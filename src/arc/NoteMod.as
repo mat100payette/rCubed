@@ -54,18 +54,20 @@ package arc
         {
             if (_mods.shuffle)
             {
-                _shuffle = new Array();
+                _shuffle = [];
                 for (var i:int = 0; i < 4; i++)
                 {
                     var map:int;
-                    while (_shuffle.indexOf((map = int(Math.random() * 4))) >= 0)
+                    do
                     {
-                    }
+                        map = int(Math.random() * 4);
+                    } while (_shuffle.indexOf(map) >= 0)
+
                     _shuffle.push(map);
                 }
             }
 
-            _notes = _song.chart.notes;
+            _notes = _song.notes;
 
             _lastChord = {frame: 0, values: [], previousValues: [], _notes: []};
         }
@@ -82,7 +84,7 @@ package arc
 
         public function required():Boolean
         {
-            return _isIsolation || _mods.random || _mods.scramble || _mods.shuffle || _mods.columnColor || _mods.halftime || _mods.mirror || _isGlobalOffset || _isRate;
+            return _isIsolation || _mods.random || _mods.scramble || _mods.shuffle || _mods.columnColor || _mods.halvedNoteskin || _mods.mirror || _isGlobalOffset || _isRate;
         }
 
         public function transformNote(index:int):Note
@@ -176,7 +178,7 @@ package arc
             if (_mods.columnColor)
                 color = (dir % 3) ? "blue" : "red";
 
-            if (_mods.halftime)
+            if (_mods.halvedNoteskin)
                 color = HALF_COLOR[color] || color;
 
             return new Note(directionOfValue(dir), pos, color, int(frame));

@@ -311,7 +311,7 @@ internal class QueueBox extends Sprite
                     var songName:Text = new Text(box, 5, yOffset, " - " + songInfo.name + " [" + songInfo.time + "]", 12, access == GlobalVariables.SONG_ACCESS_PLAYABLE ? "#FFFFFF" : "#FF9797");
                     yOffset += 20;
                 }
-                totalTime += songInfo.time_secs;
+                totalTime += songInfo.timeSecs;
             }
         }
 

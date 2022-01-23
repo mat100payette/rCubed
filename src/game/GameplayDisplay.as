@@ -314,12 +314,12 @@ package game
                         "difficulty": _song.songInfo.difficulty,
                         "style": _song.songInfo.style,
                         "author": _song.songInfo.author,
-                        "author_url": _song.songInfo.stepauthor_url,
+                        "author_url": _song.songInfo.stepauthorUrl,
                         "stepauthor": _song.songInfo.stepauthor,
                         "credits": _song.songInfo.credits,
                         "genre": _song.songInfo.genre,
-                        "nps_min": _song.songInfo.min_nps,
-                        "nps_max": _song.songInfo.max_nps,
+                        "nps_min": _song.songInfo.minNps,
+                        "nps_max": _song.songInfo.maxNps,
                         // TODO: Check these fields
                         //"release_date": song.songInfo.releasedate,
                         //"song_rating": song.songInfo.song_rating,
@@ -450,16 +450,19 @@ package game
             // Song
             _song.updateMusicDelay();
             _legacyMode = (_song.type == NoteChart.FFR || _song.type == NoteChart.FFR_RAW || _song.type == NoteChart.FFR_LEGACY);
-            if (_song.music && (_legacyMode || !_settings.mods.noBackground))
+
+            if (_song.clip && (_legacyMode || !_settings.mods.noBackground))
             {
-                _songBackground = _song.music as MovieClip;
+                _songBackground = _song.clip;
                 _gameSongFrames = _songBackground.totalFrames;
                 _songBackground.x = 115;
                 _songBackground.y = 42.5;
                 addChild(_songBackground);
+
                 if (_settings.mods.noBackground)
                     setChildIndex(_songBackground, 0);
             }
+
             _song.start();
             _songDelay = _song.mp3Frame / _settings.songRate * 1000 / 30 - _globalOffset;
         }
@@ -583,6 +586,7 @@ package game
                 if (_replay)
                     _progressDisplay.addEventListener(MouseEvent.CLICK, progressMouseClick);
             }
+
             if (_settings.displaySongProgressText)
             {
                 _progressDisplayText = new TextStatic("0:00");

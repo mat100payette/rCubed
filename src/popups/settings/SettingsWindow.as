@@ -30,6 +30,7 @@ package popups.settings
     import events.navigation.ChangePanelEvent;
     import events.navigation.OpenEditorEvent;
     import game.GameplayDisplay;
+    import classes.GameMods;
 
 
     public class SettingsWindow extends DisplayLayer
@@ -219,8 +220,7 @@ package popups.settings
 
         public function checkValidMods():void
         {
-            // TODO: Refactor the score validation somewhere
-            //_txtModWarning.visible = !_user.settings.isScoreValid();
+            _txtModWarning.visible = !new GameMods(_user.settings).isScoringCompatible;
         }
 
         private function onManageSettingsWindowClosed(window:ManageSettingsWindow):void
