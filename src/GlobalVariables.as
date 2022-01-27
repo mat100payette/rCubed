@@ -319,18 +319,18 @@ package
             return loadSongFile(songInfo, settings, preview);
         }
 
-        private function loadSongFile(songInfo:SongInfo, settings:UserSettings, preview:Boolean = false):Song
+        private function loadSongFile(songInfo:SongInfo, settings:UserSettings, isReplay:Boolean, isPreview:Boolean = false):Song
         {
             //- Only Cache 10 Songs
             var engineCache:Boolean = (songInfo.engine == Playlist.instance.engine) && (!songInfo.engine || !songInfo.engine.ignoreCache);
-            if (!preview && songCache.length > 10 && engineCache)
+            if (!isPreview && songCache.length > 10 && engineCache)
                 songCache.pop();
 
             //- Make new Song
-            var song:Song = new Song(songInfo, preview, settings);
+            var song:Song = new Song(songInfo, isPreview, settings);
 
             //- Push to cache
-            if (!preview)
+            if (!isPreview)
                 songCache.push(song);
 
             return song;
@@ -351,7 +351,12 @@ package
         public function removeSongFiles():void
         {
             for (var s:int = 0; s < songCache.length; s++)
-                songCache[s].unload();
+            {
+                var song:Song = songCache[s];
+
+                if (song)
+                    song.unload();
+            }
 
             songCache = [];
 

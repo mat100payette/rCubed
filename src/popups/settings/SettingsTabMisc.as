@@ -412,7 +412,6 @@ package popups.settings
         {
             _settings.frameRate = _optionFramerate.validate(60);
             _settings.frameRate = Math.max(Math.min(_settings.frameRate, 1000), 10);
-            _gvars.removeSongFiles();
         }
 
         private function onMPTextSizeChanged(e:Event):void

@@ -131,7 +131,6 @@ package
                         var previewSong:Song = _gvars.getSongFile(watchPreviewEvent.replay.songInfo, null, true);
                         nextPanel = new GameLoading(previewSong, null, GameplayDisplay.SOLO, null, true);
                     }
-
                     else if (e is StartReplayEvent)
                     {
                         var startReplayEvent:StartReplayEvent = e as StartReplayEvent;
@@ -224,6 +223,8 @@ package
                 addChildAt(popup, _topLayerIndex);
                 popup.stageAdd();
 
+                activePanel.focus = false;
+
                 _topLayerIndex++;
             }
             finally
@@ -245,10 +246,16 @@ package
             try
             {
                 if (_topLayerIndex == 1)
+                {
+                    activePanel.focus = true;
                     return;
+                }
 
                 removeChildAt(_topLayerIndex - 1);
                 _topLayerIndex--;
+
+                if (_topLayerIndex == 1)
+                    activePanel.focus = true;
             }
             finally
             {

@@ -691,7 +691,7 @@ package game
             var target:DisplayObject = e.target;
 
             // Don't do anything with popups open.
-            if (false)
+            if (!focus)
                 return;
 
             // Handle Key events and click in the same function
@@ -749,21 +749,17 @@ package game
 
             else if (target == _navReplay)
             {
-                var skipload:Boolean = (_songResults.length == 1 && _songResults[0].song && _songResults[0].song.isLoaded);
-
-                if (skipload)
-                {
-                    _gvars.songRestarts++;
-                    if (isReplay)
-                        dispatchEvent(new StartReplayEvent(_songResults[0].song, _replay));
-                    else
-                        dispatchEvent(new StartGameplayEvent(_songResults[0].song, false, GameplayDisplay.SOLO, _mpRoom));
-                }
+                if (isReplay)
+                    dispatchEvent(new StartReplayEvent(_songResults[0].song, _replay));
                 else
                 {
-                    // TODO: Fix this queue logic
+                    _gvars.songRestarts++;
                     _gvars.songQueue = _gvars.totalSongQueue.concat();
-                    dispatchEvent(new StartGameplayEvent(_songResults[0].song, false, GameplayDisplay.SOLO, _mpRoom));
+
+                    // Regrab song object from cache in case settings changed
+                    var song:Song = _gvars.getSongFile(_songResults[0].song.songInfo);
+
+                    dispatchEvent(new StartGameplayEvent(song, false, GameplayDisplay.SOLO, _mpRoom));
                 }
             }
 

@@ -7,6 +7,8 @@ package menu
     {
         private var _layerIndex:int;
 
+        public var focus:Boolean = true;
+
         public function DisplayLayer()
         {
             super();

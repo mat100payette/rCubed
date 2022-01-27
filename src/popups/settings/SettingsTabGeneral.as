@@ -400,7 +400,6 @@ package popups.settings
         private function onSongRateChanged(e:Event):void
         {
             _settings.songRate = _optionRate.validate(1, 0.1);
-            _gvars.removeSongFiles();
 
             _parent.checkValidMods();
         }

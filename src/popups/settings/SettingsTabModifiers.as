@@ -233,7 +233,6 @@ package popups.settings
         private function onReverseChecked(e:Event):void
         {
             toggleGameMod("reverse");
-            _gvars.removeSongFiles();
             _parent.checkValidMods();
         }
 
