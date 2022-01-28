@@ -40,6 +40,7 @@ package
     import game.GameScoreResult;
     import events.navigation.StartReplayEvent;
     import events.navigation.StartSpectatingEvent;
+    import menu.MenuSongSelection;
 
     public class Navigator extends Sprite implements IDisposable
     {
@@ -100,9 +101,8 @@ package
                         return;
                     }
                     else
-                    {
                         nextPanel = new MainMenu(panelName);
-                    }
+
                     break;
 
                 case Routes.PANEL_GAMEPLAY:
@@ -146,9 +146,6 @@ package
                         var startGameplayEvent:StartGameplayEvent = e as StartGameplayEvent;
                         var startGameplaySong:Song = startGameplayEvent.song;
 
-                        // TODO: Add queue logic here
-                        _gvars.songResults = new Vector.<GameScoreResult>();
-
                         if (startGameplaySong.isLoaded)
                             nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, startGameplayEvent.mode, false, false, null, startGameplayEvent.mpRoom);
                         else
@@ -162,10 +159,21 @@ package
                     break;
             }
 
+            // TODO: All the following stuff (except panel transition) should be done in proper
+            // state management
+            var isGameplayOrResults:Boolean = nextPanel is GameplayDisplay || nextPanel is GameResults;
+
             // Show Background only if not gameplay or results
-            var showBgAndVersion:Boolean = !(nextPanel is GameplayDisplay || nextPanel is GameResults);
-            _bg.updateDisplay(!showBgAndVersion);
-            _versionText.visible = showBgAndVersion;
+            _bg.updateDisplay(isGameplayOrResults);
+            _versionText.visible = !isGameplayOrResults;
+
+            // Clear queue if necessary
+            if (!isGameplayOrResults)
+            {
+                MenuSongSelection.options.queuePlaylist = [];
+                _gvars.songQueue = [];
+                _gvars.songQueueIndex = 0;
+            }
 
             transitionPanel(nextPanel);
         }

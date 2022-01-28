@@ -59,9 +59,9 @@ package assets
             this.graphics.endFill();
         }
 
-        public function updateDisplay(gameMode:Boolean = false):void
+        public function updateDisplay(isGameplay:Boolean = false):void
         {
-            if (gameMode)
+            if (isGameplay)
             {
                 if (BG_IMG_MENU != null)
                     BG_IMG_MENU.visible = false;

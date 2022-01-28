@@ -275,6 +275,8 @@ package game
             // Remove Mouse Move for graphs
             stage.removeEventListener(MouseEvent.MOUSE_MOVE, e_graphHover);
 
+            _gvars.songResults.length = 0;
+
             super.dispose();
         }
 
@@ -754,7 +756,7 @@ package game
                 else
                 {
                     _gvars.songRestarts++;
-                    _gvars.songQueue = _gvars.totalSongQueue.concat();
+                    _gvars.songQueueIndex = 0;
 
                     // Regrab song object from cache in case settings changed
                     var song:Song = _gvars.getSongFile(_songResults[0].song.songInfo);
@@ -791,6 +793,7 @@ package game
                 if (songList.length > 0)
                 {
                     var selectedSong:Song = _gvars.getSongFile(songList[Math.floor(Math.random() * (songList.length - 1))], _settings, false);
+
                     dispatchEvent(new StartGameplayEvent(selectedSong, false, GameplayDisplay.SOLO, _mpRoom));
                 }
             }

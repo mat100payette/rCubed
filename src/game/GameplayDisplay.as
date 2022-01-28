@@ -63,6 +63,7 @@ package game
     import com.flashfla.utils.VectorUtil;
     import classes.Room;
     import events.navigation.ShowGameResultsEvent;
+    import events.navigation.StartGameplayEvent;
 
     public class GameplayDisplay extends DisplayLayer
     {
@@ -358,12 +359,9 @@ package game
             initVars();
 
             // Preload next Song
-            /*
-               if (_gvars.songQueue.length > 0)
-               {
-               _gvars.getSongFile(_gvars.songQueue[0], _settings);
-               }
-             */
+            if (_gvars.songQueueIndex + 1 < _gvars.songQueue.length)
+                _gvars.getSongFile(_gvars.songQueue[_gvars.songQueueIndex + 1], _settings);
+
 
             // Setup MP Things
             if (_mpRoom)
@@ -1185,14 +1183,10 @@ package game
                         _gameState = GAME_END;
                     }
                     else
-                    {
                         _quitDoubleTap = _settings.frameRate / 4;
-                    }
                 }
                 else
-                {
                     _gameState = GAME_END;
-                }
             }
 
             // Pause
@@ -1525,7 +1519,20 @@ package game
             if (_isEditor || _mpSpectate)
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_MAIN_MENU));
             else
-                dispatchEvent(new ShowGameResultsEvent(_song, _isAutoplay, _replay, _mpRoom));
+            {
+                _gvars.songQueueIndex++;
+                // More songs to play, jump to gameplay or loading.
+                if (_gvars.songQueueIndex < _gvars.songQueue.length)
+                {
+                    var nextSong:Song = _gvars.getSongFile(_gvars.songQueue[_gvars.songQueueIndex]);
+                    dispatchEvent(new StartGameplayEvent(nextSong, _isAutoplay, GameplayDisplay.SOLO, _mpRoom));
+                }
+                else
+                {
+                    dispatchEvent(new ShowGameResultsEvent(_song, _isAutoplay, _replay, _mpRoom));
+                    _gvars.songResults.length = 0;
+                }
+            }
 
             _song = null;
         }

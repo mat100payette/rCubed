@@ -78,7 +78,7 @@ package
 
         ///- GamePlay
         public var songQueue:Array = [];
-        public var totalSongQueue:Array = [];
+        public var songQueueIndex:uint = 0;
         public var gameIndex:int = 0;
         public var replayHistory:Array = [];
         public var songResults:Vector.<GameScoreResult> = new <GameScoreResult>[];
