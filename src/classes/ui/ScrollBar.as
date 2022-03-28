@@ -20,22 +20,22 @@ package classes.ui
         private var _bottom:Number;
         private var _bounds:Rectangle;
 
-        public var scroll:Number = 0;
-
         private var _listener:Function = null;
+
+        public var scroll:Number = 0;
 
         public function ScrollBar(parent:DisplayObjectContainer = null, xpos:Number = 0, ypos:Number = 0, width:int = 0, height:int = 0, dragger:Sprite = null, background:Sprite = null, listener:Function = null):void
         {
             if (parent)
                 parent.addChild(this);
 
-            this.x = xpos;
-            this.y = ypos;
+            x = xpos;
+            y = ypos;
 
-            this._width = width;
-            this._height = height;
-            this._dragger = dragger;
-            this._background = background;
+            _width = width;
+            _height = height;
+            _dragger = dragger;
+            _background = background;
 
             //- Draw Background if one isn't provided
             if (_background == null)
@@ -45,7 +45,7 @@ package classes.ui
                 _background.graphics.drawRect(0, 0, _width, _height);
                 _background.graphics.endFill();
             }
-            this.addChild(_background);
+            addChild(_background);
 
             //- Draw Dragger if one isn't provided
             if (_dragger == null)
@@ -65,7 +65,7 @@ package classes.ui
             _dragger.addEventListener(MouseEvent.MOUSE_DOWN, draggerDown);
             _dragger.addEventListener(MouseEvent.MOUSE_UP, draggerUp);
 
-            this.addChild(_dragger);
+            addChild(_dragger);
 
             //- Set Bottom Bound
             _bottom = Math.floor(_height - _dragger.height);
@@ -73,8 +73,8 @@ package classes.ui
             //- Set click event listener
             if (listener != null)
             {
-                this._listener = listener;
-                this.addEventListener(Event.CHANGE, listener);
+                _listener = listener;
+                addEventListener(Event.CHANGE, listener);
             }
         }
 
@@ -88,9 +88,12 @@ package classes.ui
         {
             if (val < 0)
                 val = 0;
+
             if (val > 1)
                 val = 1;
+
             scroll = val;
+
             if (!useTween)
                 _dragger.y = (_bottom * val);
             else
@@ -134,8 +137,7 @@ package classes.ui
         private function draggerMove(e:MouseEvent):void
         {
             scroll = (_dragger.y / _bottom);
-            this.dispatchEvent(new Event(Event.CHANGE));
+            dispatchEvent(new Event(Event.CHANGE));
         }
     }
-
 }

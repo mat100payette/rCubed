@@ -1,7 +1,7 @@
 package game.controls
 {
 
-    public class Judge_Tweens
+    public class JudgeTweens
     {
         // "frame": [length, x, y, scaleX, scaleY, alpha, framelook];
         // lengths above 0 are considered tweens

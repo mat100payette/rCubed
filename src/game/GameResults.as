@@ -502,7 +502,7 @@ package game
             for each (var mod:String in _settings.activeMods)
                 mods.push(_lang.string("options_mod_" + mod));
 
-            if (_settings.judgeWindow)
+            if (JSON.stringify(_settings.judgeWindow) != JSON.stringify(Constant.DEFAULT_JUDGE_WINDOW))
                 mods.push(_lang.string("options_mod_judge"));
             if (mods.length > 0)
                 _resultsMods.text += ", Game Mods: " + mods.join(", ");

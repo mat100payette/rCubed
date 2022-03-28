@@ -13,7 +13,7 @@ package game.controls
 
     public class Judge extends Sprite
     {
-        private var _indexes:Object = Judge_Tweens.judge_indexes;
+        private var _indexes:Object = JudgeTweens.judge_indexes;
         private var _labelDesc:Array = [];
         private var _field:TextField;
         private var _freeze:Boolean = false;
@@ -35,7 +35,7 @@ package game.controls
             _isEditor = isEditor;
 
             if (!displayAnimations)
-                _indexes = Judge_Tweens.judge_indexes_static;
+                _indexes = JudgeTweens.judge_indexes_static;
 
             animationSpeed = animationSpeed;
 

@@ -28,11 +28,13 @@ package popups
     import menu.MenuSongSelection;
     import sql.SQLSongUserInfo;
     import flash.text.TextFormatAlign;
-    import fl.controls.TextInput;
     import flash.text.TextFieldType;
+    import events.navigation.popups.RemovePopupEvent;
 
     public class PopupSongNotes extends DisplayLayer
     {
+        private const MAX_NOTES_CHARS:int = 250;
+
         private var _lang:Language = Language.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _playlist:Playlist = Playlist.instance;
@@ -42,7 +44,7 @@ package popups
         private var box:Box;
         private var bmp:Bitmap;
 
-        private var songInfo:Object;
+        private var songInfo:SongInfo;
         private var sDetails:SQLSongUserInfo;
 
         private var sRating:StarSelector;
@@ -77,7 +79,7 @@ package popups
         override public function stageAdd():void
         {
             bmp = SpriteUtil.getBitmapSprite(stage);
-            this.addChild(bmp);
+            addChild(bmp);
 
             var bgbox:Box = new Box(this, (Main.GAME_WIDTH - 390) / 2, -1, false, false);
             bgbox.setSize(390, Main.GAME_HEIGHT + 2);
@@ -89,7 +91,7 @@ package popups
             box.setSize(bgbox.width, bgbox.height);
             box.activeAlpha = 0.4;
 
-            var titleDisplay:Text = new Text(box, 5, 20, "- " + songInfo["name"] + " -", 20);
+            var titleDisplay:Text = new Text(box, 5, 20, "- " + songInfo.name + " -", 20);
             titleDisplay.width = box.width - 10;
             titleDisplay.align = TextFormatAlign.CENTER;
 
@@ -121,7 +123,7 @@ package popups
             //- Notes Field
             var notesLabel:Text = new Text(box, xOff, yOff, _lang.string("song_notes"));
 
-            notesLength = new Text(box, box.width - xOff, yOff, "(0 / 250)");
+            notesLength = new Text(box, box.width - xOff, yOff, "(0 / " + MAX_NOTES_CHARS + ")");
             notesLength.align = TextFormatAlign.RIGHT;
             yOff += 20;
 
@@ -133,7 +135,7 @@ package popups
             notesField = new TextField();
             notesField.wordWrap = true;
             notesField.multiline = true;
-            notesField.maxChars = 250;
+            notesField.maxChars = MAX_NOTES_CHARS;
             notesField.type = TextFieldType.INPUT;
             notesField.antiAliasType = AntiAliasType.ADVANCED;
             notesField.embedFonts = true;
@@ -188,22 +190,22 @@ package popups
 
         private function refreshFields():void
         {
-            if (sDetails != null)
-            {
-                sRating.value = songRatingValue;
-                sFavorite.checked = sDetails.song_favorite;
-                notesField.text = sDetails.notes;
-                notesLength.text = "(" + notesField.length + " / 250)";
-                setMirrorInvert.checked = sDetails.set_mirror_invert;
-                setCustomOffsets.checked = sDetails.set_custom_offsets;
-                optionMusicOffset.text = sDetails.offset_music.toString();
-                optionJudgeOffset.text = sDetails.offset_judge.toString();
-            }
+            if (sDetails == null)
+                return;
+
+            sRating.value = songRatingValue;
+            sFavorite.checked = sDetails.song_favorite;
+            notesField.text = sDetails.notes;
+            notesLength.text = "(" + notesField.length + " / " + MAX_NOTES_CHARS + ")";
+            setMirrorInvert.checked = sDetails.set_mirror_invert;
+            setCustomOffsets.checked = sDetails.set_custom_offsets;
+            optionMusicOffset.text = sDetails.offset_music.toString();
+            optionJudgeOffset.text = sDetails.offset_judge.toString();
         }
 
         private function e_notesFieldChange(e:Event):void
         {
-            notesLength.text = "(" + notesField.length + " / 250)";
+            notesLength.text = "(" + notesField.length + " / " + MAX_NOTES_CHARS + ")";
         }
 
         override public function dispose():void
@@ -260,11 +262,13 @@ package popups
                 setMirrorInvert.checked = false;
                 setCustomOffsets.checked = false;
                 notesField.text = "";
-                notesLength.text = "(0 / 250)";
+                notesLength.text = "(0 / " + MAX_NOTES_CHARS + ")";
                 optionMusicOffset.text = "0";
                 optionJudgeOffset.text = "0";
                 optionMusicOffset.validate(0);
                 optionJudgeOffset.validate(0);
+
+                    //refreshFields();
             }
 
             //- Confirm Rating
@@ -284,11 +288,13 @@ package popups
                     }
                 }
 
+                dispatchEvent(new RemovePopupEvent());
                 return;
             }
             //- Close
             else if (e.target == closeOptions)
             {
+                dispatchEvent(new RemovePopupEvent());
                 return;
             }
         }
@@ -306,7 +312,7 @@ package popups
             if (sDetails.engine != Constant.BRAND_NAME_SHORT_LOWER)
                 sDetails.song_rating = sRating.value;
             else
-                _gvars.playerUser.songRatings[songInfo["level"]] = sRating.value;
+                _gvars.playerUser.songRatings[songInfo.level] = sRating.value;
 
             _gvars.writeUserSongData();
         }
@@ -323,7 +329,7 @@ package popups
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
             requestVars.session = _gvars.userSession;
-            requestVars.id = songInfo["level"];
+            requestVars.id = songInfo.level;
             requestVars.song_rating = sRating.value;
             requestVars.chart_rating = 2.5;
             req.data = requestVars;
@@ -347,13 +353,13 @@ package popups
                 var _data:Object = JSON.parse(e.target.data);
                 if (_data["result"] && _data["result"] == "success")
                 {
-                    _gvars.playerUser.songRatings[songInfo["level"]] = sRating.value;
+                    _gvars.playerUser.songRatings[songInfo.level] = sRating.value;
 
                     //Alert.add("Saved rating for " + sObject["name"] + "!", 120, Alert.GREEN);
 
                     if (_data["type"] && _data["type"] == 1)
                     {
-                        _playlist.playList[songInfo["level"]]["song_rating"] = _data["new_value"];
+                        _playlist.playList[songInfo.level]["song_rating"] = _data["new_value"];
                     }
                 }
                 else

@@ -234,11 +234,11 @@ package menu
                 genreDisplay.x = 5;
                 genreDisplay.y = 135;
                 genreDisplay.addEventListener(MouseEvent.CLICK, genreClick, false, 0, true);
-                this.addChild(genreDisplay);
+                addChild(genreDisplay);
 
-                this.graphics.lineStyle(1, 0xffffff, 0.5);
-                this.graphics.moveTo(22, 133);
-                this.graphics.lineTo(121, 133);
+                graphics.lineStyle(1, 0xffffff, 0.5);
+                graphics.moveTo(22, 133);
+                graphics.lineTo(121, 133);
 
                 SELECTED_GENRE_BACKGROUND = new GenreSelection();
 
@@ -254,7 +254,7 @@ package menu
                 genre_mode_prev.buttonMode = true;
                 genre_mode_prev.useHandCursor = true;
                 genre_mode_prev.addEventListener(MouseEvent.CLICK, clickHandler, false, 0, true);
-                this.addChild(genre_mode_prev);
+                addChild(genre_mode_prev);
 
                 genre_mode_next = new iconRight();
                 genre_mode_next.x = 127;
@@ -263,7 +263,7 @@ package menu
                 genre_mode_next.buttonMode = true;
                 genre_mode_next.useHandCursor = true;
                 genre_mode_next.addEventListener(MouseEvent.CLICK, clickHandler, false, 0, true);
-                this.addChild(genre_mode_next);
+                addChild(genre_mode_next);
             }
 
             //- Add Info Box Tabs
@@ -279,7 +279,8 @@ package menu
             optionsBox = new Sprite();
             optionsBox.x = 559; // 155
             optionsBox.y = 64;
-            this.addChild(optionsBox);
+
+            addChild(optionsBox);
 
             var optionsTexts:Array = [[_lang.string("song_selection_menu_search"), "search"], [_lang.string("song_selection_search"), "queue"]]
             for (i = 0; i < optionsTexts.length; i++)
@@ -298,7 +299,8 @@ package menu
                 infoBox.graphics.endFill();
                 infoBox.x = 559; // 155
                 infoBox.y = 94;
-                this.addChild(infoBox);
+
+                addChild(infoBox);
             }
 
             //- Add ScrollPane
@@ -1945,6 +1947,9 @@ package menu
          */
         private function keyHandler(e:KeyboardEvent):void
         {
+            if (!focus || !stage)
+                return;
+
             if (searchBox != null && options.infoTab == TAB_SEARCH && searchBox.focus)
             {
                 switch (e.keyCode)

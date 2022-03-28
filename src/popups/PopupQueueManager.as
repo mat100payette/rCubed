@@ -18,6 +18,7 @@ package popups
     import flash.geom.Point;
     import menu.DisplayLayer;
     import classes.SongInfo;
+    import events.navigation.popups.RemovePopupEvent;
 
     public class PopupQueueManager extends DisplayLayer
     {
@@ -113,8 +114,9 @@ package popups
             closeBtn.dispose();
 
             box.dispose();
-            this.removeChild(box);
-            this.removeChild(bmp);
+            removeChild(box);
+            removeChild(bmp);
+
             bmd = null;
             bmp = null;
             box = null;
@@ -216,9 +218,9 @@ package popups
                 renderQueues();
                 return;
             }
-            //- Close
             if (e.target == closeBtn)
             {
+                dispatchEvent(new RemovePopupEvent());
                 return;
             }
         }

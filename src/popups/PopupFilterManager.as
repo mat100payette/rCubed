@@ -283,7 +283,7 @@ package popups
                 // TODO: Change all this to a stateEvent
                 // like FiltersSavedEvent
                 var mmmenu:MainMenu = (_gvars.gameMain.navigator.activePanel as MainMenu);
-                mmmenu.buildMenuItems();
+                mmmenu.updateFiltersButton();
 
                 if (mmmenu.currentPanel != null && (mmmenu.currentPanel is MenuSongSelection))
                 {

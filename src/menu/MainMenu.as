@@ -59,6 +59,9 @@ package menu
         private var _initialPanelName:String;
         private static var _lastPanelName:String;
         private static var _currentPanelName:String;
+
+        private var btnFilters:BoxIcon;
+
         public var currentPanel:DisplayLayer;
 
         ///- Constructor
@@ -147,7 +150,9 @@ package menu
             {
                 case Routes.PANEL_SONGSELECTION:
                     if (_layerSongSelection == null)
+                    {
                         _layerSongSelection = new MenuSongSelection();
+                    }
                     newPanel = _layerSongSelection;
                     _lastPanelName = panelName;
                     break;
@@ -159,7 +164,9 @@ package menu
 
                 case Routes.PANEL_TOKENS:
                     if (_layerTokens == null)
+                    {
                         _layerTokens = new MenuTokens();
+                    }
                     newPanel = _layerTokens;
                     _lastPanelName = panelName;
                     break;
@@ -171,7 +178,9 @@ package menu
                     removeChild(currentPanel);
 
                 currentPanel = newPanel;
+
                 addChild(currentPanel);
+                currentPanel.stageAdd();
             }
         }
 
@@ -256,16 +265,11 @@ package menu
             addMenuVariableButton(true, "menu_play", onSongSelectionButtonClick);
             addMenuVariableButton(false, "menu_multiplayer", onMultiplayerButtonClick);
             addMenuVariableButton(false, "menu_tokens", onTokensButtonClick);
-            var btnFilters:BoxIcon = addMenuIconButton(false, "menu_filters", "iconFilter", onFiltersButtonClick);
+            btnFilters = addMenuIconButton(false, "menu_filters", "iconFilter", onFiltersButtonClick);
             addMenuIconButton(false, "menu_replays", "iconVideo", onReplaysButtonClick);
             addMenuVariableButton(false, "menu_options", onOptionsButtonClick);
 
-            if (_gvars.activeFilter != null)
-            {
-                btnFilters.setIconColor("#61ED42");
-                btnFilters.color = 0x61ED42;
-                btnFilters.borderColor = 0x61ED42;
-            }
+            updateFiltersButton();
         }
 
         private function onSongSelectionButtonClick(e:Event):void
@@ -296,6 +300,22 @@ package menu
         private function onReplaysButtonClick(e:Event):void
         {
             dispatchEvent(new AddPopupEvent(Routes.POPUP_REPLAY_HISTORY));
+        }
+
+        public function updateFiltersButton():void
+        {
+            if (_gvars.activeFilter != null)
+            {
+                btnFilters.setIconColor("#61ED42");
+                btnFilters.color = 0x61ED42;
+                btnFilters.borderColor = 0x61ED42;
+            }
+            else
+            {
+                btnFilters.setIconColor("#DDDDDD");
+                btnFilters.color = 0xDDDDDD;
+                btnFilters.borderColor = 0xFFFFFF;
+            }
         }
 
         public function drawMenuMusicControls():void
@@ -423,7 +443,8 @@ package menu
                 rankUpdateThrobber.x = Main.GAME_WIDTH - 48;
                 rankUpdateThrobber.y = Main.GAME_HEIGHT - 22;
                 rankUpdateThrobber.visible = false;
-                this.addChild(rankUpdateThrobber);
+
+                addChild(rankUpdateThrobber);
             }
             if (rankUpdateThrobber.running)
                 return;

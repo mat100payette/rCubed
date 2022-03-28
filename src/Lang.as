@@ -131,6 +131,7 @@ package
         public static const OPTIONS_SONPROGRESS_TEXT:String = "options_songprogress_text";
         public static const OPTIONS_SCORE:String = "options_score";
         public static const OPTIONS_COMBO:String = "options_combo";
+        public static const OPTIONS_TOTAL:String = "options_total";
         public static const OPTIONS_PA_COUNT:String = "options_pacount";
         public static const OPTIONS_ACCURACY_BAR:String = "options_accuracy_bar";
         public static const OPTIONS_SCREENCUT:String = "options_screencut";

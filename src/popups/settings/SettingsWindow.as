@@ -230,7 +230,7 @@ package popups.settings
 
         private function onResetSettingsClicked(e:Event):void
         {
-            const confirmWindow:Window = new Window(this, 0, 0, "Confirm Settings Reset");
+            const confirmWindow:Window = new Window(this, 0, 0, "Confirm Reset");
             confirmWindow.hasMinimizeButton = false;
             confirmWindow.hasCloseButton = false;
             confirmWindow.setSize(110, 105);

@@ -37,7 +37,6 @@ package
     import events.navigation.StartGameplayEvent;
     import events.navigation.WatchReplayEvent;
     import events.navigation.ShowGameResultsEvent;
-    import game.GameScoreResult;
     import events.navigation.StartReplayEvent;
     import events.navigation.StartSpectatingEvent;
     import menu.MenuSongSelection;
@@ -168,7 +167,7 @@ package
             _versionText.visible = !isGameplayOrResults;
 
             // Clear queue if necessary
-            if (!isGameplayOrResults)
+            if (!isGameplayOrResults && !(nextPanel is GameLoading))
             {
                 MenuSongSelection.options.queuePlaylist = [];
                 _gvars.songQueue = [];

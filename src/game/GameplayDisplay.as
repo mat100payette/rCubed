@@ -217,8 +217,8 @@ package game
 
         public function GameplayDisplay(song:Song, user:User, mode:int, isEditor:Boolean, isAutoplay:Boolean, replay:Replay, mpRoom:Room)
         {
-            if (mpRoom && mode == SOLO)
-                throw new Error("Cannot provide both an MP room and SOLO mode.");
+            //if (mpRoom && mode == SOLO)
+            //    throw new Error("Cannot provide both an MP room and SOLO mode.");
 
             _user = replay ? replay.user : user;
             _settings = new UserSettings();
@@ -227,7 +227,7 @@ package game
             if (replay && !song)
                 _song = _gvars.getSongFile(replay.songInfo, _settings);
             else if (mpRoom)
-                _song = _gvars.getSongFile(mpRoom.songInfo, _settings);
+                _song = song != null ? song : _gvars.getSongFile(mpRoom.songInfo, _settings);
             else
                 _song = song;
 

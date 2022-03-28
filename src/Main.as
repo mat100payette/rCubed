@@ -74,11 +74,13 @@ package
             if (stage)
                 gameInit();
             else
+            {
                 addEventListener(Event.ADDED_TO_STAGE, function _init(e:Event):void
                 {
                     removeEventListener(Event.ADDED_TO_STAGE, _init);
                     gameInit();
                 });
+            }
         }
 
         private function setListeners():void

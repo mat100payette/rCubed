@@ -21,26 +21,23 @@ package menu
 
     public class MenuTokens extends DisplayLayer
     {
-        ///- Private Locals
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _playlist:Playlist = Playlist.instanceCanon;
-
-        private var background:SongSelectionBackground;
-        private var scrollbar:ScrollBar;
-        private var pane:ScrollPane;
-
-        private var normalTokenButton:BoxButton;
-        private var skillTokenButton:BoxButton;
-        private var hideCompleteCheck:BoxCheck;
-
         private var _lang:Language = Language.instance;
 
-        public var options:Object;
-        public var isLoading:Boolean = false;
+        private var _background:SongSelectionBackground;
+        private var _scrollbar:ScrollBar;
+        private var _pane:ScrollPane;
 
-        private static var loadedTokenImages:Object = {};
-        private static var loadQueue:Array = [];
-        private static var ACTIVE_DOWNLOAD:Object = null;
+        private var _normalTokenButton:BoxButton;
+        private var _skillTokenButton:BoxButton;
+        private var _hideCompleteCheck:BoxCheck;
+
+        private var _options:Object;
+
+        private static var _loadedTokenImages:Object = {};
+        private static var _loadQueue:Array = [];
+        private static var _activeDownload:Object = null;
 
         public function MenuTokens()
         {
@@ -51,20 +48,20 @@ package menu
         public function init():void
         {
             //- Setup Settings
-            options = {};
-            options.active_type = "ski";
-            options.filter_complete = false;
+            _options = {};
+            _options.active_type = "ski";
+            _options.filter_complete = false;
 
             //- Add Background
-            background = new SongSelectionBackground();
-            background.x = 145;
-            background.y = 52;
-            background.pageBackground.visible = false;
-            background.visible = LocalOptions.getVariable("menu_show_song_selection_background", true);
-            this.addChild(background);
+            _background = new SongSelectionBackground();
+            _background.x = 145;
+            _background.y = 52;
+            _background.pageBackground.visible = false;
+            _background.visible = LocalOptions.getVariable("menu_show_song_selection_background", true);
+            this.addChild(_background);
 
             //- Add ScrollPane
-            pane = new ScrollPane(this, 155, 64, 578, 358);
+            _pane = new ScrollPane(this, 155, 64, 578, 358);
             var border:Sprite = new Sprite();
             border.graphics.lineStyle(1, 0xFFFFFF, 1, true);
             border.graphics.moveTo(0.3, -0.5);
@@ -72,19 +69,19 @@ package menu
             border.graphics.moveTo(0.3, 358.5);
             border.graphics.lineTo(577, 358.5);
             border.alpha = 0.35;
-            pane.addChild(border);
+            _pane.addChild(border);
 
             //- Add ScrollBar
-            scrollbar = new ScrollBar(this, 744, 81, 21, 325, new ScrollDragger(), new ScrollBackground());
+            _scrollbar = new ScrollBar(this, 744, 81, 21, 325, new ScrollDragger(), new ScrollBackground());
 
             // Menu Left
-            normalTokenButton = new BoxButton(this, 5, 130, 124, 29, _lang.string("menu_tokens_normal"), 12, onNormalSelect);
+            _normalTokenButton = new BoxButton(this, 5, 130, 124, 29, _lang.string("menu_tokens_normal"), 12, onNormalSelect);
 
-            skillTokenButton = new BoxButton(this, 5, 164, 124, 29, _lang.string("menu_tokens_skill"), 12, onSkillSelect);
-            skillTokenButton.active = true;
+            _skillTokenButton = new BoxButton(this, 5, 164, 124, 29, _lang.string("menu_tokens_skill"), 12, onSkillSelect);
+            _skillTokenButton.active = true;
 
             var hideLabel:Text = new Text(this, 10, 230, _lang.string("menu_tokens_hide_complete"));
-            hideCompleteCheck = new BoxCheck(this, 106, 233, hideCompleteClick);
+            _hideCompleteCheck = new BoxCheck(this, 106, 233, hideCompleteClick);
 
             //- Add Content
             buildTokens();
@@ -92,50 +89,51 @@ package menu
 
         private function hideCompleteClick(e:Event):void
         {
-            options.filter_complete = !options.filter_complete;
-            hideCompleteCheck.checked = options.filter_complete;
+            _options.filter_complete = !_options.filter_complete;
+            _hideCompleteCheck.checked = _options.filter_complete;
             buildTokens();
         }
 
         private function onNormalSelect(e:Event):void
         {
-            if (options.active_type != "has")
+            if (_options.active_type != "has")
             {
-                options.active_type = "has";
-                normalTokenButton.active = true;
-                skillTokenButton.active = false;
+                _options.active_type = "has";
+                _normalTokenButton.active = true;
+                _skillTokenButton.active = false;
                 buildTokens();
             }
         }
 
         private function onSkillSelect(e:Event):void
         {
-            if (options.active_type != "ski")
+            if (_options.active_type != "ski")
             {
-                options.active_type = "ski";
-                normalTokenButton.active = false;
-                skillTokenButton.active = true;
+                _options.active_type = "ski";
+                _normalTokenButton.active = false;
+                _skillTokenButton.active = true;
                 buildTokens();
             }
         }
 
         override public function dispose():void
         {
-            if (pane)
+            if (_pane)
             {
-                pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
-                pane.dispose();
-                this.removeChild(pane);
-                pane = null;
+                _pane.removeEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false);
+                _pane.dispose();
+                removeChild(_pane);
+
+                _pane = null;
             }
 
-            normalTokenButton.dispose();
-            skillTokenButton.dispose();
+            _normalTokenButton.dispose();
+            _skillTokenButton.dispose();
 
             //- Remove Listeners
             if (stage)
             {
-                scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
+                _scrollbar.removeEventListener(Event.CHANGE, scrollBarMoved, false);
             }
 
             super.dispose();
@@ -146,30 +144,31 @@ package menu
             //- Add Listeners
             if (stage)
             {
-                scrollbar.addEventListener(Event.CHANGE, scrollBarMoved, false, 0, false);
-                pane.addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false, 0, false);
+                _scrollbar.addEventListener(Event.CHANGE, scrollBarMoved, false, 0, false);
+                _pane.addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelMoved, false, 0, false);
             }
         }
 
         public function buildTokens():void
         {
             //- Clear out old MC in content pane
-            scrollbar.reset();
-            pane.clear();
-            loadQueue = [];
+            _scrollbar.reset();
+            _pane.clear();
+            _loadQueue = [];
 
             var yOffset:int = 0;
             var sX:int = 0;
             var token:TokenItem;
-            for each (var item:Object in _gvars.TOKENS_TYPE[options.active_type])
+
+            for each (var item:Object in _gvars.TOKENS_TYPE[_options.active_type])
             {
-                if (options.filter_complete && item["unlock"])
+                if (_options.filter_complete && item["unlock"])
                     continue;
 
                 token = new TokenItem(item);
                 token.y = yOffset;
                 token.addEventListener(MouseEvent.CLICK, e_tokenClick);
-                pane.content.addChild(token);
+                _pane.content.addChild(token);
                 yOffset += token.height + 5;
                 sX += 1;
 
@@ -178,14 +177,15 @@ package menu
 
             downloadTokenImage();
 
-            options.totalItems = sX;
-            pane.scrollTo(scrollbar.scroll, false);
-            scrollbar.draggerVisibility = (yOffset > pane.height);
+            _options.totalItems = sX;
+            _pane.scrollTo(_scrollbar.scroll, false);
+            _scrollbar.draggerVisibility = (yOffset > _pane.height);
         }
 
         private function e_tokenClick(e:Event):void
         {
             var token_songs:Array = [];
+
             for each (var level:int in(e.target as TokenItem).token_levels)
             {
                 if (level > 0)
@@ -213,51 +213,52 @@ package menu
         private function addTokenImageLoader(token_info:Object, token_ui:TokenItem):void
         {
             var imageHash:String = MD5.hash(token_info["picture"]);
-            if (loadedTokenImages[imageHash] != null)
+
+            if (_loadedTokenImages[imageHash] != null)
             {
-                token_ui.addTokenImage(loadedTokenImages[imageHash] as Bitmap, false);
+                token_ui.addTokenImage(_loadedTokenImages[imageHash] as Bitmap, false);
                 return;
             }
 
             // Load Image
-            loadQueue.push({"hash": imageHash, "url": token_info["picture"], "ui": token_ui});
+            _loadQueue.push({"hash": imageHash, "url": token_info["picture"], "ui": token_ui});
         }
 
         private function downloadTokenImage():void
         {
-            if (loadQueue.length <= 0 || ACTIVE_DOWNLOAD != null)
+            if (_loadQueue.length <= 0 || _activeDownload != null)
                 return;
 
-            ACTIVE_DOWNLOAD = loadQueue.shift();
+            _activeDownload = _loadQueue.shift();
 
             // Load Avatar
             var loader:Loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, downloadTokenImageComplete);
-            loader.load(new URLRequest(ACTIVE_DOWNLOAD["url"]));
+            loader.load(new URLRequest(_activeDownload["url"]));
         }
 
         private function downloadTokenImageComplete(e:Event):void
         {
-            loadedTokenImages[ACTIVE_DOWNLOAD["hash"]] = e.target.content as Bitmap;
+            _loadedTokenImages[_activeDownload["hash"]] = e.target.content as Bitmap;
 
-            if ((ACTIVE_DOWNLOAD["ui"] as TokenItem).parent != null)
-                (ACTIVE_DOWNLOAD["ui"] as TokenItem).addTokenImage(e.target.content as Bitmap);
+            if ((_activeDownload["ui"] as TokenItem).parent != null)
+                (_activeDownload["ui"] as TokenItem).addTokenImage(e.target.content as Bitmap);
 
-            ACTIVE_DOWNLOAD = null;
+            _activeDownload = null;
 
             downloadTokenImage();
         }
 
         private function mouseWheelMoved(e:MouseEvent):void
         {
-            var dist:Number = scrollbar.scroll + (pane.scrollFactorVertical / 2) * (e.delta > 0 ? -1 : 1);
-            pane.scrollTo(dist);
-            scrollbar.scrollTo(dist);
+            var dist:Number = _scrollbar.scroll + (_pane.scrollFactorVertical / 2) * (e.delta > 0 ? -1 : 1);
+            _pane.scrollTo(dist);
+            _scrollbar.scrollTo(dist);
         }
 
         private function scrollBarMoved(e:Event):void
         {
-            pane.scrollTo(e.target.scroll, false);
+            _pane.scrollTo(e.target.scroll, false);
         }
     }
 }

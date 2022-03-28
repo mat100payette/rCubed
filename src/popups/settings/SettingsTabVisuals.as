@@ -21,6 +21,7 @@ package popups.settings
         private var _optionSongProgressText:BoxCheck;
         private var _optionScore:BoxCheck;
         private var _optionCombo:BoxCheck;
+        private var _optionTotal:BoxCheck;
         private var _optionPACount:BoxCheck;
         private var _optionAccuracyBar:BoxCheck;
         private var _optionScreencut:BoxCheck;
@@ -116,6 +117,7 @@ package popups.settings
             _optionSongProgressText = addCheckOption(Lang.OPTIONS_SONPROGRESS_TEXT, onDisplaySongProgressTextChanged);
             _optionScore = addCheckOption(Lang.OPTIONS_SCORE, onDisplayScoreChanged);
             _optionCombo = addCheckOption(Lang.OPTIONS_COMBO, onDisplayComboChanged);
+            _optionTotal = addCheckOption(Lang.OPTIONS_TOTAL, onDisplayTotalChanged);
             _optionPACount = addCheckOption(Lang.OPTIONS_PA_COUNT, onDisplayPACountChanged);
             _optionAccuracyBar = addCheckOption(Lang.OPTIONS_ACCURACY_BAR, onDisplayAccuracyBarChanged);
             _optionScreencut = addCheckOption(Lang.OPTIONS_SCREENCUT, onDisplayScreencutChanged);
@@ -161,6 +163,7 @@ package popups.settings
             _optionSongProgressText.checked = _settings.displaySongProgressText;
             _optionScore.checked = _settings.displayScore;
             _optionCombo.checked = _settings.displayCombo;
+            _optionTotal.checked = _settings.displayTotal;
             _optionPACount.checked = _settings.displayPACount;
             _optionAccuracyBar.checked = _settings.displayAccuracyBar;
             _optionScreencut.checked = _settings.displayScreencut;
@@ -226,6 +229,12 @@ package popups.settings
         private function onDisplayComboChanged(e:Event):void
         {
             _settings.displayCombo = !_settings.displayCombo;
+            _parent.checkValidMods();
+        }
+
+        private function onDisplayTotalChanged(e:Event):void
+        {
+            _settings.displayTotal = !_settings.displayTotal;
             _parent.checkValidMods();
         }
 

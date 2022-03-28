@@ -328,7 +328,7 @@ package arc.mp
 
         public static function textFormatPrivateMessageOut(user:User, message:String):String
         {
-            var msgPrefix:String = "PM << " + user.name + ":";
+            var msgPrefix:String = "PM >> " + user.name + ":";
             return HtmlUtil.bold(HtmlUtil.color(HtmlUtil.escape(msgPrefix), "#009090")) + " " + HtmlUtil.escape(message);
         }
 
