@@ -53,6 +53,7 @@ package menu
     import events.navigation.WatchPreviewEvent;
     import events.navigation.StartGameplayEvent;
     import game.GameplayDisplay;
+    import state.AppState;
 
     public class MenuSongSelection extends DisplayLayer
     {
@@ -75,7 +76,6 @@ package menu
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
-        private var _playlist:Playlist = Playlist.instance;
         private var _mp:MultiplayerState = MultiplayerState.instance;
 
         private var genreDisplay:Sprite;
@@ -128,10 +128,12 @@ package menu
             // Load Default Alt Engine
             if (_avars.legacyDefaultEngine && !Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD])
             {
+                var playlist:Playlist = AppState.instance.content.altPlaylist;
+
                 _avars.configLegacy = _avars.legacyDefaultEngine;
-                _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, _playlist.engineChangeHandler);
-                _playlist.addEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
-                _playlist.load();
+                playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, playlist.engineChangeHandler);
+                playlist.addEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
+                playlist.load();
 
                 Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD_SKIP] = true;
 
@@ -387,9 +389,9 @@ package menu
                 {
                     songList = [];
 
-                    var len:int = _playlist.indexList.length;
+                    var len:int = _playlist._indexList.length;
                     for (i = 0; i < len; i++)
-                        songList[i] = _playlist.indexList[i];
+                        songList[i] = _playlist._indexList[i];
                 }
                 else
                 {
@@ -403,14 +405,14 @@ package menu
                         // Difficulty Filter
                         if (genre_index == _gvars.DIFFICULTY_RANGES.length - 1)
                         {
-                            songList = getFilteredSongInfoArrayFromVec(_playlist.indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
+                            songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
                             {
                                 return item.difficulty <= 0 || item.difficulty >= _gvars.DIFFICULTY_RANGES[genre_index][0];
                             });
                         }
                         else
                         {
-                            songList = getFilteredSongInfoArrayFromVec(_playlist.indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
+                            songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
                             {
                                 return item.difficulty >= _gvars.DIFFICULTY_RANGES[genre_index][0] && item.difficulty <= _gvars.DIFFICULTY_RANGES[genre_index][1];
                             });
@@ -418,7 +420,7 @@ package menu
                     }
                     else
                     {
-                        songList = _playlist.genreList[genre_index + 1];
+                        songList = _playlist._genreList[genre_index + 1];
                     }
                 }
 
@@ -468,7 +470,7 @@ package menu
                 // If displaying genres, and Legacy Genre isn't displayed, skip it.
                 if (GENRE_MODE == GENRE_GENRES)
                 {
-                    if (!_gvars.activeUser.settings.displayLegacySongs && !_playlist.engine && genre_index == (Constant.LEGACY_GENRE - 1))
+                    if (!_gvars.activeUser.settings.displayLegacySongs && !_playlist._engine && genre_index == (Constant.LEGACY_GENRE - 1))
                     {
                         continue;
                     }
@@ -560,7 +562,7 @@ package menu
                 case GENRE_SONGFLAGS:
                     return GlobalVariables.SONG_ICON_TEXT.length;
                 default:
-                    return (!_gvars.activeUser.settings.displayLegacySongs && !_playlist.engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
+                    return (!_gvars.activeUser.settings.displayLegacySongs && !_playlist._engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
             }
         }
 
@@ -630,7 +632,7 @@ package menu
                 // Doing search, build array based on case-insensitive match
                 if (options.isFilter)
                 {
-                    songList = getFilteredSongInfoArrayFromVec(_playlist.indexList, filterSongListOptionsFilter);
+                    songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, filterSongListOptionsFilter);
                     sourceListLength = songList.length;
                     genreLength = songList.length;
                     songList = songList.slice(options.pageNumber * ITEM_PER_PAGE, (options.pageNumber + 1) * ITEM_PER_PAGE);
@@ -641,9 +643,9 @@ package menu
             else if (options.activeGenre == PLAYLIST_ALL)
             {
                 songList = [];
-                var len:int = _playlist.indexList.length;
+                var len:int = _playlist._indexList.length;
                 for (i = 0; i < len; i++)
-                    songList[i] = _playlist.indexList[i];
+                    songList[i] = _playlist._indexList[i];
 
                 // Song List Filters
                 sourceListLength = songList.length;
@@ -663,11 +665,11 @@ package menu
                     // Difficulty Filter
                     if (options.activeGenre == _gvars.DIFFICULTY_RANGES.length - 1)
                     {
-                        songList = getFilteredSongInfoArrayFromVec(_playlist.indexList, filterSongListDifficultyMax);
+                        songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, filterSongListDifficultyMax);
                     }
                     else
                     {
-                        songList = getFilteredSongInfoArrayFromVec(_playlist.indexList, filterSongListDifficultyRange);
+                        songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, filterSongListDifficultyRange);
                     }
 
                     // Song List Filters
@@ -682,7 +684,7 @@ package menu
                 else if (GENRE_MODE == GENRE_SONGFLAGS)
                 {
                     // Song Flag Filter
-                    songList = getFilteredSongInfoArrayFromVec(_playlist.indexList, filterSongListSongFlags);
+                    songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, filterSongListSongFlags);
 
                     // Song List Filters
                     sourceListLength = songList.length;
@@ -696,7 +698,7 @@ package menu
                 }
                 else
                 {
-                    songList = _playlist.genreList[options.activeGenre + 1];
+                    songList = _playlist._genreList[options.activeGenre + 1];
                     genreLength = songList ? songList.length : 0;
                     sourceListLength = genreLength;
                 }
@@ -800,7 +802,7 @@ package menu
             var filteredArray:Array = [];
 
             var filteredSongInfos:Vector.<SongInfo>;
-            filteredSongInfos = _playlist.indexList.filter(filter);
+            filteredSongInfos = _playlist._indexList.filter(filter);
 
             for each (var songInfo:SongInfo in filteredSongInfos)
                 filteredArray.push(songInfo);
@@ -846,7 +848,7 @@ package menu
          */
         private function filterSongListLegacy(songList:Array):Array
         {
-            if (!_playlist.engine && !_gvars.activeUser.settings.displayLegacySongs)
+            if (!_playlist._engine && !_gvars.activeUser.settings.displayLegacySongs)
                 songList = songList.filter(filterSongListLegacyFilter);
 
             return songList;

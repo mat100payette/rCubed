@@ -9,7 +9,7 @@ package com.flashfla.utils
     import flash.net.FileReference;
     import by.blooddy.crypto.image.PNGEncoder;
     import classes.Alert;
-    import Main;
+    import flash.display.Stage;
 
     public class Screenshots
     {
@@ -17,11 +17,11 @@ package com.flashfla.utils
         /**
          * Takes a screenshot of the stage and saves it to disk.
          */
-        public static function takeScreenshot(gameMain:Main, filename:String = null):void
+        public static function takeScreenshot(stage:Stage, filename:String = null):void
         {
             // Create Bitmap of Stage
             var b:BitmapData = new BitmapData(Main.GAME_WIDTH, Main.GAME_HEIGHT, false, 0x000000);
-            b.draw(gameMain.stage);
+            b.draw(stage);
 
             try
             {

@@ -1,6 +1,6 @@
 package arc.mp
 {
-    import arc.mp.MultiplayerPanel;
+    import arc.mp.MenuMultiplayer;
 
     import classes.Alert;
     import classes.Gameplay;
@@ -40,6 +40,8 @@ package arc.mp
     import game.GameplayDisplay;
     import events.navigation.SpectateGameEvent;
     import events.navigation.StartGameplayEvent;
+    import state.AppState;
+    import state.ContentState;
 
     public class MultiplayerState extends EventDispatcher
     {
@@ -58,7 +60,7 @@ package arc.mp
         private var _currentSongFile:Song = null;
         private var _currentStatus:int = 0;
 
-        private var _panel:MultiplayerPanel = null;
+        private var _panel:MenuMultiplayer = null;
 
         private static var _instance:MultiplayerState = null;
 
@@ -80,16 +82,6 @@ package arc.mp
             if (_instance && _instance.connection && _instance.connection.connected)
                 _instance.connection.disconnect();
             _instance = null;
-        }
-
-        public function getPanel():MultiplayerPanel
-        {
-            if (_panel == null)
-                _panel = new MultiplayerPanel();
-
-            _panel.hideBackground(true);
-            _panel.setRoomsVisibility(true);
-            return _panel;
         }
 
         public function MultiplayerState()
@@ -278,7 +270,9 @@ package arc.mp
             if (_currentStatus >= Multiplayer.STATUS_PLAYING || songInfo == null)
                 return;
 
-            var playlistEngineId:Object = Playlist.instance.engine ? Playlist.instance.engine.id : null;
+            var playlistsState:ContentState = AppState.instance.content;
+
+            var playlistEngineId:Object = playlistsState.usingCanon ? null : playlistsState.altPlaylist.engineId;
             if (playlistEngineId == (songInfo.engine ? songInfo.engine.id : null))
             {
                 dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
@@ -294,7 +288,7 @@ package arc.mp
                 {
                     if (songInfo.engine)
                         gameplayPicking(songInfo);
-                    else if (_gvars.checkSongAccess(songInfo) == GlobalVariables.SONG_ACCESS_PLAYABLE)
+                    else if (songInfo.checkSongAccess(AppState.instance.auth.user) == SongInfo.SONG_ACCESS_PLAYABLE)
                         gameplayPicking(songInfo);
                 }
             }
@@ -458,7 +452,7 @@ package arc.mp
             propagateCurrentUserScore();
         }
 
-        public function gameplayResults(room:Room, gameResults:DisplayLayer, songResults:Vector.<GameScoreResult>):void
+        public function gameplayResults(room:Room, songResults:Vector.<GameScoreResult>):void
         {
             if (!room || !room.isPlayer(currentUser) || _currentStatus != Multiplayer.STATUS_PLAYING)
                 return;
@@ -511,13 +505,6 @@ package arc.mp
 
             // Update rooms
             propagateCurrentUserStatus();
-
-            // Update the visuals
-            var panel:MultiplayerPanel = getPanel();
-            gameResults.addChild(panel);
-            panel.hideBackground(false);
-            panel.setRoomsVisibility(false);
-            panel.hideRoom(room, true);
 
             // Submit score to FFR
             gameplaySubmit(room);

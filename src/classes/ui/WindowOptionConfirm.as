@@ -13,7 +13,7 @@ package classes.ui
     {
         private var _lang:Language = Language.instance;
 
-        private var _properties:WindowProperties;
+        private var _properties:WindowState;
         private var _onCancel:Function;
 
         private var _previousX:int;
@@ -27,7 +27,7 @@ package classes.ui
         private var _windowTimerText:Text;
         private var _confirmBtn:BoxButton;
 
-        public function WindowOptionConfirm(properties:WindowProperties, onCancel:Function):void
+        public function WindowOptionConfirm(properties:WindowState, onCancel:Function):void
         {
             _properties = properties;
             _onCancel = onCancel;

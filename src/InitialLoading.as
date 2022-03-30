@@ -17,13 +17,13 @@ package
     import classes.Alert;
     import events.navigation.ChangePanelEvent;
     import events.state.LanguageChangedEvent;
+    import state.AppState;
 
     public class InitialLoading extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _site:Site = Site.instance;
-        private var _playlist:Playlist = Playlist.instance;
         private var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
         private var _preloader:PreloaderStatusBar;
@@ -115,8 +115,6 @@ package
                 removeChild(_preloader);
                 removeEventListener(Event.ENTER_FRAME, updatePreloader);
 
-                _playlist.updateSongAccess();
-                _playlist.updatePublicSongsCount();
                 _gvars.loadUserSongData();
 
                 if (_gvars.activeUser.isGuest)
@@ -133,23 +131,24 @@ package
 
         private function updateLoaderText():void
         {
-            if (_preloader.text != null)
+            if (_preloader.text == null)
+                return;
+
+            var playlist:Playlist = AppState.instance.content.canonPlaylist;
+            var updatedText:String = "";
+
+            updatedText += "Total: " + _loadScripts + " / " + _loadTotal + "\n";
+            updatedText += "Playlist: " + getLoadText(playlist.isLoaded(), playlist.isError()) + "\n";
+            updatedText += "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n";
+            updatedText += "Site Data: " + getLoadText(_site.isLoaded(), _site.isError());
+
+            if (!_userLoggedIn)
             {
-                var updatedText:String = "";
-
-                updatedText += "Total: " + _loadScripts + " / " + _loadTotal + "\n";
-                updatedText += "Playlist: " + getLoadText(_playlist.isLoaded(), _playlist.isError()) + "\n";
-                updatedText += "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n";
-                updatedText += "Site Data: " + getLoadText(_site.isLoaded(), _site.isError());
-
-                if (!_userLoggedIn)
-                {
-                    updatedText += "\n" + "Noteskin Data: " + getLoadText(_noteskinList.isLoaded(), _noteskinList.isError());
-                    updatedText += "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())
-                }
-
-                _preloader.htmlText = updatedText;
+                updatedText += "\n" + "Noteskin Data: " + getLoadText(_noteskinList.isLoaded(), _noteskinList.isError());
+                updatedText += "\n" + "Language Data: " + getLoadText(_lang.isLoaded(), _lang.isError())
             }
+
+            _preloader.htmlText = updatedText;
         }
 
         ///- Game Data

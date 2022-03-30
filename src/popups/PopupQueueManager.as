@@ -164,9 +164,9 @@ package popups
                 genResultBasedQueues();
 
                 // Display Premade Genre Queues
-                for (var curGenre:String in _playlist.generatedQueues)
+                for (var curGenre:String in _playlist._generatedQueues)
                 {
-                    sI = new QueueBox(this, new SongQueueItem(_lang.string("genre_" + (int(curGenre) - 1)), _playlist.generatedQueues[curGenre]), false, true);
+                    sI = new QueueBox(this, new SongQueueItem(_lang.string("genre_" + (int(curGenre) - 1)), _playlist._generatedQueues[curGenre]), false, true);
                     sI.y = yOffset;
                     sI.index = sX;
                     scrollpane.content.addChild(sI);
@@ -229,10 +229,10 @@ package popups
         {
             var songlist:Array = [];
             STAT_LIST = [];
-            for (var index:String in _playlist.indexList)
+            for (var index:String in _playlist._indexList)
             {
 
-                var _songInfo:SongInfo = _playlist.indexList[index];
+                var _songInfo:SongInfo = _playlist._indexList[index];
                 var _rank:Object = _gvars.activeUser.getLevelRank(_songInfo);
                 var _access:int = _gvars.checkSongAccess(_songInfo);
 
@@ -304,7 +304,7 @@ internal class QueueBox extends Sprite
         var totalTime:int = 0;
         for each (var songid:int in queueItem.items)
         {
-            var songInfo:SongInfo = _playlist.playList[songid];
+            var songInfo:SongInfo = _playlist._playList[songid];
             if (songInfo)
             {
                 if (longview)
@@ -376,7 +376,7 @@ internal class QueueBox extends Sprite
         var newSongQueue:Array = [];
         for each (var songid:int in queueItem.items)
         {
-            var songInfo:SongInfo = _playlist.playList[songid];
+            var songInfo:SongInfo = _playlist._playList[songid];
             if (songInfo)
             {
                 var access:int = _gvars.checkSongAccess(songInfo);

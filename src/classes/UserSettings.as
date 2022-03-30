@@ -405,7 +405,6 @@ package classes
                 GameBackgroundColor.BG_STATIC = gameColors[2];
                 GameBackgroundColor.BG_POPUP = gameColors[3];
                 GameBackgroundColor.BG_STAGE = gameColors[4];
-                (GlobalVariables.instance.gameMain.getChildAt(0) as GameBackgroundColor).redraw();
             }
 
             function mergeIntoArray(arr1:*, arr2:*):void

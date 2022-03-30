@@ -25,6 +25,7 @@ package popups.settings
     import menu.MainMenu;
     import events.navigation.popups.AddPopupEvent;
     import events.state.LanguageChangedEvent;
+    import state.AppState;
 
     public class SettingsTabMisc extends SettingsTabBase
     {
@@ -452,7 +453,7 @@ package popups.settings
 
         private function onUseWebsocketMouseOver(e:Event):void
         {
-            if (!_gvars.air_useWebsockets)
+            if (!AppState.instance.air.useWebsockets)
                 return;
 
             const activePort:uint = _gvars.websocketPortNumber("websocket");
@@ -460,7 +461,11 @@ package popups.settings
                 return;
 
             _optionUseWebsockets.addEventListener(MouseEvent.MOUSE_OUT, onUseWebsocketMouseOut);
-            displayToolTip(_optionUseWebsockets.x, _optionUseWebsockets.y + 22, sprintf(_lang.string(Lang.OPTIONS_ACTIVE_PORT), {"port": _gvars.websocketPortNumber("websocket").toString()}));
+
+            var portInfo:Object = {"port": activePort.toString()};
+            var tooltipText:String = sprintf(_lang.string(Lang.OPTIONS_ACTIVE_PORT), portInfo);
+
+            displayToolTip(_optionUseWebsockets.x, _optionUseWebsockets.y + 22, tooltipText);
         }
 
         private function onUseWebsocketMouseOut(e:Event):void
@@ -533,8 +538,8 @@ package popups.settings
             else if (!_ignoreEngineCombo && data != _avars.configLegacy)
             {
                 _avars.configLegacy = data;
-                _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, _playlist.engineChangeHandler);
-                _playlist.addEventListener(GlobalVariables.LOAD_ERROR, _playlist.engineChangeHandler);
+                //_playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, _playlist.engineChangeHandler);
+                //_playlist.addEventListener(GlobalVariables.LOAD_ERROR, _playlist.engineChangeHandler);
                 _playlist.load();
             }
         }

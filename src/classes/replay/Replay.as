@@ -18,6 +18,7 @@ package classes.replay
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
     import flash.utils.ByteArray;
+    import state.AppState;
 
     public class Replay
     {
@@ -310,7 +311,10 @@ package classes.replay
 
         public function loadSongInfo():void
         {
-            songInfo = arc_engine ? ArcGlobals.instance.legacyDecode(arc_engine) : Playlist.instanceCanon.getSongInfo(level);
+            if (arc_engine)
+                songInfo = ArcGlobals.instance.getAltEngineSongInfo(arc_engine, AppState.instance.content.altPlaylist);
+            else
+                songInfo = AppState.instance.content.canonPlaylist.getSongInfo(level);
         }
 
         private function getDirCol(noteDir:String):String

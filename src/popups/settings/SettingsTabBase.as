@@ -51,6 +51,11 @@ package popups.settings
             }
         }
 
+        public function updateSettings(settings:UserSettings):void
+        {
+            _settings = settings;
+        }
+
         public function setValues():void
         {
 

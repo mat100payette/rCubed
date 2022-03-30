@@ -1,8 +1,17 @@
 package classes
 {
 
+    import state.AppState;
+
     public class SongInfo
     {
+        public static const SONG_ACCESS_PLAYABLE:int = 0;
+        public static const SONG_ACCESS_CREDITS:int = 1;
+        public static const SONG_ACCESS_PURCHASED:int = 2;
+        public static const SONG_ACCESS_TOKEN:int = 3;
+        public static const SONG_ACCESS_VETERAN:int = 4;
+        public static const SONG_ACCESS_BANNED:int = 5;
+
         public static const SONG_TYPE_PUBLIC:int = 0;
         public static const SONG_TYPE_TOKEN:int = 1;
         public static const SONG_TYPE_PURCHASED:int = 2;
@@ -81,6 +90,29 @@ package classes
                 return false;
 
             return true;
+        }
+
+        public function checkSongAccess(user:User):int
+        {
+            // Not allowed access types
+            if (isNaN(level))
+                return SONG_ACCESS_BANNED;
+
+            if (credits > 0 && user.credits < credits)
+                return SONG_ACCESS_CREDITS;
+
+            if (price > 0 && (index >= user.purchased.length || !user.purchased[index]))
+                return SONG_ACCESS_PURCHASED;
+
+            var tokens:Object = AppState.instance.content.tokens;
+            if (engine == null && tokens[level] != null && tokens[level].unlock == 0)
+                return SONG_ACCESS_TOKEN;
+
+            if (prerelease && !user.isVeteran)
+                return SONG_ACCESS_VETERAN;
+
+            // Allowed access type
+            return SONG_ACCESS_PLAYABLE;
         }
     }
 }

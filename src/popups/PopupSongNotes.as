@@ -359,7 +359,7 @@ package popups
 
                     if (_data["type"] && _data["type"] == 1)
                     {
-                        _playlist.playList[songInfo.level]["song_rating"] = _data["new_value"];
+                        _playlist._playList[songInfo.level]["song_rating"] = _data["new_value"];
                     }
                 }
                 else

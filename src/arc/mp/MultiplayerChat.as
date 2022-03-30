@@ -136,12 +136,6 @@ package arc.mp
                 textAreaAddLine(textFormatGameResults(event));
         }
 
-        private function checkRedraw(event:Event):void
-        {
-            _canRedraw = (GlobalVariables.instance.gameMain.navigator.activePanel is MainMenu);
-            redraw()
-        }
-
         public function resize():void
         {
             _controlInput.move(0, height - _controlInput.height);

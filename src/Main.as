@@ -13,7 +13,6 @@ package
     import classes.Alert;
     import classes.Language;
     import classes.NoteskinsList;
-    import classes.Playlist;
     import classes.Site;
     import classes.ui.VersionText;
     import com.flashdynamix.utils.SWFProfiler;
@@ -35,6 +34,13 @@ package
     import events.state.GameDataLoadedEvent;
     import events.state.LanguageChangedEvent;
     import flash.display.Sprite;
+    import state.AppState;
+    import classes.ui.WindowState;
+    import events.state.SetAirConfigEvent;
+    import state_management.StateManager;
+    import state.AirState;
+    import com.flashfla.utils.Screenshots;
+    import flash.display.StageDisplayState;
 
     public class Main extends Sprite
     {
@@ -47,26 +53,25 @@ package
         private var _lang:Language = Language.instance;
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _site:Site = Site.instance;
-        private var _playlist:Playlist = Playlist.instance;
         private var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
         public var navigator:Navigator;
         private var _stateManager:StateManager;
 
-        private var _popupQueue:Array = [];
-
         public var ignoreWindowChanges:Boolean = false;
         public var disablePopups:Boolean = false;
 
         public var versionText:VersionText;
-        public var bg:GameBackgroundColor
+        public var bg:GameBackgroundColor;
 
         ///- Constructor
         public function Main():void
         {
             super();
 
-            _gvars.gameMain = this;
+            // Initiate singleton state with its manager
+            _stateManager = new StateManager(this, null);
+            AppState.instance = new AppState(_stateManager, true);
 
             setListeners();
 
@@ -89,6 +94,11 @@ package
             addEventListener(LanguageChangedEvent.EVENT_TYPE, onLanguageChanged);
         }
 
+        public function loadAirOptions():void
+        {
+            dispatchEvent(new SetAirConfigEvent());
+        }
+
         private function gameInit():void
         {
             //- Static Class Init
@@ -103,7 +113,7 @@ package
             stage.stageFocusRect = false;
 
             //- Load Air Items
-            _gvars.loadAirOptions();
+            loadAirOptions();
 
             //- Window Options
             stage.nativeWindow.addEventListener(Event.CLOSING, onNativeWindowClosing);
@@ -122,15 +132,17 @@ package
             WINDOW_HEIGHT_EXTRA = stage.nativeWindow.height - GAME_HEIGHT;
 
             ignoreWindowChanges = true;
-            if (_gvars.air_saveWindowPosition)
+
+            var airState:AirState = AppState.instance.air;
+            if (airState.saveWindowPosition)
             {
-                stage.nativeWindow.x = _gvars.airWindowProperties.x;
-                stage.nativeWindow.y = _gvars.airWindowProperties.y;
+                stage.nativeWindow.x = airState.windowProperties.x;
+                stage.nativeWindow.y = airState.windowProperties.y;
             }
-            if (_gvars.air_saveWindowSize)
+            if (airState.saveWindowSize)
             {
-                stage.nativeWindow.width = Math.max(100, _gvars.airWindowProperties.width + WINDOW_WIDTH_EXTRA);
-                stage.nativeWindow.height = Math.max(100, _gvars.airWindowProperties.height + WINDOW_HEIGHT_EXTRA);
+                stage.nativeWindow.width = Math.max(100, airState.windowProperties.width + WINDOW_WIDTH_EXTRA);
+                stage.nativeWindow.height = Math.max(100, airState.windowProperties.height + WINDOW_HEIGHT_EXTRA);
             }
             ignoreWindowChanges = false;
 
@@ -144,7 +156,7 @@ package
 
             versionText = new VersionText(stage.width - 5, 2);
             navigator = new Navigator(this, bg, versionText);
-            _stateManager = new StateManager(this, navigator);
+
             addChild(navigator);
 
             //- Add Debug Tracking
@@ -161,6 +173,27 @@ package
             }
 
             navigator.onChangePanelEvent(new InitialLoadingEvent(false));
+        }
+
+        // TODO: Place this window stuff elsewhere
+        /**
+         * Takes a screenshot of the stage and saves it to disk.
+         */
+        public function takeScreenShot(filename:String = null):void
+        {
+            Screenshots.takeScreenshot(stage, filename);
+        }
+
+        //- Full Screen
+        public function toggleFullScreen(e:Event = null):void
+        {
+            if (stage)
+            {
+                if (stage.displayState == StageDisplayState.NORMAL)
+                    stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+                else
+                    stage.displayState = StageDisplayState.NORMAL;
+            }
         }
 
         private function onLanguageChanged(e:LanguageChangedEvent):void
@@ -189,22 +222,57 @@ package
             }
         }
 
+        public function loadMenuMusic():void
+        {
+            menuMusicSoundVolume = menuMusicSoundTransform.volume = LocalOptions.getVariable("menu_music_volume", 1);
+
+            // Load Existing Menu Music SWF
+            if (AirContext.doesFileExist(Constant.MENU_MUSIC_PATH))
+            {
+                var file_bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
+                if (file_bytes && file_bytes.length > 0)
+                {
+                    menuMusic = new SongBytes(file_bytes);
+                }
+            }
+            // Convert MP3 if exist.
+            else if (AirContext.doesFileExist(Constant.MENU_MUSIC_MP3_PATH))
+            {
+                var mp3Bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_MP3_PATH));
+                if (mp3Bytes && mp3Bytes.length > 0)
+                {
+                    menuMusic = new SongBytes(mp3Bytes, true);
+                    LocalStore.setVariable("menu_music", "External MP3");
+                }
+            }
+        }
+
         ///- Window Methods
         private function onNativeShutdown(e:Event):void
         {
             Logger.destroy();
             LocalOptions.flush();
-            _gvars.onNativeProcessClose(e);
+
+            onNativeProcessClose(e);
+        }
+
+        private function onNativeProcessClose(e:Event):void
+        {
+            if (websocket_server != null)
+                websocket_server.stop();
         }
 
         private function onNativeWindowClosing(e:Event):void
         {
-            _gvars.airWindowProperties.width = stage.nativeWindow.width - Main.WINDOW_WIDTH_EXTRA;
-            _gvars.airWindowProperties.height = stage.nativeWindow.height - Main.WINDOW_HEIGHT_EXTRA;
-            _gvars.airWindowProperties.x = stage.nativeWindow.x;
-            _gvars.airWindowProperties.y = stage.nativeWindow.y;
+            var airWindowProperties:WindowState = AppState.instance.air.windowProperties;
 
-            LocalOptions.setVariable("window_properties", _gvars.airWindowProperties);
+            // TODO: Do not mutate state in here
+            airWindowProperties.width = stage.nativeWindow.width - Main.WINDOW_WIDTH_EXTRA;
+            airWindowProperties.height = stage.nativeWindow.height - Main.WINDOW_HEIGHT_EXTRA;
+            airWindowProperties.x = stage.nativeWindow.x;
+            airWindowProperties.y = stage.nativeWindow.y;
+
+            LocalOptions.setVariable("window_properties", airWindowProperties);
         }
 
         private function onNativeWindowPropertyChange(e:NativeWindowBoundsEvent):void
@@ -212,21 +280,19 @@ package
             if (ignoreWindowChanges)
                 return;
 
-            _gvars.airWindowProperties.width = e.afterBounds.width - Main.WINDOW_WIDTH_EXTRA;
-            _gvars.airWindowProperties.height = e.afterBounds.height - Main.WINDOW_HEIGHT_EXTRA;
-            _gvars.airWindowProperties.x = e.afterBounds.x;
-            _gvars.airWindowProperties.y = e.afterBounds.y;
+            var airWindowProperties:WindowState = AppState.instance.air.windowProperties;
+
+            // TODO: Do not mutate state in here
+            airWindowProperties.width = e.afterBounds.width - Main.WINDOW_WIDTH_EXTRA;
+            airWindowProperties.height = e.afterBounds.height - Main.WINDOW_HEIGHT_EXTRA;
+            airWindowProperties.x = e.afterBounds.x;
+            airWindowProperties.y = e.afterBounds.y;
         }
 
         CONFIG::vsync
         public function onVsyncStateChangeAvailability(event:VsyncStateChangeAvailabilityEvent):void
         {
-            stage.vsyncEnabled = event.available ? _gvars.air_useVSync : true;
-        }
-
-        public function addPopupQueue(_panel:*, newLayer:Boolean = false):void
-        {
-            _popupQueue.push({"panel": _panel, "layer": newLayer});
+            stage.vsyncEnabled = event.available ? AppState.instance.air.useVSync : true;
         }
 
         public function redrawBackground():void

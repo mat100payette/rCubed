@@ -19,10 +19,5 @@ package events.state
         {
             return _stateName;
         }
-
-        override public function clone():Event
-        {
-            return new StateEvent(_stateName);
-        }
     }
 }

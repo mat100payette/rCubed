@@ -1,7 +1,7 @@
 package menu
 {
     import arc.ArcGlobals;
-    import arc.mp.MultiplayerPanel;
+    import arc.mp.MenuMultiplayer;
     import arc.mp.MultiplayerState;
     import assets.GameBackgroundColor;
     import assets.menu.Logo;
@@ -38,9 +38,9 @@ package menu
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
-        public var _layerSongSelection:DisplayLayer;
-        private var _layerMultiplayer:DisplayLayer;
-        private var _layerTokens:DisplayLayer;
+        public var _layerSongSelection:MenuSongSelection;
+        private var _layerMultiplayer:MenuMultiplayer;
+        private var _layerTokens:MenuTokens;
 
         private var hover_message:MouseTooltip;
         private var userText:Text;
@@ -158,7 +158,14 @@ package menu
                     break;
 
                 case Routes.PANEL_MULTIPLAYER:
-                    newPanel = MultiplayerState.instance.getPanel();
+                    if (_layerMultiplayer == null)
+                    {
+                        _layerMultiplayer = new MenuMultiplayer();
+
+                        _layerMultiplayer.hideBackground(true);
+                        _layerMultiplayer.setRoomsVisibility(true);
+                    }
+                    newPanel = _layerMultiplayer;
                     _lastPanelName = panelName;
                     break;
 

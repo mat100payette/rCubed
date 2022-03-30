@@ -35,7 +35,7 @@ package arc.mp
     import flash.utils.Timer;
     import menu.DisplayLayer;
 
-    public class MultiplayerPanel extends DisplayLayer
+    public class MenuMultiplayer extends DisplayLayer
     {
         public var _lang:Language = Language.instance;
 
@@ -56,7 +56,7 @@ package arc.mp
 
         public var window:Window;
 
-        public function MultiplayerPanel()
+        public function MenuMultiplayer()
         {
             _connection = MultiplayerState.instance.connection;
             // Connect immediately if logged in

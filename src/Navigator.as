@@ -232,7 +232,9 @@ package
 
                 activePanel.focus = false;
 
-                _topLayerIndex++;
+                // Stats update popup has unique behavior
+                if (!(popup is PopupSkillRankUpdate))
+                    _topLayerIndex++;
             }
             finally
             {

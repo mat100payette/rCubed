@@ -102,11 +102,10 @@ package arc
             return engine;
         }
 
-        public function legacyDecode(data:Object):SongInfo
+        public function getAltEngineSongInfo(data:Object, playlist:Playlist):SongInfo
         {
-            var playlist:Playlist = Playlist.instance;
-            if (playlist.engine && playlist.engine.id == data["engineID"])
-                return playlist.playList[data["songLevel"]];
+            if (playlist.engineId == data["engineID"])
+                return playlist.getSongInfoByLevelId(data["songLevel"]);
 
             var engine:Object = legacyEngine(data.engineID);
             if (!engine)

@@ -10,6 +10,7 @@ package classes
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
+    import events.state.UpdateGameContentFromSiteEvent;
 
     public class Site extends EventDispatcher
     {
@@ -98,44 +99,9 @@ package classes
                 return;
             }
 
-            // Has Response
-            _gvars.TOTAL_GENRES = data.game_totalgenres;
-            _gvars.MAX_CREDITS = data.game_maxcredits;
-            _gvars.SCORE_PER_CREDIT = data.game_scorepercredit;
-            _gvars.MAX_DIFFICULTY = data.game_maxdifficulty;
-            _gvars.DIFFICULTY_RANGES = data.game_difficulty_range;
-            _gvars.NONPUBLIC_GENRES = data.game_nonpublic_genres;
-
-            // MP Divisions
-            GlobalVariables.divisionLevel = data.division_levels;
-            GlobalVariables.divisionTitle = data.division_titles;
-
-            var divisionColors:Array = [];
-            for each (var value:String in data.division_colors)
-                divisionColors.push(parseInt(value.substring(1), 16));
-            GlobalVariables.divisionColor = divisionColors;
-
-            // Tokens
-            _gvars.TOKENS = {};
-            var tokens:Object = {};
-            for each (var tok:Object in data.game_tokens_all)
-            {
-                if (!tokens[tok.type])
-                {
-                    tokens[tok.type] = [];
-                }
-                tokens[tok.type][tok.id] = tok;
-
-                if (tok.level)
-                    _gvars.TOKENS[tok.level] = tok;
-            }
-            _gvars.TOKENS_TYPE = tokens;
-
-            _isLoaded = true;
-            _loadError = false;
-            Logger.info(this, "Parse Complete");
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
-
+            // TODO: See if this double dispatch works
+            dispatchEvent(new UpdateGameContentFromSiteEvent(data));
+            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
         }
 
         private function siteLoadError(err:ErrorEvent = null):void

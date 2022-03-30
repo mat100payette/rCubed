@@ -28,6 +28,7 @@ package classes.chart
     import flash.utils.ByteArray;
     import classes.UserSettings;
     import com.flashfla.utils.ArrayUtil;
+    import state.AppState;
 
     public class Song extends EventDispatcher
     {
@@ -207,7 +208,7 @@ package classes.chart
             var urlFileHash:String = "";
             var binDataPath:String = AirContext.getSongCachePath(this) + "data.bin";
 
-            if ((_gvars.air_useLocalFileCache) && AirContext.doesFileExist(binDataPath))
+            if ((AppState.instance.air.useLocalFileCache) && AirContext.doesFileExist(binDataPath))
             {
                 var fileKey:int = _songInfo.engine ? 0 : _songInfo.level;
 
@@ -372,7 +373,7 @@ package classes.chart
 
                 // Check for server response for matching hash. Encode Compressed SWF Data
                 var storeChartData:ByteArray;
-                if (_gvars.air_useLocalFileCache)
+                if (AppState.instance.air.useLocalFileCache)
                 {
                     // Alt Engine has Data
                     if (_songInfo.engine && _localFileData)
@@ -438,7 +439,7 @@ package classes.chart
                 mloader.loadBytes(mbytes, AirContext.getLoaderContext());
 
                 // Store SWF
-                if (_gvars.air_useLocalFileCache && storeChartData)
+                if (AppState.instance.air.useLocalFileCache && storeChartData)
                 {
                     try
                     {

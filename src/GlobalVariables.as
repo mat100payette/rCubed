@@ -30,8 +30,8 @@ package
     import flash.system.Capabilities;
     import flash.utils.ByteArray;
     import game.GameScoreResult;
-    import classes.ui.WindowProperties;
     import classes.UserSettings;
+    import state.AppState;
 
     public class GlobalVariables extends EventDispatcher
     {
@@ -45,12 +45,8 @@ package
         public static const HIGHSCORES_LOAD_COMPLETE:String = "HighscoresLoadComplete";
         public static const HIGHSCORES_LOAD_ERROR:String = "HighscoresLoadError";
 
-        public var gameMain:Main;
-
         ///- Game Data
         public var TOTAL_GENRES:uint = 13;
-        public var TOTAL_SONGS:uint = 0;
-        public var TOTAL_PUBLIC_SONGS:uint = 0;
         public var HEALTH_JUDGE_ADD:int = 5;
         public var HEALTH_JUDGE_REMOVE:int = -5;
         public var TOTAL_STEPS:int = 31;
@@ -60,8 +56,7 @@ package
         public var MAX_DIFFICULTY:int = 120;
         public var DIFFICULTY_RANGES:Array = [[1, 120]];
         public var NONPUBLIC_GENRES:Array = [];
-        public var TOKENS:Object = {};
-        public var TOKENS_TYPE:Object = {};
+
         public var songStartTime:String = "0";
         public var songStartHash:String = "0";
         public var songCache:Array = [];
@@ -94,50 +89,9 @@ package
         public var menuMusicSoundVolume:Number = 1;
         public var menuMusicSoundTransform:SoundTransform = new SoundTransform();
 
-        ///- Air Options
-        public var air_useLocalFileCache:Boolean = false;
-        public var air_autoSaveLocalReplays:Boolean = false;
-        public var air_useVSync:Boolean = true;
-        public var air_useWebsockets:Boolean = false;
-        public var air_saveWindowPosition:Boolean = false;
-        public var air_saveWindowSize:Boolean = false;
-
-        public var airWindowProperties:WindowProperties;
         public var file_replay_cache:FileCache = new FileCache("replays/cache.json", 1);
 
-        private var websocket_server:AIRServer;
-        private static var websocket_message:Message = new Message();
 
-        ///- Constructor
-        public function GlobalVariables(en:SingletonEnforcer)
-        {
-            if (en == null)
-            {
-                throw Error("Multi-Instance Blocked");
-            }
-        }
-
-        public function loadAirOptions():void
-        {
-            air_useVSync = LocalOptions.getVariable("vsync", false);
-            air_useLocalFileCache = LocalOptions.getVariable("use_local_file_cache", true);
-            air_autoSaveLocalReplays = LocalOptions.getVariable("auto_save_local_replays", true);
-            air_useWebsockets = LocalOptions.getVariable("use_websockets", false);
-            air_saveWindowPosition = LocalOptions.getVariable("save_window_position", false);
-            air_saveWindowSize = LocalOptions.getVariable("save_window_size", false);
-
-            airWindowProperties = parseWindowProperties(LocalOptions.getVariable("window_properties", {"x": 0, "y": 0, "width": 0, "height": 0}));
-
-            if (air_useWebsockets)
-            {
-                initWebsocketServer();
-            }
-        }
-
-        private function parseWindowProperties(properties:Object):WindowProperties
-        {
-            return new WindowProperties(properties["x"], properties["y"], properties["width"], properties["height"]);
-        }
 
         public function loadUserSongData():void
         {
@@ -193,86 +147,6 @@ package
             SQLQueries.writeFile(json_file);
         }
 
-        public function websocketPortNumber(type:String):uint
-        {
-            if (websocket_server != null)
-            {
-                return websocket_server.getPortNumber(type);
-            }
-            return 0;
-        }
-
-        public function initWebsocketServer():Boolean
-        {
-            if (websocket_server == null)
-            {
-                websocket_server = new AIRServer();
-                websocket_server.addEndPoint(new SocketEndPoint(21235, new WebSocketClientHandlerFactory()));
-
-                // didn't start, remove reference
-                if (!websocket_server.start())
-                {
-                    websocket_server.stop();
-                    websocket_server = null;
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        public function destroyWebsocketServer():void
-        {
-            if (websocket_server != null)
-            {
-                websocket_server.stop();
-                websocket_server = null;
-            }
-        }
-
-        public function websocketSend(cmd:String, data:Object):void
-        {
-            if (websocket_server != null)
-            {
-                websocket_message.command = cmd;
-                websocket_message.data = data;
-                websocket_server.sendMessageToAllClients(websocket_message);
-            }
-        }
-
-        public function onNativeProcessClose(e:Event):void
-        {
-            if (websocket_server != null)
-            {
-                websocket_server.stop();
-            }
-        }
-
-        public function loadMenuMusic():void
-        {
-            menuMusicSoundVolume = menuMusicSoundTransform.volume = LocalOptions.getVariable("menu_music_volume", 1);
-
-            // Load Existing Menu Music SWF
-            if (AirContext.doesFileExist(Constant.MENU_MUSIC_PATH))
-            {
-                var file_bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
-                if (file_bytes && file_bytes.length > 0)
-                {
-                    menuMusic = new SongBytes(file_bytes);
-                }
-            }
-            // Convert MP3 if exist.
-            else if (AirContext.doesFileExist(Constant.MENU_MUSIC_MP3_PATH))
-            {
-                var mp3Bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_MP3_PATH));
-                if (mp3Bytes && mp3Bytes.length > 0)
-                {
-                    menuMusic = new SongBytes(mp3Bytes, true);
-                    LocalStore.setVariable("menu_music", "External MP3");
-                }
-            }
-        }
-
         ///- Public
         //- Player Divisions
         public static function getDivisionColor(level:int):int
@@ -305,7 +179,7 @@ package
                 settings = activeUser.settings;
 
             // TODO: Redo caching logic
-            if (!preview && songInfo.engine == Playlist.instance.engine && (!songInfo.engine || !songInfo.engine.ignoreCache))
+            if (!preview && songInfo.engine == AppState.instance.content.currentPlaylist.engine && (!songInfo.engine || !songInfo.engine.ignoreCache))
             {
                 for (var i:int = 0; i < songCache.length; i++)
                 {
@@ -322,7 +196,7 @@ package
         private function loadSongFile(songInfo:SongInfo, settings:UserSettings, isReplay:Boolean, isPreview:Boolean = false):Song
         {
             //- Only Cache 10 Songs
-            var engineCache:Boolean = (songInfo.engine == Playlist.instance.engine) && (!songInfo.engine || !songInfo.engine.ignoreCache);
+            var engineCache:Boolean = (songInfo.engine == AppState.instance.content.currentPlaylist.engine) && (!songInfo.engine || !songInfo.engine.ignoreCache);
             if (!isPreview && songCache.length > 10 && engineCache)
                 songCache.pop();
 
@@ -365,28 +239,6 @@ package
             {
                 mpInstance.clearStatus();
             }
-        }
-
-        public static const SONG_ACCESS_PLAYABLE:int = 0;
-        public static const SONG_ACCESS_CREDITS:int = 1;
-        public static const SONG_ACCESS_PURCHASED:int = 2;
-        public static const SONG_ACCESS_TOKEN:int = 3;
-        public static const SONG_ACCESS_VETERAN:int = 4;
-        public static const SONG_ACCESS_BANNED:int = 5;
-
-        public function checkSongAccess(songInfo:SongInfo):int
-        {
-            if (songInfo == null || isNaN(songInfo.level))
-                return SONG_ACCESS_BANNED;
-            if (songInfo.credits > 0 && activeUser.credits < songInfo.credits)
-                return SONG_ACCESS_CREDITS;
-            if (songInfo.price > 0 && (songInfo.index >= playerUser.purchased.length || !playerUser.purchased[songInfo.index]))
-                return SONG_ACCESS_PURCHASED;
-            if (songInfo.engine == null && TOKENS[songInfo.level] != null && TOKENS[songInfo.level].unlock == 0)
-                return SONG_ACCESS_TOKEN;
-            if (songInfo.prerelease && !playerUser.isVeteran)
-                return SONG_ACCESS_VETERAN;
-            return SONG_ACCESS_PLAYABLE;
         }
 
         private static const SONG_ICON_NO_SCORE:int = 0;
@@ -578,15 +430,6 @@ package
             _loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, highscoreLoadError);
         }
 
-        //- ScreenShot Handling
-        /**
-         * Takes a screenshot of the stage and saves it to disk.
-         */
-        public function takeScreenShot(filename:String = null):void
-        {
-            Screenshots.takeScreenshot(gameMain, filename);
-        }
-
         public function logDebugError(id:String, params:Object = null):void
         {
             var output:String = id;
@@ -613,49 +456,5 @@ package
             _debugLoader.dataFormat = URLLoaderDataFormat.TEXT;
             _debugLoader.load(req);
         }
-
-        //- Full Screen
-        public function toggleFullScreen(e:Event = null):void
-        {
-            if (gameMain.stage)
-            {
-                if (gameMain.stage.displayState == StageDisplayState.NORMAL)
-                {
-                    gameMain.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-                }
-                else
-                {
-                    gameMain.stage.displayState = StageDisplayState.NORMAL;
-                }
-            }
-        }
-
-
-
-        public function unlockTokenById(type:String, id:String):void
-        {
-            try
-            {
-                TOKENS[TOKENS_TYPE[type][id].level].unlock = 1;
-            }
-            catch (err:Error)
-            {
-                Logger.error(this, "Attempted Unlock of Unknown Token: " + type + ", " + id);
-            }
-        }
-
-        public static function get instance():GlobalVariables
-        {
-            if (_instance == null)
-            {
-                _instance = new GlobalVariables(new SingletonEnforcer());
-            }
-
-            return _instance;
-        }
     }
-}
-
-class SingletonEnforcer
-{
 }

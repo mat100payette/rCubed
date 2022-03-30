@@ -314,7 +314,7 @@ package
                 _gvars.userSession = _data.session;
                 // TODO: Event to reset load status on InitialLoading
                 //_gvars.gameMain.loadComplete = false;
-                Playlist.clearCanon();
+
                 dispatchEvent(new InitialLoadingEvent(true));
             }
             else

@@ -1,6 +1,7 @@
 package classes
 {
     import classes.replay.Replay;
+    import state.AppState;
 
     public class SongPreview extends Replay
     {
@@ -15,7 +16,7 @@ package classes
             var _gvars:GlobalVariables = GlobalVariables.instance;
 
             if (!songData)
-                songData = Playlist.instanceCanon.playList[level];
+                songData = AppState.instance.content.canonPlaylist.getSongInfoByLevelId(level);
 
             if (!songData)
                 return;

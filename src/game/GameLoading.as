@@ -24,7 +24,6 @@ package game
 
         private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
-        private var _playlist:Playlist = Playlist.instance;
 
         private var _preloader:PreloaderStatusBar;
         private var _blackOverlay:Sprite;

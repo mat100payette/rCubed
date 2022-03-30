@@ -55,6 +55,8 @@ package game
     import events.navigation.StartGameplayEvent;
     import classes.chart.Song;
     import events.navigation.StartReplayEvent;
+    import state.AppState;
+    import events.state.UpdateSongAccessEvent;
 
     public class GameResults extends DisplayLayer
     {
@@ -70,7 +72,6 @@ package game
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
         private var _loader:DynamicURLLoader;
-        private var _playlist:Playlist = Playlist.instance;
 
         private var _settings:UserSettings;
         private var _replay:Replay;
@@ -259,7 +260,7 @@ package game
             // Display Game Result
             displayGameResult(_songResults.length > 1 ? -1 : 0);
 
-            _mp.gameplayResults(_mpRoom, this, _songResults);
+            _mp.gameplayResults(_mpRoom, _songResults);
         }
 
         private function get isReplay():Boolean
@@ -767,13 +768,14 @@ package game
 
             else if (target == _navRandomSong)
             {
-                var songList:Array = _playlist.playList;
+                var playlist:Playlist = AppState.instance.content.currentPlaylist;
+                var songList:Array = playlist.songList;
 
                 //Check for filters and filter the songs list
                 if (_gvars.activeFilter != null)
                 {
                     var filteredSongInfos:Vector.<SongInfo>;
-                    filteredSongInfos = _playlist.indexList.filter(function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
+                    filteredSongInfos = playlist.indexList.filter(function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
                     {
                         return _gvars.activeFilter.process(item, _gvars.activeUser);
                     });
@@ -786,7 +788,7 @@ package game
                 // Filter to only Playable Songs
                 songList = songList.filter(function(item:SongInfo, index:int, array:Array):Boolean
                 {
-                    return _gvars.checkSongAccess(item) == GlobalVariables.SONG_ACCESS_PLAYABLE;
+                    return item.checkSongAccess(AppState.instance.auth.user) == SongInfo.SONG_ACCESS_PLAYABLE;
                 });
 
                 // Check for at least 1 possible playable song.
@@ -1041,21 +1043,27 @@ package game
                 // Server Message Popup
                 if (data.gServerMessageFull != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupMessage(data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : ""));
+                    var popupMsg:PopupMessage = new PopupMessage(data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : "");
+                    dispatchEvent(new QueuePopupMessageEvent(popupMsg));
                 }
 
                 // Token Unlock
+                var popupTokenUnlock:PopupTokenUnlock;
                 if (data.token_unlocks != null)
                 {
                     for each (var token_item:Object in data.token_unlocks)
                     {
-                        _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(token_item.type, token_item.ID, token_item.text));
+                        popupTokenUnlock = new PopupTokenUnlock(token_item.type, token_item.ID, token_item.text);
+                        dispatchEvent(new QueuePopupTokenUnlockEvent(popupTokenUnlock));
+
                         _gvars.unlockTokenById(token_item.type, token_item.ID);
                     }
                 }
                 else if (data.tUnlock != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(data.tType, data.tID, data.tText, data.tName, data.tMessage));
+                    popupTokenUnlock = new PopupTokenUnlock(data.tType, data.tID, data.tText, data.tName, data.tMessage);
+                    dispatchEvent(new QueuePopupTokenUnlockEvent(popupTokenUnlock));
+
                     _gvars.unlockTokenById(data.tType, data.tID);
                 }
 
@@ -1125,7 +1133,7 @@ package game
                 _gvars.activeUser.grandTotal += gameResult.score_total;
                 _gvars.activeUser.credits += gameResult.credits;
 
-                Playlist.instanceCanon.updateSongAccess();
+                dispatchEvent(new UpdateSongAccessEvent());
             }
             else
             {
@@ -1280,13 +1288,15 @@ package game
                 // Server Message Popup
                 if (data.gServerMessageFull != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupMessage(data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : ""));
+                    var popupMsg:PopupMessage = new PopupMessage(data.gServerMessageFull, data.gServerMessageTitle ? data.gServerMessageTitle : "");
+                    dispatchEvent(new QueuePopupMessageEvent(popupMsg));
                 }
 
                 // Token Unlock
                 if (data.tUnlock != null)
                 {
-                    _gvars.gameMain.addPopupQueue(new PopupTokenUnlock(data.tType, data.tID, data.tText, data.tName, data.tMessage));
+                    var popupTokenUnlock:PopupTokenUnlock = new PopupTokenUnlock(data.tType, data.tID, data.tText, data.tName, data.tMessage);
+                    dispatchEvent(new QueuePopupTokenUnlockEvent(popupTokenUnlock));
                 }
             }
         }
@@ -1342,7 +1352,7 @@ package game
             }
 
             // Write Local txt Replay Encode
-            if (_gvars.air_autoSaveLocalReplays && result.replayBin != null)
+            if (AppState.instance.air.autoSaveLocalReplays && result.replayBin != null)
             {
                 try
                 {

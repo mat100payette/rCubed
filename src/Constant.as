@@ -6,7 +6,6 @@ package
     import flash.text.StyleSheet;
     import flash.text.TextFormat;
     import flash.text.TextFormatAlign;
-    import classes.UserSettings;
 
     public class Constant
     {
@@ -98,6 +97,8 @@ package
             {t: 50, s: 25, f: 2},
             {t: 84, s: 25, f: 3},
             {t: 117, s: 0}];
+
+
 
         // Static Initializer
         public static var GRADIENT_MATRIX:Matrix;

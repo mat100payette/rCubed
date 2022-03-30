@@ -17,6 +17,7 @@ package popups
     import flash.text.TextField;
     import menu.DisplayLayer;
     import flash.text.TextFieldAutoSize;
+    import events.navigation.popups.RemovePopupEvent;
 
     public class PopupSkillRankUpdate extends DisplayLayer
     {
@@ -56,6 +57,7 @@ package popups
 
         override public function dispose():void
         {
+            dispatchEvent(new RemovePopupEvent());
             closeBox.dispose();
 
             box.dispose();

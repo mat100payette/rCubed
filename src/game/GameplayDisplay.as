@@ -64,6 +64,8 @@ package game
     import classes.Room;
     import events.navigation.ShowGameResultsEvent;
     import events.navigation.StartGameplayEvent;
+    import state.AppState;
+    import events.state.SetPopupsEnabledEvent;
 
     public class GameplayDisplay extends DisplayLayer
     {
@@ -379,7 +381,9 @@ package game
 
             interfaceSetup();
 
-            _gvars.gameMain.disablePopups = true;
+            // TODO: dispatch action to state manager
+            dispatchEvent(new SetPopupsEnabledEvent(false));
+            AppState.instance.menu.disablePopups = true;
 
             if (!_isEditor && !_replay && !_mpSpectate)
                 Mouse.hide();
@@ -425,7 +429,8 @@ package game
                 }
             }
 
-            _gvars.gameMain.disablePopups = false;
+            // TODO: dispatch action to state manager
+            AppState.instance.menu.disablePopups = false;
 
             Mouse.show();
         }
@@ -739,7 +744,7 @@ package game
             if (postStart)
             {
                 // Websocket
-                if (_gvars.air_useWebsockets)
+                if (AppState.instance.air.useWebsockets)
                 {
                     _socketScoreMessage["amazing"] = _hitAmazing;
                     _socketScoreMessage["perfect"] = _hitPerfect;
@@ -1293,7 +1298,7 @@ package game
                 _songPausePosition = getTimer();
                 _song.pause();
 
-                if (_gvars.air_useWebsockets)
+                if (AppState.instance.air.useWebsockets)
                 {
                     _gvars.websocketSend("SONG_PAUSE", _socketSongMessage);
                 }
@@ -1304,7 +1309,7 @@ package game
                 _absoluteStart += (getTimer() - _songPausePosition);
                 _song.resume();
 
-                if (_gvars.air_useWebsockets)
+                if (AppState.instance.air.useWebsockets)
                 {
                     _gvars.websocketSend("SONG_RESUME", _socketSongMessage);
                 }
@@ -1406,7 +1411,7 @@ package game
             }
 
             // Websocket
-            if (_gvars.air_useWebsockets)
+            if (AppState.instance.air.useWebsockets)
             {
                 _socketScoreMessage["amazing"] = _hitAmazing;
                 _socketScoreMessage["perfect"] = _hitPerfect;
@@ -1574,7 +1579,7 @@ package game
             _gvars.songRestarts++;
 
             // Websocket
-            if (_gvars.air_useWebsockets)
+            if (AppState.instance.air.useWebsockets)
             {
                 _socketScoreMessage["restarts"] = _gvars.songRestarts;
                 _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
@@ -2240,7 +2245,7 @@ package game
             }
 
             // Websocket
-            if (_gvars.air_useWebsockets)
+            if (AppState.instance.air.useWebsockets)
             {
                 _socketScoreMessage["amazing"] = _hitAmazing;
                 _socketScoreMessage["perfect"] = _hitPerfect;

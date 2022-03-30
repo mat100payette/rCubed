@@ -27,7 +27,6 @@ package popups.settings
     import menu.DisplayLayer;
     import menu.MenuSongSelection;
     import events.navigation.popups.RemovePopupEvent;
-    import events.navigation.ChangePanelEvent;
     import events.navigation.OpenEditorEvent;
     import game.GameplayDisplay;
     import classes.GameMods;
@@ -245,7 +244,12 @@ package popups.settings
                     _user.settings = new User().settings;
                     _avars.resetSettings();
                 }
+
+                for each (var tab:SettingsTabBase in _tabs)
+                    tab.updateSettings(_user.settings);
+
                 changeTab(_currentIndex);
+                _currentTab.setValues();
             }
 
             function onCancelResetClicked(e:Event):void
