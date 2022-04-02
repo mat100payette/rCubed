@@ -7,6 +7,8 @@ package game
     import classes.replay.ReplayPack;
     import flash.utils.ByteArray;
     import classes.replay.ReplayBinFrame;
+    import state.ContentState;
+    import state.AppState;
 
     public class GameScoreResult
     {
@@ -61,7 +63,7 @@ package game
         // Binary Replays (aka Replay v4)
         public var replay_bin_notes:Vector.<ReplayBinFrame>;
         public var replay_bin_boos:Vector.<ReplayBinFrame>;
-        private var _replay_bin:ByteArray;
+        private var _replayBin:ByteArray;
 
         public function get songInfo():SongInfo
         {
@@ -98,13 +100,13 @@ package game
 
         public function get replayBin():ByteArray
         {
-            if (_replay_bin == null)
+            if (_replayBin == null)
             {
                 var judgementsEncode:String = JSON.stringify({"amazing": amazing, "perfect": perfect, "good": good, "average": average, "boo": boo, "miss": miss, "maxcombo": max_combo});
-                _replay_bin = ReplayPack.writeReplay(user.siteId, songInfo, user.settings, judgementsEncode, replay_bin_notes, replay_bin_boos);
+                _replayBin = ReplayPack.writeReplay(user.siteId, songInfo, user.settings, judgementsEncode, replay_bin_notes, replay_bin_boos);
             }
 
-            return _replay_bin;
+            return _replayBin;
         }
 
         public function get replay_bin_encoded():String
@@ -123,7 +125,9 @@ package game
          */
         public function update(_gvars:GlobalVariables):void
         {
-            credits = Math.max(0, Math.min(Math.floor(score_total / _gvars.SCORE_PER_CREDIT), _gvars.MAX_CREDITS));
+            var contentState:ContentState = AppState.instance.content;
+
+            credits = Math.max(0, Math.min(Math.floor(score_total / contentState.scorePerCredit), contentState.maxCreditsPerPlay));
             updateJudge();
         }
 

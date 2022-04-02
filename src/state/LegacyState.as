@@ -23,6 +23,9 @@ package state
         {
             var cloned:LegacyState = new LegacyState(false);
 
+            cloned._engineDefaultLoad = _engineDefaultLoad;
+            cloned._engineDefaultLoadSkip = _engineDefaultLoadSkip;
+
             return cloned;
         }
 

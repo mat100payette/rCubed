@@ -1,11 +1,8 @@
 package classes
 {
-    import com.flashfla.utils.ArrayUtil;
 
     public class Playlist
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-
         private var _playlistLoader:PlaylistLoader;
 
         private var _generatedQueues:Array;
@@ -97,14 +94,6 @@ package classes
         public function get totalSongs():int
         {
             return _indexList.length;
-        }
-
-        public function get totalPublicSongs():int
-        {
-            return _indexList.filter(function(songInfo:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
-            {
-                return !ArrayUtil.containsAny([songInfo.genre], _gvars.NONPUBLIC_GENRES)
-            }).length;
         }
     }
 }

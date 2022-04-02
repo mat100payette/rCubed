@@ -10,7 +10,6 @@ package popups.settings
 
     public class SettingsTabVisuals extends SettingsTabBase
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var _optionGameTopBar:BoxCheck;
@@ -41,9 +40,9 @@ package popups.settings
         private var _optionSongFlag:BoxCheck;
         private var _optionSongNote:BoxCheck;
 
-        public function SettingsTabVisuals(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabVisuals(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
         }
 
         override public function get name():String

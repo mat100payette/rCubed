@@ -3,7 +3,6 @@ package popups.settings
     import arc.ArcGlobals;
     import classes.Alert;
     import classes.Language;
-    import classes.Playlist;
     import classes.UserSettings;
     import classes.chart.parse.ChartFFRLegacy;
     import classes.ui.BoxButton;
@@ -12,9 +11,14 @@ package popups.settings
     import classes.ui.Text;
     import classes.ui.ValidatedText;
     import classes.ui.WindowOptionConfirm;
+    import classes.ui.WindowState;
     import com.bit101.components.ComboBox;
     import com.bit101.components.Style;
     import com.flashfla.utils.sprintf;
+    import events.navigation.popups.AddPopupEvent;
+    import events.state.LanguageChangedEvent;
+    import events.state.ToggleWebsocketEvent;
+    import events.state.WebsocketStateChangedEvent;
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.events.NativeWindowBoundsEvent;
@@ -23,17 +27,13 @@ package popups.settings
     import flash.system.Capabilities;
     import flash.text.TextFormatAlign;
     import menu.MainMenu;
-    import events.navigation.popups.AddPopupEvent;
-    import events.state.LanguageChangedEvent;
+    import state.AirState;
     import state.AppState;
 
     public class SettingsTabMisc extends SettingsTabBase
     {
-
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
-        private var _playlist:Playlist = Playlist.instance;
 
         private var _languagesComboItems:Array = [];
         private var _startUpScreenComboItems:Array = [];
@@ -72,9 +72,11 @@ package popups.settings
         private var _setWindowPositionBtn:BoxButton;
         private var _resetWindowPositionBtn:BoxButton;
 
-        public function SettingsTabMisc(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabMisc(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
+
+            addEventListener(WebsocketStateChangedEvent.STATE, onWebsocketStateChanged);
         }
 
         override public function get name():String
@@ -282,22 +284,24 @@ package popups.settings
 
             setLanguage();
 
-            _optionAutosaveLocal.checked = _gvars.air_autoSaveLocalReplays;
-            _optionUseCache.checked = _gvars.air_useLocalFileCache;
-            _optionUseWebsockets.checked = _gvars.air_useWebsockets;
+            var airState:AirState = AppState.instance.air;
+
+            _optionAutosaveLocal.checked = airState.autoSaveLocalReplays;
+            _optionUseCache.checked = airState.useLocalFileCache;
+            _optionUseWebsockets.checked = airState.useWebsockets;
 
             CONFIG::vsync
             {
-                _optionUseVSync.checked = _gvars.air_useVSync;
+                _optionUseVSync.checked = airState.useVSync;
             }
 
-            _optionWindowWidth.text = _gvars.airWindowProperties.width.toString();
-            _optionWindowHeight.text = _gvars.airWindowProperties.height.toString();
-            _optionWindowX.text = _gvars.airWindowProperties.x.toString();
-            _optionWindowY.text = _gvars.airWindowProperties.y.toString();
+            _optionWindowWidth.text = airState.windowState.width.toString();
+            _optionWindowHeight.text = airState.windowState.height.toString();
+            _optionWindowX.text = airState.windowState.x.toString();
+            _optionWindowY.text = airState.windowState.y.toString();
 
-            _optionWindowSavePosition.checked = _gvars.air_saveWindowPosition;
-            _optionWindowSaveSize.checked = _gvars.air_saveWindowSize;
+            _optionWindowSavePosition.checked = airState.saveWindowPosition;
+            _optionWindowSaveSize.checked = airState.saveWindowSize;
         }
 
         private function onForceJudgeClicked(e:Event):void
@@ -331,32 +335,27 @@ package popups.settings
         {
             CONFIG::vsync
             {
-                _gvars.gameMain.stage.vsyncEnabled = _gvars.air_useVSync = !_gvars.air_useVSync;
-                LocalOptions.setVariable("vsync", _gvars.air_useVSync);
+                dispatchEvent(new ToggleVSyncEvent());
             }
         }
 
         private function onUseWebsocketsClicked(e:Event):void
         {
-            if (_gvars.air_useWebsockets)
-            {
-                _gvars.destroyWebsocketServer();
-                _gvars.air_useWebsockets = false;
-                LocalOptions.setVariable("use_websockets", _gvars.air_useWebsockets);
-            }
+            dispatchEvent(new ToggleWebsocketEvent());
+        }
+
+        private function onWebsocketStateChanged(e:WebsocketStateChangedEvent):void
+        {
+            var airState:AirState = AppState.instance.air;
+
+            if (airState.useWebsockets)
+                onUseWebsocketMouseOver(null);
             else
             {
-                if (_gvars.initWebsocketServer())
-                {
-                    _gvars.air_useWebsockets = true;
-                    LocalOptions.setVariable("use_websockets", _gvars.air_useWebsockets);
-                    onUseWebsocketMouseOver(null);
-                }
-                else
-                {
-                    _optionUseWebsockets.checked = false;
+                _optionUseWebsockets.checked = false;
+
+                if (e.failedInit)
                     Alert.add(_lang.string(Lang.OPTIONS_UNABLE_TO_START_WEBSOCKETS), 120, Alert.RED);
-                }
             }
         }
 
@@ -384,6 +383,7 @@ package popups.settings
         {
             _gvars.airWindowProperties.x = Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5);
             _gvars.airWindowProperties.y = Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5);
+
             onWindowOptionUpdated();
         }
 
@@ -423,14 +423,20 @@ package popups.settings
 
         private function onWindowPropertyChanged(e:Event):void
         {
-            _optionWindowX.text = _gvars.airWindowProperties.x.toString();
-            _optionWindowY.text = _gvars.airWindowProperties.y.toString();
-            _optionWindowWidth.text = _gvars.airWindowProperties.width.toString();
-            _optionWindowHeight.text = _gvars.airWindowProperties.height.toString();
+            var airWindowState:WindowState = AppState.instance.air.windowState;
+
+            _optionWindowX.text = airWindowState.x.toString();
+            _optionWindowY.text = airWindowState.y.toString();
+            _optionWindowWidth.text = airWindowState.width.toString();
+            _optionWindowHeight.text = airWindowState.height.toString();
         }
 
         public function onWindowOptionUpdated():void
         {
+            var setWindowEvent:SetWindowStateEvent = new SetWindowStateEvent();
+
+            dispatchEvent(new SetWindowStateEvent());
+
             _gvars.gameMain.ignoreWindowChanges = true;
             _gvars.gameMain.stage.nativeWindow.x = _gvars.airWindowProperties.x;
             _gvars.gameMain.stage.nativeWindow.y = _gvars.airWindowProperties.y;
@@ -538,8 +544,8 @@ package popups.settings
             else if (!_ignoreEngineCombo && data != _avars.configLegacy)
             {
                 _avars.configLegacy = data;
-                //_playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, _playlist.engineChangeHandler);
-                //_playlist.addEventListener(GlobalVariables.LOAD_ERROR, _playlist.engineChangeHandler);
+                //_playlist.addEventListener(Constant.LOAD_COMPLETE, _playlist.engineChangeHandler);
+                //_playlist.addEventListener(Constant.LOAD_ERROR, _playlist.engineChangeHandler);
                 _playlist.load();
             }
         }

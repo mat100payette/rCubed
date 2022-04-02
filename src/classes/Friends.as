@@ -82,19 +82,19 @@ package classes
                 list = JSON.parse(e.target.data);
                 _isLoaded = true;
                 _loadError = false;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+                this.dispatchEvent(new Event(Constant.LOAD_COMPLETE));
             }
             catch (e:Error)
             {
                 _loadError = true;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                this.dispatchEvent(new Event(Constant.LOAD_ERROR));
             }
         }
 
         private function friendsLoadError(e:Event = null):void
         {
             removeLoaderListeners();
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            this.dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function addLoaderListeners():void

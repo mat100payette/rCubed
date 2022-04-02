@@ -13,6 +13,7 @@ package classes
     import flash.net.URLLoader;
     import flash.net.URLRequest;
     import events.state.LanguageChangedEvent;
+    import state.AppState;
 
     public class Language extends EventDispatcher
     {
@@ -23,7 +24,6 @@ package classes
         private static var _instance:Language = null;
 
         ///- Private Locals
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _loader:URLLoader;
         private var _isLoaded:Boolean = false;
         private var _isLoading:Boolean = false;
@@ -74,7 +74,9 @@ package classes
 
         public function string(id:String):String
         {
-            return string2(id, _gvars.playerUser ? _gvars.playerUser.settings.language : "us");
+            var user:User = AppState.instance.auth.user;
+
+            return string2(id, user != null ? user.settings.language : "us");
         }
 
         public function string2(id:String, lang:String):String
@@ -100,7 +102,9 @@ package classes
 
         public function stringSimple(id:String):String
         {
-            return string2Simple(id, _gvars.playerUser ? _gvars.playerUser.settings.language : "us");
+            var user:User = AppState.instance.auth.user;
+
+            return string2Simple(id, user != null ? user.settings.language : "us");
         }
 
         public function string2Simple(id:String, lang:String):String
@@ -164,7 +168,7 @@ package classes
                 AirContext.writeTextFile(AirContext.getAppFile("logs/language.txt"), siteDataString);
 
                 _loadError = true;
-                dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                dispatchEvent(new Event(Constant.LOAD_ERROR));
                 return;
             }
 
@@ -208,7 +212,7 @@ package classes
             if (isLoaded())
             {
                 dispatchEvent(new LanguageChangedEvent());
-                dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE, true));
+                dispatchEvent(new Event(Constant.LOAD_COMPLETE, true));
             }
         }
 
@@ -216,7 +220,7 @@ package classes
         {
             Logger.error(this, "Load Failure: " + Logger.event_error(err));
             removeLoaderListeners();
-            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function addLoaderListeners():void

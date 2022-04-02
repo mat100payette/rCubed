@@ -34,7 +34,6 @@ package arc.mp
     import flash.net.URLVariables;
     import flash.utils.Timer;
     import game.GameScoreResult;
-    import menu.DisplayLayer;
     import flash.events.EventDispatcher;
     import events.navigation.ChangePanelEvent;
     import game.GameplayDisplay;
@@ -45,7 +44,6 @@ package arc.mp
 
     public class MultiplayerState extends EventDispatcher
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         public var connection:Multiplayer;

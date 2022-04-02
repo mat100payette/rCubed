@@ -66,6 +66,8 @@ package game
     import events.navigation.StartGameplayEvent;
     import state.AppState;
     import events.state.SetPopupsEnabledEvent;
+    import events.SendWebsocketMessageEvent;
+    import state.ContentState;
 
     public class GameplayDisplay extends DisplayLayer
     {
@@ -97,7 +99,6 @@ package game
         private static const LAYOUT_MP_PA:String = "mppa";
         private static const LAYOUT_MP_HEADER:String = "mpheader";
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _noteskins:NoteskinsList = NoteskinsList.instance;
         private var _lang:Language = Language.instance;
@@ -678,9 +679,9 @@ package game
                 var req:URLRequest = new URLRequest(Constant.SONG_START_URL);
                 var requestVars:URLVariables = new URLVariables();
                 Constant.addDefaultRequestVariables(requestVars);
-                requestVars.session = _gvars.userSession;
+                requestVars.session = AppState.instance.auth.userSession;
                 requestVars.id = _song.songInfo.level;
-                requestVars.restarts = _gvars.songRestarts;
+                requestVars.restarts = AppState.instance.gameplay.songRestarts;
                 req.data = requestVars;
                 req.method = URLRequestMethod.POST;
                 _loader.dataFormat = URLLoaderDataFormat.VARIABLES;
@@ -757,8 +758,9 @@ package game
                     _socketScoreMessage["score"] = _gameScore;
                     _socketScoreMessage["last_hit"] = null;
                     _socketScoreMessage["restarts"] = _gvars.songRestarts;
-                    _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
-                    _gvars.websocketSend("SONG_START", _socketSongMessage);
+
+                    dispatchEvent(new SendWebsocketMessageEvent("NOTE_JUDGE", _socketScoreMessage));
+                    dispatchEvent(new SendWebsocketMessageEvent("SONG_START", _socketSongMessage));
                 }
             }
         }
@@ -1171,14 +1173,16 @@ package game
                 }
             }
 
+            var user:User = AppState.instance.auth.user;
+
             // Game Restart
-            if (keyCode == _gvars.playerUser.settings.keyRestart && !_mpRoom)
+            if (keyCode == user.settings.keyRestart && !_mpRoom)
             {
                 _gameState = GAME_RESTART;
             }
 
             // Quit
-            else if (keyCode == _gvars.playerUser.settings.keyQuit)
+            else if (keyCode == user.settings.keyQuit)
             {
                 if (_gvars.songQueue.length > 0)
                 {
@@ -1195,13 +1199,13 @@ package game
             }
 
             // Pause
-            else if (keyCode == 19 && (CONFIG::debug || _gvars.playerUser.isAdmin || _gvars.playerUser.isDeveloper || _replay))
+            else if (keyCode == 19 && (CONFIG::debug || user.isAdmin || user.isDeveloper || _replay))
             {
                 togglePause();
             }
 
             // Auto-Play
-            else if (keyCode == Keyboard.F8 && (CONFIG::debug || _gvars.playerUser.isDeveloper || _gvars.playerUser.isAdmin))
+            else if (keyCode == Keyboard.F8 && (CONFIG::debug || user.isDeveloper || user.isAdmin))
             {
                 _isAutoplay = !_isAutoplay;
                 Alert.add("Bot Play: " + _isAutoplay, 60);
@@ -1299,9 +1303,7 @@ package game
                 _song.pause();
 
                 if (AppState.instance.air.useWebsockets)
-                {
-                    _gvars.websocketSend("SONG_PAUSE", _socketSongMessage);
-                }
+                    dispatchEvent(new SendWebsocketMessageEvent("SONG_PAUSE", _socketSongMessage));
             }
             else if (_gameState == GAME_PAUSE)
             {
@@ -1310,9 +1312,7 @@ package game
                 _song.resume();
 
                 if (AppState.instance.air.useWebsockets)
-                {
-                    _gvars.websocketSend("SONG_RESUME", _socketSongMessage);
-                }
+                    dispatchEvent(new SendWebsocketMessageEvent("SONG_RESUME", _socketSongMessage));
             }
         }
 
@@ -1370,8 +1370,8 @@ package game
                 newGameResults.replay_bin_boos = _binReplayBoos;
                 newGameResults.user = _replay ? _replay.user : _user;
                 newGameResults.restarts = _replay ? 0 : _gvars.songRestarts;
-                newGameResults.start_time = _gvars.songStartTime;
-                newGameResults.start_hash = _gvars.songStartHash;
+                newGameResults.start_time = AppState.instance.gameplay.songStartTime;
+                newGameResults.start_hash = AppState.instance.gameplay.songStartHash;
                 newGameResults.end_time = _replay ? TimeUtil.getFormattedDate(new Date(_replay.timestamp * 1000)) : TimeUtil.getCurrentDate();
                 newGameResults.song_progress = (_gameProgress / _gameLastNoteFrame);
                 newGameResults.playtime_secs = ((getTimer() - _msStartTime) / 1000);
@@ -1423,8 +1423,9 @@ package game
                 _socketScoreMessage["maxcombo"] = _hitMaxCombo;
                 _socketScoreMessage["score"] = _gameScore;
                 _socketScoreMessage["last_hit"] = null;
-                _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
-                _gvars.websocketSend("SONG_END", _socketSongMessage);
+
+                dispatchEvent(new SendWebsocketMessageEvent("NOTE_JUDGE", _socketScoreMessage));
+                dispatchEvent(new SendWebsocketMessageEvent("SONG_END", _socketSongMessage));
             }
 
             // Cleanup
@@ -1566,7 +1567,7 @@ package game
             _gvars.songStats.raw_score += _gameScore;
             _gvars.songStats.amazing += _hitAmazing;
             _gvars.songStats.grandtotal += tempGT;
-            _gvars.songStats.credits += Math.round(tempGT / _gvars.SCORE_PER_CREDIT);
+            _gvars.songStats.credits += Math.round(tempGT / AppState.instance.content.scorePerCredit);
             _gvars.songStats.restarts++;
 
             // Restart
@@ -1582,8 +1583,9 @@ package game
             if (AppState.instance.air.useWebsockets)
             {
                 _socketScoreMessage["restarts"] = _gvars.songRestarts;
-                _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
-                _gvars.websocketSend("SONG_RESTART", _socketSongMessage);
+
+                dispatchEvent(new SendWebsocketMessageEvent("NOTE_JUDGE", _socketScoreMessage));
+                dispatchEvent(new SendWebsocketMessageEvent("SONG_RESTART", _socketSongMessage));
             }
         }
 
@@ -2212,7 +2214,8 @@ package game
             if (_player1Judge && !_isEditor)
                 _player1Judge.showJudge(jscore);
 
-            updateHealth(health > 0 ? _gvars.HEALTH_JUDGE_ADD : _gvars.HEALTH_JUDGE_REMOVE);
+            var contentState:ContentState = AppState.instance.content;
+            updateHealth(health > 0 ? contentState.healthJudgeAdd : contentState.healthJudgeRemove);
 
             if (_hitCombo > _hitMaxCombo)
                 _hitMaxCombo = _hitCombo;
@@ -2257,7 +2260,8 @@ package game
                 _socketScoreMessage["maxcombo"] = _hitMaxCombo;
                 _socketScoreMessage["score"] = _gameScore;
                 _socketScoreMessage["last_hit"] = score;
-                _gvars.websocketSend("NOTE_JUDGE", _socketScoreMessage);
+
+                dispatchEvent(new SendWebsocketMessageEvent("NOTE_JUDGE", _socketScoreMessage));
             }
         }
 

@@ -30,19 +30,17 @@ package popups.settings
     import events.navigation.OpenEditorEvent;
     import game.GameplayDisplay;
     import classes.GameMods;
+    import state.AppState;
 
 
     public class SettingsWindow extends DisplayLayer
     {
         public var pane:ScrollPane;
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
 
         private var _scrollbar:ScrollBar;
-
-        private var _user:User;
 
         private var _box:Sprite;
         private var _bmp:Bitmap;
@@ -76,18 +74,16 @@ package popups.settings
 
         private var _windowManage:ManageSettingsWindow;
 
-        public function SettingsWindow(user:User)
+        public function SettingsWindow()
         {
-            _user = user;
-
             // build menus
-            _tabs = new <SettingsTabBase>[new SettingsTabGeneral(this, user.settings),
-                new SettingsTabInput(this, user.settings),
-                new SettingsTabNoteskin(this, user.settings),
-                new SettingsTabModifiers(this, user.settings),
-                new SettingsTabVisuals(this, user.settings),
-                new SettingsTabColors(this, user.settings),
-                new SettingsTabMisc(this, user.settings)];
+            _tabs = new <SettingsTabBase>[new SettingsTabGeneral(this),
+                new SettingsTabInput(this),
+                new SettingsTabNoteskin(this),
+                new SettingsTabModifiers(this),
+                new SettingsTabVisuals(this),
+                new SettingsTabColors(this),
+                new SettingsTabMisc(this)];
 
             _tabButtons = new <TabButton>[];
 
@@ -219,7 +215,7 @@ package popups.settings
 
         public function checkValidMods():void
         {
-            _txtModWarning.visible = !new GameMods(_user.settings).isScoringCompatible;
+            _txtModWarning.visible = !(new GameMods(_user.settings).isScoringCompatible);
         }
 
         private function onManageSettingsWindowClosed(window:ManageSettingsWindow):void
@@ -239,14 +235,11 @@ package popups.settings
             function onConfirmResetClicked(e:Event):void
             {
                 confirmWindow.parent.removeChild(confirmWindow);
-                if (_user == _gvars.playerUser)
-                {
-                    _user.settings = new User().settings;
-                    _avars.resetSettings();
-                }
 
-                for each (var tab:SettingsTabBase in _tabs)
-                    tab.updateSettings(_user.settings);
+                dispatchEvent(new ResetUserSettingsEvent());
+
+                _user.settings = new User().settings;
+                _avars.resetSettings();
 
                 changeTab(_currentIndex);
                 _currentTab.setValues();
@@ -286,9 +279,9 @@ package popups.settings
             const tempSongInfo:SongInfo = new SongInfo();
             tempSongInfo.level = 1337;
             tempSongInfo.chart_type = "EDITOR";
-            var song:Song = new Song(tempSongInfo, false, _user.settings);
+            var song:Song = new Song(tempSongInfo, false, AppState.instance.auth.user.settings);
 
-            dispatchEvent(new OpenEditorEvent(song, _user, editorFlag));
+            dispatchEvent(new OpenEditorEvent(song, editorFlag));
         }
 
         private function onManageSettingsClicked(e:Event):void
@@ -299,25 +292,22 @@ package popups.settings
 
         private function onCloseClicked(e:Event):void
         {
-            if (_user == _gvars.playerUser)
+            _user.saveSettingsLocally();
+            _user.saveSettingsOnline(_gvars.userSession);
+
+            // Setup Background Colors
+            GameBackgroundColor.BG_LIGHT = _user.settings.gameColors[0];
+            GameBackgroundColor.BG_DARK = _user.settings.gameColors[1];
+            GameBackgroundColor.BG_STATIC = _user.settings.gameColors[2];
+            GameBackgroundColor.BG_POPUP = _user.settings.gameColors[3];
+            GameBackgroundColor.BG_STAGE = _user.settings.gameColors[4];
+            _gvars.gameMain.redrawBackground();
+
+            if (_gvars.gameMain.navigator.activePanel is MainMenu && ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel is MenuSongSelection))
             {
-                _user.saveSettingsLocally();
-                _user.saveSettingsOnline(_gvars.userSession);
-
-                // Setup Background Colors
-                GameBackgroundColor.BG_LIGHT = _user.settings.gameColors[0];
-                GameBackgroundColor.BG_DARK = _user.settings.gameColors[1];
-                GameBackgroundColor.BG_STATIC = _user.settings.gameColors[2];
-                GameBackgroundColor.BG_POPUP = _user.settings.gameColors[3];
-                GameBackgroundColor.BG_STAGE = _user.settings.gameColors[4];
-                _gvars.gameMain.redrawBackground();
-
-                if (_gvars.gameMain.navigator.activePanel is MainMenu && ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel is MenuSongSelection))
-                {
-                    const panel:MenuSongSelection = ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel as MenuSongSelection);
-                    panel.buildGenreList();
-                    panel.drawPages();
-                }
+                const panel:MenuSongSelection = ((_gvars.gameMain.navigator.activePanel as MainMenu).currentPanel as MenuSongSelection);
+                panel.buildGenreList();
+                panel.drawPages();
             }
 
             SoundMixer.soundTransform = new SoundTransform(_user.settings.gameVolume);

@@ -13,10 +13,10 @@ package classes
     import flash.net.URLVariables;
     import events.state.EngineLoadedEvent;
     import flash.events.IEventDispatcher;
+    import state.AppState;
 
     public class PlaylistLoader extends EventDispatcher
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var _loader:URLLoader;
@@ -71,7 +71,7 @@ package classes
                 var req:URLRequest = new URLRequest(Constant.SITE_PLAYLIST_URL + "?d=" + time);
                 var requestVars:URLVariables = new URLVariables();
                 Constant.addDefaultRequestVariables(requestVars);
-                requestVars.session = _gvars.userSession;
+                requestVars.session = AppState.instance.auth.userSession;
                 req.data = requestVars;
                 req.method = URLRequestMethod.POST;
                 _loader.load(req);
@@ -96,7 +96,7 @@ package classes
             catch (e:Error)
             {
                 _loadError = true;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                this.dispatchEvent(new Event(Constant.LOAD_ERROR));
                 return;
             }
 
@@ -214,7 +214,7 @@ package classes
 
             _onPlaylistDataLoaded(generatedQueues, genreList, playList, indexList);
 
-            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+            dispatchEvent(new Event(Constant.LOAD_COMPLETE));
         }
 
         private function compareSongLevel(songInfo1:SongInfo, songInfo2:SongInfo):Number
@@ -231,7 +231,7 @@ package classes
         {
             removeLoaderListeners();
             _loadError = true;
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            this.dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function addLoaderListeners():void
@@ -251,17 +251,17 @@ package classes
 
         public function engineChangeHandler(e:Event):void
         {
-            removeEventListener(GlobalVariables.LOAD_COMPLETE, engineChangeHandler);
-            removeEventListener(GlobalVariables.LOAD_ERROR, engineChangeHandler);
+            removeEventListener(Constant.LOAD_COMPLETE, engineChangeHandler);
+            removeEventListener(Constant.LOAD_ERROR, engineChangeHandler);
             switch (e.type)
             {
-                case GlobalVariables.LOAD_ERROR:
+                case Constant.LOAD_ERROR:
                     ArcGlobals.instance.configLegacy = null;
                     load();
                     Alert.add(_lang.string("error_loading_playlist"));
                     break;
-                case GlobalVariables.LOAD_COMPLETE:
-                    _gvars.dispatchEvent(new EngineLoadedEvent());
+                case Constant.LOAD_COMPLETE:
+                    dispatchEvent(new EngineLoadedEvent());
                     break;
             }
         }

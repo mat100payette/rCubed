@@ -16,7 +16,7 @@ package menu
     import classes.Language;
     import classes.Playlist;
     import classes.SongInfo;
-    import classes.SongBytes;
+    import classes.SoundPlayer;
     import classes.SongPreview;
     import classes.SongQueueItem;
     import classes.chart.Song;
@@ -54,6 +54,7 @@ package menu
     import events.navigation.StartGameplayEvent;
     import game.GameplayDisplay;
     import state.AppState;
+    import classes.User;
 
     public class MenuSongSelection extends DisplayLayer
     {
@@ -112,7 +113,7 @@ package menu
         private var songItemContextMenu:ContextMenu;
         private var songItemRemoveQueueContext:ContextMenuItem;
 
-        public static var previewMusic:SongBytes;
+        public static var previewMusic:SoundPlayer;
 
         ///- Constructor
         public function MenuSongSelection()
@@ -131,8 +132,8 @@ package menu
                 var playlist:Playlist = AppState.instance.content.altPlaylist;
 
                 _avars.configLegacy = _avars.legacyDefaultEngine;
-                playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, playlist.engineChangeHandler);
-                playlist.addEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
+                playlist.addEventListener(Constant.LOAD_COMPLETE, playlist.engineChangeHandler);
+                playlist.addEventListener(Constant.LOAD_ERROR, e_defaultEngineLoadFail);
                 playlist.load();
 
                 Flags.VALUES[Flags.LEGACY_ENGINE_DEFAULT_LOAD_SKIP] = true;
@@ -356,7 +357,7 @@ package menu
          */
         private function e_defaultEngineLoadFail(e:Event):void
         {
-            _playlist.removeEventListener(GlobalVariables.LOAD_ERROR, e_defaultEngineLoadFail);
+            _playlist.removeEventListener(Constant.LOAD_ERROR, e_defaultEngineLoadFail);
             _playlist.engineChangeHandler(e);
 
             dispatchEvent(new ChangePanelEvent(Routes.PANEL_SONGSELECTION));
@@ -371,12 +372,17 @@ package menu
          */
         public function buildGenreListFlags():void
         {
-            if (!_gvars.activeUser.settings.displayGenreFlag)
+            var user:User = AppState.instance.auth.user;
+
+            if (!user.settings.displayGenreFlag)
                 return;
 
             genreListFlags = [];
 
             var i:int;
+
+            var playlist:Playlist = AppState.instance.content.currentPlaylist;
+            var difficultyRanges:Array = AppState.instance.content.difficultyRanges;
 
             //- Build Genre List
             var totalGenres:int = getTotalGenres();
@@ -389,9 +395,9 @@ package menu
                 {
                     songList = [];
 
-                    var len:int = _playlist._indexList.length;
+                    var len:int = playlist.indexList.length;
                     for (i = 0; i < len; i++)
-                        songList[i] = _playlist._indexList[i];
+                        songList[i] = playlist.indexList[i];
                 }
                 else
                 {
@@ -403,41 +409,41 @@ package menu
                     else if (GENRE_MODE == GENRE_DIFFICULTIES)
                     {
                         // Difficulty Filter
-                        if (genre_index == _gvars.DIFFICULTY_RANGES.length - 1)
+                        if (genre_index == difficultyRanges.length - 1)
                         {
-                            songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
+                            songList = getFilteredSongInfoArrayFromVec(playlist.indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
                             {
-                                return item.difficulty <= 0 || item.difficulty >= _gvars.DIFFICULTY_RANGES[genre_index][0];
+                                return item.difficulty <= 0 || item.difficulty >= difficultyRanges[genre_index][0];
                             });
                         }
                         else
                         {
-                            songList = getFilteredSongInfoArrayFromVec(_playlist._indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
+                            songList = getFilteredSongInfoArrayFromVec(playlist.indexList, function(item:SongInfo, index:int, vec:Vector.<SongInfo>):Boolean
                             {
-                                return item.difficulty >= _gvars.DIFFICULTY_RANGES[genre_index][0] && item.difficulty <= _gvars.DIFFICULTY_RANGES[genre_index][1];
+                                return item.difficulty >= difficultyRanges[genre_index][0] && item.difficulty <= difficultyRanges[genre_index][1];
                             });
                         }
                     }
                     else
                     {
-                        songList = _playlist._genreList[genre_index + 1];
+                        songList = playlist.genreList[genre_index + 1];
                     }
                 }
 
                 if (songList != null)
                 {
-                    var best_flag:int = 6; // 6 = AAA
+                    var bestFlag:int = 6; // 6 = AAA
                     for (i = 0; i < songList.length; i++)
                     {
-                        var song_flag:int = GlobalVariables.getSongIconIndex(songList[i], _gvars.activeUser.getLevelRank(songList[i]));
-                        if (song_flag < best_flag)
+                        var songFlag:int = GlobalVariables.getSongIconIndex(songList[i], user.getLevelRank(songList[i]));
+                        if (songFlag < bestFlag)
                         {
-                            best_flag = song_flag;
-                            if (song_flag <= 1)
+                            bestFlag = songFlag;
+                            if (songFlag <= 1)
                                 break;
                         }
                     }
-                    genreListFlags[genre_index] = (best_flag >= 2 ? GlobalVariables.SONG_ICON_COLOR[best_flag] : null);
+                    genreListFlags[genre_index] = (bestFlag >= 2 ? GlobalVariables.SONG_ICON_COLOR[bestFlag] : null);
                     songList = null;
                 }
             }
@@ -462,41 +468,43 @@ package menu
             //- Build Genre List
             var totalGenres:int = getTotalGenres();
 
-            var genre_index:int;
-            var position_index:int = -1;
+            var genreIndex:int;
+            var positionIndex:int = -1;
 
-            for (genre_index = -1; genre_index < totalGenres; ++genre_index)
+            var user:User = AppState.instance.auth.user;
+            var usingCanon:Boolean = AppState.instance.content.usingCanon;
+
+            for (genreIndex = -1; genreIndex < totalGenres; ++genreIndex)
             {
                 // If displaying genres, and Legacy Genre isn't displayed, skip it.
                 if (GENRE_MODE == GENRE_GENRES)
                 {
-                    if (!_gvars.activeUser.settings.displayLegacySongs && !_playlist._engine && genre_index == (Constant.LEGACY_GENRE - 1))
-                    {
+                    if (!user.settings.displayLegacySongs && usingCanon && genreIndex == (Constant.LEGACY_GENRE - 1))
                         continue;
-                    }
-                    position_index++;
+
+                    positionIndex++;
                 }
                 else
                 {
-                    position_index = genre_index + 1;
+                    positionIndex = genreIndex + 1;
                 }
 
                 // Flag Color
-                var genre_flag:String = genreListFlags[genre_index];
-                var genre_text:String = getGenreText(genre_index);
+                var genreFlag:String = genreListFlags[genreIndex];
+                var genreText:String = getGenreText(genreIndex);
 
-                if (genre_flag != null && _gvars.activeUser.settings.displayGenreFlag)
-                    genre_text = "<font color=\"" + genre_flag + "\">•</font> " + genre_text;
+                if (genreFlag != null && user.settings.displayGenreFlag)
+                    genreText = "<font color=\"" + genreFlag + "\">•</font> " + genreText;
 
                 // Build Label
-                var songGenre:Text = new Text(genreDisplay, 0, 0, genre_text, 14);
+                var songGenre:Text = new Text(genreDisplay, 0, 0, genreText, 14);
                 songGenre.height = 22.6;
                 songGenre.width = 130.75;
                 songGenre.mouseEnabled = true;
                 songGenre.useHandCursor = true;
                 songGenre.buttonMode = true;
-                songGenre.index = genre_index;
-                songGenre.position = position_index;
+                songGenre.index = genreIndex;
+                songGenre.position = positionIndex;
                 genreItems.push(songGenre);
             }
 
@@ -2205,7 +2213,7 @@ package menu
             if (previewMusic)
                 previewMusic.stop();
 
-            _gvars.menuMusic = new SongBytes(song.bytesSWF);
+            _gvars.menuMusic = new SoundPlayer(song.bytesSWF);
             _gvars.menuMusic.start();
         }
 
@@ -2223,7 +2231,7 @@ package menu
             if (previewMusic)
                 previewMusic.stop();
 
-            previewMusic = new SongBytes(song.bytesSWF, false, true);
+            previewMusic = new SoundPlayer(song.bytesSWF, false, true);
             previewMusic.start();
         }
 

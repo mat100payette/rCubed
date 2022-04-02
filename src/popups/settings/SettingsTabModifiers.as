@@ -9,7 +9,6 @@ package popups.settings
 
     public class SettingsTabModifiers extends SettingsTabBase
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var _optionHidden:BoxCheck;
@@ -36,9 +35,9 @@ package popups.settings
         private var _optionHalftime:BoxCheck;
         private var _optionNoBackground:BoxCheck;
 
-        public function SettingsTabModifiers(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabModifiers(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
         }
 
         override public function get name():String

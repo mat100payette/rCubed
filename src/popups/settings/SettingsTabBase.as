@@ -4,25 +4,23 @@ package popups.settings
     import classes.ui.MouseTooltip;
     import classes.ui.ScrollPaneContent;
     import classes.ui.Text;
-    import flash.geom.Point;
     import flash.display.DisplayObject;
-    import flash.text.TextFormatAlign;
     import flash.events.EventDispatcher;
+    import flash.geom.Point;
+    import flash.text.TextFormatAlign;
 
     public class SettingsTabBase extends EventDispatcher
     {
         public var container:ScrollPaneContent;
 
         protected var _parent:SettingsWindow;
-        protected var _settings:UserSettings;
         protected var _defaultSettings:UserSettings;
         protected var _options:Object = {};
         private var _hoverMessage:MouseTooltip;
 
-        public function SettingsTabBase(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabBase(settingsWindow:SettingsWindow):void
         {
             _parent = settingsWindow;
-            _settings = settings;
 
             _defaultSettings = new UserSettings();
         }
@@ -49,11 +47,6 @@ package popups.settings
                     //olditem.removeEventListener(MouseEvent.CLICK, clickHandler);
                     //olditem.removeEventListener(Event.CHANGE, changeHandler);
             }
-        }
-
-        public function updateSettings(settings:UserSettings):void
-        {
-            _settings = settings;
         }
 
         public function setValues():void

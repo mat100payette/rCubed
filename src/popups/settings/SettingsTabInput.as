@@ -32,9 +32,9 @@ package popups.settings
         private var _keysHeld:Array = [];
         private var _keysHeldText:Text;
 
-        public function SettingsTabInput(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabInput(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
         }
 
         override public function get name():String

@@ -55,7 +55,5 @@ package classes
             boo += stats.boo;
             credits += stats.credits;
         }
-
     }
-
 }

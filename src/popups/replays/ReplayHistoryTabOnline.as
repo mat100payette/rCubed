@@ -1,25 +1,25 @@
 package popups.replays
 {
 
+    import classes.Alert;
+    import classes.Language;
     import classes.replay.Replay;
     import classes.ui.BoxButton;
+    import classes.ui.Text;
+    import com.flashfla.net.WebRequest;
+    import com.flashfla.utils.SpriteUtil;
     import flash.display.Bitmap;
     import flash.display.Sprite;
-    import flash.events.MouseEvent;
-    import classes.ui.Text;
-    import com.flashfla.utils.SpriteUtil;
-    import classes.Language;
-    import com.flashfla.net.WebRequest;
     import flash.events.Event;
-    import classes.Alert;
+    import flash.events.MouseEvent;
     import flash.text.TextFormatAlign;
+    import state.AppState;
 
     public class ReplayHistoryTabOnline extends ReplayHistoryTabBase
     {
-        private static var INITIAL_LOAD:Boolean = false;
-        private static var REPLAYS:Vector.<Replay>;
+        private var initialLoad:Boolean = false;
+        private var replays:Vector.<Replay>;
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var _http:WebRequest;
@@ -38,7 +38,7 @@ package popups.replays
             var lockUIText:Text = new Text(_uiLock, 0, 200, _lang.string("replay_loading_online"), 24);
             lockUIText.setAreaParams(780, 30, TextFormatAlign.CENTER);
 
-            _loadingCancelButton = new BoxButton(_uiLock, 390 - 40, 440, 80, 30, _lang.string("menu_cancel"), 12, clickHandler);
+            _loadingCancelButton = new BoxButton(_uiLock, 390 - 40, 440, 80, 30, _lang.string("menu_cancel"), 12, cancelWebLoading);
         }
 
         override public function get name():String
@@ -56,10 +56,10 @@ package popups.replays
             parent.addChild(_btnRefresh);
 
             // Initial Load
-            if (!INITIAL_LOAD)
+            if (!initialLoad)
             {
                 loadOnlineReplays();
-                INITIAL_LOAD = true;
+                initialLoad = true;
             }
         }
 
@@ -71,7 +71,7 @@ package popups.replays
         override public function setValues():void
         {
             var renderList:Array = [];
-            for each (var r:Replay in REPLAYS)
+            for each (var r:Replay in replays)
             {
                 if (r.songInfo == null)
                     continue;
@@ -88,20 +88,19 @@ package popups.replays
         private function loadOnlineReplays(e:MouseEvent = null):void
         {
             Logger.info(this, "Loading Online Replays");
-            lockUI = true;
+            lockUI();
 
-            REPLAYS = new <Replay>[];
+            // TODO: Put in state maybe
+            replays = new <Replay>[];
 
             _http = new WebRequest(Constant.SITE_REPLAYS_URL, onReplaysFetched, onReplaysFetchError);
-            _http.load({"session": _gvars.userSession});
+            _http.load({"session": AppState.instance.auth.userSession});
         }
 
-        private function clickHandler(e:MouseEvent):void
+        private function cancelWebLoading(e:MouseEvent):void
         {
             if (e.target == _loadingCancelButton)
-            {
                 webLoadComplete(true);
-            }
         }
 
         private function onReplaysFetched(e:Event):void
@@ -116,7 +115,7 @@ package popups.replays
                     var r:Replay = new Replay(replay["replayid"]);
                     r.parseReplay(replay, false);
                     r.loadSongInfo();
-                    REPLAYS[REPLAYS.length] = r;
+                    replays[replays.length] = r;
                 }
             }
             catch (error:Error)
@@ -140,27 +139,27 @@ package popups.replays
                 _http.loader.close();
 
             _http = null;
-            lockUI = false;
+
+            unlockUI();
             setValues();
         }
 
-        public function set lockUI(val:Boolean):void
+        private function lockUI():void
         {
-            if (val)
-            {
-                _uiLockBG = SpriteUtil.getBitmapSprite(_gvars.gameMain.stage, 0.3);
-                _uiLock.addChildAt(_uiLockBG, 0);
-                parent.addChild(_uiLock);
-            }
-            else
-            {
-                if (parent.contains(_uiLock))
-                {
-                    _uiLock.removeChildAt(0);
-                    _uiLockBG = null;
-                    parent.removeChild(_uiLock);
-                }
-            }
+            // TODO: Check if this stage actually works for this
+            _uiLockBG = SpriteUtil.getBitmapSprite(parent.stage, 0.3);
+            _uiLock.addChildAt(_uiLockBG, 0);
+            parent.addChild(_uiLock);
+        }
+
+        private function unlockUI():void
+        {
+            if (!parent.contains(_uiLock))
+                return;
+
+            _uiLock.removeChildAt(0);
+            _uiLockBG = null;
+            parent.removeChild(_uiLock);
         }
     }
 }

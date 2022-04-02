@@ -116,12 +116,12 @@ package state
             _saveWindowSize = value;
         }
 
-        public function get windowProperties():WindowState
+        public function get windowState():WindowState
         {
             return _window;
         }
 
-        public function set windowProperties(value:WindowState):void
+        public function set windowState(value:WindowState):void
         {
             throwIfFrozen();
             _window = value;

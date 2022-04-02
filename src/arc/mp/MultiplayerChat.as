@@ -25,6 +25,7 @@ package arc.mp
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
     import menu.MainMenu;
+    import state.AppState;
 
     public class MultiplayerChat extends Component
     {
@@ -225,7 +226,7 @@ package arc.mp
             _chatFrameDelay = 0;
 
             _chatText += (_chatText.length == 0 ? "" : "\n");
-            if (GlobalVariables.instance.activeUser.settings.displayMPTimestamp)
+            if (AppState.instance.auth.user.settings.displayMPTimestamp)
             {
                 var date:Date = new Date();
                 var hoursStr:String = (date.hours == 0 ? 12 : (date.hours > 12 ? date.hours - 12 : date.hours)).toString();
@@ -296,8 +297,8 @@ package arc.mp
         public static function textFormatLevel(user:User):String
         {
             const level:int = user.userLevel;
-            const color:int = GlobalVariables.getDivisionColor(level);
-            const title:String = GlobalVariables.getDivisionTitle(level);
+            const color:int = AppState.instance.content.getDivisionColor(level);
+            const title:String = AppState.instance.content.getDivisionTitle(level);
             const dulledColor:String = textDullColor(color, 1).toString(16);
 
             return HtmlUtil.color("Lv." + level + " (" + title + ") ", "#" + dulledColor);

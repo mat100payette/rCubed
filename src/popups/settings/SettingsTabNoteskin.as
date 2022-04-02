@@ -43,9 +43,9 @@ package popups.settings
         private var _noteskinCheckOptions:Vector.<NoteskinCheckOption> = new <NoteskinCheckOption>[];
         private var _noteColorOptions:Vector.<NoteColorOption> = new <NoteColorOption>[];
 
-        public function SettingsTabNoteskin(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabNoteskin(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
 
             _previousNoteskinId = _settings.noteskinId;
 

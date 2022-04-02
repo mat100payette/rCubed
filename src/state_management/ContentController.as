@@ -11,11 +11,11 @@ package state_management
     import state.ContentState;
     import events.state.UpdateGameContentFromSiteEvent;
 
-    public class ContentStateManager extends StateManager
+    public class ContentController extends Controller
     {
         private var _target:IEventDispatcher;
 
-        public function ContentStateManager(target:IEventDispatcher, owner:Object, updateStateCallback:Function)
+        public function ContentController(target:IEventDispatcher, owner:Object, updateStateCallback:Function)
         {
             super(target, owner, updateStateCallback);
         }
@@ -86,22 +86,22 @@ package state_management
             var contentState:ContentState = newState.content;
 
             // Has Response
-            contentState.TOTAL_GENRES = data.game_totalgenres;
-            contentState.MAX_CREDITS = data.game_maxcredits;
-            contentState.SCORE_PER_CREDIT = data.game_scorepercredit;
-            contentState.MAX_DIFFICULTY = data.game_maxdifficulty;
-            contentState.DIFFICULTY_RANGES = data.game_difficulty_range;
-            contentState.NONPUBLIC_GENRES = data.game_nonpublic_genres;
+            contentState.totalGenres = data.game_totalgenres;
+            contentState.maxCreditsPerPlay = data.game_maxcredits;
+            contentState.scorePerCredit = data.game_scorepercredit;
+            contentState.maxSongDifficulty = data.game_maxdifficulty;
+            contentState.difficultyRanges = data.game_difficulty_range;
+            contentState.nonPublicGenres = data.game_nonpublic_genres;
 
             // MP Divisions
-            GlobalVariables.divisionLevel = data.division_levels;
-            GlobalVariables.divisionTitle = data.division_titles;
+            contentState.divisionLevel = data.division_levels;
+            contentState.divisionTitle = data.division_titles;
 
             var divisionColors:Array = [];
             for each (var value:String in data.division_colors)
                 divisionColors.push(parseInt(value.substring(1), 16));
 
-            GlobalVariables.divisionColor = divisionColors;
+            contentState.divisionColor = divisionColors;
 
             // Tokens
             contentState.tokens = {};

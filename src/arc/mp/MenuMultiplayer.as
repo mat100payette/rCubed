@@ -34,6 +34,7 @@ package arc.mp
     import flash.ui.ContextMenuItem;
     import flash.utils.Timer;
     import menu.DisplayLayer;
+    import state.AppState;
 
     public class MenuMultiplayer extends DisplayLayer
     {
@@ -60,7 +61,8 @@ package arc.mp
         {
             _connection = MultiplayerState.instance.connection;
             // Connect immediately if logged in
-            if (!GlobalVariables.instance.activeUser.isGuest && GlobalVariables.instance.activeUser.id != 2)
+            var user:User = AppState.instance.auth.user;
+            if (!user.isGuest && user.id != 2)
             {
                 _connection.connect();
             }
@@ -379,8 +381,8 @@ package arc.mp
 
             if (room.userCount > 0 && level != -1)
             {
-                const color:int = GlobalVariables.getDivisionColor(level);
-                const titleString:String = GlobalVariables.getDivisionTitle(level);
+                const color:int = AppState.instance.content.getDivisionColor(level);
+                const titleString:String = AppState.instance.content.getDivisionTitle(level);
                 const dulledColor:String = MultiplayerChat.textDullColor(color, 1).toString(16);
                 const titlePrefix:String = "(" + titleString + ")";
 

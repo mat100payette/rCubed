@@ -57,6 +57,8 @@ package game
     import events.navigation.StartReplayEvent;
     import state.AppState;
     import events.state.UpdateSongAccessEvent;
+    import classes.User;
+    import state.AuthState;
 
     public class GameResults extends DisplayLayer
     {
@@ -68,7 +70,6 @@ package game
         private var _graphCache:Object = {"0": {}, "1": {}};
 
         private var _mp:MultiplayerState = MultiplayerState.instance;
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
         private var _loader:DynamicURLLoader;
@@ -664,6 +665,8 @@ package game
         private function getSaveHash(result:Object):String
         {
             var dataSerial:String = "";
+            var user:User = AppState.instance.auth.user;
+
             dataSerial += "amazing:" + result.amazing + ",";
             dataSerial += "perfect:" + result.perfect + ",";
             dataSerial += "good:" + result.good + ",";
@@ -675,9 +678,10 @@ package game
             dataSerial += "replay:" + result.replay + ",";
             dataSerial += "level:" + result.level + ",";
             dataSerial += "session:" + result.session + ",";
-            dataSerial += "uid:" + _gvars.activeUser.siteId + ",";
-            dataSerial += "ses:" + _gvars.activeUser.hash + ",";
+            dataSerial += "uid:" + user.siteId + ",";
+            dataSerial += "ses:" + user.hash + ",";
             dataSerial += R3::HASH_STRING;
+
             return SHA1.hash(dataSerial);
         }
 
@@ -702,19 +706,21 @@ package game
             {
                 target = null;
                 var keyCode:int = e.keyCode;
-                if ((keyCode == _gvars.playerUser.settings.keyLeft || keyCode == Keyboard.LEFT) && _navPrev.visible)
+                var user:User = AppState.instance.auth.user;
+
+                if ((keyCode == user.settings.keyLeft || keyCode == Keyboard.LEFT) && _navPrev.visible)
                 {
                     target = _navPrev;
                 }
-                else if ((keyCode == _gvars.playerUser.settings.keyRight || keyCode == Keyboard.RIGHT) && _navNext.visible)
+                else if ((keyCode == user.settings.keyRight || keyCode == Keyboard.RIGHT) && _navNext.visible)
                 {
                     target = _navNext;
                 }
-                else if (keyCode == _gvars.playerUser.settings.keyRestart)
+                else if (keyCode == user.settings.keyRestart)
                 {
                     target = _navReplay;
                 }
-                else if (keyCode == _gvars.playerUser.settings.keyQuit)
+                else if (keyCode == user.settings.keyQuit)
                 {
                     target = _navMenu;
                     stage.removeEventListener(KeyboardEvent.KEY_DOWN, eventHandler);
@@ -899,10 +905,13 @@ package game
         private function canSendScore(result:GameScoreResult, valid_score:Boolean = true, valid_replay:Boolean = true, check_replay:Boolean = true, check_alt_engine:Boolean = true):Boolean
         {
             var ret:Boolean = false;
+            var user:User = AppState.instance.auth.user;
+
             ret ||= valid_score && !isScoreValid(true, false);
             ret ||= valid_replay && !isScoreValid(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && _isReplayEdited) || result.user.siteId != user.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
+
             return !ret;
         }
 
@@ -920,10 +929,13 @@ package game
         private function canUpdateScore(result:GameScoreResult, valid_score:Boolean = true, valid_replay:Boolean = true, check_replay:Boolean = true, check_alt_engine:Boolean = true):Boolean
         {
             var ret:Boolean = false;
+            var user:User = AppState.instance.auth.user;
+
             ret ||= valid_score && !isScoreUpdated(true, false);
             ret ||= valid_replay && !isScoreUpdated(false, true);
-            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && _isReplayEdited) || result.user.siteId != _gvars.playerUser.siteId)
+            ret ||= check_replay && (result.replayData.length <= 0 || result.score <= 0 || (isReplay && _isReplayEdited) || result.user.siteId != user.siteId)
             ret ||= check_alt_engine && (result.user.isGuest || result.songInfo.engine != null);
+
             return !ret;
         }
 
@@ -977,7 +989,7 @@ package game
             scoreSender.replay = Replay.getReplayString(gameResult.replayData);
             scoreSender.save_settings = _settings.stringify();
             scoreSender.restart_stats = JSON.stringify(gameResult.restart_stats);
-            scoreSender.session = _gvars.userSession;
+            scoreSender.session = AppState.instance.auth.userSession;
             scoreSender.start_time = gameResult.start_time;
             scoreSender.start_hash = gameResult.start_hash;
             scoreSender.hashMap = getSaveHash(scoreSender);
@@ -1209,6 +1221,8 @@ package game
                     "stepauthor": gameResult.songInfo.stepauthor,
                     "time": gameResult.songInfo.time};
 
+            var userSession:String = AppState.instance.auth.userSession;
+
             // Post Game Data
             var dataObject:Object = {};
             dataObject.engine = gameResult.songInfo.engine;
@@ -1227,12 +1241,12 @@ package game
             dataObject.score = gameResult.score;
             dataObject.replay = gameResult.replay_bin_encoded;
             dataObject.save_settings = _settings;
-            dataObject.session = _gvars.userSession;
+            dataObject.session = userSession;
             dataObject.hashMap = getSaveHash(dataObject);
 
             // Must create a replacer for the settings' circular dependencies
             scoreSender.data = JSON.stringify(dataObject, UserSettings.replacer(dataObject.save_settings));
-            scoreSender.session = _gvars.userSession;
+            scoreSender.session = userSession;
 
             // Set Request
             req.data = scoreSender;
@@ -1342,6 +1356,7 @@ package game
             nR.replayBin = result.replayBin;
             nR.timestamp = int(new Date().getTime() / 1000);
             nR.songInfo = result.songInfo;
+
             _gvars.replayHistory.unshift(nR);
 
             // Display F2 Shortcut key only once per session.
@@ -1396,6 +1411,8 @@ package game
             var scoreSender:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(scoreSender);
 
+            var auth:AuthState = AppState.instance.auth;
+
             // Post Game Data
             scoreSender.level = gameResult.song.songInfo.level;
             scoreSender.update = canUpdateScore(gameResult, true, true, false, false);
@@ -1413,10 +1430,10 @@ package game
             scoreSender.replay = Replay.getReplayString(gameResult.replayData);
             scoreSender.replay_bin = gameResult.replay_bin_encoded;
             scoreSender.save_settings = _settings.stringify();
-            scoreSender.session = _gvars.userSession;
+            scoreSender.session = auth.userSession;
             scoreSender.start_time = gameResult.start_time;
             scoreSender.start_hash = gameResult.start_hash;
-            scoreSender.hash = SHA1.hash(scoreSender.replay + _gvars.activeUser.siteId);
+            scoreSender.hash = SHA1.hash(scoreSender.replay + auth.user.siteId);
 
             // Set Request
             req.data = scoreSender;

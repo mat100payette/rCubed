@@ -19,10 +19,10 @@ package classes.replay
     import flash.net.URLVariables;
     import flash.utils.ByteArray;
     import state.AppState;
+    import state.AuthState;
 
     public class Replay
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _loader:URLLoader;
 
         public var fileReplay:Boolean = false;
@@ -111,10 +111,12 @@ package classes.replay
 
             //- Level Details
             this.user = new User(false, data.userid);
-            this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
+            this.user.addEventListener(Constant.LOAD_COMPLETE, onUserLoad);
+
+            var auth:AuthState = AppState.instance.auth;
 
             if (loadUser)
-                this.user.loadFull(_gvars.userSession);
+                this.user.loadFull(auth.userSession);
             else
                 this.user.siteId = data.userid;
 
@@ -140,7 +142,7 @@ package classes.replay
             if (data.replayversion == "FFR")
             {
                 tempSettings = tempSettings.split("|");
-                jsonSettings = _gvars.playerUser.isGuest ? new User().settings : _gvars.playerUser.settings;
+                jsonSettings = auth.user.isGuest ? new User().settings : auth.user.settings;
                 jsonSettings.scrollSpeed = Number(tempSettings[0]);
                 jsonSettings.scrollDirection = Constant.cleanScrollDirection(tempSettings[2]);
                 jsonSettings.songRate = 1;
@@ -164,7 +166,8 @@ package classes.replay
                 for (var ss:int = 0; ss < tempSettings.length; ss++)
                     tempSettings[ss] = tempSettings[ss].split("|");
 
-                jsonSettings = _gvars.playerUser.isGuest ? new User().settings : _gvars.playerUser.settings;
+                var user:User = AppState.instance.auth.user;
+                jsonSettings = user.isGuest ? new User().settings : user.settings;
                 jsonSettings.scrollSpeed = Number(tempSettings[0][1]);
                 jsonSettings.scrollDirection = Constant.cleanScrollDirection(tempSettings[0][0]);
                 jsonSettings.songRate = 1;
@@ -227,7 +230,7 @@ package classes.replay
             this.user = new User(false);
             if (loadUser)
                 this.user.loadWithoutSettings();
-            this.user.addEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
+            this.user.addEventListener(Constant.LOAD_COMPLETE, onUserLoad);
             this.user.siteId = data.user_id;
             this.level = data.song_id;
             this.timestamp = data.timestamp;
@@ -337,7 +340,7 @@ package classes.replay
 
         private function onUserLoad(e:Event):void
         {
-            this.user.removeEventListener(GlobalVariables.LOAD_COMPLETE, onUserLoad);
+            this.user.removeEventListener(Constant.LOAD_COMPLETE, onUserLoad);
             isLoaded = true;
         }
 

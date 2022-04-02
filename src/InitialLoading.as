@@ -22,7 +22,6 @@ package
     public class InitialLoading extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _site:Site = Site.instance;
         private var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
@@ -159,22 +158,22 @@ package
             _gvars.playerUser = new User(true);
             _gvars.playerUser.loadFull(_gvars.userSession, onUserLoggedIn);
             _gvars.activeUser = _gvars.playerUser;
-            _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+            _gvars.activeUser.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+            _gvars.activeUser.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
 
-            _site.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            _site.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-            _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            _playlist.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+            _site.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+            _site.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
+            AppState.instance.content.currentPlaylist.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+            _playlist.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
             _site.load();
             _playlist.load();
 
             if (!_userLoggedIn)
             {
-                _lang.addEventListener(GlobalVariables.LOAD_COMPLETE, onLanguageDataLoaded);
-                _lang.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
-                _noteskinList.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _noteskinList.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                _lang.addEventListener(Constant.LOAD_COMPLETE, onLanguageDataLoaded);
+                _lang.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
+                _noteskinList.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+                _noteskinList.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
                 _lang.load();
                 _noteskinList.load();
             }
@@ -190,8 +189,8 @@ package
 
         private function gameScriptLoad(e:Event):void
         {
-            e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+            e.target.removeEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+            e.target.removeEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
             _loadScripts++;
 
             // Update Text
@@ -200,8 +199,8 @@ package
 
         private function gameScriptLoadError(e:Event):void
         {
-            e.target.removeEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-            e.target.removeEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+            e.target.removeEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+            e.target.removeEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
 
             // Update Text
             updateLoaderText();
@@ -224,34 +223,34 @@ package
 
             if (!_playlist.isLoaded())
             {
-                _playlist.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _playlist.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                _playlist.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+                _playlist.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
                 _playlist.load();
             }
             if (!_site.isLoaded())
             {
-                _site.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _site.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                _site.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+                _site.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
                 _site.load();
             }
             if (!_gvars.activeUser.isLoaded())
             {
-                _gvars.activeUser.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                _gvars.activeUser.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                _gvars.activeUser.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+                _gvars.activeUser.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
                 _gvars.activeUser.loadFull(_gvars.userSession);
             }
             if (!_userLoggedIn)
             {
                 if (!_noteskinList.isLoaded())
                 {
-                    _noteskinList.addEventListener(GlobalVariables.LOAD_COMPLETE, gameScriptLoad);
-                    _noteskinList.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                    _noteskinList.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
+                    _noteskinList.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
                     _noteskinList.load();
                 }
                 if (!_lang.isLoaded())
                 {
-                    _lang.addEventListener(GlobalVariables.LOAD_COMPLETE, onLanguageDataLoaded);
-                    _lang.addEventListener(GlobalVariables.LOAD_ERROR, gameScriptLoadError);
+                    _lang.addEventListener(Constant.LOAD_COMPLETE, onLanguageDataLoaded);
+                    _lang.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
                     _lang.load();
                 }
             }

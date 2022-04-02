@@ -40,9 +40,9 @@ package popups.settings
         private var _optionBooflagCombo:SelectableColorOption;
         private var _optionMissflagCombo:SelectableColorOption;
 
-        public function SettingsTabColors(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabColors(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
         }
 
         override public function get name():String

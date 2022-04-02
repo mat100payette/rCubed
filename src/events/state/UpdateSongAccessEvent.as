@@ -2,9 +2,9 @@ package events.state
 {
 
     import flash.events.Event;
-    import events.state.interfaces.IContentStateEvent;
+    import events.state.interfaces.IContentEvent;
 
-    public class UpdateSongAccessEvent extends StateEvent implements IContentStateEvent
+    public class UpdateSongAccessEvent extends StateEvent implements IContentEvent
     {
         public static const STATE:String = "UpdateSongAccess";
 

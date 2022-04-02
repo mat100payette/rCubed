@@ -2,9 +2,9 @@ package events.state
 {
 
     import flash.events.Event;
-    import events.state.interfaces.IMenuStateEvent;
+    import events.state.interfaces.IMenuEvent;
 
-    public class SetPopupsEnabledEvent extends StateEvent implements IMenuStateEvent
+    public class SetPopupsEnabledEvent extends StateEvent implements IMenuEvent
     {
         public static const STATE:String = "SetPopupsEnabled";
 

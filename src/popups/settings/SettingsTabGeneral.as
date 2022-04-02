@@ -15,6 +15,7 @@ package popups.settings
     import flash.events.MouseEvent;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
+    import events.state.SetMenuMusicVolumeEvent;
 
     public class SettingsTabGeneral extends SettingsTabBase
     {
@@ -57,9 +58,9 @@ package popups.settings
         private var _optionIsolation:ValidatedText;
         private var _optionIsolationTotal:ValidatedText;
 
-        public function SettingsTabGeneral(settingsWindow:SettingsWindow, settings:UserSettings):void
+        public function SettingsTabGeneral(settingsWindow:SettingsWindow):void
         {
-            super(settingsWindow, settings);
+            super(settingsWindow);
         }
 
         override public function get name():String
@@ -297,14 +298,9 @@ package popups.settings
 
         private function onMenuVolumeChanged(e:Event):void
         {
-            if (isNaN(_gvars.menuMusicSoundVolume))
-                _gvars.menuMusicSoundVolume = 1;
+            var volume:Number = Math.max(Math.min(_optionMenuVolume.slideValue, _optionMenuVolume.maxValue), _optionMenuVolume.minValue);
 
-            _gvars.menuMusicSoundVolume = Math.max(Math.min(_optionMenuVolume.slideValue, _optionMenuVolume.maxValue), _optionMenuVolume.minValue);
-            _gvars.menuMusicSoundTransform.volume = _optionMenuVolume.slideValue;
-
-            if (_gvars.menuMusic && _gvars.menuMusic.isPlaying)
-                _gvars.menuMusic.soundChannel.soundTransform = _gvars.menuMusicSoundTransform;
+            dispatchEvent(new SetMenuMusicVolumeEvent(volume));
         }
 
         private function onGlobalOffsetChanged(e:Event):void

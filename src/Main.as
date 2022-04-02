@@ -12,15 +12,22 @@ package
     import assets.GameBackgroundColor;
     import classes.Alert;
     import classes.Language;
-    import classes.NoteskinsList;
-    import classes.Site;
     import classes.ui.VersionText;
+    import classes.ui.WindowState;
     import com.flashdynamix.utils.SWFProfiler;
+    import com.flashfla.utils.Screenshots;
     import com.greensock.TweenLite;
     import com.greensock.plugins.AutoAlphaPlugin;
     import com.greensock.plugins.TintPlugin;
     import com.greensock.plugins.TweenPlugin;
+    import events.navigation.InitialLoadingEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.state.GameDataLoadedEvent;
+    import events.state.LanguageChangedEvent;
+    import events.state.LoadLocalAirConfigEvent;
     import flash.desktop.NativeApplication;
+    import flash.display.Sprite;
+    import flash.display.StageDisplayState;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
     import flash.events.KeyboardEvent;
@@ -29,18 +36,10 @@ package
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
-    import events.navigation.popups.AddPopupEvent;
-    import events.navigation.InitialLoadingEvent;
-    import events.state.GameDataLoadedEvent;
-    import events.state.LanguageChangedEvent;
-    import flash.display.Sprite;
-    import state.AppState;
-    import classes.ui.WindowState;
-    import events.state.SetAirConfigEvent;
-    import state_management.StateManager;
     import state.AirState;
-    import com.flashfla.utils.Screenshots;
-    import flash.display.StageDisplayState;
+    import state.AppState;
+    import state_management.AppController;
+    import state_management.Controller;
 
     public class Main extends Sprite
     {
@@ -51,15 +50,11 @@ package
         public static var WINDOW_HEIGHT_EXTRA:Number = 0;
 
         private var _lang:Language = Language.instance;
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-        private var _site:Site = Site.instance;
-        private var _noteskinList:NoteskinsList = NoteskinsList.instance;
 
         public var navigator:Navigator;
-        private var _stateManager:StateManager;
+        private var _appController:Controller;
 
         public var ignoreWindowChanges:Boolean = false;
-        public var disablePopups:Boolean = false;
 
         public var versionText:VersionText;
         public var bg:GameBackgroundColor;
@@ -70,8 +65,8 @@ package
             super();
 
             // Initiate singleton state with its manager
-            _stateManager = new StateManager(this, null);
-            AppState.instance = new AppState(_stateManager, true);
+            _appController = new AppController(this, null);
+            AppState.instance = new AppState(_appController, true);
 
             setListeners();
 
@@ -96,7 +91,7 @@ package
 
         public function loadAirOptions():void
         {
-            dispatchEvent(new SetAirConfigEvent());
+            dispatchEvent(new LoadLocalAirConfigEvent());
         }
 
         private function gameInit():void
@@ -136,18 +131,18 @@ package
             var airState:AirState = AppState.instance.air;
             if (airState.saveWindowPosition)
             {
-                stage.nativeWindow.x = airState.windowProperties.x;
-                stage.nativeWindow.y = airState.windowProperties.y;
+                stage.nativeWindow.x = airState.windowState.x;
+                stage.nativeWindow.y = airState.windowState.y;
             }
             if (airState.saveWindowSize)
             {
-                stage.nativeWindow.width = Math.max(100, airState.windowProperties.width + WINDOW_WIDTH_EXTRA);
-                stage.nativeWindow.height = Math.max(100, airState.windowProperties.height + WINDOW_HEIGHT_EXTRA);
+                stage.nativeWindow.width = Math.max(100, airState.windowState.width + WINDOW_WIDTH_EXTRA);
+                stage.nativeWindow.height = Math.max(100, airState.windowState.height + WINDOW_HEIGHT_EXTRA);
             }
             ignoreWindowChanges = false;
 
             //- Load Menu Music
-            _gvars.loadMenuMusic();
+            dispatchEvent(new LoadMenuMusicEvent());
 
             //- Background
             stage.color = 0x000000;
@@ -222,49 +217,18 @@ package
             }
         }
 
-        public function loadMenuMusic():void
-        {
-            menuMusicSoundVolume = menuMusicSoundTransform.volume = LocalOptions.getVariable("menu_music_volume", 1);
-
-            // Load Existing Menu Music SWF
-            if (AirContext.doesFileExist(Constant.MENU_MUSIC_PATH))
-            {
-                var file_bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
-                if (file_bytes && file_bytes.length > 0)
-                {
-                    menuMusic = new SongBytes(file_bytes);
-                }
-            }
-            // Convert MP3 if exist.
-            else if (AirContext.doesFileExist(Constant.MENU_MUSIC_MP3_PATH))
-            {
-                var mp3Bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_MP3_PATH));
-                if (mp3Bytes && mp3Bytes.length > 0)
-                {
-                    menuMusic = new SongBytes(mp3Bytes, true);
-                    LocalStore.setVariable("menu_music", "External MP3");
-                }
-            }
-        }
-
         ///- Window Methods
         private function onNativeShutdown(e:Event):void
         {
             Logger.destroy();
             LocalOptions.flush();
 
-            onNativeProcessClose(e);
-        }
-
-        private function onNativeProcessClose(e:Event):void
-        {
-            if (websocket_server != null)
-                websocket_server.stop();
+            dispatchEvent(new CloseWebsocketEvent());
         }
 
         private function onNativeWindowClosing(e:Event):void
         {
-            var airWindowProperties:WindowState = AppState.instance.air.windowProperties;
+            var airWindowProperties:WindowState = AppState.instance.air.windowState;
 
             // TODO: Do not mutate state in here
             airWindowProperties.width = stage.nativeWindow.width - Main.WINDOW_WIDTH_EXTRA;
@@ -280,7 +244,7 @@ package
             if (ignoreWindowChanges)
                 return;
 
-            var airWindowProperties:WindowState = AppState.instance.air.windowProperties;
+            var airWindowProperties:WindowState = AppState.instance.air.windowState;
 
             // TODO: Do not mutate state in here
             airWindowProperties.width = e.afterBounds.width - Main.WINDOW_WIDTH_EXTRA;
@@ -303,7 +267,7 @@ package
         ///- Fullscreen Handling
         private function toggleContextPopup(e:Event):void
         {
-            if (!disablePopups)
+            if (!AppState.instance.menu.disablePopups)
                 dispatchEvent(new AddPopupEvent(Routes.POPUP_CONTEXT_MENU));
         }
 
@@ -314,7 +278,7 @@ package
             if (Flags.VALUES[Flags.ENABLE_GLOBAL_POPUPS])
             {
                 // Options
-                if (keyCode == _gvars.playerUser.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
+                if (keyCode == AppState.instance.auth.user.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
                     dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
 
                 // Help Menu

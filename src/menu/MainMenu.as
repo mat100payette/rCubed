@@ -13,6 +13,7 @@ package menu
     import classes.Alert;
     import classes.Language;
     import classes.ui.Box;
+    import classes.ui.BoxButton;
     import classes.ui.BoxIcon;
     import classes.ui.IconUtil;
     import classes.ui.MouseTooltip;
@@ -22,20 +23,18 @@ package menu
     import com.flashfla.net.WebRequest;
     import com.flashfla.utils.NumberUtil;
     import com.flashfla.utils.sprintf;
+    import events.navigation.ChangePanelEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.navigation.popups.AddPopupSkillRankUpdateEvent;
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.text.TextFormatAlign;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
-    import flash.text.TextFormatAlign;
-    import events.navigation.popups.AddPopupSkillRankUpdateEvent;
-    import events.navigation.popups.AddPopupEvent;
-    import classes.ui.BoxButton;
-    import events.navigation.ChangePanelEvent;
 
     public class MainMenu extends DisplayLayer
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         public var _layerSongSelection:MenuSongSelection;
@@ -123,7 +122,7 @@ package menu
             }
 
             // Guests
-            if (GlobalVariables.instance.activeUser.isGuest)
+            if (_gvars.activeUser.isGuest)
                 setActiveLayer(Routes.PANEL_SONGSELECTION);
             else
             {
@@ -219,7 +218,8 @@ package menu
                 statUpdaterBtn.y = Main.GAME_HEIGHT - 28;
                 statUpdaterBtn.addEventListener(MouseEvent.MOUSE_OVER, e_statUpdaterMouseOver);
                 statUpdaterBtn.addEventListener(MouseEvent.CLICK, e_statUpdaterClick);
-                this.addChild(statUpdaterBtn);
+
+                addChild(statUpdaterBtn);
             }
 
             menuItemBox = new Sprite();

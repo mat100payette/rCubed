@@ -11,6 +11,7 @@ package classes
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
     import events.state.UpdateGameContentFromSiteEvent;
+    import state.AppState;
 
     public class Site extends EventDispatcher
     {
@@ -18,7 +19,6 @@ package classes
         private static var _instance:Site = null;
 
         ///- Private Locals
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _loader:URLLoader;
         private var _isLoaded:Boolean = false;
         private var _isLoading:Boolean = false;
@@ -70,7 +70,7 @@ package classes
             var req:URLRequest = new URLRequest(Constant.SITE_DATA_URL + "?d=" + new Date().getTime());
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = _gvars.userSession;
+            requestVars.session = AppState.instance.auth.userSession;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);
@@ -95,20 +95,20 @@ package classes
                 AirContext.writeTextFile(AirContext.getAppFile("logs/site.txt"), siteDataString);
 
                 _loadError = true;
-                this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                this.dispatchEvent(new Event(Constant.LOAD_ERROR));
                 return;
             }
 
             // TODO: See if this double dispatch works
             dispatchEvent(new UpdateGameContentFromSiteEvent(data));
-            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+            dispatchEvent(new Event(Constant.LOAD_COMPLETE));
         }
 
         private function siteLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Load Failure: " + Logger.event_error(err));
             removeLoaderListeners();
-            this.dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            this.dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function addLoaderListeners():void

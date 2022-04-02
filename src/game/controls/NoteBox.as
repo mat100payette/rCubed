@@ -14,7 +14,6 @@ package game.controls
 
     public class NoteBox extends Sprite
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _noteskins:NoteskinsList = NoteskinsList.instance;
 
         private var _defaultNoteColors:Array;

@@ -219,7 +219,7 @@ package classes
                 AirContext.writeTextFile(AirContext.getAppFile("logs/user_main.txt"), siteDataString);
 
                 _loadError = true;
-                dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                dispatchEvent(new Event(Constant.LOAD_ERROR));
                 return;
             }
 
@@ -237,7 +237,7 @@ package classes
             else
             {
                 _isLoaded = true;
-                dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+                dispatchEvent(new Event(Constant.LOAD_COMPLETE));
             }
         }
 
@@ -307,7 +307,7 @@ package classes
             _removeCommonLoaderListeners();
 
             _loadError = true;
-            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function _addCommonLoaderListeners():void
@@ -408,14 +408,14 @@ package classes
                 }
             }
             _isLoaded = true;
-            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+            dispatchEvent(new Event(Constant.LOAD_COMPLETE));
         }
 
         private function ranksLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Ranks Load Failure: " + Logger.event_error(err));
             removeLoaderRanksListeners();
-            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function addLoaderRanksListeners():void
@@ -457,14 +457,14 @@ package classes
         {
             Logger.debug(this, "Settings Save Success");
             removeLoaderSaveListeners();
-            dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+            dispatchEvent(new Event(Constant.LOAD_COMPLETE));
         }
 
         private function settingLoadError(err:ErrorEvent = null):void
         {
             Logger.error(this, "Settings Save Failure: " + Logger.event_error(err));
             removeLoaderSaveListeners();
-            dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+            dispatchEvent(new Event(Constant.LOAD_ERROR));
         }
 
         private function addLoaderSaveListeners():void

@@ -35,8 +35,6 @@ package classes.chart
         private static const LOAD_MUSIC:String = "music";
         private static const LOAD_CHART:String = "chart";
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-
         private var _clipLoader:*;
         private var _chartLoader:URLLoader;
 
@@ -274,12 +272,14 @@ package classes.chart
 
         private function urlGen(fileType:String, fileHash:String = ""):String
         {
+            var userSession:String = AppState.instance.auth.userSession;
+
             switch (_songInfo.chart_type || _type)
             {
                 case NoteChart.FFR:
                 case NoteChart.FFR_RAW:
                 case NoteChart.FFR_MP3:
-                    return Constant.SONG_DATA_URL + "?" + fileHash + "id=" + (_isPreview ? songInfo.previewHash : songInfo.playHash) + (_isPreview ? "&mode=2" : "") + (_gvars.userSession != "0" ? "&session=" + _gvars.userSession : "") + "&type=" + NoteChart.FFR + "_" + fileType;
+                    return Constant.SONG_DATA_URL + "?" + fileHash + "id=" + (_isPreview ? songInfo.previewHash : songInfo.playHash) + (_isPreview ? "&mode=2" : "") + (userSession != "0" ? "&session=" + userSession : "") + "&type=" + NoteChart.FFR + "_" + fileType;
 
                 case NoteChart.FFR_LEGACY:
                     return ChartFFRLegacy.songUrl(songInfo);

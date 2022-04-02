@@ -1,114 +1,47 @@
 package
 {
     import arc.mp.MultiplayerState;
-    import be.aboutme.airserver.AIRServer;
-    import be.aboutme.airserver.endpoints.socket.SocketEndPoint;
-    import be.aboutme.airserver.endpoints.socket.handlers.websocket.WebSocketClientHandlerFactory;
-    import be.aboutme.airserver.messages.Message;
-    import classes.Playlist;
     import classes.SongInfo;
-    import classes.SongBytes;
-    import classes.StatTracker;
     import classes.User;
+    import classes.UserSettings;
     import classes.chart.Song;
-    import classes.filter.EngineLevelFilter;
     import com.flashfla.loader.DataEvent;
     import com.flashfla.net.DynamicURLLoader;
-    import com.flashfla.utils.Screenshots;
-    import flash.display.StageDisplayState;
     import flash.events.Event;
     import flash.events.EventDispatcher;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
     import flash.filesystem.File;
-    import flash.media.SoundTransform;
     import flash.net.URLLoader;
     import flash.net.URLLoaderDataFormat;
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
     import flash.system.Capabilities;
-    import flash.utils.ByteArray;
-    import game.GameScoreResult;
-    import classes.UserSettings;
     import state.AppState;
 
     public class GlobalVariables extends EventDispatcher
     {
-        ///- Singleton Instance
-        private static var _instance:GlobalVariables = null;
         private var _loader:DynamicURLLoader;
 
-        ///- Constants
-        public static const LOAD_COMPLETE:String = "LoadComplete";
-        public static const LOAD_ERROR:String = "LoadError";
-        public static const HIGHSCORES_LOAD_COMPLETE:String = "HighscoresLoadComplete";
-        public static const HIGHSCORES_LOAD_ERROR:String = "HighscoresLoadError";
-
-        ///- Game Data
-        public var TOTAL_GENRES:uint = 13;
-        public var HEALTH_JUDGE_ADD:int = 5;
-        public var HEALTH_JUDGE_REMOVE:int = -5;
-        public var TOTAL_STEPS:int = 31;
-        public var BEAT_DELAY:int = -31;
-        public var MAX_CREDITS:int = 120;
-        public var SCORE_PER_CREDIT:int = 50000;
-        public var MAX_DIFFICULTY:int = 120;
-        public var DIFFICULTY_RANGES:Array = [[1, 120]];
-        public var NONPUBLIC_GENRES:Array = [];
-
-        public var songStartTime:String = "0";
-        public var songStartHash:String = "0";
-        public var songCache:Array = [];
-        public var songHighscores:Object = {};
-
-        public static var divisionColor:Array = [0xC27BA0, 0x8E7CC3, 0x6D9EEB, 0x93C47D, 0xCEA023, 0xE06666, 0x919C86, 0xD2C7AC, 0xBF0000];
-        public static var divisionTitle:Array = ["Novice", "Intermediate", "Advanced", "Expert", "Master", "Guru", "Legendary", "Godly", "Developer"];
-        public static var divisionLevel:Array = [0, 26, 50, 59, 69, 83, 94, 101, 122];
-
-        ///- User Vars
-        public var userSession:String = "0";
-        public var activeUser:User;
-        public var playerUser:User;
-
-        ///- GamePlay
-        public var songQueue:Array = [];
-        public var songQueueIndex:uint = 0;
-        public var gameIndex:int = 0;
-        public var replayHistory:Array = [];
-        public var songResults:Vector.<GameScoreResult> = new <GameScoreResult>[];
-        public var songResultRanks:Array = [];
-        public var songRestarts:int;
-        public var activeFilter:EngineLevelFilter;
-
-        ///- Session Stats
-        public var sessionStats:StatTracker = new StatTracker();
-        public var songStats:StatTracker = new StatTracker();
-
-        public var menuMusic:SongBytes;
-        public var menuMusicSoundVolume:Number = 1;
-        public var menuMusicSoundTransform:SoundTransform = new SoundTransform();
-
         public var file_replay_cache:FileCache = new FileCache("replays/cache.json", 1);
-
-
 
         public function loadUserSongData():void
         {
             // Export SQL to JSON
-            var db_name:String = "dbinfo/" + (activeUser != null && activeUser.siteId > 0 ? activeUser.siteId : "0") + "_info.";
-            var sql_file:File = AirContext.getAppFile(db_name + "db");
-            var json_file:File = AirContext.getAppFile(db_name + "json");
+            var dbName:String = "dbinfo/" + (activeUser != null && activeUser.siteId > 0 ? activeUser.siteId : "0") + "_info.";
+            var sqlFile:File = AirContext.getAppFile(dbName + "db");
+            var jsonFile:File = AirContext.getAppFile(dbName + "json");
 
             // Use JSON first
-            if (json_file.exists)
+            if (jsonFile.exists)
             {
-                var json_str:String = AirContext.readTextFile(json_file);
-                if (json_str != null)
+                var jsonStr:String = AirContext.readTextFile(jsonFile);
+                if (jsonStr != null)
                 {
                     try
                     {
-                        SQLQueries.loadFromObject(JSON.parse(json_str));
+                        SQLQueries.loadFromObject(JSON.parse(jsonStr));
                     }
                     catch (e:Error)
                     {
@@ -117,24 +50,24 @@ package
                 }
             }
             // Fallback to SQL
-            else if (sql_file.exists)
+            else if (sqlFile.exists)
             {
-                SQLQueries.exportToJSON(sql_file, function(data:Object):void
+                SQLQueries.exportToJSON(sqlFile, function(data:Object):void
                 {
                     SQLQueries.loadFromObject(data);
                     writeUserSongData();
 
                     // Create Backup File
-                    var backupFile:File = AirContext.getAppFile(db_name + "db.bak");
+                    var backupFile:File = AirContext.getAppFile(dbName + "db.bak");
                     for (var i:int = 0; i < 10; i++)
                     {
                         if (!backupFile.exists)
                         {
-                            sql_file.moveToAsync(backupFile);
+                            sqlFile.moveToAsync(backupFile);
                             break;
                         }
 
-                        backupFile = AirContext.getAppFile(db_name + "db.bak" + i);
+                        backupFile = AirContext.getAppFile(dbName + "db.bak" + i);
                     }
                 });
             }
@@ -142,34 +75,11 @@ package
 
         public function writeUserSongData():void
         {
-            var db_name:String = "dbinfo/" + (activeUser != null && activeUser.siteId > 0 ? activeUser.siteId : "0") + "_info.";
-            var json_file:File = AirContext.getAppFile(db_name + "json");
-            SQLQueries.writeFile(json_file);
-        }
+            var user:User = AppState.instance.auth.user;
+            var dbName:String = "dbinfo/" + (user != null && user.siteId > 0 ? user.siteId : "0") + "_info.";
+            var jsonFile:File = AirContext.getAppFile(dbName + "json");
 
-        ///- Public
-        //- Player Divisions
-        public static function getDivisionColor(level:int):int
-        {
-            return divisionColor[getDivisionNumber(level)];
-        }
-
-        public static function getDivisionTitle(level:int):String
-        {
-            return divisionTitle[getDivisionNumber(level)];
-        }
-
-        public static function getDivisionNumber(level:int):int
-        {
-            var div:int;
-            for (div = divisionLevel.length - 1; div >= 0; --div)
-            {
-                if (level >= divisionLevel[div])
-                {
-                    break;
-                }
-            }
-            return div;
+            SQLQueries.writeFile(jsonFile);
         }
 
         //- Song Data
@@ -381,7 +291,7 @@ package
             var req:URLRequest = new URLRequest(Constant.SITE_HISCORES_URL + "?d=" + new Date().getTime());
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = this.userSession;
+            requestVars.session = AppState.instance.auth.userSession;
             requestVars.level = lvlID;
             requestVars.start = startIndex;
             req.data = requestVars;
@@ -407,13 +317,13 @@ package
                     songHighscores[lvlID][item.id] = item;
                 }
             }
-            this.dispatchEvent(new DataEvent(GlobalVariables.HIGHSCORES_LOAD_COMPLETE, data));
+            this.dispatchEvent(new DataEvent(Constant.HIGHSCORES_LOAD_COMPLETE, data));
         }
 
         private function highscoreLoadError(e:Event = null):void
         {
             removeLoaderListeners();
-            this.dispatchEvent(new Event(GlobalVariables.HIGHSCORES_LOAD_ERROR));
+            this.dispatchEvent(new Event(Constant.HIGHSCORES_LOAD_ERROR));
         }
 
         private function addLoaderListeners():void
@@ -443,18 +353,18 @@ package
                 output += "\n" + params;
             }
 
-            var _debugLoader:URLLoader = new URLLoader();
+            var debugLoader:URLLoader = new URLLoader();
             var req:URLRequest = new URLRequest(Constant.DEBUG_LOG_URL);
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = userSession;
+            requestVars.session = AppState.instance.auth.userSession;
             requestVars.error = output;
             requestVars.gameVersion = CONFIG::timeStamp;
             requestVars.gameSettings = Capabilities.serverString;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
-            _debugLoader.dataFormat = URLLoaderDataFormat.TEXT;
-            _debugLoader.load(req);
+            debugLoader.dataFormat = URLLoaderDataFormat.TEXT;
+            debugLoader.load(req);
         }
     }
 }

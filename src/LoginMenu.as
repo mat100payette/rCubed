@@ -32,7 +32,6 @@ package
 
     public class LoginMenu extends DisplayLayer
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _loader:URLLoader;
 

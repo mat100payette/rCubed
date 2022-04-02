@@ -9,10 +9,9 @@ package popups.replays
 
     public class ReplayHistoryTabSession extends ReplayHistoryTabBase
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
-        private var btn_import:BoxButton;
+        private var btnImport:BoxButton;
 
         public function ReplayHistoryTabSession(replayWindow:ReplayHistoryWindow):void
         {
@@ -27,16 +26,16 @@ package popups.replays
         override public function openTab():void
         {
             // Add UI Elements
-            if (!btn_import)
+            if (!btnImport)
             {
-                btn_import = new BoxButton(null, 5, Main.GAME_HEIGHT - 35, 162, 29, _lang.string("popup_replay_import"), 12, e_importClick);
+                btnImport = new BoxButton(null, 5, Main.GAME_HEIGHT - 35, 162, 29, _lang.string("popup_replay_import"), 12, e_importClick);
             }
-            parent.addChild(btn_import);
+            parent.addChild(btnImport);
         }
 
         override public function closeTab():void
         {
-            parent.removeChild(btn_import);
+            parent.removeChild(btnImport);
         }
 
         override public function setValues():void

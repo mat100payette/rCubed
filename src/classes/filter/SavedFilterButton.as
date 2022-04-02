@@ -8,7 +8,6 @@ package classes.filter
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
     import classes.ui.Text;
-    import com.flashfla.utils.ArrayUtil;
     import com.flashfla.utils.SystemUtil;
     import flash.display.DisplayObjectContainer;
     import flash.display.Sprite;
@@ -16,10 +15,10 @@ package classes.filter
     import flash.events.MouseEvent;
     import popups.PopupFilterManager;
     import com.flashfla.utils.VectorUtil;
+    import state.AppState;
 
     public class SavedFilterButton extends Box
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private static var hover_message:Sprite;
 
@@ -100,7 +99,7 @@ package classes.filter
         private function e_defaultClick(e:Event):void
         {
             if (!filter.is_default)
-                for each (var item:EngineLevelFilter in _gvars.activeUser.settings.filters)
+                for each (var item:EngineLevelFilter in AppState.instance.auth.user.settings.filters)
                     item.is_default = false;
 
             filter.is_default = !filter.is_default;
@@ -117,7 +116,7 @@ package classes.filter
 
         private function e_deleteClick(e:Event):void
         {
-            if (VectorUtil.removeFirst(filter, _gvars.activeUser.settings.filters))
+            if (VectorUtil.removeFirst(filter, AppState.instance.auth.user.settings.filters))
                 updater.draw();
         }
 

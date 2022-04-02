@@ -17,12 +17,13 @@ package classes.ui
     import flash.text.TextFieldType;
     import flash.text.TextFormat;
     import flash.display.Stage;
+    import state.AuthState;
+    import state.AppState;
 
     public class ManageSettingsWindow extends Sprite
     {
         private const BOX_MID:Number = (Main.GAME_WIDTH - 200) / 2;
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var _onClose:Function;
@@ -41,8 +42,10 @@ package classes.ui
         {
             _onClose = onClose;
 
-            const userSettings:UserSettings = _gvars.activeUser.settings;
-            _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
+            var auth:AuthState = AppState.instance.auth;
+
+            const userSettings:UserSettings = auth.user.settings;
+            auth.user.saveSettingsOnline(auth.userSession);
             _settingsJSONString = userSettings.stringify();
 
             _bmp = SpriteUtil.getBitmapSprite(stage);
@@ -131,7 +134,7 @@ package classes.ui
                     if (optionsJSON.length >= 2 && optionsJSON.charAt(0) == "{")
                     {
                         const item:Object = JSON.parse(optionsJSON);
-                        _gvars.activeUser.settings.update(item);
+                        AppState.instance.auth.user.settings.update(item);
                         Alert.add("Settings Imported!", 120, Alert.GREEN);
                     }
                     else

@@ -19,50 +19,47 @@ package popups.replays
     import flash.events.MouseEvent;
     import menu.DisplayLayer;
     import flash.text.TextFormatAlign;
-    import events.navigation.ChangePanelEvent;
     import events.navigation.popups.RemovePopupEvent;
     import events.navigation.WatchReplayEvent;
 
     public class ReplayHistoryWindow extends DisplayLayer
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
 
-        private var box:Sprite;
-        private var bmp:Bitmap;
+        private var _box:Sprite;
+        private var _bmp:Bitmap;
 
-        public var scrollbar:ScrollBar;
+        private var _scrollbar:ScrollBar;
         public var pane:ReplayHistoryScrollpane;
 
-        private var TABS:Vector.<ReplayHistoryTabBase>;
+        private var _tabs:Vector.<ReplayHistoryTabBase>;
 
-        private var CURRENT_TAB:ReplayHistoryTabBase;
-        private var CURRENT_INDEX:int = -1;
-        private static var LAST_INDEX:int = 0;
+        private var _currentTab:ReplayHistoryTabBase;
+        private var _currentTabIndex:int = -1;
+        private var _previousTabIndex:int = 0;
 
-        private var TAB_BUTTONS:Vector.<TabButton>;
+        private var _tabButtons:Vector.<TabButton>;
 
-        private var txt_title:Text;
-        private var txt_mod_warning:Text;
+        private var _txtTitle:Text;
+        private var _txtModWarning:Text;
 
-        private var search_field:BoxText;
-        private var search_field_placeholder:Text;
-        private var _search_text:String = "";
+        private var _searchField:BoxText;
+        private var _searchFieldPlaceholder:Text;
+        private var _searchText:String = "";
 
-        // buttons
-        private var btn_close:BoxButton;
+        private var _btnClose:BoxButton;
 
         public function ReplayHistoryWindow():void
         {
             // build menus
-            TABS = new <ReplayHistoryTabBase>[new ReplayHistoryTabSession(this),
+            _tabs = new <ReplayHistoryTabBase>[new ReplayHistoryTabSession(this),
                 new ReplayHistoryTabLocal(this)];
 
             if (!_gvars.activeUser.isGuest)
-                TABS.push(new ReplayHistoryTabOnline(this));
+                _tabs.push(new ReplayHistoryTabOnline(this));
 
-            TAB_BUTTONS = new <TabButton>[];
+            _tabButtons = new <TabButton>[];
 
             super();
         }
@@ -71,78 +68,78 @@ package popups.replays
         {
             stage.focus = stage;
 
-            bmp = SpriteUtil.getBitmapSprite(stage);
-            addChild(bmp);
+            _bmp = SpriteUtil.getBitmapSprite(stage);
+            addChild(_bmp);
 
             // background
-            box = new Sprite();
-            box.graphics.lineStyle(0, 0, 0);
+            _box = new Sprite();
+            _box.graphics.lineStyle(0, 0, 0);
 
-            box.graphics.beginFill(0, 0.2);
-            box.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
-            box.graphics.endFill();
+            _box.graphics.beginFill(0, 0.2);
+            _box.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
+            _box.graphics.endFill();
 
-            box.graphics.beginFill(GameBackgroundColor.BG_POPUP, 0.6);
-            box.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
-            box.graphics.endFill();
+            _box.graphics.beginFill(GameBackgroundColor.BG_POPUP, 0.6);
+            _box.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
+            _box.graphics.endFill();
 
-            box.graphics.beginFill(0xFFFFFF, 0.07);
-            box.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
-            box.graphics.endFill();
+            _box.graphics.beginFill(0xFFFFFF, 0.07);
+            _box.graphics.drawRect(0, 0, Main.GAME_WIDTH, Main.GAME_HEIGHT);
+            _box.graphics.endFill();
 
-            box.graphics.beginFill(0x000000, 0.1);
-            box.graphics.drawRect(0, 61, 173, Main.GAME_HEIGHT - 60);
-            box.graphics.endFill();
+            _box.graphics.beginFill(0x000000, 0.1);
+            _box.graphics.drawRect(0, 61, 173, Main.GAME_HEIGHT - 60);
+            _box.graphics.endFill();
 
             // dividers
-            box.graphics.lineStyle(1, 0xFFFFFF, 0.35);
-            box.graphics.moveTo(670, 0);
-            box.graphics.lineTo(670, 60);
-            box.graphics.moveTo(0, 60);
-            box.graphics.lineTo(Main.GAME_WIDTH, 60);
-            box.graphics.moveTo(174, 61);
-            box.graphics.lineTo(174, Main.GAME_HEIGHT);
-            box.graphics.moveTo(Main.GAME_WIDTH - 16, 61);
-            box.graphics.lineTo(Main.GAME_WIDTH - 16, Main.GAME_HEIGHT);
+            _box.graphics.lineStyle(1, 0xFFFFFF, 0.35);
+            _box.graphics.moveTo(670, 0);
+            _box.graphics.lineTo(670, 60);
+            _box.graphics.moveTo(0, 60);
+            _box.graphics.lineTo(Main.GAME_WIDTH, 60);
+            _box.graphics.moveTo(174, 61);
+            _box.graphics.lineTo(174, Main.GAME_HEIGHT);
+            _box.graphics.moveTo(Main.GAME_WIDTH - 16, 61);
+            _box.graphics.lineTo(Main.GAME_WIDTH - 16, Main.GAME_HEIGHT);
 
-            addChild(box);
+            addChild(_box);
 
             // scroll pane
             pane = new ReplayHistoryScrollpane(this, 180, 61, 584, Main.GAME_HEIGHT - 61);
             pane.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheelMoved, false, 0, false);
             pane.addEventListener(MouseEvent.CLICK, onReplayEntryClicked);
-            scrollbar = new ScrollBar(this, Main.GAME_WIDTH - 16, 61, 16, Main.GAME_HEIGHT - 61, null, new Sprite());
-            scrollbar.addEventListener(Event.CHANGE, onScrollBarMoved, false, 0, false);
+            _scrollbar = new ScrollBar(this, Main.GAME_WIDTH - 16, 61, 16, Main.GAME_HEIGHT - 61, null, new Sprite());
+            _scrollbar.addEventListener(Event.CHANGE, onScrollBarMoved, false, 0, false);
 
             // ui
             buildTabs();
 
-            txt_title = new Text(box, 15, 5, _lang.string("replay_history_title"), 32);
+            _txtTitle = new Text(_box, 15, 5, _lang.string("replay_history_title"), 32);
 
             // Search
-            search_field_placeholder = new Text(box, 405, 17, _lang.string("replay_search"));
-            search_field_placeholder.setAreaParams(210, 27, TextFormatAlign.LEFT);
-            search_field_placeholder.alpha = 0.6;
+            _searchFieldPlaceholder = new Text(_box, 405, 17, _lang.string("replay_search"));
+            _searchFieldPlaceholder.setAreaParams(210, 27, TextFormatAlign.LEFT);
+            _searchFieldPlaceholder.alpha = 0.6;
 
-            search_field = new BoxText(box, 400, 15, 220, 29);
-            search_field.addEventListener(Event.CHANGE, onSearchChanged, false, 0, true);
+            _searchField = new BoxText(_box, 400, 15, 220, 29);
+            _searchField.addEventListener(Event.CHANGE, onSearchChanged, false, 0, true);
 
             var searchSprite:Sprite = new iconSearch();
             searchSprite.x = 644;
             searchSprite.y = 31;
             searchSprite.scaleX = searchSprite.scaleY = 0.25;
             searchSprite.alpha = 0.8;
-            box.addChild(searchSprite);
+            _box.addChild(searchSprite);
 
-            btn_close = new BoxButton(box, 685, 15, 80, 29, _lang.string("menu_close"), 12, onCloseClicked);
+            _btnClose = new BoxButton(_box, 685, 15, 80, 29, _lang.string("menu_close"), 12, onCloseClicked);
 
-            changeTab(LAST_INDEX);
+            changeTab(_previousTabIndex);
         }
 
         override public function dispose():void
         {
-            CURRENT_TAB.closeTab();
-            scrollbar.removeEventListener(Event.CHANGE, onScrollBarMoved, false);
+            _currentTab.closeTab();
+            _scrollbar.removeEventListener(Event.CHANGE, onScrollBarMoved, false);
             pane.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheelMoved, false);
         }
 
@@ -150,35 +147,35 @@ package popups.replays
         {
             var tabBox:TabButton;
 
-            for (var idx:int = 0; idx < TABS.length; idx++)
+            for (var idx:int = 0; idx < _tabs.length; idx++)
             {
-                tabBox = new TabButton(box, -1, 60 + 33 * idx, idx, _lang.string("replay_tab_" + TABS[idx].name));
+                tabBox = new TabButton(_box, -1, 60 + 33 * idx, idx, _lang.string("replay_tab_" + _tabs[idx].name));
                 tabBox.tabIndex = idx;
                 tabBox.addEventListener(MouseEvent.CLICK, onTabClicked);
 
-                TAB_BUTTONS.push(tabBox);
+                _tabButtons.push(tabBox);
             }
         }
 
         public function changeTab(idx:int):void
         {
-            if (CURRENT_INDEX == idx)
+            if (_currentTabIndex == idx)
                 return;
 
-            if (CURRENT_TAB != null)
+            if (_currentTab != null)
             {
-                CURRENT_TAB.closeTab();
+                _currentTab.closeTab();
                 pane.clear();
             }
 
-            CURRENT_INDEX = idx;
-            CURRENT_TAB = TABS[idx];
-            CURRENT_TAB.openTab();
-            CURRENT_TAB.setValues();
-            LAST_INDEX = idx;
+            _currentTabIndex = idx;
+            _currentTab = _tabs[idx];
+            _currentTab.openTab();
+            _currentTab.setValues();
+            _previousTabIndex = idx;
 
             // update buttons
-            for each (var tabButton:TabButton in TAB_BUTTONS)
+            for each (var tabButton:TabButton in _tabButtons)
                 tabButton.setActive(tabButton.index == idx);
         }
 
@@ -194,12 +191,12 @@ package popups.replays
 
         private function onMouseWheelMoved(e:MouseEvent):void
         {
-            if (!scrollbar.visible)
+            if (!_scrollbar.visible)
                 return;
 
-            var dist:Number = scrollbar.scroll + (pane.scrollFactorVertical / 2) * (e.delta > 0 ? -1 : 1);
+            var dist:Number = _scrollbar.scroll + (pane.scrollFactorVertical / 2) * (e.delta > 0 ? -1 : 1);
             pane.scrollTo(dist);
-            scrollbar.scrollTo(dist, false);
+            _scrollbar.scrollTo(dist, false);
         }
 
         private function onScrollBarMoved(e:Event):void
@@ -210,9 +207,9 @@ package popups.replays
         public function updateScrollPane():void
         {
             pane.scrollTo(0);
-            scrollbar.scrollTo(0, false);
+            _scrollbar.scrollTo(0, false);
 
-            scrollbar.visible = pane.doScroll;
+            _scrollbar.visible = pane.doScroll;
         }
 
         public function onReplayEntryClicked(e:MouseEvent):void
@@ -222,7 +219,7 @@ package popups.replays
             {
                 var target:SimpleBoxButton = te as SimpleBoxButton;
                 var entry:ReplayHistoryEntry = target.parent as ReplayHistoryEntry;
-                var replay:Replay = CURRENT_TAB.prepareReplay(entry.replay);
+                var replay:Replay = _currentTab.prepareReplay(entry.replay);
 
                 if (replay == null)
                     return;
@@ -259,14 +256,14 @@ package popups.replays
 
         private function onSearchChanged(e:Event):void
         {
-            _search_text = search_field.text;
-            search_field_placeholder.visible = (_search_text.length <= 0);
-            CURRENT_TAB.setValues();
+            _searchText = _searchField.text;
+            _searchFieldPlaceholder.visible = (_searchText.length <= 0);
+            _currentTab.setValues();
         }
 
         public function get searchText():String
         {
-            return _search_text;
+            return _searchText;
         }
     }
 }

@@ -67,6 +67,12 @@ package
         public static const REPLAY_PATH:String = "replays/";
         public static const SONG_CACHE_PATH:String = "song_cache/";
 
+        ///- Event Constants
+        public static const LOAD_COMPLETE:String = "LoadComplete";
+        public static const LOAD_ERROR:String = "LoadError";
+        public static const HIGHSCORES_LOAD_COMPLETE:String = "HighscoresLoadComplete";
+        public static const HIGHSCORES_LOAD_ERROR:String = "HighscoresLoadError";
+
         // Embed Fonts
         AachenLight;
         BreeSerif;

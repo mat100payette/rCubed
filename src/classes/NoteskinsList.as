@@ -118,13 +118,13 @@ package classes
             if (_loadedNoteskinCount > 0 && !_loadError)
             {
                 _isLoaded = true;
-                dispatchEvent(new Event(GlobalVariables.LOAD_COMPLETE));
+                dispatchEvent(new Event(Constant.LOAD_COMPLETE));
             }
             // No Loaded Noteskins or loading error
             else
             {
                 _loadError = true;
-                dispatchEvent(new Event(GlobalVariables.LOAD_ERROR));
+                dispatchEvent(new Event(Constant.LOAD_ERROR));
             }
         }
 

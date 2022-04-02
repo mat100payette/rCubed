@@ -40,11 +40,11 @@ package
     import events.navigation.StartReplayEvent;
     import events.navigation.StartSpectatingEvent;
     import menu.MenuSongSelection;
+    import state.AppState;
+    import classes.User;
 
     public class Navigator extends Sprite implements IDisposable
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-
         private var _bg:GameBackgroundColor;
         private var _versionText:VersionText;
 
@@ -74,6 +74,8 @@ package
         {
             var panelName:String = e.panelName;
             var nextPanel:DisplayLayer;
+            var user:User = AppState.instance.auth.user;
+            ;
 
             switch (panelName)
             {
@@ -112,7 +114,7 @@ package
                         var openEditorEvent:OpenEditorEvent = e as OpenEditorEvent;
                         var editorMode:int = openEditorEvent.editorMode;
 
-                        nextPanel = new GameplayDisplay(openEditorEvent.song, openEditorEvent.user, editorMode, true, false, null, null);
+                        nextPanel = new GameplayDisplay(openEditorEvent.song, user, editorMode, true, false, null, null);
                     }
                     else if (e is SpectateGameEvent)
                     {
@@ -138,7 +140,8 @@ package
                     else if (e is StartSpectatingEvent)
                     {
                         var startSpectatingEvent:StartSpectatingEvent = e as StartSpectatingEvent;
-                        nextPanel = new GameplayDisplay(null, _gvars.activeUser, GameplayDisplay.SPECTATOR, false, true, null, startSpectatingEvent.room);
+
+                        nextPanel = new GameplayDisplay(null, user, GameplayDisplay.SPECTATOR, false, true, null, startSpectatingEvent.room);
                     }
                     else if (e is StartGameplayEvent)
                     {
@@ -146,7 +149,7 @@ package
                         var startGameplaySong:Song = startGameplayEvent.song;
 
                         if (startGameplaySong.isLoaded)
-                            nextPanel = new GameplayDisplay(startGameplaySong, _gvars.activeUser, startGameplayEvent.mode, false, false, null, startGameplayEvent.mpRoom);
+                            nextPanel = new GameplayDisplay(startGameplaySong, user, startGameplayEvent.mode, false, false, null, startGameplayEvent.mpRoom);
                         else
                             nextPanel = new GameLoading(startGameplaySong, null, startGameplayEvent.mode, startGameplayEvent.mpRoom, false);
                     }
@@ -154,7 +157,7 @@ package
 
                 case Routes.PANEL_RESULTS:
                     var gameResultsEvent:ShowGameResultsEvent = e as ShowGameResultsEvent;
-                    nextPanel = new GameResults(gameResultsEvent.song, _gvars.activeUser.settings, gameResultsEvent.replay, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
+                    nextPanel = new GameResults(gameResultsEvent.song, user.settings, gameResultsEvent.replay, gameResultsEvent.isAutoplay, gameResultsEvent.mpRoom);
                     break;
             }
 
@@ -196,7 +199,7 @@ package
                 switch (popupName)
                 {
                     case Routes.POPUP_OPTIONS:
-                        popup = new SettingsWindow(_gvars.activeUser);
+                        popup = new SettingsWindow();
                         break;
                     case Routes.POPUP_HELP:
                         popup = new PopupHelp();

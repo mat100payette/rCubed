@@ -6,7 +6,7 @@ package classes
     import flash.media.SoundChannel;
     import flash.utils.ByteArray;
 
-    public class SongBytes
+    public class SoundPlayer
     {
         public var sound:Sound;
         public var soundChannel:SoundChannel;
@@ -15,10 +15,10 @@ package classes
         public var userPaused:Boolean = false;
         public var userStopped:Boolean = false;
 
-        private var pausePosition:int = 0;
+        private var _pausePosition:int = 0;
         private var _noRepeat:Boolean;
 
-        public function SongBytes(swfBytes:ByteArray, isMP3File:Boolean = false, noRepeat:Boolean = false)
+        public function SoundPlayer(swfBytes:ByteArray, isMP3File:Boolean = false, noRepeat:Boolean = false)
         {
             if (swfBytes && swfBytes.length > 0)
             {
@@ -38,7 +38,7 @@ package classes
                 return;
 
             stop();
-            soundChannel = sound.play(pausePosition);
+            soundChannel = sound.play(_pausePosition);
             soundChannel.soundTransform = GlobalVariables.instance.menuMusicSoundTransform;
             soundChannel.addEventListener(Event.SOUND_COMPLETE, onComplete);
             isPlaying = true;
@@ -47,7 +47,7 @@ package classes
         private function onComplete(e:Event):void
         {
             SoundChannel(e.target).removeEventListener(e.type, onComplete);
-            pausePosition = 0;
+            _pausePosition = 0;
             if (_noRepeat)
                 isPlaying = false;
             else
@@ -67,7 +67,7 @@ package classes
 
         public function userPause():void
         {
-            pausePosition = soundChannel.position;
+            _pausePosition = soundChannel.position;
             userPaused = true;
             stop();
         }
@@ -80,10 +80,9 @@ package classes
 
         public function userStop():void
         {
-            pausePosition = 0;
+            _pausePosition = 0;
             userStopped = true;
             stop();
         }
     }
-
 }
