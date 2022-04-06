@@ -1,18 +1,19 @@
-package events.state
+package events.actions.menu
 {
 
     import flash.events.Event;
-    import events.state.interfaces.IMenuEvent;
+    import events.actions.ActionEvent;
+    import events.interfaces.IMenuEvent;
 
-    public class SetPopupsEnabledEvent extends StateEvent implements IMenuEvent
+    public class SetPopupsEnabledEvent extends ActionEvent implements IMenuEvent
     {
-        public static const STATE:String = "SetPopupsEnabled";
+        public static const EVENT_TYPE:String = "SetPopupsEnabledEvent";
 
         private var _enabled:Boolean;
 
         public function SetPopupsEnabledEvent(enabled:Boolean):void
         {
-            super(STATE);
+            super();
 
             _enabled = enabled;
         }

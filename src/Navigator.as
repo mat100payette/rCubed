@@ -42,6 +42,7 @@ package
     import menu.MenuSongSelection;
     import state.AppState;
     import classes.User;
+    import events.actions.gameplay.ClearSongQueueEvent;
 
     public class Navigator extends Sprite implements IDisposable
     {
@@ -172,9 +173,7 @@ package
             // Clear queue if necessary
             if (!isGameplayOrResults && !(nextPanel is GameLoading))
             {
-                MenuSongSelection.options.queuePlaylist = [];
-                _gvars.songQueue = [];
-                _gvars.songQueueIndex = 0;
+                dispatchEvent(new ClearSongQueueEvent());
             }
 
             transitionPanel(nextPanel);

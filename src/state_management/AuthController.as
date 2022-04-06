@@ -1,10 +1,10 @@
 package state_management
 {
     import classes.User;
+    import events.actions.auth.LogoutEvent;
+    import events.actions.auth.SetUserSessionEvent;
     import events.navigation.ChangePanelEvent;
     import events.navigation.popups.RemovePopupEvent;
-    import events.state.LogoutEvent;
-    import events.state.StateEvent;
     import flash.events.IEventDispatcher;
     import state.AppState;
     import state.AuthState;
@@ -15,21 +15,17 @@ package state_management
         public function AuthController(target:IEventDispatcher, owner:Object, updateStateCallback:Function)
         {
             super(target, owner, updateStateCallback);
+
+            addListeners();
         }
 
-        override public function onStateEvent(e:StateEvent):void
+        private function addListeners():void
         {
-            var stateName:String = e.stateName;
-
-            switch (stateName)
-            {
-                case LogoutEvent.STATE:
-                    onLogoutEvent();
-                    break;
-            }
+            target.addEventListener(LogoutEvent.EVENT_TYPE, logout);
+            target.addEventListener(SetUserSessionEvent.EVENT_TYPE, setUserSession);
         }
 
-        private function onLogoutEvent():void
+        private function logout():void
         {
             var newState:AppState = AppState.clone(owner);
             var auth:AuthState = newState.auth;
@@ -45,6 +41,16 @@ package state_management
 
             target.dispatchEvent(new RemovePopupEvent());
             target.dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_LOGIN));
+        }
+
+        private function setUserSession(event:SetUserSessionEvent):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var auth:AuthState = newState.auth;
+
+            auth.userSession = event.session;
+
+            updateState(newState);
         }
     }
 }

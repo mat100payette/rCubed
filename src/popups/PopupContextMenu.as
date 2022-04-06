@@ -12,8 +12,7 @@ package popups
     import menu.DisplayLayer;
     import events.navigation.popups.RemovePopupEvent;
     import flash.events.Event;
-    import events.state.ReloadEngineEvent;
-    import events.state.LogoutEvent;
+    import events.actions.air.TakeScreenshotEvent;
 
     public class PopupContextMenu extends DisplayLayer
     {
@@ -124,7 +123,7 @@ package popups
             }
             else if (e.target.action == "screenshot_local")
             {
-                _gvars.takeScreenShot();
+                dispatchEvent(new TakeScreenshotEvent());
             }
             else if (e.target.action == "reload_engine")
             {

@@ -1,18 +1,19 @@
-package events.state
+package events.actions.content
 {
 
     import flash.events.Event;
-    import events.state.interfaces.IContentEvent;
+    import events.actions.ActionEvent;
+    import events.interfaces.IContentEvent;
 
-    public class UpdateGameContentFromSiteEvent extends StateEvent implements IContentEvent
+    public class UpdateGameContentFromSiteEvent extends ActionEvent implements IContentEvent
     {
-        public static const STATE:String = "UpdateGameContentFromSite";
+        public static const EVENT_TYPE:String = "UpdateGameContentFromSiteEvent";
 
         private var _siteData:Object;
 
         public function UpdateGameContentFromSiteEvent(siteData:Object):void
         {
-            super(STATE);
+            super();
 
             _siteData = siteData;
         }

@@ -1,19 +1,20 @@
-package events.state
+package events.actions.air
 {
 
     import flash.events.Event;
-    import events.state.interfaces.IAirEvent;
+    import events.actions.ActionEvent;
+    import events.interfaces.IAirEvent;
 
-    public class WebsocketStateChangedEvent extends StateEvent implements IAirEvent
+    public class WebsocketStateChangedEvent extends ActionEvent implements IAirEvent
     {
-        public static const STATE:String = "WebsocketStateChanged";
+        public static const EVENT_TYPE:String = "WebsocketStateChangedEvent";
 
         private var _enabled:Boolean;
         private var _failedInit:Boolean;
 
         public function WebsocketStateChangedEvent(enabled:Boolean, failedInit:Boolean):void
         {
-            super(STATE);
+            super();
 
             _enabled = enabled;
             _failedInit = failedInit;

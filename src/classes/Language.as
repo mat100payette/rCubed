@@ -5,6 +5,7 @@
 package classes
 {
     import classes.ui.Text;
+    import events.actions.menu.LanguageChangedEvent;
     import flash.events.ErrorEvent;
     import flash.events.Event;
     import flash.events.EventDispatcher;
@@ -12,7 +13,6 @@ package classes
     import flash.events.SecurityErrorEvent;
     import flash.net.URLLoader;
     import flash.net.URLRequest;
-    import events.state.LanguageChangedEvent;
     import state.AppState;
 
     public class Language extends EventDispatcher

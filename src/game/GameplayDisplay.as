@@ -65,9 +65,10 @@ package game
     import events.navigation.ShowGameResultsEvent;
     import events.navigation.StartGameplayEvent;
     import state.AppState;
-    import events.state.SetPopupsEnabledEvent;
-    import events.SendWebsocketMessageEvent;
     import state.ContentState;
+    import state.GameplayState;
+    import events.actions.menu.SetPopupsEnabledEvent;
+    import events.actions.air.SendWebsocketMessageEvent;
 
     public class GameplayDisplay extends DisplayLayer
     {
@@ -362,9 +363,12 @@ package game
             initVars();
 
             // Preload next Song
-            if (_gvars.songQueueIndex + 1 < _gvars.songQueue.length)
-                _gvars.getSongFile(_gvars.songQueue[_gvars.songQueueIndex + 1], _settings);
+            var gameplayState:GameplayState = AppState.instance.gameplay;
+            var songQueueIndex:int = gameplayState.songQueueIndex;
+            var songQueue:Array = gameplayState.songQueue;
 
+            if (songQueueIndex + 1 < songQueue.length)
+                _gvars.getSongFile(songQueue[songQueueIndex + 1], _settings);
 
             // Setup MP Things
             if (_mpRoom)
@@ -382,9 +386,7 @@ package game
 
             interfaceSetup();
 
-            // TODO: dispatch action to state manager
             dispatchEvent(new SetPopupsEnabledEvent(false));
-            AppState.instance.menu.disablePopups = true;
 
             if (!_isEditor && !_replay && !_mpSpectate)
                 Mouse.hide();
@@ -619,11 +621,11 @@ package game
         private function onCloseEditorClicked(e:MouseEvent):void
         {
             _gameState = GAME_END;
-            if (!_replay)
-            {
-                _user.saveSettingsLocally();
-                _user.saveSettingsOnline(_gvars.userSession);
-            }
+            if (_replay)
+                return;
+
+            _user.saveSettingsLocally();
+            _user.saveSettingsOnline(_gvars.userSession);
         }
 
         private function onResetLayoutClicked(e:MouseEvent):void
@@ -728,6 +730,7 @@ package game
             _gamePosition = 0;
             _gameProgress = 0;
             _absolutePosition = 0;
+
             if (_song != null)
             {
                 _songOffset = new RollingAverage(_song.frameRate * 4, _avars.configMusicOffset);
@@ -757,7 +760,7 @@ package game
                     _socketScoreMessage["maxcombo"] = _hitMaxCombo;
                     _socketScoreMessage["score"] = _gameScore;
                     _socketScoreMessage["last_hit"] = null;
-                    _socketScoreMessage["restarts"] = _gvars.songRestarts;
+                    _socketScoreMessage["restarts"] = AppState.instance.gameplay.songRestarts;
 
                     dispatchEvent(new SendWebsocketMessageEvent("NOTE_JUDGE", _socketScoreMessage));
                     dispatchEvent(new SendWebsocketMessageEvent("SONG_START", _socketSongMessage));
@@ -1390,7 +1393,7 @@ package game
                     }
                 }
 
-                newGameResults.update(_gvars);
+                newGameResults.update();
                 _gvars.songResults.push(newGameResults);
             }
 

@@ -10,9 +10,14 @@ package game
     import assets.results.ResultsBackground;
     import by.blooddy.crypto.SHA1;
     import classes.Alert;
+    import classes.GameMods;
     import classes.Language;
     import classes.Playlist;
+    import classes.Room;
     import classes.SongInfo;
+    import classes.User;
+    import classes.UserSettings;
+    import classes.chart.Song;
     import classes.replay.Replay;
     import classes.ui.BoxButton;
     import classes.ui.BoxIcon;
@@ -23,6 +28,14 @@ package game
     import com.flashfla.utils.ObjectUtil;
     import com.flashfla.utils.TimeUtil;
     import com.flashfla.utils.sprintf;
+    import events.actions.air.TakeScreenshotEvent;
+    import events.actions.content.UpdateSongAccessEvent;
+    import events.navigation.ChangePanelEvent;
+    import events.navigation.StartGameplayEvent;
+    import events.navigation.StartReplayEvent;
+    import events.navigation.popups.AddPopupEvent;
+    import events.navigation.popups.AddPopupHighscoresEvent;
+    import events.navigation.popups.AddPopupSongNotesEvent;
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.DisplayObject;
@@ -45,19 +58,7 @@ package game
     import popups.PopupMessage;
     import popups.PopupTokenUnlock;
     import popups.replays.ReplayHistoryTabLocal;
-    import classes.UserSettings;
-    import events.navigation.popups.AddPopupHighscoresEvent;
-    import events.navigation.popups.AddPopupSongNotesEvent;
-    import events.navigation.popups.AddPopupEvent;
-    import events.navigation.ChangePanelEvent;
-    import classes.GameMods;
-    import classes.Room;
-    import events.navigation.StartGameplayEvent;
-    import classes.chart.Song;
-    import events.navigation.StartReplayEvent;
     import state.AppState;
-    import events.state.UpdateSongAccessEvent;
-    import classes.User;
     import state.AuthState;
 
     public class GameResults extends DisplayLayer
@@ -351,7 +352,7 @@ package game
                     // Score Total
                     scoreTotal += tempResult.score_total;
                 }
-                result.update(_gvars);
+                result.update();
 
                 result.max_combo = getMaxCombo(result);
                 songTitle = sprintf(_lang.string("game_results_total_songs"), {"total": NumberUtil.numberFormat(_songResults.length)});
@@ -617,15 +618,17 @@ package game
          */
         private function updateJudgeOffset(result:GameScoreResult):void
         {
-            if (_gvars.activeUser.settings.autoJudgeOffset && // Auto Judge Offset enabled 
-                (result.amazing + result.perfect + result.good + result.average >= 50) && // Accuracy data is reliable
-                result.accuracy !== 0)
-            {
-                _gvars.activeUser.settings.judgeOffset = Number(result.accuracy_frames.toFixed(3));
-                // Save settings
-                _gvars.activeUser.saveSettingsLocally();
-                _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
-            }
+            var user:User = AppState.instance.auth.user;
+            var reliableAccData:Boolean = result.amazing + result.perfect + result.good + result.average >= 50;
+
+            if (!user.settings.autoJudgeOffset || !reliableAccData || result.accuracy == 0)
+                return;
+
+            _gvars.activeUser.settings.judgeOffset = Number(result.accuracy_frames.toFixed(3));
+
+            // Save settings
+            _gvars.activeUser.saveSettingsLocally();
+            _gvars.activeUser.saveSettingsOnline(_gvars.userSession);
         }
 
         /**
@@ -639,20 +642,21 @@ package game
         {
             var maxCombo:int = 0;
             var curCombo:int = 0;
+
             for (var x:int = 0; x < gameResult.replay_hit.length; x++)
             {
                 var curNote:int = gameResult.replay_hit[x];
+
                 if (curNote > 0)
-                {
                     curCombo += 1;
-                }
+
                 else if (curNote <= 0)
-                {
                     curCombo = 0;
-                }
+
                 if (curCombo > maxCombo)
                     maxCombo = curCombo;
             }
+
             return maxCombo;
         }
 
@@ -740,10 +744,9 @@ package game
             {
                 var ext:String = "";
                 if (_resultIndex >= 0)
-                {
                     ext = _songResults[_resultIndex].screenshot_path;
-                }
-                _gvars.takeScreenShot(ext);
+
+                dispatchEvent(new TakeScreenshotEvent(ext));
             }
 
             else if (target == _navPrev)
@@ -1340,24 +1343,24 @@ package game
             if (!canSendScore(result, true, false, true, false))
                 return;
 
-            var nR:Replay = new Replay(_gvars.gameIndex);
-            nR.user.settings.update(_gvars.playerUser.settings);
-            nR.level = result.songInfo.level;
+            var replay:Replay = new Replay(_gvars.gameIndex);
+            replay.user.settings.update(_gvars.playerUser.settings);
+            replay.level = result.songInfo.level;
             if (result.songInfo.engine)
-                nR.arc_engine = _avars.legacyEncode(result.songInfo);
-            nR.score = result.score;
-            nR.perfect = (result.amazing + result.perfect);
-            nR.good = result.good;
-            nR.average = result.average;
-            nR.miss = result.miss;
-            nR.boo = result.boo;
-            nR.maxcombo = result.max_combo;
-            nR.replayData = result.replayData;
-            nR.replayBin = result.replayBin;
-            nR.timestamp = int(new Date().getTime() / 1000);
-            nR.songInfo = result.songInfo;
+                replay.arc_engine = _avars.legacyEncode(result.songInfo);
+            replay.score = result.score;
+            replay.perfect = (result.amazing + result.perfect);
+            replay.good = result.good;
+            replay.average = result.average;
+            replay.miss = result.miss;
+            replay.boo = result.boo;
+            replay.maxcombo = result.max_combo;
+            replay.replayData = result.replayData;
+            replay.replayBin = result.replayBin;
+            replay.timestamp = int(new Date().getTime() / 1000);
+            replay.songInfo = result.songInfo;
 
-            _gvars.replayHistory.unshift(nR);
+            _gvars.replayHistory.unshift(replay);
 
             // Display F2 Shortcut key only once per session.
             if (!Flags.VALUES[Flags.F2_REPLAYS])
@@ -1380,13 +1383,13 @@ package game
                     // Store Bin Encoded Replay
                     if (!AirContext.doesFileExist(path))
                     {
-                        AirContext.writeTextFile(AirContext.getAppFile(path), nR.getEncode());
+                        AirContext.writeTextFile(AirContext.getAppFile(path), replay.getEncode());
 
                         var cachePath:String = path.substr(Constant.REPLAY_PATH.length);
                         _gvars.file_replay_cache.setValue(cachePath, result.replay_cache_object);
                         _gvars.file_replay_cache.save();
 
-                        ReplayHistoryTabLocal.REPLAYS.push(nR);
+                        ReplayHistoryTabLocal.REPLAYS.push(replay);
                     }
                 }
                 catch (err:Error)

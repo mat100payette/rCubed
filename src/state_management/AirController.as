@@ -4,16 +4,21 @@ package state_management
     import be.aboutme.airserver.AIRServer;
     import be.aboutme.airserver.messages.Message;
     import classes.ui.WindowState;
-    import events.state.LoadLocalAirConfigEvent;
-    import events.state.StateEvent;
-    import events.state.ToggleVSyncEvent;
-    import events.state.ToggleWebsocketEvent;
-    import events.state.WebsocketStateChangedEvent;
     import flash.display.Stage;
     import flash.events.IEventDispatcher;
     import singletons.StreamWebsocket;
     import state.AirState;
     import state.AppState;
+    import com.flashfla.utils.Screenshots;
+    import flash.display.StageDisplayState;
+    import events.actions.air.LoadLocalAirConfigEvent;
+    import events.actions.air.ToggleWebsocketEvent;
+    import events.actions.air.ToggleVSyncEvent;
+    import events.actions.air.SendWebsocketMessageEvent;
+    import events.actions.air.TakeScreenshotEvent;
+    import events.actions.air.ToggleFullScreenEvent;
+    import events.actions.air.CloseWebsocketEvent;
+    import events.actions.air.WebsocketStateChangedEvent;
 
     public class AirController extends Controller
     {
@@ -24,24 +29,19 @@ package state_management
             super(target, owner, updateStateCallback);
 
             _stage = stage;
+
+            addListeners();
         }
 
-        override public function onStateEvent(e:StateEvent):void
+        private function addListeners():void
         {
-            var stateName:String = e.stateName;
-
-            switch (stateName)
-            {
-                case LoadLocalAirConfigEvent.STATE:
-                    loadAirConfig();
-                    break;
-                case ToggleWebsocketEvent.STATE:
-                    onToggleWebsocketEvent();
-                    break;
-                case ToggleVSyncEvent.STATE:
-                    toggleVSync();
-                    break;
-            }
+            target.addEventListener(LoadLocalAirConfigEvent.EVENT_TYPE, loadAirConfig);
+            target.addEventListener(ToggleWebsocketEvent.EVENT_TYPE, toggleWebsocket);
+            target.addEventListener(ToggleVSyncEvent.EVENT_TYPE, toggleVSync);
+            target.addEventListener(TakeScreenshotEvent.EVENT_TYPE, takeScreenShot);
+            target.addEventListener(ToggleFullScreenEvent.EVENT_TYPE, toggleFullScreen);
+            target.addEventListener(SendWebsocketMessageEvent.EVENT_TYPE, websocketSend);
+            target.addEventListener(CloseWebsocketEvent.EVENT_TYPE, closeWebsocket);
         }
 
         private function loadAirConfig():void
@@ -61,6 +61,18 @@ package state_management
             if (airState.useWebsockets)
                 StreamWebsocket.initWebsocketServer(this);
 
+            if (airState.saveWindowPosition)
+            {
+                _stage.nativeWindow.x = airState.windowState.x;
+                _stage.nativeWindow.y = airState.windowState.y;
+            }
+
+            if (airState.saveWindowSize)
+            {
+                _stage.nativeWindow.width = Math.max(100, airState.windowState.width + Main.WINDOW_WIDTH_EXTRA);
+                _stage.nativeWindow.height = Math.max(100, airState.windowState.height + Main.WINDOW_HEIGHT_EXTRA);
+            }
+
             var newState:AppState = AppState.clone(owner);
             newState.air = airState;
 
@@ -72,7 +84,7 @@ package state_management
             return new WindowState(properties["x"], properties["y"], properties["width"], properties["height"]);
         }
 
-        private function onToggleWebsocketEvent():void
+        private function toggleWebsocket():void
         {
             var newState:AppState = AppState.clone(owner);
             var airState:AirState = newState.air;
@@ -101,15 +113,23 @@ package state_management
             target.dispatchEvent(new WebsocketStateChangedEvent(airState.useWebsockets, !successfulInit));
         }
 
-        private function websocketSend(cmd:String, data:Object):void
+        private function closeWebsocket():void
         {
+            StreamWebsocket.destroyWebsocketServer(this);
+        }
+
+        private function websocketSend(event:SendWebsocketMessageEvent):void
+        {
+            var command:String = event.command;
+            var data:Object = event.data;
+
             var websocket:AIRServer = StreamWebsocket.getWebsocket(this);
 
             if (websocket == null)
                 return;
 
             var websocketMessage:Message = new Message();
-            websocketMessage.command = cmd;
+            websocketMessage.command = command;
             websocketMessage.data = data;
 
             websocket.sendMessageToAllClients(websocketMessage);
@@ -126,6 +146,25 @@ package state_management
             LocalOptions.setVariable("vsync", airState.useVSync);
 
             updateState(newState);
+        }
+
+        /**
+         * Takes a screenshot of the stage and saves it to disk.
+         */
+        private function takeScreenShot(event:TakeScreenshotEvent):void
+        {
+            Screenshots.takeScreenshot(_stage, event.path);
+        }
+
+        private function toggleFullScreen():void
+        {
+            if (_stage == null)
+                return;
+
+            if (_stage.displayState == StageDisplayState.NORMAL)
+                _stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+            else
+                _stage.displayState = StageDisplayState.NORMAL;
         }
     }
 }

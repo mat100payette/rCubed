@@ -4,16 +4,15 @@
 
 package com.flashfla.utils
 {
-    import classes.Language;
-    import flash.display.BitmapData;
-    import flash.net.FileReference;
     import by.blooddy.crypto.image.PNGEncoder;
     import classes.Alert;
+    import classes.Language;
+    import flash.display.BitmapData;
     import flash.display.Stage;
+    import flash.net.FileReference;
 
     public class Screenshots
     {
-        //- ScreenShot Handling
         /**
          * Takes a screenshot of the stage and saves it to disk.
          */
@@ -25,8 +24,11 @@ package com.flashfla.utils
 
             try
             {
-                var _file:FileReference = new FileReference();
-                _file.save(PNGEncoder.encode(b), AirContext.createFileName((filename != null ? filename : "R^3 - " + DateUtil.toRFC822(new Date()).replace(/:/g, ".")) + ".png"));
+                var file:FileReference = new FileReference();
+
+                var finalFilename:String = filename != null ? filename : "R^3 - " + DateUtil.toRFC822(new Date()).replace(/:/g, ".");
+
+                file.save(PNGEncoder.encode(b), AirContext.createFileName(finalFilename) + ".png");
             }
             catch (e:Error)
             {

@@ -3,16 +3,16 @@ package classes
     import arc.ArcGlobals;
     import classes.chart.parse.ChartFFRLegacy;
     import com.flashfla.utils.Crypt;
+    import events.actions.content.EngineLoadedEvent;
     import flash.events.Event;
     import flash.events.EventDispatcher;
+    import flash.events.IEventDispatcher;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
     import flash.net.URLLoader;
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
-    import events.state.EngineLoadedEvent;
-    import flash.events.IEventDispatcher;
     import state.AppState;
 
     public class PlaylistLoader extends EventDispatcher

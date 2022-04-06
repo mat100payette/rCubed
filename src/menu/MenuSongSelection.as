@@ -55,6 +55,7 @@ package menu
     import game.GameplayDisplay;
     import state.AppState;
     import classes.User;
+    import state.ContentState;
 
     public class MenuSongSelection extends DisplayLayer
     {
@@ -74,7 +75,6 @@ package menu
         public static const GENRE_SONGFLAGS:int = 2;
         public static const GENRE_MODES:int = 2;
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
         private var _lang:Language = Language.instance;
         private var _mp:MultiplayerState = MultiplayerState.instance;
@@ -404,7 +404,7 @@ package menu
                     // We already know the flag.
                     if (GENRE_MODE == GENRE_SONGFLAGS)
                     {
-                        genreListFlags[genre_index] = (genre_index >= 2 ? GlobalVariables.SONG_ICON_COLOR[genre_index] : null);
+                        genreListFlags[genre_index] = (genre_index >= 2 ? SongInfo.SONG_ICON_COLOR[genre_index] : null);
                     }
                     else if (GENRE_MODE == GENRE_DIFFICULTIES)
                     {
@@ -435,7 +435,7 @@ package menu
                     var bestFlag:int = 6; // 6 = AAA
                     for (i = 0; i < songList.length; i++)
                     {
-                        var songFlag:int = GlobalVariables.getSongIconIndex(songList[i], user.getLevelRank(songList[i]));
+                        var songFlag:int = SongInfo.getSongIconIndex(songList[i], user.getLevelRank(songList[i]));
                         if (songFlag < bestFlag)
                         {
                             bestFlag = songFlag;
@@ -443,7 +443,7 @@ package menu
                                 break;
                         }
                     }
-                    genreListFlags[genre_index] = (bestFlag >= 2 ? GlobalVariables.SONG_ICON_COLOR[bestFlag] : null);
+                    genreListFlags[genre_index] = (bestFlag >= 2 ? SongInfo.SONG_ICON_COLOR[bestFlag] : null);
                     songList = null;
                 }
             }
@@ -554,7 +554,7 @@ package menu
             if (gindex == 1)
                 return _lang.string("song_selection_played");
 
-            return GlobalVariables.SONG_ICON_TEXT[gindex];
+            return SongInfo.SONG_ICON_TEXT[gindex];
         }
 
         /**
@@ -563,14 +563,16 @@ package menu
          */
         private function getTotalGenres():int
         {
+            var contentState:ContentState = AppState.instance.content;
+
             switch (GENRE_MODE)
             {
                 case GENRE_DIFFICULTIES:
-                    return _gvars.DIFFICULTY_RANGES.length;
+                    return contentState.difficultyRanges.length;
                 case GENRE_SONGFLAGS:
-                    return GlobalVariables.SONG_ICON_TEXT.length;
+                    return SongInfo.SONG_ICON_TEXT.length;
                 default:
-                    return (!_gvars.activeUser.settings.displayLegacySongs && !_playlist._engine) ? _gvars.TOTAL_GENRES - 1 : _gvars.TOTAL_GENRES;
+                    return (!_gvars.activeUser.settings.displayLegacySongs && !_playlist._engine) ? contentState.totalGenres - 1 : contentState.totalGenres;
             }
         }
 
@@ -1413,9 +1415,9 @@ package menu
          */
         public function buildInfoBoxSongActionButtons(songInfo:SongInfo):void
         {
-            var accessLevel:int = _gvars.checkSongAccess(songInfo);
+            var accessLevel:int = songInfo.checkSongAccess(AppState.instance.auth.user);
             var isCanonEngine:Boolean = !songInfo.engine;
-            if (accessLevel == GlobalVariables.SONG_ACCESS_PLAYABLE)
+            if (accessLevel == SongInfo.SONG_ACCESS_PLAYABLE)
             {
                 var buttonWidth:int = isCanonEngine ? 51.5 : 79.5;
 

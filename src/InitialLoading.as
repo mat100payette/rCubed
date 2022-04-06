@@ -1,22 +1,22 @@
 package
 {
 
-    import classes.ui.PreloaderStatusBar;
-    import menu.DisplayLayer;
-    import flash.events.Event;
-    import classes.ui.BoxButton;
-    import classes.User;
     import arc.mp.MultiplayerState;
+    import classes.Alert;
     import classes.Language;
-    import classes.Site;
-    import classes.Playlist;
     import classes.NoteskinsList;
+    import classes.Playlist;
+    import classes.Site;
+    import classes.User;
+    import classes.ui.BoxButton;
     import classes.ui.EpilepsyWarning;
+    import classes.ui.PreloaderStatusBar;
     import com.greensock.TweenMax;
     import com.greensock.easing.SineInOut;
-    import classes.Alert;
+    import events.actions.menu.LanguageChangedEvent;
     import events.navigation.ChangePanelEvent;
-    import events.state.LanguageChangedEvent;
+    import flash.events.Event;
+    import menu.DisplayLayer;
     import state.AppState;
 
     public class InitialLoading extends DisplayLayer
@@ -116,7 +116,7 @@ package
 
                 _gvars.loadUserSongData();
 
-                if (_gvars.activeUser.isGuest)
+                if (AppState.instance.auth.user.isGuest)
                     dispatchEvent(new ChangePanelEvent(Routes.PANEL_GAME_LOGIN));
                 else
                 {
@@ -135,10 +135,11 @@ package
 
             var playlist:Playlist = AppState.instance.content.canonPlaylist;
             var updatedText:String = "";
+            var user:User = AppState.instance.auth.user;
 
             updatedText += "Total: " + _loadScripts + " / " + _loadTotal + "\n";
             updatedText += "Playlist: " + getLoadText(playlist.isLoaded(), playlist.isError()) + "\n";
-            updatedText += "User Data: " + getLoadText(_gvars.playerUser.isLoaded(), _gvars.playerUser.isError()) + "\n";
+            updatedText += "User Data: " + getLoadText(user.isLoaded(), user.isError()) + "\n";
             updatedText += "Site Data: " + getLoadText(_site.isLoaded(), _site.isError());
 
             if (!_userLoggedIn)
@@ -157,7 +158,6 @@ package
 
             _gvars.playerUser = new User(true);
             _gvars.playerUser.loadFull(_gvars.userSession, onUserLoggedIn);
-            _gvars.activeUser = _gvars.playerUser;
             _gvars.activeUser.addEventListener(Constant.LOAD_COMPLETE, gameScriptLoad);
             _gvars.activeUser.addEventListener(Constant.LOAD_ERROR, gameScriptLoadError);
 

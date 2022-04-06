@@ -192,32 +192,31 @@ package classes.filter
 
         /**
          * Compares a Bitmask from Song Flags with a Bit Flag
-         * @param	flag_bits
-         * @param	bitmask
          */
         private function compareSongFlag(songInfo:SongInfo, levelRank:Object, value:Number):Boolean
         {
-            var flag_int:int = GlobalVariables.getSongIconIndex(songInfo, levelRank);
-            var flag_bits:int = GlobalVariables.getSongIconIndexBitmask(songInfo, levelRank);
+            var flagIndex:int = SongInfo.getSongIconIndex(songInfo, levelRank);
+            var flagBits:int = SongInfo.getSongIconIndexBitmask(songInfo, levelRank);
             var bitmask:int = 1 << value;
 
-            if (isNaN(flag_int) || isNaN(flag_bits) || isNaN(bitmask))
+            if (isNaN(flagIndex) || isNaN(flagBits) || isNaN(bitmask))
                 return true;
 
             switch (comparison)
             {
                 case "equal":
-                    return flag_int == value;
+                    return flagIndex == value;
 
                 case "not_equal":
-                    return flag_int != value;
+                    return flagIndex != value;
 
                 case "contains":
-                    return (flag_bits & bitmask) != 0;
+                    return (flagBits & bitmask) != 0;
 
                 case "not_contains":
-                    return (flag_bits & bitmask) == 0;
+                    return (flagBits & bitmask) == 0;
             }
+
             return false;
         }
 
@@ -232,6 +231,7 @@ package classes.filter
         {
             if (isNaN(value1) || isNaN(value2))
                 return true;
+
             switch (comparison)
             {
                 case "=":
@@ -252,13 +252,14 @@ package classes.filter
                 case ">":
                     return value1 > value2;
             }
+
             return false;
         }
 
         private function compareNumberEqual(value1:Number, value2:Number):Boolean
         {
-            var out:Boolean = value1 == value2;
-            return inverse ? !out : out;
+            var isEqual:Boolean = value1 == value2;
+            return inverse ? !isEqual : isEqual;
         }
 
         /**

@@ -1,6 +1,6 @@
 package classes
 {
-    import arc.ArcGlobals;
+    import events.actions.content.UpdateGameContentFromSiteEvent;
     import flash.events.ErrorEvent;
     import flash.events.Event;
     import flash.events.EventDispatcher;
@@ -10,7 +10,6 @@ package classes
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
-    import events.state.UpdateGameContentFromSiteEvent;
     import state.AppState;
 
     public class Site extends EventDispatcher

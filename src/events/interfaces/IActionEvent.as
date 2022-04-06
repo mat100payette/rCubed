@@ -1,9 +1,9 @@
-package events.state.interfaces
+package events.interfaces
 {
 
     import flash.events.Event;
 
-    public interface IStateEvent
+    public interface IActionEvent
     {
         function clone():Event;
     }

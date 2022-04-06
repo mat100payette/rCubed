@@ -1,8 +1,7 @@
-package
+package menu
 {
     import classes.Alert;
     import classes.Language;
-    import classes.Playlist;
     import classes.ui.Box;
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
@@ -29,6 +28,7 @@ package
     import menu.DisplayLayer;
     import events.navigation.ChangePanelEvent;
     import events.navigation.InitialLoadingEvent;
+    import events.actions.auth.SetUserSessionEvent;
 
     public class LoginMenu extends DisplayLayer
     {
@@ -60,6 +60,7 @@ package
         {
             if (stage)
                 stage.removeEventListener(KeyboardEvent.KEY_DOWN, loginKeyDown);
+
             _saveDetails.dispose();
             super.dispose();
         }
@@ -280,11 +281,12 @@ package
             removeLoaderListeners();
 
             // Parse Response
-            var _data:Object;
+            var data:Object;
             var siteDataString:String = e.target.data;
+
             try
             {
-                _data = JSON.parse(siteDataString);
+                data = JSON.parse(siteDataString);
             }
             catch (err:Error)
             {
@@ -298,22 +300,21 @@ package
             }
 
             // Has Response
-            if (_data.result == 4)
+            if (data.result == 4)
             {
                 Logger.error(this, "Invalid User/Session");
                 _isLoading = false;
                 Alert.add(_lang.string("login_invalid_session"));
                 changeUserEvent(e);
             }
-            else if (_data.result >= 1 && _data.result <= 3)
+            else if (data.result >= 1 && data.result <= 3)
             {
                 Logger.info(this, "Login Success!");
-                if (_data.result == 1 || _data.result == 2)
-                    saveLoginDetails(this.rememberPassword, _data.session);
-                _gvars.userSession = _data.session;
-                // TODO: Event to reset load status on InitialLoading
-                //_gvars.gameMain.loadComplete = false;
 
+                if (data.result == 1 || data.result == 2)
+                    saveLoginDetails(rememberPassword, data.session);
+
+                dispatchEvent(new SetUserSessionEvent(data.session));
                 dispatchEvent(new InitialLoadingEvent(true));
             }
             else
@@ -394,7 +395,7 @@ package
             }
         }
 
-        public function loadLoginDetails():Object
+        private function loadLoginDetails():Object
         {
             var out:Object = {"state": STORED_NONE};
 
@@ -419,6 +420,5 @@ package
 
             return out;
         }
-
     }
 }

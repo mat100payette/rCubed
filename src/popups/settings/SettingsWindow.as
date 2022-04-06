@@ -215,7 +215,7 @@ package popups.settings
 
         public function checkValidMods():void
         {
-            _txtModWarning.visible = !(new GameMods(_user.settings).isScoringCompatible);
+            _txtModWarning.visible = !(new GameMods(AppState.instance.auth.user.settings).isScoringCompatible);
         }
 
         private function onManageSettingsWindowClosed(window:ManageSettingsWindow):void

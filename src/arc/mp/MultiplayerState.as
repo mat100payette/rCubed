@@ -389,14 +389,16 @@ package arc.mp
                     continue;
 
                 var gameplay:Gameplay = player.gameplay;
-                if (gameplay && gameplay.encodedReplay)
-                {
-                    var replay:Replay = new Replay(new Date().getTime());
-                    replay.parseEncode(gameplay.encodedReplay);
-                    replay.loadSongInfo();
-                    if (!replay.isEdited && replay.isValid())
-                        _gvars.replayHistory.unshift(replay);
-                }
+                if (gameplay == null || !gameplay.encodedReplay)
+                    continue;
+
+                var replay:Replay = new Replay(new Date().getTime());
+
+                replay.parseEncode(gameplay.encodedReplay);
+                replay.loadSongInfo();
+
+                if (!replay.isEdited && replay.isValid())
+                    dispatchEvent(new PrependReplayEvent(replay));
             }
         }
 

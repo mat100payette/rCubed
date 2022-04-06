@@ -1,12 +1,14 @@
 package state_management
 {
 
-    import events.state.SetMenuMusicVolumeEvent;
-    import events.state.SetPopupsEnabledEvent;
-    import events.state.StateEvent;
+    import classes.SoundPlayer;
+    import events.actions.menu.LoadMenuMusicEvent;
+    import events.actions.menu.SetMenuMusicVolumeEvent;
+    import events.actions.menu.SetPopupsEnabledEvent;
     import flash.events.IEventDispatcher;
+    import flash.utils.ByteArray;
+    import singletons.MenuMusicPlayer;
     import state.AppState;
-    import state.MenuState;
 
     public class MenuController extends Controller
     {
@@ -15,24 +17,18 @@ package state_management
         public function MenuController(target:IEventDispatcher, owner:Object, updateStateCallback:Function)
         {
             super(target, owner, updateStateCallback);
+
+            addListeners();
         }
 
-        override public function onStateEvent(e:StateEvent):void
+        private function addListeners():void
         {
-            var stateName:String = e.stateName;
-
-            switch (stateName)
-            {
-                case SetPopupsEnabledEvent.STATE:
-                    onSetPopupsEnabled(e as SetPopupsEnabledEvent);
-                    break;
-                case SetMenuMusicVolumeEvent.STATE:
-                    setMenuMusicVolume(e as SetMenuMusicVolumeEvent);
-                    break;
-            }
+            target.addEventListener(SetPopupsEnabledEvent.EVENT_TYPE, setPopupsEnabled);
+            target.addEventListener(SetMenuMusicVolumeEvent.EVENT_TYPE, setMenuMusicVolume);
+            target.addEventListener(LoadMenuMusicEvent.EVENT_TYPE, loadMenuMusic);
         }
 
-        private function onSetPopupsEnabled(e:SetPopupsEnabledEvent):void
+        private function setPopupsEnabled(e:SetPopupsEnabledEvent):void
         {
             var newState:AppState = AppState.clone(owner);
             newState.menu.disablePopups = e.enabled;
@@ -42,34 +38,26 @@ package state_management
 
         private function setMenuMusicVolume(e:SetMenuMusicVolumeEvent):void
         {
-            var newState:AppState = AppState.clone(owner);
-            var menuState:MenuState = newState.menu;
+            var menuPlayer:SoundPlayer = MenuMusicPlayer.getPlayer(this);
 
             var volume:Number = e.volume;
-            if (isNaN(volume))
-                volume = 1;
+            menuPlayer.volume = volume;
 
-            menuState.menuMusicSoundVolume = volume;
-            menuState.menuMusicSoundTransform.volume = volume;
-
-            if (_gvars.menuMusic && _gvars.menuMusic.isPlaying)
-                _gvars.menuMusic.soundChannel.soundTransform = _gvars.menuMusicSoundTransform;
-
-            updateState(newState);
+            LocalOptions.setVariable("menu_music_volume", 1);
         }
 
         public function loadMenuMusic():void
         {
-            menuMusicSoundVolume = menuMusicSoundTransform.volume = LocalOptions.getVariable("menu_music_volume", 1);
+            var menuPlayer:SoundPlayer = MenuMusicPlayer.getPlayer(this);
+
+            menuPlayer.soundTransform.volume = LocalOptions.getVariable("menu_music_volume", 1);
 
             // Load Existing Menu Music SWF
             if (AirContext.doesFileExist(Constant.MENU_MUSIC_PATH))
             {
-                var file_bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
-                if (file_bytes && file_bytes.length > 0)
-                {
-                    menuMusic = new SongBytes(file_bytes);
-                }
+                var fileBytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
+                if (fileBytes && fileBytes.length > 0)
+                    menuPlayer.setBytes(fileBytes);
             }
             // Convert MP3 if exist.
             else if (AirContext.doesFileExist(Constant.MENU_MUSIC_MP3_PATH))
@@ -77,10 +65,21 @@ package state_management
                 var mp3Bytes:ByteArray = AirContext.readFile(AirContext.getAppFile(Constant.MENU_MUSIC_MP3_PATH));
                 if (mp3Bytes && mp3Bytes.length > 0)
                 {
-                    menuMusic = new SongBytes(mp3Bytes, true);
+                    menuPlayer.setBytes(mp3Bytes, true);
                     LocalStore.setVariable("menu_music", "External MP3");
                 }
             }
+        }
+
+        private function deleteMenuMusic():void
+        {
+            var menuPlayer:SoundPlayer = MenuMusicPlayer.getPlayer(this);
+
+            menuPlayer.userStop();
+
+            menuMusicControls.parent.removeChild(menuMusicControls);
+
+            AirContext.deleteFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
         }
     }
 }

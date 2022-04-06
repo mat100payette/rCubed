@@ -15,19 +15,19 @@ package
     import classes.ui.VersionText;
     import classes.ui.WindowState;
     import com.flashdynamix.utils.SWFProfiler;
-    import com.flashfla.utils.Screenshots;
     import com.greensock.TweenLite;
     import com.greensock.plugins.AutoAlphaPlugin;
     import com.greensock.plugins.TintPlugin;
     import com.greensock.plugins.TweenPlugin;
+    import events.actions.air.CloseWebsocketEvent;
+    import events.actions.air.LoadLocalAirConfigEvent;
+    import events.actions.content.GameDataLoadedEvent;
+    import events.actions.menu.LanguageChangedEvent;
+    import events.actions.menu.LoadMenuMusicEvent;
     import events.navigation.InitialLoadingEvent;
     import events.navigation.popups.AddPopupEvent;
-    import events.state.GameDataLoadedEvent;
-    import events.state.LanguageChangedEvent;
-    import events.state.LoadLocalAirConfigEvent;
     import flash.desktop.NativeApplication;
     import flash.display.Sprite;
-    import flash.display.StageDisplayState;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
     import flash.events.KeyboardEvent;
@@ -36,7 +36,6 @@ package
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.ui.Keyboard;
-    import state.AirState;
     import state.AppState;
     import state_management.AppController;
     import state_management.Controller;
@@ -53,8 +52,6 @@ package
 
         public var navigator:Navigator;
         private var _appController:Controller;
-
-        public var ignoreWindowChanges:Boolean = false;
 
         public var versionText:VersionText;
         public var bg:GameBackgroundColor;
@@ -89,14 +86,9 @@ package
             addEventListener(LanguageChangedEvent.EVENT_TYPE, onLanguageChanged);
         }
 
-        public function loadAirOptions():void
-        {
-            dispatchEvent(new LoadLocalAirConfigEvent());
-        }
-
         private function gameInit():void
         {
-            //- Static Class Init
+            //- Static Classes Init
             Logger.init();
             AirContext.initFolders();
             LocalOptions.init();
@@ -107,8 +99,11 @@ package
             TweenLite.defaultOverwrite = "all";
             stage.stageFocusRect = false;
 
-            //- Load Air Items
-            loadAirOptions();
+            WINDOW_WIDTH_EXTRA = stage.nativeWindow.width - GAME_WIDTH;
+            WINDOW_HEIGHT_EXTRA = stage.nativeWindow.height - GAME_HEIGHT;
+
+            //- Load Air config
+            dispatchEvent(new LoadLocalAirConfigEvent());
 
             //- Window Options
             stage.nativeWindow.addEventListener(Event.CLOSING, onNativeWindowClosing);
@@ -122,24 +117,6 @@ package
             }
 
             stage.nativeWindow.title = Constant.AIR_WINDOW_TITLE;
-
-            WINDOW_WIDTH_EXTRA = stage.nativeWindow.width - GAME_WIDTH;
-            WINDOW_HEIGHT_EXTRA = stage.nativeWindow.height - GAME_HEIGHT;
-
-            ignoreWindowChanges = true;
-
-            var airState:AirState = AppState.instance.air;
-            if (airState.saveWindowPosition)
-            {
-                stage.nativeWindow.x = airState.windowState.x;
-                stage.nativeWindow.y = airState.windowState.y;
-            }
-            if (airState.saveWindowSize)
-            {
-                stage.nativeWindow.width = Math.max(100, airState.windowState.width + WINDOW_WIDTH_EXTRA);
-                stage.nativeWindow.height = Math.max(100, airState.windowState.height + WINDOW_HEIGHT_EXTRA);
-            }
-            ignoreWindowChanges = false;
 
             //- Load Menu Music
             dispatchEvent(new LoadMenuMusicEvent());
@@ -168,27 +145,6 @@ package
             }
 
             navigator.onChangePanelEvent(new InitialLoadingEvent(false));
-        }
-
-        // TODO: Place this window stuff elsewhere
-        /**
-         * Takes a screenshot of the stage and saves it to disk.
-         */
-        public function takeScreenShot(filename:String = null):void
-        {
-            Screenshots.takeScreenshot(stage, filename);
-        }
-
-        //- Full Screen
-        public function toggleFullScreen(e:Event = null):void
-        {
-            if (stage)
-            {
-                if (stage.displayState == StageDisplayState.NORMAL)
-                    stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-                else
-                    stage.displayState = StageDisplayState.NORMAL;
-            }
         }
 
         private function onLanguageChanged(e:LanguageChangedEvent):void
@@ -241,9 +197,6 @@ package
 
         private function onNativeWindowPropertyChange(e:NativeWindowBoundsEvent):void
         {
-            if (ignoreWindowChanges)
-                return;
-
             var airWindowProperties:WindowState = AppState.instance.air.windowState;
 
             // TODO: Do not mutate state in here
@@ -275,20 +228,20 @@ package
         private function keyboardKeyDown(e:KeyboardEvent):void
         {
             var keyCode:int = e.keyCode;
-            if (Flags.VALUES[Flags.ENABLE_GLOBAL_POPUPS])
-            {
-                // Options
-                if (keyCode == AppState.instance.auth.user.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
-                    dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
+            if (!Flags.VALUES[Flags.ENABLE_GLOBAL_POPUPS])
+                return;
 
-                // Help Menu
-                else if (keyCode == Keyboard.F1)
-                    dispatchEvent(new AddPopupEvent(Routes.POPUP_HELP));
+            // Options
+            if (keyCode == AppState.instance.auth.user.settings.keyOptions && (stage.focus == null || !(stage.focus is TextField)))
+                dispatchEvent(new AddPopupEvent(Routes.POPUP_OPTIONS));
 
-                // Replay History
-                else if (keyCode == Keyboard.F2)
-                    dispatchEvent(new AddPopupEvent(Routes.POPUP_REPLAY_HISTORY));
-            }
+            // Help Menu
+            else if (keyCode == Keyboard.F1)
+                dispatchEvent(new AddPopupEvent(Routes.POPUP_HELP));
+
+            // Replay History
+            else if (keyCode == Keyboard.F2)
+                dispatchEvent(new AddPopupEvent(Routes.POPUP_REPLAY_HISTORY));
         }
     }
 }

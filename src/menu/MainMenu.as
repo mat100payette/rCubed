@@ -32,6 +32,8 @@ package menu
     import flash.text.TextFormatAlign;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
+    import state.AppState;
+    import classes.User;
 
     public class MainMenu extends DisplayLayer
     {
@@ -87,18 +89,18 @@ package menu
             addChild(logo);
 
             //- Add Menu Background
-            var menu_bg:MainMenuBackground = new MainMenuBackground();
-            menu_bg.x = 145;
-            menu_bg.visible = LocalOptions.getVariable("menu_show_menu_background", true);
-            addChild(menu_bg);
+            var menuBg:MainMenuBackground = new MainMenuBackground();
+            menuBg.x = 145;
+            menuBg.visible = LocalOptions.getVariable("menu_show_menu_background", true);
+            addChild(menuBg);
 
             //- Add Menu to Stage
             buildMenuItems();
 
             for (var i:int = 0; i < mmc_strings.length; ++i)
             {
-                var menu_music_button:BoxIcon = new BoxIcon(null, 5 + 30 * i, 5, 25, 25, mmc_icons[i], mmc_functions[i]);
-                mmc_buttons[i] = menu_music_button;
+                var menuMusicButton:BoxIcon = new BoxIcon(null, 5 + 30 * i, 5, 25, 25, mmc_icons[i], mmc_functions[i]);
+                mmc_buttons[i] = menuMusicButton;
             }
 
             //- Add Menu Music to Stage
@@ -106,9 +108,7 @@ package menu
             {
                 drawMenuMusicControls();
                 if (!_gvars.menuMusic.isPlaying && !_gvars.menuMusic.userStopped)
-                {
                     _gvars.menuMusic.start();
-                }
             }
 
             MultiplayerState.instance.gameplayCleanup();
@@ -121,14 +121,16 @@ package menu
                 return;
             }
 
+            var user:User = AppState.instance.auth.user;
+
             // Guests
-            if (_gvars.activeUser.isGuest)
+            if (user.isGuest)
                 setActiveLayer(Routes.PANEL_SONGSELECTION);
             else
             {
                 if (!Flags.VALUES[Flags.STARTUP_SCREEN])
                 {
-                    var playerStartup:int = _gvars.activeUser.settings.startUpScreen;
+                    var playerStartup:int = user.settings.startUpScreen;
                     Flags.VALUES[Flags.STARTUP_SCREEN] = true;
 
                     if (playerStartup == 0)
@@ -199,25 +201,28 @@ package menu
             }
 
             //- User Info Display
+            var user:User = AppState.instance.auth.user;
+
             _gvars.activeUser.updateAverageRank(_gvars.TOTAL_PUBLIC_SONGS);
-            userText = new Text(this, 153, 452, sprintf(_lang.string("main_menu_userbar"), {"player_name": _gvars.activeUser.name,
-                    "games_played": NumberUtil.numberFormat(_gvars.activeUser.gamesPlayed),
-                    "grand_total": NumberUtil.numberFormat(_gvars.activeUser.grandTotal),
-                    "rank": NumberUtil.numberFormat(_gvars.activeUser.gameRank),
-                    "skill_level": _gvars.activeUser.skillLevel,
-                    "skill_rating": NumberUtil.numberFormat(_gvars.activeUser.skillRating, 2),
-                    "avg_rank": NumberUtil.numberFormat(_gvars.activeUser.averageRank, 3, true)}));
+
+            userText = new Text(this, 153, 452, sprintf(_lang.string("main_menu_userbar"), {"player_name": user.name,
+                    "games_played": NumberUtil.numberFormat(user.gamesPlayed),
+                    "grand_total": NumberUtil.numberFormat(user.grandTotal),
+                    "rank": NumberUtil.numberFormat(user.gameRank),
+                    "skill_level": user.skillLevel,
+                    "skill_rating": NumberUtil.numberFormat(user.skillRating, 2),
+                    "avg_rank": NumberUtil.numberFormat(user.averageRank, 3, true)}));
             userText.width = 594;
             userText.height = 28;
             userText.align = TextFormatAlign.CENTER;
 
-            if (!_gvars.activeUser.isGuest)
+            if (!AppState.instance.auth.isGuest)
             {
                 statUpdaterBtn = new SimpleBoxButton(609, 28);
                 statUpdaterBtn.x = 147;
                 statUpdaterBtn.y = Main.GAME_HEIGHT - 28;
                 statUpdaterBtn.addEventListener(MouseEvent.MOUSE_OVER, e_statUpdaterMouseOver);
-                statUpdaterBtn.addEventListener(MouseEvent.CLICK, e_statUpdaterClick);
+                statUpdaterBtn.addEventListener(MouseEvent.CLICK, onStatUpdaterClicked);
 
                 addChild(statUpdaterBtn);
             }
@@ -392,17 +397,7 @@ package menu
             }
         }
 
-        private function deleteMusic(e:Event):void
-        {
-            if (_gvars.menuMusic)
-            {
-                _gvars.menuMusic.userStop();
-                _gvars.menuMusic = null;
-                menuMusicControls.parent.removeChild(menuMusicControls);
 
-                AirContext.deleteFile(AirContext.getAppFile(Constant.MENU_MUSIC_PATH));
-            }
-        }
 
         private function e_statUpdaterMouseOver(e:Event):void
         {
@@ -442,7 +437,7 @@ package menu
             addChild(hover_message);
         }
 
-        private function e_statUpdaterClick(e:MouseEvent):void
+        private function onStatUpdaterClicked(e:MouseEvent):void
         {
             if (!rankUpdateThrobber)
             {
@@ -456,31 +451,32 @@ package menu
             if (rankUpdateThrobber.running)
                 return;
 
-            var wr:WebRequest = new WebRequest(Constant.USER_RANKS_UPDATE_URL, c_rankComplete, c_rankFail);
+            var wr:WebRequest = new WebRequest(Constant.USER_RANKS_UPDATE_URL, onRankLoadCompleted, onRankLoadFailed);
             wr.load({"session": _gvars.userSession});
+
             rankUpdateThrobber.visible = true;
             rankUpdateThrobber.start();
+        }
 
-            function c_rankComplete(e:* = null):void
+        private function onRankLoadCompleted(e:* = null):void
+        {
+            var resp:Object = JSON.parse(e.target.data);
+            if (_gvars.gameMain.navigator.activePanel is MainMenu)
             {
-                var resp:Object = JSON.parse(e.target.data);
-                if (_gvars.gameMain.navigator.activePanel is MainMenu)
-                {
-                    dispatchEvent(new AddPopupSkillRankUpdateEvent(resp));
+                dispatchEvent(new AddPopupSkillRankUpdateEvent(resp));
 
-                    rankUpdateThrobber.stop();
-                    rankUpdateThrobber.visible = false;
-                }
+                rankUpdateThrobber.stop();
+                rankUpdateThrobber.visible = false;
             }
+        }
 
-            function c_rankFail(e:*):void
+        private function onRankLoadFailed(e:*):void
+        {
+            Alert.add(_lang.string("skill_rank_update_fail"), 90, Alert.RED);
+            if (_gvars.gameMain.navigator.activePanel is MainMenu)
             {
-                Alert.add(_lang.string("skill_rank_update_fail"), 90, Alert.RED);
-                if (_gvars.gameMain.navigator.activePanel is MainMenu)
-                {
-                    rankUpdateThrobber.stop();
-                    rankUpdateThrobber.visible = false;
-                }
+                rankUpdateThrobber.stop();
+                rankUpdateThrobber.visible = false;
             }
         }
     }

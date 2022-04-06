@@ -121,9 +121,8 @@ package game
 
         /**
          * Updates variables that need to be calculated after others are set.
-         * @param _gvars GlobalVariables reference.
          */
-        public function update(_gvars:GlobalVariables):void
+        public function update():void
         {
             var contentState:ContentState = AppState.instance.content;
 

@@ -16,9 +16,6 @@ package popups.settings
     import com.bit101.components.Style;
     import com.flashfla.utils.sprintf;
     import events.navigation.popups.AddPopupEvent;
-    import events.state.LanguageChangedEvent;
-    import events.state.ToggleWebsocketEvent;
-    import events.state.WebsocketStateChangedEvent;
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.events.NativeWindowBoundsEvent;
@@ -29,6 +26,9 @@ package popups.settings
     import menu.MainMenu;
     import state.AirState;
     import state.AppState;
+    import events.actions.air.WebsocketStateChangedEvent;
+    import events.actions.air.ToggleWebsocketEvent;
+    import events.actions.air.ToggleVSyncEvent;
 
     public class SettingsTabMisc extends SettingsTabBase
     {
@@ -76,7 +76,7 @@ package popups.settings
         {
             super(settingsWindow);
 
-            addEventListener(WebsocketStateChangedEvent.STATE, onWebsocketStateChanged);
+            addEventListener(WebsocketStateChangedEvent.EVENT_TYPE, onWebsocketStateChanged);
         }
 
         override public function get name():String
@@ -118,7 +118,7 @@ package popups.settings
             _optionLanguage.openPosition = ComboBox.BOTTOM;
             _optionLanguage.fontSize = 11;
             _optionLanguage.addEventListener(Event.SELECT, onLanguageSelected);
-            setLanguage();
+            setLanguageUI();
             yOff += 30;
 
             // Start Up Screen
@@ -282,7 +282,7 @@ package popups.settings
             _optionMPTextSize.text = _avars.configMPSize.toString();
             _optionStartUpScreen.selectedIndex = _settings.startUpScreen;
 
-            setLanguage();
+            setLanguageUI();
 
             var airState:AirState = AppState.instance.air;
 
@@ -435,7 +435,7 @@ package popups.settings
         {
             var setWindowEvent:SetWindowStateEvent = new SetWindowStateEvent();
 
-            dispatchEvent(new SetWindowStateEvent());
+            dispatchEvent(setWindowEvent);
 
             _gvars.gameMain.ignoreWindowChanges = true;
             _gvars.gameMain.stage.nativeWindow.x = _gvars.airWindowProperties.x;
@@ -485,7 +485,7 @@ package popups.settings
             _settings.startUpScreen = e.target.selectedItem.data as int;
         }
 
-        private function setLanguage():void
+        private function setLanguageUI():void
         {
             _ignoreLanguageCombo = true;
             _optionLanguage.selectedItemByData = _settings.language;

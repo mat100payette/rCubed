@@ -76,15 +76,13 @@ package
                 folder.createDirectory();
         }
 
-        public static function createFileName(file_name:String, replace:String = ""):String
+        public static function createFileName(filename:String, replaceBadWith:String = ""):String
         {
             // Remove chars not allowed in Windows filename \ / : * ? " < > |
-            file_name = file_name.replace(/[~\\\/:\*\?"<>\|]/g, replace);
-
             // Trim leading and trailing whitespace.
-            file_name = file_name.replace(/^\s+|\s+$/gs, replace);
+            var cleanedFilename:String = filename.replace(/[~\\\/:\*\?"<>\|]/g, replaceBadWith).replace(/^\s+|\s+$/gs, replaceBadWith);
 
-            return file_name;
+            return cleanedFilename;
         }
 
         static public function getLoaderContext():LoaderContext

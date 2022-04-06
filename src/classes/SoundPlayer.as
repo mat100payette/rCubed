@@ -4,43 +4,85 @@ package classes
     import flash.events.Event;
     import flash.media.Sound;
     import flash.media.SoundChannel;
+    import flash.media.SoundTransform;
     import flash.utils.ByteArray;
 
     public class SoundPlayer
     {
-        public var sound:Sound;
-        public var soundChannel:SoundChannel;
+        public var isPlaying:Boolean;
+        public var userPaused:Boolean;
+        public var userStopped:Boolean;
 
-        public var isPlaying:Boolean = false;
-        public var userPaused:Boolean = false;
-        public var userStopped:Boolean = false;
-
-        private var _pausePosition:int = 0;
+        private var _pausePosition:int;
         private var _noRepeat:Boolean;
+
+        private var _sound:Sound;
+        private var _soundTransform:SoundTransform;
+        private var _soundChannel:SoundChannel;
 
         public function SoundPlayer(swfBytes:ByteArray, isMP3File:Boolean = false, noRepeat:Boolean = false)
         {
-            if (swfBytes && swfBytes.length > 0)
-            {
-                if (!isMP3File)
-                    swfBytes = MP3Extraction.extractSound(swfBytes);
+            isPlaying = false;
+            userPaused = false;
+            userStopped = false;
 
-                swfBytes.position = 0;
-                sound = new Sound();
-                sound.loadCompressedDataFromByteArray(swfBytes, swfBytes.length);
-            }
+            _soundTransform = new SoundTransform();
+            _pausePosition = 0;
             _noRepeat = noRepeat;
+
+            setBytes(swfBytes, isMP3File);
+        }
+
+        public function setBytes(bytes:ByteArray, isMP3File:Boolean = false):void
+        {
+            if (!bytes || bytes.length <= 0)
+                return;
+
+            if (!isMP3File)
+                bytes = MP3Extraction.extractSound(bytes);
+
+            bytes.position = 0;
+
+            if (_sound != null)
+            {
+                try
+                {
+                    _sound.close();
+                }
+                catch (e:Error)
+                {
+                    Logger.error(this, "Could not close sound properly");
+                }
+            }
+
+            _sound = new Sound();
+            _sound.loadCompressedDataFromByteArray(bytes, bytes.length);
+        }
+
+        public function set volume(value:Number):void
+        {
+            if (_soundTransform == null || isNaN(value))
+                return;
+
+            _soundTransform.volume = value;
+        }
+
+        public function get soundTransform():SoundTransform
+        {
+            return _soundTransform;
         }
 
         public function start():void
         {
-            if (!sound || userPaused)
+            if (!_sound || userPaused)
                 return;
 
             stop();
-            soundChannel = sound.play(_pausePosition);
-            soundChannel.soundTransform = GlobalVariables.instance.menuMusicSoundTransform;
-            soundChannel.addEventListener(Event.SOUND_COMPLETE, onComplete);
+
+            _soundChannel = _sound.play(_pausePosition);
+            _soundChannel.soundTransform = _soundTransform;
+            _soundChannel.addEventListener(Event.SOUND_COMPLETE, onComplete);
+
             isPlaying = true;
         }
 
@@ -48,6 +90,7 @@ package classes
         {
             SoundChannel(e.target).removeEventListener(e.type, onComplete);
             _pausePosition = 0;
+
             if (_noRepeat)
                 isPlaying = false;
             else
@@ -56,10 +99,10 @@ package classes
 
         public function stop():void
         {
-            if (soundChannel)
+            if (_soundChannel)
             {
-                soundChannel.stop();
-                soundChannel.removeEventListener(Event.SOUND_COMPLETE, onComplete);
+                _soundChannel.stop();
+                _soundChannel.removeEventListener(Event.SOUND_COMPLETE, onComplete);
             }
 
             isPlaying = false;
@@ -67,7 +110,7 @@ package classes
 
         public function userPause():void
         {
-            _pausePosition = soundChannel.position;
+            _pausePosition = _soundChannel.position;
             userPaused = true;
             stop();
         }

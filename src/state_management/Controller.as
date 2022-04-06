@@ -1,7 +1,6 @@
 package state_management
 {
 
-    import events.state.StateEvent;
     import flash.events.EventDispatcher;
     import flash.events.IEventDispatcher;
 
@@ -32,10 +31,6 @@ package state_management
         protected function get updateState():Function
         {
             return _update;
-        }
-
-        public function onStateEvent(e:StateEvent):void
-        {
         }
     }
 }
