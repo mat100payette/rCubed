@@ -1,18 +1,40 @@
 package popups.settings
 {
     import classes.Language;
+    import classes.UserSettings;
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
     import classes.ui.ColorField;
     import classes.ui.ColorOption;
-    import classes.ui.Text;
     import classes.ui.SelectableColorOption;
+    import classes.ui.Text;
     import classes.ui.ValidatedText;
-    import classes.UserSettings;
-    import com.flashfla.utils.ColorUtil;
-    import flash.events.Event;
+    import events.actions.gameplay.SetRawGoodTrackerEvent;
+    import events.actions.gameplay.colors.GameAColorChangedEvent;
+    import events.actions.gameplay.colors.GameBColorChangedEvent;
+    import events.actions.gameplay.colors.GameCColorChangedEvent;
+    import events.actions.gameplay.colors.SetAAAComboColorEvent;
+    import events.actions.gameplay.colors.SetAvflagComboColorEvent;
+    import events.actions.gameplay.colors.SetBlackflagComboColorEvent;
+    import events.actions.gameplay.colors.SetBooflagComboColorEvent;
+    import events.actions.gameplay.colors.SetFCComboColorEvent;
+    import events.actions.gameplay.colors.SetGameAColorEvent;
+    import events.actions.gameplay.colors.SetGameBColorEvent;
+    import events.actions.gameplay.colors.SetGameCColorEvent;
+    import events.actions.gameplay.colors.SetJudgeColorEvent;
+    import events.actions.gameplay.colors.SetMissflagComboColorEvent;
+    import events.actions.gameplay.colors.SetNormalComboColorEvent;
+    import events.actions.gameplay.colors.SetSDGComboColorEvent;
+    import events.actions.gameplay.colors.ToggleAAAComboColorEvent;
+    import events.actions.gameplay.colors.ToggleAvflagComboColorEvent;
+    import events.actions.gameplay.colors.ToggleBlackflagComboColorEvent;
+    import events.actions.gameplay.colors.ToggleBooflagComboColorEvent;
+    import events.actions.gameplay.colors.ToggleFCComboColorEvent;
+    import events.actions.gameplay.colors.ToggleMissflagComboColorEvent;
+    import events.actions.gameplay.colors.ToggleSDGComboColorEvent;
     import flash.events.Event;
     import flash.text.TextFormatAlign;
+    import state.AppState;
 
     public class SettingsTabColors extends SettingsTabBase
     {
@@ -43,6 +65,10 @@ package popups.settings
         public function SettingsTabColors(settingsWindow:SettingsWindow):void
         {
             super(settingsWindow);
+
+            addEventListener(GameAColorChangedEvent.EVENT_TYPE, updateGameAColorUI);
+            addEventListener(GameBColorChangedEvent.EVENT_TYPE, updateGameBColorUI);
+            addEventListener(GameCColorChangedEvent.EVENT_TYPE, updateGameCColorUI);
         }
 
         override public function get name():String
@@ -50,7 +76,7 @@ package popups.settings
             return "colors";
         }
 
-        private function changeColor(e:Event, option:ColorOption):int
+        private function getSelectedJudgeColor(e:Event, option:ColorOption):int
         {
             var newColor:int;
 
@@ -61,7 +87,6 @@ package popups.settings
             else
                 newColor = option.color;
 
-            option.color = newColor;
             return newColor;
         }
 
@@ -189,267 +214,278 @@ package popups.settings
 
         override public function setValues():void
         {
-            _optionAmazingJudge.color = _settings.judgeColors[0];
-            _optionPerfectJudge.color = _settings.judgeColors[1];
-            _optionGoodJudge.color = _settings.judgeColors[2];
-            _optionAverageJudge.color = _settings.judgeColors[3];
-            _optionMissJudge.color = _settings.judgeColors[4];
-            _optionBooJudge.color = _settings.judgeColors[5];
+            var settings:UserSettings = AppState.instance.auth.user.settings;
 
-            _optionGameColor1.color = _settings.gameColors[0];
-            _optionGameColor2.color = _settings.gameColors[1];
-            _optionGameColor3.color = _settings.gameColors[4];
+            _optionAmazingJudge.color = settings.judgeColors[0];
+            _optionPerfectJudge.color = settings.judgeColors[1];
+            _optionGoodJudge.color = settings.judgeColors[2];
+            _optionAverageJudge.color = settings.judgeColors[3];
+            _optionMissJudge.color = settings.judgeColors[4];
+            _optionBooJudge.color = settings.judgeColors[5];
 
-            _optionNormalCombo.color = _settings.comboColors[0];
-            _optionFCCombo.color = _settings.comboColors[1];
-            _optionFCCombo.checked = _settings.enableComboColors[1];
-            _optionAAACombo.color = _settings.comboColors[2];
-            _optionAAACombo.checked = _settings.enableComboColors[2];
-            _optionSDGCombo.color = _settings.comboColors[3];
-            _optionSDGCombo.checked = _settings.enableComboColors[3];
-            _optionBlackflagCombo.color = _settings.comboColors[4];
-            _optionBlackflagCombo.checked = _settings.enableComboColors[4];
-            _optionAvflagCombo.color = _settings.comboColors[5];
-            _optionAvflagCombo.checked = _settings.enableComboColors[5];
-            _optionBooflagCombo.color = _settings.comboColors[6];
-            _optionBooflagCombo.checked = _settings.enableComboColors[6];
-            _optionMissflagCombo.color = _settings.comboColors[7];
-            _optionMissflagCombo.checked = _settings.enableComboColors[7];
+            _optionGameColor1.color = settings.gameColors[0];
+            _optionGameColor2.color = settings.gameColors[1];
+            _optionGameColor3.color = settings.gameColors[4];
 
-            _optionRawGoodTracker.text = _settings.rawGoodTracker.toString();
+            _optionNormalCombo.color = settings.comboColors[0];
+            _optionFCCombo.color = settings.comboColors[1];
+            _optionFCCombo.checked = settings.enableComboColors[1];
+            _optionAAACombo.color = settings.comboColors[2];
+            _optionAAACombo.checked = settings.enableComboColors[2];
+            _optionSDGCombo.color = settings.comboColors[3];
+            _optionSDGCombo.checked = settings.enableComboColors[3];
+            _optionBlackflagCombo.color = settings.comboColors[4];
+            _optionBlackflagCombo.checked = settings.enableComboColors[4];
+            _optionAvflagCombo.color = settings.comboColors[5];
+            _optionAvflagCombo.checked = settings.enableComboColors[5];
+            _optionBooflagCombo.color = settings.comboColors[6];
+            _optionBooflagCombo.checked = settings.enableComboColors[6];
+            _optionMissflagCombo.color = settings.comboColors[7];
+            _optionMissflagCombo.checked = settings.enableComboColors[7];
+
+            _optionRawGoodTracker.text = settings.rawGoodTracker.toString();
         }
 
         private function onAmazingJudgeColorChanged(e:Event):void
         {
-            _settings.judgeColors[0] = changeColor(e, _optionAmazingJudge);
+            dispatchEvent(new SetJudgeColorEvent(0, getSelectedJudgeColor(e, _optionAmazingJudge)));
         }
 
         private function onAmazingJudgeColorReset():void
         {
-            _settings.judgeColors[0] = _defaultSettings.judgeColors[0];
-            setValues();
+            dispatchEvent(new SetJudgeColorEvent(0, _defaultSettings.judgeColors[0]));
+            _optionAmazingJudge.color = _defaultSettings.judgeColors[0];
         }
 
         private function onPerfectJudgeColorChanged(e:Event):void
         {
-            _settings.judgeColors[1] = changeColor(e, _optionPerfectJudge);
+            dispatchEvent(new SetJudgeColorEvent(1, getSelectedJudgeColor(e, _optionPerfectJudge)));
         }
 
         private function onPerfectJudgeColorReset():void
         {
-            _settings.judgeColors[1] = _defaultSettings.judgeColors[1];
-            setValues();
+            dispatchEvent(new SetJudgeColorEvent(1, _defaultSettings.judgeColors[1]));
+            _optionAmazingJudge.color = _defaultSettings.judgeColors[1];
         }
 
         private function onGoodJudgeColorChanged(e:Event):void
         {
-            _settings.judgeColors[2] = changeColor(e, _optionGoodJudge);
+            dispatchEvent(new SetJudgeColorEvent(2, getSelectedJudgeColor(e, _optionGoodJudge)));
         }
 
         private function onGoodJudgeColorReset():void
         {
-            _settings.judgeColors[2] = _defaultSettings.judgeColors[2];
-            setValues();
+            dispatchEvent(new SetJudgeColorEvent(2, _defaultSettings.judgeColors[2]));
+            _optionAmazingJudge.color = _defaultSettings.judgeColors[2];
         }
 
         private function onAverageJudgeColorChanged(e:Event):void
         {
-            _settings.judgeColors[3] = changeColor(e, _optionAverageJudge);
+            dispatchEvent(new SetJudgeColorEvent(3, getSelectedJudgeColor(e, _optionAverageJudge)));
         }
 
         private function onAverageJudgeColorReset():void
         {
-            _settings.judgeColors[3] = _defaultSettings.judgeColors[3];
-            setValues();
+            dispatchEvent(new SetJudgeColorEvent(3, _defaultSettings.judgeColors[3]));
+            _optionAmazingJudge.color = _defaultSettings.judgeColors[3];
         }
 
         private function onMissJudgeColorChanged(e:Event):void
         {
-            _settings.judgeColors[4] = changeColor(e, _optionMissJudge);
+            dispatchEvent(new SetJudgeColorEvent(4, getSelectedJudgeColor(e, _optionMissJudge)));
         }
 
         private function onMissJudgeColorReset():void
         {
-            _settings.judgeColors[4] = _defaultSettings.judgeColors[4];
-            setValues();
+            dispatchEvent(new SetJudgeColorEvent(4, _defaultSettings.judgeColors[4]));
+            _optionAmazingJudge.color = _defaultSettings.judgeColors[4];
         }
 
         private function onBooJudgeColorChanged(e:Event):void
         {
-            _settings.judgeColors[5] = changeColor(e, _optionBooJudge);
+            dispatchEvent(new SetJudgeColorEvent(5, getSelectedJudgeColor(e, _optionBooJudge)));
         }
 
         private function onBooJudgeColorReset():void
         {
-            _settings.judgeColors[5] = _defaultSettings.judgeColors[5];
-            setValues();
+            dispatchEvent(new SetJudgeColorEvent(5, _defaultSettings.judgeColors[5]));
+            _optionAmazingJudge.color = _defaultSettings.judgeColors[5];
         }
 
         private function onGameAColorChanged(e:Event):void
         {
-            const newColor:int = changeColor(e, _optionGameColor1);
-            _settings.gameColors[0] = newColor;
-            _settings.gameColors[2] = ColorUtil.darkenColor(newColor, 0.27);
+            const newColor:int = getSelectedJudgeColor(e, _optionGameColor1);
+            dispatchEvent(new SetGameAColorEvent(newColor));
         }
 
         private function onGameAColorReset():void
         {
-            _settings.gameColors[0] = _defaultSettings.gameColors[0];
-            _settings.gameColors[2] = ColorUtil.darkenColor(_defaultSettings.gameColors[0], 0.27);
-            setValues();
+            dispatchEvent(new SetGameAColorEvent(_defaultSettings.gameColors[0]));
+        }
+
+        private function updateGameAColorUI():void
+        {
+            _optionGameColor1.color = AppState.instance.auth.user.settings.gameColors[0];
         }
 
         private function onGameBColorChanged(e:Event):void
         {
-            const newColor:int = changeColor(e, _optionGameColor2);
-            _settings.gameColors[1] = newColor;
-            _settings.gameColors[3] = ColorUtil.darkenColor(newColor, 0.08);
+            const newColor:int = getSelectedJudgeColor(e, _optionGameColor2);
+            dispatchEvent(new SetGameBColorEvent(newColor));
         }
 
         private function onGameBColorReset():void
         {
-            _settings.gameColors[0] = _defaultSettings.gameColors[0];
-            _settings.gameColors[3] = ColorUtil.brightenColor(_defaultSettings.gameColors[1], 0.08);
-            setValues();
+            dispatchEvent(new SetGameBColorEvent(_defaultSettings.gameColors[1]));
+        }
+
+        private function updateGameBColorUI():void
+        {
+            _optionGameColor2.color = AppState.instance.auth.user.settings.gameColors[1];
         }
 
         private function onGameCColorChanged(e:Event):void
         {
-            _settings.gameColors[4] = changeColor(e, _optionGameColor3);
+            const newColor:int = getSelectedJudgeColor(e, _optionGameColor3);
+            dispatchEvent(new SetGameCColorEvent(newColor));
         }
 
         private function onGameCColorReset():void
         {
-            _settings.gameColors[4] = _defaultSettings.gameColors[4];
-            setValues();
+            dispatchEvent(new SetGameCColorEvent(_defaultSettings.gameColors[4]));
+        }
+
+        private function updateGameCColorUI():void
+        {
+            _optionGameColor3.color = AppState.instance.auth.user.settings.gameColors[4];
         }
 
         private function onNormalComboColorChanged(e:Event):void
         {
-            _settings.comboColors[0] = changeColor(e, _optionNormalCombo);
+            dispatchEvent(new SetNormalComboColorEvent(getSelectedJudgeColor(e, _optionNormalCombo)));
         }
 
         private function onNormalComboColorReset():void
         {
-            _settings.comboColors[0] = _defaultSettings.comboColors[0];
-            setValues();
+            dispatchEvent(new SetNormalComboColorEvent(_defaultSettings.comboColors[0]));
+            _optionNormalCombo.color = _defaultSettings.comboColors[0];
         }
 
         private function onFCComboColorChanged(e:Event):void
         {
-            _settings.comboColors[1] = changeColor(e, _optionFCCombo);
+            dispatchEvent(new SetFCComboColorEvent(getSelectedJudgeColor(e, _optionFCCombo)));
         }
 
         private function onFCComboColorReset():void
         {
-            _settings.comboColors[1] = _defaultSettings.comboColors[1];
-            setValues();
+            dispatchEvent(new SetFCComboColorEvent(_defaultSettings.comboColors[1]));
+            _optionFCCombo.color = _defaultSettings.comboColors[1];
         }
 
         private function onFCComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[1] = !_settings.enableComboColors[1];
+            dispatchEvent(new ToggleFCComboColorEvent());
         }
 
         private function onAAAComboColorChanged(e:Event):void
         {
-            _settings.comboColors[2] = changeColor(e, _optionAAACombo);
+            dispatchEvent(new SetAAAComboColorEvent(getSelectedJudgeColor(e, _optionAAACombo)));
         }
 
         private function onAAAComboColorReset():void
         {
-            _settings.comboColors[2] = _defaultSettings.comboColors[2];
-            setValues();
+            dispatchEvent(new SetAAAComboColorEvent(_defaultSettings.comboColors[2]));
+            _optionAAACombo.color = _defaultSettings.comboColors[2];
         }
 
         private function onAAAComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[2] = !_settings.enableComboColors[2];
+            dispatchEvent(new ToggleAAAComboColorEvent());
         }
 
         private function onSDGComboColorChanged(e:Event):void
         {
-            _settings.comboColors[3] = changeColor(e, _optionSDGCombo);
+            dispatchEvent(new SetSDGComboColorEvent(getSelectedJudgeColor(e, _optionSDGCombo)));
         }
 
         private function onSDGComboColorReset():void
         {
-            _settings.comboColors[3] = _defaultSettings.comboColors[2];
-            setValues();
+            dispatchEvent(new SetSDGComboColorEvent(_defaultSettings.comboColors[3]));
+            _optionSDGCombo.color = _defaultSettings.comboColors[3];
         }
 
         private function onSDGComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[2] = !_settings.enableComboColors[2];
+            dispatchEvent(new ToggleSDGComboColorEvent());
         }
 
         private function onBlackflagComboColorChanged(e:Event):void
         {
-            _settings.comboColors[4] = changeColor(e, _optionBlackflagCombo);
+            dispatchEvent(new SetBlackflagComboColorEvent(getSelectedJudgeColor(e, _optionBlackflagCombo)));
         }
 
         private function onBlackflagComboColorReset():void
         {
-            _settings.comboColors[4] = _defaultSettings.comboColors[4];
-            setValues();
+            dispatchEvent(new SetBlackflagComboColorEvent(_defaultSettings.comboColors[4]));
+            _optionBlackflagCombo.color = _defaultSettings.comboColors[4];
         }
 
         private function onBlackflagComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[4] = !_settings.enableComboColors[4];
+            dispatchEvent(new ToggleBlackflagComboColorEvent());
         }
 
         private function onAvflagComboColorChanged(e:Event):void
         {
-            _settings.comboColors[5] = changeColor(e, _optionAvflagCombo);
+            dispatchEvent(new SetAvflagComboColorEvent(getSelectedJudgeColor(e, _optionAvflagCombo)));
         }
 
         private function onAvflagComboColorReset():void
         {
-            _settings.comboColors[5] = _defaultSettings.comboColors[5];
-            setValues();
+            dispatchEvent(new SetAvflagComboColorEvent(_defaultSettings.comboColors[5]));
+            _optionAvflagCombo.color = _defaultSettings.comboColors[5];
         }
 
         private function onAvflagComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[5] = !_settings.enableComboColors[5];
+            dispatchEvent(new ToggleAvflagComboColorEvent());
         }
 
         private function onBooflagComboColorChanged(e:Event):void
         {
-            _settings.comboColors[6] = changeColor(e, _optionBooflagCombo);
+            dispatchEvent(new SetBooflagComboColorEvent(getSelectedJudgeColor(e, _optionBooflagCombo)));
         }
 
         private function onBooflagComboColorReset():void
         {
-            _settings.comboColors[6] = _defaultSettings.comboColors[6];
-            setValues();
+            dispatchEvent(new SetBooflagComboColorEvent(_defaultSettings.comboColors[6]));
+            _optionBooflagCombo.color = _defaultSettings.comboColors[6];
         }
 
         private function onBooflagComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[6] = !_settings.enableComboColors[6];
+            dispatchEvent(new ToggleBooflagComboColorEvent());
         }
 
         private function onMissflagComboColorChanged(e:Event):void
         {
-            _settings.comboColors[4] = changeColor(e, _optionMissflagCombo);
+            dispatchEvent(new SetMissflagComboColorEvent(getSelectedJudgeColor(e, _optionMissflagCombo)));
         }
 
         private function onMissflagComboColorReset():void
         {
-            _settings.comboColors[7] = _defaultSettings.comboColors[7];
-            setValues();
+            dispatchEvent(new SetMissflagComboColorEvent(_defaultSettings.comboColors[7]));
+            _optionMissflagCombo.color = _defaultSettings.comboColors[7];
         }
 
         private function onMissflagComboColorEnabled(e:Event):void
         {
-            _settings.enableComboColors[7] = !_settings.enableComboColors[7];
+            dispatchEvent(new ToggleMissflagComboColorEvent());
         }
 
         public function onRawGoodsTrackerChanged(e:Event):void
         {
-            _settings.rawGoodTracker = _optionRawGoodTracker.validate(0, 0);
+            dispatchEvent(new SetRawGoodTrackerEvent(_optionRawGoodTracker.validate(0, 0)));
         }
     }
 }

@@ -213,6 +213,7 @@ package popups.settings
             changeTab((e.currentTarget as TabButton).index);
         }
 
+        // TODO: React to event from controller when an update needs this check done
         public function checkValidMods():void
         {
             _txtModWarning.visible = !(new GameMods(AppState.instance.auth.user.settings).isScoringCompatible);

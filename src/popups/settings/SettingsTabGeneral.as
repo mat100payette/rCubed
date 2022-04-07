@@ -15,13 +15,31 @@ package popups.settings
     import flash.events.MouseEvent;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
-    import events.state.SetMenuMusicVolumeEvent;
+    import events.actions.menu.SetMenuMusicVolumeEvent;
+    import events.actions.gameplay.SetSongRateEvent;
+    import events.actions.gameplay.ToggleMirrorEvent;
+    import events.actions.gameplay.SetScrollDirectionEvent;
+    import events.actions.gameplay.SetAutofailRawGoodsEvent;
+    import events.actions.gameplay.SetAutofailBooEvent;
+    import events.actions.gameplay.SetAutofailMissEvent;
+    import events.actions.gameplay.SetAutofailAverageEvent;
+    import events.actions.gameplay.SetAutofailGoodEvent;
+    import events.actions.gameplay.SetAutofailPerfectEvent;
+    import events.actions.gameplay.SetAutofailAmazingEvent;
+    import events.actions.gameplay.ToggleAutoJudgeOffsetEvent;
+    import events.actions.gameplay.SetJudgeOffsetEvent;
+    import events.actions.gameplay.SetGlobalOffsetEvent;
+    import events.actions.gameplay.SetNoteScaleEvent;
+    import events.actions.gameplay.SetReceptorGapEvent;
+    import events.actions.gameplay.SetScrollSpeedEvent;
+    import state.AppState;
+    import state.MenuState;
+    import events.actions.gameplay.AutoJudgeOffsetToggledEvent;
 
     public class SettingsTabGeneral extends SettingsTabBase
     {
         private static const SCROLL_DIRECTIONS:Array = ["up", "down", "left", "right", "split", "split_down", "plus"];
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
 
@@ -61,6 +79,8 @@ package popups.settings
         public function SettingsTabGeneral(settingsWindow:SettingsWindow):void
         {
             super(settingsWindow);
+
+            addEventListener(AutoJudgeOffsetToggledEvent.EVENT_TYPE, updateJudgeOffsetUI);
         }
 
         override public function get name():String
@@ -225,39 +245,42 @@ package popups.settings
 
         override public function setValues():void
         {
-            _optionScrollSpeed.text = _settings.scrollSpeed.toString();
-            _optionReceptorSpacing.text = _settings.receptorGap.toString();
+            var settings:UserSettings = AppState.instance.auth.user.settings;
+            var menuState:MenuState = AppState.instance.menu;
 
-            _optionNoteScale.slideValue = _settings.noteScale;
+            _optionScrollSpeed.text = settings.scrollSpeed.toString();
+            _optionReceptorSpacing.text = settings.receptorGap.toString();
 
-            _optionGameVolume.slideValue = _settings.gameVolume;
-            _optionMenuVolume.slideValue = _gvars.menuMusicSoundVolume;
+            _optionNoteScale.slideValue = settings.noteScale;
 
-            _optionGlobalOffset.text = _settings.globalOffset.toString();
-            _optionJudgeOffset.text = _settings.judgeOffset.toString();
-            _optionAutoJudgeOffset.text = _settings.autoJudgeOffset;
+            _optionGameVolume.slideValue = settings.gameVolume;
+            _optionMenuVolume.slideValue = menuState.menuMusicSoundVolume;
 
-            updateJudgeOffsetState();
+            _optionGlobalOffset.text = settings.globalOffset.toString();
+            _optionJudgeOffset.text = settings.judgeOffset.toString();
+            _optionAutoJudgeOffset.text = settings.autoJudgeOffset;
 
-            _optionAutofailAmazing.text = _settings.autofailAmazing.toString();
-            _optionAutofailPerfect.text = _settings.autofailPerfect.toString();
-            _optionAutofailGood.text = _settings.autofailGood.toString();
-            _optionAutofailAverage.text = _settings.autofailAverage.toString();
-            _optionAutofailMiss.text = _settings.autofailMiss.toString();
-            _optionAutofailBoo.text = _settings.autofailBoo.toString();
-            _optionAutofailRawGoods.text = _settings.autofailRawGoods.toString();
+            updateJudgeOffsetUI();
 
-            _optionScrollDirectionUp.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[0];
-            _optionScrollDirectionDown.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[1];
-            _optionScrollDirectionLeft.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[2];
-            _optionScrollDirectionRight.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[3];
-            _optionScrollDirectionSplit.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[4];
-            _optionScrollDirectionSplitDown.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[5];
-            _optionScrollDirectionPlus.checked = _settings.scrollDirection == SCROLL_DIRECTIONS[6];
+            _optionAutofailAmazing.text = settings.autofailAmazing.toString();
+            _optionAutofailPerfect.text = settings.autofailPerfect.toString();
+            _optionAutofailGood.text = settings.autofailGood.toString();
+            _optionAutofailAverage.text = settings.autofailAverage.toString();
+            _optionAutofailMiss.text = settings.autofailMiss.toString();
+            _optionAutofailBoo.text = settings.autofailBoo.toString();
+            _optionAutofailRawGoods.text = settings.autofailRawGoods.toString();
 
-            _optionMirrorMod.checked = _settings.activeVisualMods.indexOf("mirror") != -1;
+            _optionScrollDirectionUp.checked = settings.scrollDirection == SCROLL_DIRECTIONS[0];
+            _optionScrollDirectionDown.checked = settings.scrollDirection == SCROLL_DIRECTIONS[1];
+            _optionScrollDirectionLeft.checked = settings.scrollDirection == SCROLL_DIRECTIONS[2];
+            _optionScrollDirectionRight.checked = settings.scrollDirection == SCROLL_DIRECTIONS[3];
+            _optionScrollDirectionSplit.checked = settings.scrollDirection == SCROLL_DIRECTIONS[4];
+            _optionScrollDirectionSplitDown.checked = settings.scrollDirection == SCROLL_DIRECTIONS[5];
+            _optionScrollDirectionPlus.checked = settings.scrollDirection == SCROLL_DIRECTIONS[6];
 
-            _optionRate.text = _settings.songRate.toString();
+            _optionMirrorMod.checked = settings.activeVisualMods.indexOf("mirror") != -1;
+
+            _optionRate.text = settings.songRate.toString();
 
             _optionIsolation.text = (_avars.configIsolationStart + 1).toString();
             _optionIsolationTotal.text = _avars.configIsolationLength.toString();
@@ -270,12 +293,12 @@ package popups.settings
 
         private function onScrollSpeedChanged(e:Event):void
         {
-            _settings.scrollSpeed = _optionScrollSpeed.validate(1, 0.1);
+            dispatchEvent(new SetScrollSpeedEvent(_optionScrollSpeed.validate(1, 0.1)));
         }
 
         private function onReceptorGapChanged(e:Event):void
         {
-            _settings.receptorGap = _optionReceptorSpacing.validate(80);
+            dispatchEvent(new SetReceptorGapEvent(_optionReceptorSpacing.validate(80)));
         }
 
         private function onNoteScaleChanged(e:Event):void
@@ -288,12 +311,12 @@ package popups.settings
             if (snapValue == 1 || snapValue == snapTarget - 1)
                 sliderValue = Math.round(sliderValue / snapTarget) * snapTarget;
 
-            _settings.noteScale = sliderValue / 100;
+            dispatchEvent(new SetNoteScaleEvent(sliderValue / 100));
         }
 
         private function onGameVolumeChanged(e:Event):void
         {
-            _settings.gameVolume = _optionGameVolume.slideValue;
+            dispatchEvent(new SetGameVolumeEvent(_optionGameVolume.slideValue));
         }
 
         private function onMenuVolumeChanged(e:Event):void
@@ -305,59 +328,60 @@ package popups.settings
 
         private function onGlobalOffsetChanged(e:Event):void
         {
-            _settings.globalOffset = _optionGlobalOffset.validate(0);
+            dispatchEvent(new SetGlobalOffsetEvent(_optionGlobalOffset.validate(0)));
         }
 
         private function onJudgeOffsetChanged(e:Event):void
         {
-            _settings.judgeOffset = _optionJudgeOffset.validate(0);
+            dispatchEvent(new SetJudgeOffsetEvent(_optionJudgeOffset.validate(0)));
         }
 
         private function onAutoJudgeOffsetChanged(e:Event):void
         {
-            _settings.autoJudgeOffset = !_settings.autoJudgeOffset;
-            updateJudgeOffsetState();
+            dispatchEvent(new ToggleAutoJudgeOffsetEvent());
         }
 
-        private function updateJudgeOffsetState():void
+        private function updateJudgeOffsetUI():void
         {
-            _optionJudgeOffset.selectable = !_settings.autoJudgeOffset;
-            _optionJudgeOffset.alpha = _settings.autoJudgeOffset ? 0.55 : 1.0;
+            var autoJudgeOffset:Boolean = AppState.instance.auth.user.settings.autoJudgeOffset;
+
+            _optionJudgeOffset.selectable = !autoJudgeOffset;
+            _optionJudgeOffset.alpha = autoJudgeOffset ? 0.55 : 1.0;
         }
 
         private function onAutofailAmazingChanged(e:Event):void
         {
-            _settings.autofailAmazing = _optionAutofailAmazing.validate(0, 0);
+            dispatchEvent(new SetAutofailAmazingEvent(_optionAutofailAmazing.validate(0, 0)));
         }
 
         private function onAutofailPerfectChanged(e:Event):void
         {
-            _settings.autofailPerfect = _optionAutofailPerfect.validate(0, 0);
+            dispatchEvent(new SetAutofailPerfectEvent(_optionAutofailPerfect.validate(0, 0)));
         }
 
         private function onAutofailGoodChanged(e:Event):void
         {
-            _settings.autofailGood = _optionAutofailGood.validate(0, 0);
+            dispatchEvent(new SetAutofailGoodEvent(_optionAutofailGood.validate(0, 0)));
         }
 
         private function onAutofailAverageChanged(e:Event):void
         {
-            _settings.autofailAverage = _optionAutofailAverage.validate(0, 0);
+            dispatchEvent(new SetAutofailAverageEvent(_optionAutofailAverage.validate(0, 0)));
         }
 
         private function onAutofailMissChanged(e:Event):void
         {
-            _settings.autofailMiss = _optionAutofailMiss.validate(0, 0);
+            dispatchEvent(new SetAutofailMissEvent(_optionAutofailMiss.validate(0, 0)));
         }
 
         private function onAutofailBooChanged(e:Event):void
         {
-            _settings.autofailBoo = _optionAutofailBoo.validate(0, 0);
+            dispatchEvent(new SetAutofailBooEvent(_optionAutofailBoo.validate(0, 0)));
         }
 
         private function onAutofailRawGoodsChanged(e:Event):void
         {
-            _settings.autofailRawGoods = _optionAutofailRawGoods.validate(0, 0);
+            dispatchEvent(new SetAutofailRawGoodsEvent(_optionAutofailRawGoods.validate(0, 0)));
         }
 
         private function onScrollDirectionChanged(e:Event):void
@@ -370,38 +394,36 @@ package popups.settings
 
             // TODO: This badly needs radiobuttons
             if (e.target == _optionScrollDirectionUp)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[0];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[0]));
             else if (e.target == _optionScrollDirectionDown)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[1];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[1]));
             else if (e.target == _optionScrollDirectionLeft)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[2];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[2]));
             else if (e.target == _optionScrollDirectionRight)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[3];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[3]));
             else if (e.target == _optionScrollDirectionSplit)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[4];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[4]));
             else if (e.target == _optionScrollDirectionSplitDown)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[5];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[5]));
             else if (e.target == _optionScrollDirectionPlus)
-                _settings.scrollDirection = SCROLL_DIRECTIONS[6];
+                dispatchEvent(new SetScrollDirectionEvent(SCROLL_DIRECTIONS[6]));
         }
 
         private function onMirrorChanged(e:Event):void
         {
-            if (_settings.activeVisualMods.indexOf("mirror") != -1)
-                ArrayUtil.removeValue("mirror", _settings.activeVisualMods);
-            else
-                _settings.activeVisualMods.push("mirror");
+            dispatchEvent(new ToggleMirrorEvent());
         }
 
         private function onSongRateChanged(e:Event):void
         {
-            _settings.songRate = _optionRate.validate(1, 0.1);
+            dispatchEvent(new SetSongRateEvent(_optionRate.validate(1, 0.1)));
 
             _parent.checkValidMods();
         }
 
         private function onIsolationStartChanged(e:Event):void
         {
+            // TODO: destroy avars...
             _avars.configIsolationStart = _optionIsolation.validate(1, 1) - 1;
             _avars.configIsolation = _avars.configIsolationStart > 0 || _avars.configIsolationLength > 0;
 
@@ -420,11 +442,13 @@ package popups.settings
         {
             const judgeMenu:ContextMenu = new ContextMenu();
             const judgeItem:ContextMenuItem = new ContextMenuItem("Custom Judge Windows");
+
             judgeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void
             {
                 new Prompt(parent, 320, "Judge Window", 100, "SUBMIT", onCustomJudgeWindowSubmit);
             });
             judgeMenu.customItems.push(judgeItem);
+
             return judgeMenu;
         }
 

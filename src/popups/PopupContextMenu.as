@@ -13,6 +13,8 @@ package popups
     import events.navigation.popups.RemovePopupEvent;
     import flash.events.Event;
     import events.actions.air.TakeScreenshotEvent;
+    import events.actions.content.ReloadEngineEvent;
+    import events.actions.auth.LogoutEvent;
 
     public class PopupContextMenu extends DisplayLayer
     {
@@ -21,7 +23,6 @@ package popups
             private static var redrawBoolean:Boolean = false;
         }
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         //- Background
@@ -116,7 +117,6 @@ package popups
                 }
             }
 
-            //- Close
             if (e.target.action == "fullscreen")
             {
                 _gvars.toggleFullScreen();

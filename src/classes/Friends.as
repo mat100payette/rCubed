@@ -8,6 +8,7 @@ package classes
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
     import flash.net.URLVariables;
+    import state.AppState;
 
     public class Friends extends EventDispatcher
     {
@@ -15,7 +16,6 @@ package classes
         private static var _instance:Friends = null;
 
         ///- Private Locals
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _loader:URLLoader;
         private var _isLoaded:Boolean = false;
         private var _isLoading:Boolean = false;
@@ -67,7 +67,7 @@ package classes
             var req:URLRequest = new URLRequest(Constant.USER_FRIENDS_URL + "?d=" + new Date().getTime());
             var requestVars:URLVariables = new URLVariables();
             Constant.addDefaultRequestVariables(requestVars);
-            requestVars.session = _gvars.userSession;
+            requestVars.session = AppState.instance.auth.userSession;
             req.data = requestVars;
             req.method = URLRequestMethod.POST;
             _loader.load(req);

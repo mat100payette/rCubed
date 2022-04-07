@@ -14,7 +14,6 @@ package popups
 
     public class FilterItemButton extends Box
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         private var updater:PopupFilterManager;

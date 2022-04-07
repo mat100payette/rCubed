@@ -21,7 +21,6 @@ package popups
 
     public class PopupHighscores extends DisplayLayer
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         //- Background
@@ -192,7 +191,7 @@ package popups
                     box.addChild(throbber);
                 throbber.start();
 
-                _gvars.addEventListener(GlobalVariables.HIGHSCORES_LOAD_COMPLETE, highscoresLoaded);
+                _gvars.addEventListener(Constant.HIGHSCORES_LOAD_COMPLETE, highscoresLoaded);
                 _gvars.loadHighscores(songInfo.level, page * 10);
             }
             pageText.text = sprintf(_lang.string("popup_highscores_page_number"), {"page": page + 1});
@@ -205,7 +204,7 @@ package popups
 
         private function highscoresLoaded(e:DataEvent):void
         {
-            _gvars.removeEventListener(GlobalVariables.HIGHSCORES_LOAD_COMPLETE, highscoresLoaded);
+            _gvars.removeEventListener(Constant.HIGHSCORES_LOAD_COMPLETE, highscoresLoaded);
             if (e.data.error == null)
             {
                 var newEntriesCount:uint = ObjectUtil.count(e.data);

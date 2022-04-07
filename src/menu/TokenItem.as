@@ -28,9 +28,9 @@ package menu
 
         private var _lang:Language = Language.instance;
 
-        public function TokenItem(token_data:Object):void
+        public function TokenItem(tokenData:Object):void
         {
-            this.token_info = token_data;
+            this.token_info = tokenData;
             this.buttonMode = true;
             this.mouseChildren = false;
             this.useHandCursor = true;

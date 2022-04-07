@@ -9,20 +9,27 @@ package popups.settings
     import classes.ui.BoxButton;
     import classes.ui.BoxCheck;
     import classes.ui.BoxIcon;
+    import classes.ui.NoteColorComboBoxItem;
+    import classes.ui.NoteColorOption;
+    import classes.ui.NoteskinCheckOption;
     import classes.ui.Prompt;
     import classes.ui.Text;
-    import classes.ui.NoteColorOption;
-    import classes.ui.NoteColorComboBoxItem;
     import com.bit101.components.ComboBox;
-    import com.flashfla.utils.VectorUtil;
     import com.flashfla.utils.SystemUtil;
+    import com.flashfla.utils.VectorUtil;
+    import events.actions.gameplay.CustomNoteskinToggledEvent;
+    import events.actions.gameplay.NoteColorChangedEvent;
+    import events.actions.gameplay.NoteskinIdChangedEvent;
+    import events.actions.gameplay.SetNoteskinIdEvent;
+    import events.actions.gameplay.ToggleCustomNoteskinEvent;
+    import events.actions.gameplay.colors.SetNoteColorEvent;
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     import flash.text.TextFormatAlign;
     import game.noteskins.ExternalNoteskin;
-    import classes.ui.NoteskinCheckOption;
+    import state.AppState;
 
     public class SettingsTabNoteskin extends SettingsTabBase
     {
@@ -47,7 +54,11 @@ package popups.settings
         {
             super(settingsWindow);
 
-            _previousNoteskinId = _settings.noteskinId;
+            addEventListener(NoteskinIdChangedEvent.EVENT_TYPE, setValues);
+            addEventListener(NoteColorChangedEvent.EVENT_TYPE, updateNoteColorPreview);
+            addEventListener(CustomNoteskinToggledEvent.EVENT_TYPE, customNoteskinToggled);
+
+            _previousNoteskinId = AppState.instance.auth.user.settings.noteskinId;
 
             for (var i:int = 0; i < _defaultSettings.noteColors.length; i++)
             {
@@ -82,7 +93,7 @@ package popups.settings
             function addNoteskinColorOption(colorIndex:int):void
             {
                 const defaultColor:String = _defaultSettings.noteColors[colorIndex];
-                const currentColor:String = _settings.noteColors[colorIndex];
+                const currentColor:String = AppState.instance.auth.user.settings.noteColors[colorIndex];
                 const textLocalStringName:String = Lang.OPTIONS_NOTE_COLOR_PREFIX + defaultColor;
 
                 const noteDefaultColorSprite:Sprite = getNoteSprite(xOff + 11, yOff + 11, 22, defaultColor);
@@ -185,7 +196,7 @@ package popups.settings
 
         private function getNoteSprite(xOff:Number, yOff:Number, receptorSize:Number, color:String):Sprite
         {
-            const data:Object = _noteskinsList.getInfo(_settings.noteskinId);
+            const data:Object = _noteskinsList.getInfo(AppState.instance.auth.user.settings.noteskinId);
             const hasRotation:Boolean = (data.rotation != 0);
 
             const noteHolder:Sprite = new Sprite();
@@ -225,7 +236,7 @@ package popups.settings
             {
                 const noteColorOption:NoteColorOption = _noteColorOptions[i];
                 const defaultColor:String = _defaultSettings.noteColors[i];
-                const replacedColor:String = _settings.noteColors[i];
+                const replacedColor:String = AppState.instance.auth.user.settings.noteColors[i];
 
                 noteColorOption.defaultSprite = replaceNoteImage(noteColorOption.defaultSprite, 22, defaultColor);
                 noteColorOption.replacedSprite = replaceNoteImage(noteColorOption.replacedSprite, 22, replacedColor);
@@ -236,24 +247,25 @@ package popups.settings
 
         override public function setValues():void
         {
+            var settings:UserSettings = AppState.instance.auth.user.settings;
+
             // Set Noteskin
             for each (var checkOption:NoteskinCheckOption in _noteskinCheckOptions)
-                checkOption.checkbox.checked = (checkOption.noteskinId == _settings.noteskinId);
+                checkOption.checkbox.checked = (checkOption.noteskinId == settings.noteskinId);
 
             for (var i:int = 0; i < _defaultSettings.noteColors.length; i++)
-                (_noteColorOptions[i] as NoteColorOption).comboBox.selectedItemByData = _settings.noteColors[i];
+                (_noteColorOptions[i] as NoteColorOption).comboBox.selectedItemByData = settings.noteColors[i];
 
-            if (_previousNoteskinId != _settings.noteskinId)
+            if (_previousNoteskinId != settings.noteskinId)
             {
-                _previousNoteskinId = _settings.noteskinId;
+                _previousNoteskinId = settings.noteskinId;
                 updateNoteImages();
             }
         }
 
         private function onNoteskinChecked(noteskinId:int):void
         {
-            _settings.noteskinId = noteskinId;
-            setValues();
+            dispatchEvent(new SetNoteskinIdEvent(noteskinId));
         }
 
         private function onNoteskinComboRefresh(e:Event):void
@@ -274,7 +286,7 @@ package popups.settings
 
         private function onImportCustomNoteskinClicked(e:Event):void
         {
-            new Prompt(_parent, 320, _lang.string(Lang.OPTIONS_POPUP_NOTESKIN_IMPORT_JSON), 100, _lang.string(Lang.OPTIONS_POPUP_NOTESKIN_IMPORT), e_importNoteskin);
+            new Prompt(_parent, 320, _lang.string(Lang.OPTIONS_POPUP_NOTESKIN_IMPORT_JSON), 100, _lang.string(Lang.OPTIONS_POPUP_NOTESKIN_IMPORT), importNoteskin);
         }
 
         private function onExportCustomNoteskinClicked(e:Event):void
@@ -294,7 +306,14 @@ package popups.settings
         {
             const noteColorOption:NoteColorOption = _noteColorOptions[colorIndex];
 
-            _settings.noteColors[colorIndex] = newColor;
+            dispatchEvent(new SetNoteColorEvent(colorIndex, newColor));
+        }
+
+        private function updateNoteColorPreview(colorIndex:int):void
+        {
+            const noteColorOption:NoteColorOption = _noteColorOptions[colorIndex];
+            const newColor:String = AppState.instance.auth.user.settings.noteColors[colorIndex];
+
             noteColorOption.replacedSprite = replaceNoteImage(noteColorOption.replacedSprite, 22, newColor);
         }
 
@@ -372,18 +391,18 @@ package popups.settings
                 LocalStore.setVariable(NoteskinsList.CUSTOM_NOTESKIN_FILE, extNS.file);
             }
 
-            if (_settings.noteskinId != 0)
-            {
-                _settings.noteskinId = 0;
-                setValues();
-            }
-
-            _noteskinsList.loadCustomNoteskin();
-            _parent.addEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
+            dispatchEvent(new ToggleCustomNoteskinEvent());
         }
 
+        private function customNoteskinToggled():void
+        {
+            setValues();
 
-        private function e_importNoteskin(noteskinJSON:String):void
+            _noteskinsList.loadCustomNoteskin();
+            _parent.addEventListener(Event.ENTER_FRAME, onDelayCustomUpdated);
+        }
+
+        private function importNoteskin(noteskinJSON:String):void
         {
             try
             {
@@ -398,25 +417,25 @@ package popups.settings
 
                 Alert.add(_lang.string(Lang.OPTIONS_POPUP_NOTESKIN_SAVED), 90, Alert.GREEN);
 
-                _parent.addEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
+                _parent.addEventListener(Event.ENTER_FRAME, onDelayCustomUpdated);
             }
             catch (e:Error)
             {
             }
         }
 
-        private function e_delayCustomUpdate(e:Event):void
+        private function onDelayCustomUpdated(e:Event):void
         {
             // reload images, custom noteskins are async loaded so we just check for them to load
-            if (_settings.noteskinId == 0)
-            {
-                if (_noteskinsList.getNoteskin(0).notes["blue"] != null)
-                {
-                    _parent.removeEventListener(Event.ENTER_FRAME, e_delayCustomUpdate);
-                    if (_parent != null && _parent.stage != null)
-                        updateNoteImages();
-                }
-            }
+            if (AppState.instance.auth.user.settings.noteskinId != 0)
+                return;
+
+            if (_noteskinsList.getNoteskin(0).notes["blue"] == null)
+                return;
+
+            _parent.removeEventListener(Event.ENTER_FRAME, onDelayCustomUpdated);
+            if (_parent != null && _parent.stage != null)
+                updateNoteImages();
         }
 
         private function noteskinsString():String

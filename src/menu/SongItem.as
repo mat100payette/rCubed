@@ -267,7 +267,7 @@ package menu
         {
             _songInfo = songInfo;
             _level = songInfo.level;
-            isLocked = !(!songInfo.access || songInfo.access == GlobalVariables.SONG_ACCESS_PLAYABLE);
+            isLocked = !(!songInfo.access || songInfo.access == SongInfo.SONG_ACCESS_PLAYABLE);
 
             // Song Details
             _songUserInfo = SQLQueries.getSongUserInfo(songInfo);
@@ -284,7 +284,7 @@ package menu
             // Locked Song Item, basically anything but playable songs.
             if (isLocked)
             {
-                this.mouseChildren = (songInfo.access == GlobalVariables.SONG_ACCESS_TOKEN);
+                this.mouseChildren = (songInfo.access == SongInfo.SONG_ACCESS_TOKEN);
 
                 var _message:String = getSongLockText();
 
@@ -320,7 +320,7 @@ package menu
                 _lblSongDifficulty.setAreaParams(30, 27, TextFormatAlign.CENTER);
 
                 // Song Flag
-                var FLAG_TEXT:String = GlobalVariables.getSongIcon(_songInfo, rank);
+                var FLAG_TEXT:String = SongInfo.getSongIcon(_songInfo, rank);
                 if (FLAG_TEXT != "" && GlobalVariables.instance.activeUser.settings.displaySongFlag)
                 {
                     _lblSongFlag = new Text(this, 296, 0, FLAG_TEXT, 14);
@@ -353,26 +353,25 @@ package menu
         public function getSongLockText():String
         {
             // Get them here to reduce instance loading, as only locked songs call this.
-            var _gvars:GlobalVariables = GlobalVariables.instance;
             var _lang:Language = Language.instance;
 
             switch (songInfo.access)
             {
-                case GlobalVariables.SONG_ACCESS_CREDITS:
+                case SongInfo.SONG_ACCESS_CREDITS:
                     return sprintf(_lang.string("song_selection_banned_credits"), {"more_needed": NumberUtil.numberFormat(songInfo.credits - _gvars.activeUser.credits),
                             "user_credits": NumberUtil.numberFormat(_gvars.activeUser.credits),
                             "song_price": NumberUtil.numberFormat(songInfo.credits)});
 
-                case GlobalVariables.SONG_ACCESS_PURCHASED:
+                case SongInfo.SONG_ACCESS_PURCHASED:
                     return sprintf(_lang.string("song_selection_banned_purchased"), {"song_price": NumberUtil.numberFormat(songInfo.price)});
 
-                case GlobalVariables.SONG_ACCESS_VETERAN:
+                case SongInfo.SONG_ACCESS_VETERAN:
                     return _lang.string("song_selection_banned_veteran");
 
-                case GlobalVariables.SONG_ACCESS_TOKEN:
+                case SongInfo.SONG_ACCESS_TOKEN:
                     return _gvars.TOKENS[songInfo.level].info;
 
-                case GlobalVariables.SONG_ACCESS_BANNED:
+                case SongInfo.SONG_ACCESS_BANNED:
                     return _lang.string("song_selection_banned_invalid");
             }
             return sprintf(_lang.string("song_selection_banned_unknown"), {"access": songInfo.access});

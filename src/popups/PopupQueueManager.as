@@ -25,9 +25,7 @@ package popups
         private const TAB_MAIN:int = 0;
         private const TAB_PREGEN:int = 1;
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
-        private var _playlist:Playlist = Playlist.instanceCanon;
 
         private var CURRENT_TAB:int = TAB_MAIN;
 
@@ -274,9 +272,7 @@ import classes.SongInfo;
 
 internal class QueueBox extends Sprite
 {
-    private var _gvars:GlobalVariables = GlobalVariables.instance;
     private var _lang:Language = Language.instance;
-    private var _playlist:Playlist = Playlist.instanceCanon;
 
     //- Song Details
     public var box:Box;

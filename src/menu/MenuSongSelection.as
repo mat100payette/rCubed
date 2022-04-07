@@ -1933,7 +1933,7 @@ package menu
                 {
                     var randomList:Array = songList.filter(function(item:SongInfo, index:int, array:Array):Boolean
                     {
-                        return (_gvars.activeFilter ? _gvars.activeFilter.process(item, _gvars.activeUser) : true) && _gvars.checkSongAccess(item) == GlobalVariables.SONG_ACCESS_PLAYABLE;
+                        return (_gvars.activeFilter ? _gvars.activeFilter.process(item, _gvars.activeUser) : true) && _gvars.checkSongAccess(item) == SongInfo.SONG_ACCESS_PLAYABLE;
                     });
                     if (randomList.length > 0)
                     {

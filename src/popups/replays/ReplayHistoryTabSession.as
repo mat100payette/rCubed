@@ -64,8 +64,10 @@ package popups.replays
         {
             var r:Replay = new Replay(new Date().getTime());
             r.parseEncode(replayString);
+
             if (r.isEdited)
                 Alert.add(_lang.string("popup_replay_import_edited"), 180);
+
             if (r.isValid())
             {
                 r.loadSongInfo();

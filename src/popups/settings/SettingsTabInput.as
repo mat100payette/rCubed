@@ -6,11 +6,20 @@ package popups.settings
     import classes.ui.BoxText;
     import classes.ui.Text;
     import com.flashfla.utils.StringUtil;
+    import events.actions.gameplay.input.SetKeyDownEvent;
+    import events.actions.gameplay.input.SetKeyLeftEvent;
+    import events.actions.gameplay.input.SetKeyOptionsEvent;
+    import events.actions.gameplay.input.SetKeyQuitEvent;
+    import events.actions.gameplay.input.SetKeyRestartEvent;
+    import events.actions.gameplay.input.SetKeyRightEvent;
+    import events.actions.gameplay.input.SetKeyUpEvent;
     import flash.display.MovieClip;
     import flash.events.KeyboardEvent;
     import flash.events.MouseEvent;
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFormatAlign;
+
+    import state.AppState;
 
     public class SettingsTabInput extends SettingsTabBase
     {
@@ -116,7 +125,8 @@ package popups.settings
             const INPUT_WIDTH:int = 60;
             const RECEPTOR_SIZE:Number = 38;
 
-            const noteskinData:Object = _noteskins.getInfo(_settings.noteskinId);
+            // TODO: Possibly have this be reloadable
+            const noteskinData:Object = _noteskins.getInfo(AppState.instance.auth.user.settings.noteskinId);
             // This is true if the current noteskin isn't symmetric
             const hasRotation:Boolean = (noteskinData.rotation != 0);
 
@@ -164,21 +174,25 @@ package popups.settings
 
         override public function setValues():void
         {
-            _optionLeftReceptor.text = StringUtil.keyCodeChar(_settings.keyLeft);
-            _optionDownReceptor.text = StringUtil.keyCodeChar(_settings.keyDown);
-            _optionUpReceptor.text = StringUtil.keyCodeChar(_settings.keyUp);
-            _optionRightReceptor.text = StringUtil.keyCodeChar(_settings.keyRight);
+            var settings:UserSettings = AppState.instance.auth.user.settings;
 
-            _optionRestartKey.text = StringUtil.keyCodeChar(_settings.keyRestart);
-            _optionQuitKey.text = StringUtil.keyCodeChar(_settings.keyQuit);
-            _optionOptionsKey.text = StringUtil.keyCodeChar(_settings.keyOptions);
+            _optionLeftReceptor.text = StringUtil.keyCodeChar(settings.keyLeft);
+            _optionDownReceptor.text = StringUtil.keyCodeChar(settings.keyDown);
+            _optionUpReceptor.text = StringUtil.keyCodeChar(settings.keyUp);
+            _optionRightReceptor.text = StringUtil.keyCodeChar(settings.keyRight);
+
+            _optionRestartKey.text = StringUtil.keyCodeChar(settings.keyRestart);
+            _optionQuitKey.text = StringUtil.keyCodeChar(settings.keyQuit);
+            _optionOptionsKey.text = StringUtil.keyCodeChar(settings.keyOptions);
         }
 
         public function onKeySetterClick(e:MouseEvent, onKeyPicked:Function):void
         {
             setValues();
+
             const textField:BoxText = e.target as BoxText;
             textField.htmlText = _lang.string(Lang.OPTIONS_KEY_PICK);
+
             _keyListenerTarget = textField;
             _onKeyPicked = onKeyPicked;
         }
@@ -239,37 +253,37 @@ package popups.settings
 
         private function setKeyLeft(keyCode:uint):void
         {
-            _settings.keyLeft = keyCode;
+            dispatchEvent(new SetKeyLeftEvent(keyCode));
         }
 
         private function setKeyDown(keyCode:uint):void
         {
-            _settings.keyDown = keyCode;
+            dispatchEvent(new SetKeyDownEvent(keyCode));
         }
 
         private function setKeyUp(keyCode:uint):void
         {
-            _settings.keyUp = keyCode;
+            dispatchEvent(new SetKeyUpEvent(keyCode));
         }
 
         private function setKeyRight(keyCode:uint):void
         {
-            _settings.keyRight = keyCode;
+            dispatchEvent(new SetKeyRightEvent(keyCode));
         }
 
         private function setKeyRestart(keyCode:uint):void
         {
-            _settings.keyRestart = keyCode;
+            dispatchEvent(new SetKeyRestartEvent(keyCode));
         }
 
         private function setKeyQuit(keyCode:uint):void
         {
-            _settings.keyQuit = keyCode;
+            dispatchEvent(new SetKeyQuitEvent(keyCode));
         }
 
         private function setKeyOptions(keyCode:uint):void
         {
-            _settings.keyOptions = keyCode;
+            dispatchEvent(new SetKeyOptionsEvent(keyCode));
         }
     }
 }

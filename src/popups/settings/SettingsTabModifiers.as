@@ -6,6 +6,9 @@ package popups.settings
     import classes.ui.Text;
     import com.flashfla.utils.ArrayUtil;
     import flash.events.Event;
+    import state.AppState;
+    import events.actions.gameplay.ToggleGameModEvent;
+    import events.actions.gameplay.ToggleVisualModEvent;
 
     public class SettingsTabModifiers extends SettingsTabBase
     {
@@ -114,46 +117,42 @@ package popups.settings
 
         override public function setValues():void
         {
-            // TODO: Refactor UserSettings to use well defined variables per mod
-            _optionHidden.checked = _settings.activeMods.indexOf("hidden") != -1;
-            _optionSudden.checked = _settings.activeMods.indexOf("sudden") != -1;
-            _optionBlink.checked = _settings.activeMods.indexOf("blink") != -1;
-            _optionRotating.checked = _settings.activeMods.indexOf("rotating") != -1;
-            _optionRotateCW.checked = _settings.activeMods.indexOf("rotate_cw") != -1;
-            _optionRotateCCW.checked = _settings.activeMods.indexOf("rotate_ccw") != -1;
-            _optionWave.checked = _settings.activeMods.indexOf("wave") != -1;
-            _optionDrunk.checked = _settings.activeMods.indexOf("drunk") != -1;
-            _optionTornado.checked = _settings.activeMods.indexOf("tornado") != -1;
-            _optionMiniResize.checked = _settings.activeMods.indexOf("mini_resize") != -1;
-            _optionTapPulse.checked = _settings.activeMods.indexOf("tap_pulse") != -1;
-            _optionRandom.checked = _settings.activeMods.indexOf("random") != -1;
-            _optionScramble.checked = _settings.activeMods.indexOf("scramble") != -1;
-            _optionShuffle.checked = _settings.activeMods.indexOf("shuffle") != -1;
-            _optionReverse.checked = _settings.activeMods.indexOf("reverse") != -1;
+            var settings:UserSettings = AppState.instance.auth.user.settings;
 
-            _optionMirror.checked = _settings.activeVisualMods.indexOf("mirror") != -1;
-            _optionDark.checked = _settings.activeVisualMods.indexOf("dark") != -1;
-            _optionHide.checked = _settings.activeVisualMods.indexOf("hide") != -1;
-            _optionMini.checked = _settings.activeVisualMods.indexOf("mini") != -1;
-            _optionColumnColor.checked = _settings.activeVisualMods.indexOf("columncolour") != -1;
-            _optionHalftime.checked = _settings.activeVisualMods.indexOf("halftime") != -1;
-            _optionNoBackground.checked = _settings.activeVisualMods.indexOf("nobackground") != -1;
+            // TODO: Refactor UserSettings to use well defined variables per mod
+            _optionHidden.checked = settings.activeMods.indexOf("hidden") != -1;
+            _optionSudden.checked = settings.activeMods.indexOf("sudden") != -1;
+            _optionBlink.checked = settings.activeMods.indexOf("blink") != -1;
+            _optionRotating.checked = settings.activeMods.indexOf("rotating") != -1;
+            _optionRotateCW.checked = settings.activeMods.indexOf("rotate_cw") != -1;
+            _optionRotateCCW.checked = settings.activeMods.indexOf("rotate_ccw") != -1;
+            _optionWave.checked = settings.activeMods.indexOf("wave") != -1;
+            _optionDrunk.checked = settings.activeMods.indexOf("drunk") != -1;
+            _optionTornado.checked = settings.activeMods.indexOf("tornado") != -1;
+            _optionMiniResize.checked = settings.activeMods.indexOf("mini_resize") != -1;
+            _optionTapPulse.checked = settings.activeMods.indexOf("tap_pulse") != -1;
+            _optionRandom.checked = settings.activeMods.indexOf("random") != -1;
+            _optionScramble.checked = settings.activeMods.indexOf("scramble") != -1;
+            _optionShuffle.checked = settings.activeMods.indexOf("shuffle") != -1;
+            _optionReverse.checked = settings.activeMods.indexOf("reverse") != -1;
+
+            _optionMirror.checked = settings.activeVisualMods.indexOf("mirror") != -1;
+            _optionDark.checked = settings.activeVisualMods.indexOf("dark") != -1;
+            _optionHide.checked = settings.activeVisualMods.indexOf("hide") != -1;
+            _optionMini.checked = settings.activeVisualMods.indexOf("mini") != -1;
+            _optionColumnColor.checked = settings.activeVisualMods.indexOf("columncolour") != -1;
+            _optionHalftime.checked = settings.activeVisualMods.indexOf("halftime") != -1;
+            _optionNoBackground.checked = settings.activeVisualMods.indexOf("nobackground") != -1;
         }
 
         private function toggleGameMod(modName:String):void
         {
-            if (_settings.activeMods.indexOf(modName) != -1)
-                ArrayUtil.removeValue(modName, _settings.activeMods);
-            else
-                _settings.activeMods.push(modName);
+            dispatchEvent(new ToggleGameModEvent(modName));
         }
 
         private function toggleVisualMod(modName:String):void
         {
-            if (_settings.activeVisualMods.indexOf(modName) != -1)
-                ArrayUtil.removeValue(modName, _settings.activeVisualMods);
-            else
-                _settings.activeVisualMods.push(modName);
+            dispatchEvent(new ToggleVisualModEvent(modName));
         }
 
         private function onHiddenChecked(e:Event):void

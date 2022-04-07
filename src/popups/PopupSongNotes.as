@@ -36,8 +36,6 @@ package popups
         private const MAX_NOTES_CHARS:int = 250;
 
         private var _lang:Language = Language.instance;
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-        private var _playlist:Playlist = Playlist.instance;
         private var _loader:URLLoader;
 
         //- Background

@@ -22,7 +22,7 @@ package popups.replays
     {
         private static var INITIAL_LOAD:Boolean = false;
         public static var REPLAYS:Vector.<Replay> = new <Replay>[];
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
+
         private var _lang:Language = Language.instance;
         private var _avars:ArcGlobals = ArcGlobals.instance;
 

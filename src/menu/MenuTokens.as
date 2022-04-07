@@ -21,8 +21,6 @@ package menu
 
     public class MenuTokens extends DisplayLayer
     {
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
-        private var _playlist:Playlist = Playlist.instanceCanon;
         private var _lang:Language = Language.instance;
 
         private var _background:SongSelectionBackground;

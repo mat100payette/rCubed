@@ -20,7 +20,6 @@ package popups
     public class PopupTokenUnlock extends DisplayLayer
     {
         private var _lang:Language = Language.instance;
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
 
         //- Background
         private var box:Box;

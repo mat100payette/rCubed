@@ -31,7 +31,6 @@ package popups
         public static const TAB_LIST:int = 1;
         public static const INDENT_GAP:int = 29;
 
-        private var _gvars:GlobalVariables = GlobalVariables.instance;
         private var _lang:Language = Language.instance;
 
         //- Background
@@ -167,8 +166,10 @@ package popups
                 filterNameInput.visible = clearFilterButton.visible = false;
                 addSavedFilterButton.visible = tabLabel.visible = true;
                 importFilterButton.visible = true;
+
                 var yPos:Number = -40;
                 var savedFilterButton:SavedFilterButton;
+
                 for each (var item:EngineLevelFilter in _gvars.activeUser.settings.filters)
                 {
                     savedFilterButton = new SavedFilterButton(scrollpane.content, 0, yPos += 40, item, this);
@@ -329,8 +330,10 @@ package popups
             {
                 var item:Object = JSON.parse(filterJSON);
                 var filter:EngineLevelFilter = new EngineLevelFilter();
+
                 filter.setup(item);
                 filter.is_default = false;
+
                 _gvars.activeUser.settings.filters.push(filter);
                 draw();
             }

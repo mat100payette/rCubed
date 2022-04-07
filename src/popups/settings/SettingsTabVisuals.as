@@ -7,6 +7,7 @@ package popups.settings
     import classes.ui.Text;
     import flash.events.Event;
     import flash.events.Event;
+    import state.AppState;
 
     public class SettingsTabVisuals extends SettingsTabBase
     {
@@ -154,33 +155,35 @@ package popups.settings
 
         override public function setValues():void
         {
-            _optionGameTopBar.checked = _settings.displayGameTopBar;
-            _optionGameBottomBar.checked = _settings.displayGameBottomBar;
-            _optionJudge.checked = _settings.displayJudge;
-            _optionHealth.checked = _settings.displayHealth;
-            _optionSongProgress.checked = _settings.displaySongProgress;
-            _optionSongProgressText.checked = _settings.displaySongProgressText;
-            _optionScore.checked = _settings.displayScore;
-            _optionCombo.checked = _settings.displayCombo;
-            _optionTotal.checked = _settings.displayTotal;
-            _optionPACount.checked = _settings.displayPACount;
-            _optionAccuracyBar.checked = _settings.displayAccuracyBar;
-            _optionScreencut.checked = _settings.displayScreencut;
+            var settings:UserSettings = AppState.instance.auth.user.settings;
 
-            _optionAmazing.checked = _settings.displayAmazing;
-            _optionPerfect.checked = _settings.displayPerfect;
-            _optionReceptorAnimations.checked = _settings.displayReceptorAnimations;
-            _optionJudgeAnimation.checked = _settings.displayJudgeAnimations;
-            _optionJudgeSpeed.slideValue = _settings.judgeSpeed;
+            _optionGameTopBar.checked = settings.displayGameTopBar;
+            _optionGameBottomBar.checked = settings.displayGameBottomBar;
+            _optionJudge.checked = settings.displayJudge;
+            _optionHealth.checked = settings.displayHealth;
+            _optionSongProgress.checked = settings.displaySongProgress;
+            _optionSongProgressText.checked = settings.displaySongProgressText;
+            _optionScore.checked = settings.displayScore;
+            _optionCombo.checked = settings.displayCombo;
+            _optionTotal.checked = settings.displayTotal;
+            _optionPACount.checked = settings.displayPACount;
+            _optionAccuracyBar.checked = settings.displayAccuracyBar;
+            _optionScreencut.checked = settings.displayScreencut;
 
-            _optionMPUI.checked = _settings.displayMPUI;
-            _optionMPPA.checked = _settings.displayMPPA;
-            _optionMPJudge.checked = _settings.displayMPJudge;
-            _optionMPCombo.checked = _settings.displayMPCombo;
+            _optionAmazing.checked = settings.displayAmazing;
+            _optionPerfect.checked = settings.displayPerfect;
+            _optionReceptorAnimations.checked = settings.displayReceptorAnimations;
+            _optionJudgeAnimation.checked = settings.displayJudgeAnimations;
+            _optionJudgeSpeed.slideValue = settings.judgeSpeed;
 
-            _optionGenreFlag.checked = _settings.displayGenreFlag;
-            _optionSongFlag.checked = _settings.displaySongFlag;
-            _optionSongNote.checked = _settings.displaySongNote;
+            _optionMPUI.checked = settings.displayMPUI;
+            _optionMPPA.checked = settings.displayMPPA;
+            _optionMPJudge.checked = settings.displayMPJudge;
+            _optionMPCombo.checked = settings.displayMPCombo;
+
+            _optionGenreFlag.checked = settings.displayGenreFlag;
+            _optionSongFlag.checked = settings.displaySongFlag;
+            _optionSongNote.checked = settings.displaySongNote;
         }
 
         private function onDisplayGameTopBarChanged(e:Event):void
