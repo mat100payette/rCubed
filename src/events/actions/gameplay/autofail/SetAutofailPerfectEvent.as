@@ -1,17 +1,17 @@
-package events.actions.gameplay
+package events.actions.gameplay.autofail
 {
 
     import flash.events.Event;
     import events.actions.ActionEvent;
     import events.interfaces.IGameplayEvent;
 
-    public class SetAutofailMissEvent extends ActionEvent implements IGameplayEvent
+    public class SetAutofailPerfectEvent extends ActionEvent implements IGameplayEvent
     {
-        public static const EVENT_TYPE:String = "SetAutofailMissEvent";
+        public static const EVENT_TYPE:String = "SetAutofailPerfectEvent";
 
         private var _count:Number;
 
-        public function SetAutofailMissEvent(count:Number):void
+        public function SetAutofailPerfectEvent(count:Number):void
         {
             super();
 
@@ -25,7 +25,7 @@ package events.actions.gameplay
 
         override public function clone():Event
         {
-            return new SetAutofailMissEvent(_count);
+            return new SetAutofailPerfectEvent(_count);
         }
     }
 }

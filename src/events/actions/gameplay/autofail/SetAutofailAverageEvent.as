@@ -1,4 +1,4 @@
-package events.actions.gameplay
+package events.actions.gameplay.autofail
 {
 
     import flash.events.Event;

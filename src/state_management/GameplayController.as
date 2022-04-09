@@ -4,27 +4,31 @@ package state_management
     import classes.UserSettings;
     import com.flashfla.utils.ArrayUtil;
     import com.flashfla.utils.ColorUtil;
+    import events.actions.gameplay.AutoJudgeOffsetToggledEvent;
     import events.actions.gameplay.ClearSongQueueEvent;
     import events.actions.gameplay.CustomNoteskinToggledEvent;
     import events.actions.gameplay.NoteColorChangedEvent;
-    import events.actions.gameplay.SetAutofailAmazingEvent;
-    import events.actions.gameplay.SetAutofailAverageEvent;
-    import events.actions.gameplay.SetAutofailBooEvent;
-    import events.actions.gameplay.SetAutofailGoodEvent;
-    import events.actions.gameplay.SetAutofailMissEvent;
-    import events.actions.gameplay.SetAutofailPerfectEvent;
-    import events.actions.gameplay.SetAutofailRawGoodsEvent;
     import events.actions.gameplay.SetGlobalOffsetEvent;
     import events.actions.gameplay.SetJudgeOffsetEvent;
     import events.actions.gameplay.SetNoteScaleEvent;
     import events.actions.gameplay.SetNoteskinIdEvent;
+    import events.actions.gameplay.SetRawGoodTrackerEvent;
     import events.actions.gameplay.SetReceptorGapEvent;
     import events.actions.gameplay.SetScrollDirectionEvent;
     import events.actions.gameplay.SetScrollSpeedEvent;
     import events.actions.gameplay.SetSongRateEvent;
     import events.actions.gameplay.ToggleAutoJudgeOffsetEvent;
     import events.actions.gameplay.ToggleCustomNoteskinEvent;
+    import events.actions.gameplay.ToggleGameModEvent;
     import events.actions.gameplay.ToggleMirrorEvent;
+    import events.actions.gameplay.ToggleVisualModEvent;
+    import events.actions.gameplay.autofail.SetAutofailAmazingEvent;
+    import events.actions.gameplay.autofail.SetAutofailAverageEvent;
+    import events.actions.gameplay.autofail.SetAutofailBooEvent;
+    import events.actions.gameplay.autofail.SetAutofailGoodEvent;
+    import events.actions.gameplay.autofail.SetAutofailMissEvent;
+    import events.actions.gameplay.autofail.SetAutofailPerfectEvent;
+    import events.actions.gameplay.autofail.SetAutofailRawGoodsEvent;
     import events.actions.gameplay.colors.GameAColorChangedEvent;
     import events.actions.gameplay.colors.GameBColorChangedEvent;
     import events.actions.gameplay.colors.GameCColorChangedEvent;
@@ -55,12 +59,30 @@ package state_management
     import events.actions.gameplay.input.SetKeyRestartEvent;
     import events.actions.gameplay.input.SetKeyRightEvent;
     import events.actions.gameplay.input.SetKeyUpEvent;
+    import events.actions.gameplay.layout.ToggleAccuracyBarEvent;
+    import events.actions.gameplay.layout.ToggleAmazingEvent;
+    import events.actions.gameplay.layout.ToggleComboEvent;
+    import events.actions.gameplay.layout.ToggleGameBottomBarEvent;
+    import events.actions.gameplay.layout.ToggleGameTopBarEvent;
+    import events.actions.gameplay.layout.ToggleHealthEvent;
+    import events.actions.gameplay.layout.ToggleJudgeAnimationsEvent;
+    import events.actions.gameplay.layout.ToggleJudgeEvent;
+    import events.actions.gameplay.layout.ToggleMPComboEvent;
+    import events.actions.gameplay.layout.ToggleMPJudgeEvent;
+    import events.actions.gameplay.layout.ToggleMPPAEvent;
+    import events.actions.gameplay.layout.ToggleMPUIEvent;
+    import events.actions.gameplay.layout.TogglePACountEvent;
+    import events.actions.gameplay.layout.TogglePerfectEvent;
+    import events.actions.gameplay.layout.ToggleReceptorAnimationsEvent;
+    import events.actions.gameplay.layout.ToggleScoreEvent;
+    import events.actions.gameplay.layout.ToggleScreencutEvent;
+    import events.actions.gameplay.layout.ToggleSongProgressEvent;
+    import events.actions.gameplay.layout.ToggleSongTimeEvent;
+    import events.actions.gameplay.layout.ToggleTotalEvent;
     import flash.events.IEventDispatcher;
     import state.AppState;
-    import events.actions.gameplay.AutoJudgeOffsetToggledEvent;
-    import events.actions.gameplay.SetRawGoodTrackerEvent;
-    import events.actions.gameplay.ToggleGameModEvent;
-    import events.actions.gameplay.ToggleVisualModEvent;
+    import events.actions.gameplay.SetGameVolumeEvent;
+    import events.actions.gameplay.SetJudgeAnimationSpeedEvent;
 
     public class GameplayController extends Controller
     {
@@ -130,6 +152,30 @@ package state_management
 
             target.addEventListener(ToggleGameModEvent.EVENT_TYPE, toggleGameMod);
             target.addEventListener(ToggleVisualModEvent.EVENT_TYPE, toggleVisualMod);
+
+            target.addEventListener(ToggleAccuracyBarEvent.EVENT_TYPE, toggleAccuracyBar);
+            target.addEventListener(ToggleAmazingEvent.EVENT_TYPE, toggleAmazing);
+            target.addEventListener(ToggleComboEvent.EVENT_TYPE, toggleCombo);
+            target.addEventListener(ToggleGameBottomBarEvent.EVENT_TYPE, toggleGameBottomBar);
+            target.addEventListener(ToggleGameTopBarEvent.EVENT_TYPE, toggleGameTopBar);
+            target.addEventListener(ToggleHealthEvent.EVENT_TYPE, toggleHealth);
+            target.addEventListener(ToggleJudgeAnimationsEvent.EVENT_TYPE, toggleJudgeAnimations);
+            target.addEventListener(SetJudgeAnimationSpeedEvent.EVENT_TYPE, setJudgeAnimationSpeed);
+            target.addEventListener(ToggleJudgeEvent.EVENT_TYPE, toggleJudge);
+            target.addEventListener(ToggleMPComboEvent.EVENT_TYPE, toggleMPCombo);
+            target.addEventListener(ToggleMPJudgeEvent.EVENT_TYPE, toggleMPJudge);
+            target.addEventListener(ToggleMPPAEvent.EVENT_TYPE, toggleMPPA);
+            target.addEventListener(ToggleMPUIEvent.EVENT_TYPE, toggleMPUI);
+            target.addEventListener(TogglePACountEvent.EVENT_TYPE, togglePACount);
+            target.addEventListener(TogglePerfectEvent.EVENT_TYPE, togglePerfect);
+            target.addEventListener(ToggleReceptorAnimationsEvent.EVENT_TYPE, toggleReceptorAnimations);
+            target.addEventListener(ToggleScoreEvent.EVENT_TYPE, toggleScore);
+            target.addEventListener(ToggleScreencutEvent.EVENT_TYPE, toggleScreencut);
+            target.addEventListener(ToggleSongProgressEvent.EVENT_TYPE, toggleSongProgress);
+            target.addEventListener(ToggleSongTimeEvent.EVENT_TYPE, toggleSongTime);
+            target.addEventListener(ToggleTotalEvent.EVENT_TYPE, toggleTotal);
+
+            target.addEventListener(SetGameVolumeEvent.EVENT_TYPE, setGameVolume)
         }
 
         private function clearSongQueue():void
@@ -596,6 +642,227 @@ package state_management
                 ArrayUtil.removeValue(mod, settings.activeVisualMods);
             else
                 settings.activeVisualMods.push(mod);
+
+            updateState(newState);
+        }
+
+        private function toggleAccuracyBar(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayAccuracyBar = !settings.displayAccuracyBar;
+
+            updateState(newState);
+        }
+
+        private function toggleAmazing(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayAmazing = !settings.displayAmazing;
+
+            updateState(newState);
+        }
+
+        private function toggleCombo(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayCombo = !settings.displayCombo;
+
+            updateState(newState);
+        }
+
+        private function toggleGameBottomBar(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayGameBottomBar = !settings.displayGameBottomBar;
+
+            updateState(newState);
+        }
+
+        private function toggleGameTopBar(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayGameTopBar = !settings.displayGameTopBar;
+
+            updateState(newState);
+        }
+
+        private function toggleHealth(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayHealth = !settings.displayHealth;
+
+            updateState(newState);
+        }
+
+        private function toggleJudgeAnimations(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayJudgeAnimations = !settings.displayJudgeAnimations;
+
+            updateState(newState);
+        }
+
+        private function setJudgeAnimationSpeed(event:SetJudgeAnimationSpeedEvent):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.judgeSpeed = event.speed;
+
+            updateState(newState);
+        }
+
+        private function toggleJudge(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayJudge = !settings.displayJudge;
+
+            updateState(newState);
+        }
+
+        private function toggleMPCombo(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayMPCombo = !settings.displayMPCombo;
+
+            updateState(newState);
+        }
+
+        private function toggleMPJudge(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayMPJudge = !settings.displayMPJudge;
+
+            updateState(newState);
+        }
+
+        private function toggleMPPA(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayMPPA = !settings.displayMPPA;
+
+            updateState(newState);
+        }
+
+        private function toggleMPUI(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayMPUI = !settings.displayMPUI;
+
+            updateState(newState);
+        }
+
+        private function togglePACount(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayPACount = !settings.displayPACount;
+
+            updateState(newState);
+        }
+
+        private function togglePerfect(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayPerfect = !settings.displayPerfect;
+
+            updateState(newState);
+        }
+
+        private function toggleReceptorAnimations(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayReceptorAnimations = !settings.displayReceptorAnimations;
+
+            updateState(newState);
+        }
+
+        private function toggleScore(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayScore = !settings.displayScore;
+
+            updateState(newState);
+        }
+
+        private function toggleScreencut(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayScreencut = !settings.displayScreencut;
+
+            updateState(newState);
+        }
+
+        private function toggleSongProgress(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displaySongProgress = !settings.displaySongProgress;
+
+            updateState(newState);
+        }
+
+        private function toggleSongTime(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displaySongProgressText = !settings.displaySongProgressText;
+
+            updateState(newState);
+        }
+
+        private function toggleTotal(event:Object):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            settings.displayTotal = !settings.displayTotal;
+
+            updateState(newState);
+        }
+
+        private function setGameVolume(event:SetGameVolumeEvent):void
+        {
+            var newState:AppState = AppState.clone(owner);
+            var settings:UserSettings = newState.auth.user.settings;
+
+            // TODO: Singleton for gameplay music player
+            settings.gameVolume = event.volume;
 
             updateState(newState);
         }

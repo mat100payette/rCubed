@@ -29,6 +29,7 @@ package popups.settings
     import events.actions.air.WebsocketStateChangedEvent;
     import events.actions.air.ToggleWebsocketEvent;
     import events.actions.air.ToggleVSyncEvent;
+    import singletons.StreamWebsocket;
 
     public class SettingsTabMisc extends SettingsTabBase
     {
@@ -272,19 +273,20 @@ package popups.settings
 
         override public function setValues():void
         {
+            var settings:UserSettings = AppState.instance.auth.user.settings;
+            var airState:AirState = AppState.instance.air;
+
             // Set Framerate
-            _optionFramerate.text = _settings.frameRate.toString();
+            _optionFramerate.text = settings.frameRate.toString();
 
-            _optionForceJudge.checked = _settings.forceNewJudge;
+            _optionForceJudge.checked = settings.forceNewJudge;
 
-            _optionMPTimestamp.checked = _settings.displayMPTimestamp;
-            _optionIncludeLegacy.checked = _settings.displayLegacySongs;
+            _optionMPTimestamp.checked = settings.displayMPTimestamp;
+            _optionIncludeLegacy.checked = settings.displayLegacySongs;
             _optionMPTextSize.text = _avars.configMPSize.toString();
-            _optionStartUpScreen.selectedIndex = _settings.startUpScreen;
+            _optionStartUpScreen.selectedIndex = settings.startUpScreen;
 
             setLanguageUI();
-
-            var airState:AirState = AppState.instance.air;
 
             _optionAutosaveLocal.checked = airState.autoSaveLocalReplays;
             _optionUseCache.checked = airState.useLocalFileCache;
@@ -374,8 +376,9 @@ package popups.settings
         {
             _parent.addChild(new WindowOptionConfirm(_gvars.airWindowProperties, onWindowOptionUpdated));
 
-            _gvars.airWindowProperties.x = _optionWindowX.validate(Math.round((Capabilities.screenResolutionX - _gvars.gameMain.stage.nativeWindow.width) * 0.5));
-            _gvars.airWindowProperties.y = _optionWindowY.validate(Math.round((Capabilities.screenResolutionY - _gvars.gameMain.stage.nativeWindow.height) * 0.5));
+            _gvars.airWindowProperties.x = _optionWindowX.validate(Math.round((Capabilities.screenResolutionX - _parent.stage.nativeWindow.width) * 0.5));
+            _gvars.airWindowProperties.y = _optionWindowY.validate(Math.round((Capabilities.screenResolutionY - _parent.stage.nativeWindow.height) * 0.5));
+
             onWindowOptionUpdated();
         }
 
@@ -404,15 +407,16 @@ package popups.settings
 
         private function onWindowResetSizeClicked(e:Event):void
         {
-            _gvars.airWindowProperties.width = Main.GAME_WIDTH;
-            _gvars.airWindowProperties.height = Main.GAME_HEIGHT;
+            dispatchEvent(new SetWindowSizeEvent(Main.GAME_WIDTH, Main.GAME_HEIGHT));
+
             onWindowOptionUpdated();
         }
 
         private function onFramerateChanged(e:Event):void
         {
-            _settings.frameRate = _optionFramerate.validate(60);
-            _settings.frameRate = Math.max(Math.min(_settings.frameRate, 1000), 10);
+            var framerate:Number = Math.max(Math.min(_optionFramerate.validate(60), 1000), 10);
+
+            dispatchEvent(new SetFramerateEvent(framerate));
         }
 
         private function onMPTextSizeChanged(e:Event):void
@@ -462,7 +466,7 @@ package popups.settings
             if (!AppState.instance.air.useWebsockets)
                 return;
 
-            const activePort:uint = _gvars.websocketPortNumber("websocket");
+            const activePort:uint = StreamWebsocket.websocketPortNumber("websocket");
             if (activePort == 0)
                 return;
 

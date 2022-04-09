@@ -5,9 +5,32 @@ package popups.settings
     import classes.ui.BoxCheck;
     import classes.ui.BoxSlider;
     import classes.ui.Text;
-    import flash.events.Event;
+    import events.actions.gameplay.layout.ToggleAccuracyBarEvent;
+    import events.actions.gameplay.layout.ToggleAmazingEvent;
+    import events.actions.gameplay.layout.ToggleComboEvent;
+    import events.actions.gameplay.layout.ToggleGameBottomBarEvent;
+    import events.actions.gameplay.layout.ToggleGameTopBarEvent;
+    import events.actions.gameplay.layout.ToggleHealthEvent;
+    import events.actions.gameplay.layout.ToggleJudgeAnimationsEvent;
+    import events.actions.gameplay.layout.ToggleJudgeEvent;
+    import events.actions.gameplay.layout.ToggleMPComboEvent;
+    import events.actions.gameplay.layout.ToggleMPJudgeEvent;
+    import events.actions.gameplay.layout.ToggleMPPAEvent;
+    import events.actions.gameplay.layout.ToggleMPUIEvent;
+    import events.actions.gameplay.layout.TogglePACountEvent;
+    import events.actions.gameplay.layout.TogglePerfectEvent;
+    import events.actions.gameplay.layout.ToggleReceptorAnimationsEvent;
+    import events.actions.gameplay.layout.ToggleScoreEvent;
+    import events.actions.gameplay.layout.ToggleScreencutEvent;
+    import events.actions.gameplay.layout.ToggleSongProgressEvent;
+    import events.actions.gameplay.layout.ToggleSongTimeEvent;
+    import events.actions.gameplay.layout.ToggleTotalEvent;
+    import events.actions.menu.ToggleGenreFlagEvent;
+    import events.actions.menu.ToggleSongFlagEvent;
+    import events.actions.menu.ToggleSongNoteEvent;
     import flash.events.Event;
     import state.AppState;
+    import events.actions.gameplay.SetJudgeAnimationSpeedEvent;
 
     public class SettingsTabVisuals extends SettingsTabBase
     {
@@ -188,104 +211,89 @@ package popups.settings
 
         private function onDisplayGameTopBarChanged(e:Event):void
         {
-            _settings.displayGameTopBar = !_settings.displayGameTopBar;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleGameTopBarEvent());
         }
 
         private function onDisplayGameBottomBarChanged(e:Event):void
         {
-            _settings.displayGameBottomBar = !_settings.displayGameBottomBar;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleGameBottomBarEvent());
         }
 
         private function onDisplayJudgeChanged(e:Event):void
         {
-            _settings.displayJudge = !_settings.displayJudge;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleJudgeEvent());
         }
 
         private function onDisplayHealthChanged(e:Event):void
         {
-            _settings.displayHealth = !_settings.displayHealth;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleHealthEvent());
         }
 
         private function onDisplaySongProgressChanged(e:Event):void
         {
-            _settings.displaySongProgress = !_settings.displaySongProgress;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleSongProgressEvent());
         }
 
         private function onDisplaySongProgressTextChanged(e:Event):void
         {
-            _settings.displaySongProgressText = !_settings.displaySongProgressText;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleSongTimeEvent());
         }
 
         private function onDisplayScoreChanged(e:Event):void
         {
-            _settings.displayScore = !_settings.displayScore;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleScoreEvent());
         }
 
         private function onDisplayComboChanged(e:Event):void
         {
-            _settings.displayCombo = !_settings.displayCombo;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleComboEvent());
         }
 
         private function onDisplayTotalChanged(e:Event):void
         {
-            _settings.displayTotal = !_settings.displayTotal;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleTotalEvent());
         }
 
         private function onDisplayPACountChanged(e:Event):void
         {
-            _settings.displayPACount = !_settings.displayPACount;
-            _parent.checkValidMods();
+            dispatchEvent(new TogglePACountEvent());
         }
 
         private function onDisplayAccuracyBarChanged(e:Event):void
         {
-            _settings.displayAccuracyBar = !_settings.displayAccuracyBar;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleAccuracyBarEvent());
         }
 
         private function onDisplayScreencutChanged(e:Event):void
         {
-            _settings.displayScreencut = !_settings.displayScreencut;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleScreencutEvent());
         }
 
         private function onDisplayAmazingChanged(e:Event):void
         {
-            _settings.displayAmazing = !_settings.displayAmazing;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleAmazingEvent());
         }
 
         private function onDisplayPerfectChanged(e:Event):void
         {
-            _settings.displayPerfect = !_settings.displayPerfect;
-            _parent.checkValidMods();
+            dispatchEvent(new TogglePerfectEvent());
         }
 
         private function onDisplayReceptorAnimationsChanged(e:Event):void
         {
-            _settings.displayReceptorAnimations = !_settings.displayReceptorAnimations;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleReceptorAnimationsEvent());
         }
 
         private function onDisplayJudgeAnimationsChanged(e:Event):void
         {
-            _settings.displayJudgeAnimations = !_settings.displayJudgeAnimations;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleJudgeAnimationsEvent());
         }
 
         private function onJudgeAnimationSpeedChanged(e:Event):void
         {
-            _settings.judgeSpeed = ((Math.round((_optionJudgeSpeed.slideValue * 100) / 5) * 5) / 100);
-            _parent.checkValidMods();
+            var animationSpeed:Number = (Math.round((_optionJudgeSpeed.slideValue * 100) / 5) * 5) / 100;
+
+            dispatchEvent(new SetJudgeAnimationSpeedEvent(animationSpeed));
         }
 
         private function judgeAnimationValueTextTransformer(value:Number):String
@@ -295,44 +303,37 @@ package popups.settings
 
         private function onDisplayMPUIChanged(e:Event):void
         {
-            _settings.displayMPUI = !_settings.displayMPUI;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleMPUIEvent());
         }
 
         private function onDisplayMPPAChanged(e:Event):void
         {
-            _settings.displayMPPA = !_settings.displayMPPA;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleMPPAEvent());
         }
 
         private function onDisplayMPJudgeChanged(e:Event):void
         {
-            _settings.displayMPJudge = !_settings.displayMPJudge;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleMPJudgeEvent());
         }
 
         private function onDisplayMPComboChanged(e:Event):void
         {
-            _settings.displayMPCombo = !_settings.displayMPCombo;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleMPComboEvent());
         }
 
         private function onDisplayGenreFlagChanged(e:Event):void
         {
-            _settings.displayGenreFlag = !_settings.displayGenreFlag;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleGenreFlagEvent());
         }
 
         private function onDisplaySongFlagChanged(e:Event):void
         {
-            _settings.displaySongFlag = !_settings.displaySongFlag;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleSongFlagEvent());
         }
 
         private function onDisplaySongNoteChanged(e:Event):void
         {
-            _settings.displaySongNote = !_settings.displaySongNote;
-            _parent.checkValidMods();
+            dispatchEvent(new ToggleSongNoteEvent());
         }
     }
 }
